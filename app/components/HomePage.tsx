@@ -22,7 +22,13 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function HomePage() {
   useEffect(() => {
+    // Initial refresh after hydration
     ScrollTrigger.refresh();
+
+    // Re-run refresh after dynamic components mount (lazy-loaded sections)
+    const refreshTimer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 800);
 
     const handleAnchorClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -40,7 +46,10 @@ export default function HomePage() {
     };
 
     document.addEventListener("click", handleAnchorClick);
-    return () => document.removeEventListener("click", handleAnchorClick);
+    return () => {
+      document.removeEventListener("click", handleAnchorClick);
+      clearTimeout(refreshTimer);
+    };
   }, []);
 
   return (
