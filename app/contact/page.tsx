@@ -3,7 +3,7 @@
 import { useState, FormEvent } from "react";
 import { ArrowRight, CheckCircle, Loader2 } from "lucide-react";
 import { supabase } from "../lib/supabase";
-import emailjs from "emailjs-com";
+import emailjs from "@emailjs/browser";
 
 const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "";
 const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "";
