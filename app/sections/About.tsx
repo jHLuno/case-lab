@@ -144,10 +144,12 @@ export default function About() {
                   background: item.dark
                     ? item.id === "origin"
                       ? `linear-gradient(165deg, rgba(4, 0, 130, 0.80) 0%, rgba(6, 6, 50, 0.84) 45%, rgba(2, 2, 25, 0.88) 100%), url(/CASElab.webp)`
-                      : "linear-gradient(165deg, rgba(4, 0, 130, 0.95) 0%, rgba(6, 6, 50, 0.98) 45%, rgba(2, 2, 25, 1) 100%)"
+                      : item.id === "evolution"
+                        ? `linear-gradient(165deg, rgba(4, 0, 130, 0.80) 0%, rgba(6, 6, 50, 0.84) 45%, rgba(2, 2, 25, 0.88) 100%), url(/caselab2.webp)`
+                        : "linear-gradient(165deg, rgba(4, 0, 130, 0.95) 0%, rgba(6, 6, 50, 0.98) 45%, rgba(2, 2, 25, 1) 100%)"
                     : "#fff",
-                  backgroundSize: item.id === "origin" ? "cover" : undefined,
-                  backgroundPosition: item.id === "origin" ? "center" : undefined,
+                  backgroundSize: (item.id === "origin" || item.id === "evolution") ? "cover" : undefined,
+                  backgroundPosition: (item.id === "origin" || item.id === "evolution") ? "center" : undefined,
                   border: item.dark ? "none" : "1px solid rgba(0,0,0,0.08)",
                 }}
               >
