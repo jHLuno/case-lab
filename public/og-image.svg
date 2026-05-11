@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#000011"/>
+      <stop offset="100%" stop-color="#040082"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  
+  <!-- Grid pattern -->
+  <g opacity="0.04">
+    <defs>
+      <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+        <path d="M 60 0 L 0 0 0 60" fill="none" stroke="white" stroke-width="0.5"/>
+      </pattern>
+    </defs>
+    <rect width="1200" height="630" fill="url(#grid)"/>
+  </g>
+  
+  <!-- Decorative star -->
+  <g transform="translate(900, 120) scale(2.5)" opacity="0.12">
+    <path d="M12 0L13.5 10.5L24 12L13.5 13.5L12 24L10.5 13.5L0 12L10.5 10.5L12 0Z" fill="white"/>
+  </g>
+  <g transform="translate(1050, 480) scale(1.8) rotate(15)" opacity="0.08">
+    <path d="M12 0L13.5 10.5L24 12L13.5 13.5L12 24L10.5 13.5L0 12L10.5 10.5L12 0Z" fill="white"/>
+  </g>
+  
+  <!-- Main text -->
+  <text x="100" y="260" font-family="system-ui, -apple-system, sans-serif" font-size="96" font-weight="700" letter-spacing="2" fill="white">CASE</text>
+  <text x="100" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="96" font-weight="400" font-style="italic" letter-spacing="2" fill="white">LAB</text>
+  
+  <!-- Tagline -->
+  <text x="100" y="420" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="300" letter-spacing="1" fill="rgba(255,255,255,0.6)">Маркетинговая диагностика и стратегия роста</text>
+  
+  <!-- Bottom info -->
+  <text x="100" y="560" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="400" letter-spacing="0.5" fill="rgba(255,255,255,0.4)">Алматы, Казахстан · caselab.kz</text>
+  
+  <!-- Small accent line -->
+  <rect x="100" y="480" width="80" height="3" rx="1.5" fill="#1a1a9e" opacity="0.8"/>
+</svg>

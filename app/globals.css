@@ -1,0 +1,200 @@
+@import "tailwindcss";
+
+/* ── Custom Fonts ── */
+@font-face {
+  font-family: 'Benzin';
+  src: url('/fonts/Benzin-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Benzin';
+  src: url('/fonts/Benzin-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gilroy';
+  src: url('/fonts/Gilroy-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gilroy';
+  src: url('/fonts/Gilroy-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  /* Colors */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-blue: #040082;
+  --color-blue-light: #1a1a9e;
+  --color-blue-dark: #020060;
+  --color-gray: #6d6d6d;
+  --color-gray-light: #f5f5f5;
+
+  /* Typography */
+  --font-heading: 'Benzin', var(--font-bebas), 'Oswald', 'Impact', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Gilroy', var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-roobert: var(--font-body);
+
+  /* Text scale */
+  --text-caption: 11px;
+  --leading-caption: 1.58;
+  --text-body: 16px;
+  --leading-body: 1.25;
+  --text-subheading: 18px;
+  --leading-subheading: 1.22;
+  --text-heading-sm: 29px;
+  --leading-heading-sm: 1.21;
+  --text-heading: 39px;
+  --leading-heading: 1.15;
+  --text-heading-lg: 54px;
+  --leading-heading-lg: 1.39;
+  --text-display: 225px;
+  --leading-display: 0.7;
+
+  /* Spacing */
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-28: 28px;
+  --spacing-40: 40px;
+  --spacing-48: 48px;
+  --spacing-64: 64px;
+  --spacing-68: 68px;
+  --spacing-152: 152px;
+}
+
+@layer base {
+  html {
+    scroll-behavior: auto;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: #ffffff;
+    color: #000000;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  p {
+    font-family: var(--font-body);
+    line-height: 1.25;
+  }
+}
+
+@layer utilities {
+  .gradient-blue {
+    background: linear-gradient(90deg, #040082, #1a1a9e 50%, #040082);
+  }
+
+  .gradient-text-blue {
+    background: linear-gradient(90deg, #040082, #1a1a9e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .font-heading {
+    font-family: var(--font-heading);
+  }
+
+  .font-body {
+    font-family: var(--font-body);
+  }
+
+  .btn-pill {
+    border-radius: 75px;
+    padding: 11px 34px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.25;
+    transition: all 0.3s ease;
+  }
+
+  .divider-gradient {
+    background: linear-gradient(90deg, transparent, rgba(4, 0, 130, 0.3), transparent);
+  }
+
+  .overflow-x-hidden {
+    overflow-x: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Marquee animation for Clients section */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  animation: marquee 60s linear infinite;
+}
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Line clamp for CRM */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Focus-visible ring for keyboard navigation */
+:focus-visible {
+  outline: 2px solid #040082;
+  outline-offset: 2px;
+}
+
+/* Remove default outline for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}

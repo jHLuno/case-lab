@@ -1,0 +1,62 @@
+"use client";
+
+import { useEffect } from "react";
+import dynamic from "next/dynamic";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Navbar from "./Navbar";
+import Footer from "./Footer";
+import Hero from "../sections/Hero";
+import About from "../sections/About";
+import Pricing from "../sections/Pricing";
+import OurAdvantage from "../sections/OurAdvantage";
+import Timeline from "../sections/Timeline";
+
+const Testimonials = dynamic(() => import("../sections/Testimonials"), { ssr: false });
+const BusinessModel = dynamic(() => import("../sections/BusinessModel"), { ssr: false });
+const Clients = dynamic(() => import("../sections/Clients"), { ssr: false });
+const Evolution = dynamic(() => import("../sections/Evolution"), { ssr: false });
+const QuickLinks = dynamic(() => import("../sections/QuickLinks"), { ssr: false });
+
+gsap.registerPlugin(ScrollTrigger);
+
+export default function HomePage() {
+  useEffect(() => {
+    ScrollTrigger.refresh();
+
+    const handleAnchorClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest('a[href^="#"]');
+      if (anchor) {
+        const href = anchor.getAttribute("href");
+        if (href && href !== "#") {
+          e.preventDefault();
+          const element = document.querySelector(href);
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth" });
+          }
+        }
+      }
+    };
+
+    document.addEventListener("click", handleAnchorClick);
+    return () => document.removeEventListener("click", handleAnchorClick);
+  }, []);
+
+  return (
+    <main className="relative">
+      <Navbar />
+      <Hero />
+      <About />
+      <Pricing />
+      <OurAdvantage />
+      <Timeline />
+      <Testimonials />
+      <BusinessModel />
+      <Clients />
+      <Evolution />
+      <QuickLinks />
+      <Footer />
+    </main>
+  );
+}
