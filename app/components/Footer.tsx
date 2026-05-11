@@ -54,7 +54,7 @@ export default function Footer() {
           </div>
 
           {/* Contact */}
-          <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
+          <div>
             <a
               href="mailto:hello@caselab.kz"
               className="text-black/60 text-[15px] hover:text-black transition-colors duration-300 font-light"
@@ -62,12 +62,6 @@ export default function Footer() {
             >
               hello@caselab.kz
             </a>
-            <span
-              className="text-black/20 text-[15px] font-light"
-              style={{ fontFamily: "var(--font-body)" }}
-            >
-              Алматы, Казахстан
-            </span>
           </div>
 
           {/* Social */}
