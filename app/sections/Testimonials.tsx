@@ -152,7 +152,7 @@ export default function Testimonials() {
       ref={sectionRef}
       id="testimonials"
       aria-label="Результаты сессий"
-      className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-hidden"
+      className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-hidden z-[2]"
     >
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 

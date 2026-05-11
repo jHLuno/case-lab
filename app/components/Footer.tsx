@@ -6,7 +6,7 @@ import Image from "next/image";
 
 export default function Footer() {
   return (
-    <footer className="relative bg-white pt-20 md:pt-32 pb-8 px-6 md:px-10">
+    <footer className="relative bg-white pt-20 md:pt-32 pb-8 px-6 md:px-10 z-[2]">
       {/* Top divider */}
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
