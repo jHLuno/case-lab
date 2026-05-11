@@ -224,7 +224,7 @@ export default function About() {
           className="mt-12 md:mt-16"
         >
           <a
-            href="#industries"
+            href="/insights/"
             className="inline-flex items-center gap-2 text-black text-[15px] font-normal hover:gap-3 transition-all duration-300 group"
             style={{ fontFamily: "var(--font-body)" }}
           >

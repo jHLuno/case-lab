@@ -78,7 +78,7 @@ export default function Clients() {
       <div className="max-w-[1078px] mx-auto mt-8">
         <ScrollReveal delay={0.2}>
           <a
-            href="#industries"
+            href="/insights/"
             className="inline-flex items-center gap-2 bg-[#040082] text-white px-6 py-3 rounded-full text-[14px] font-normal hover:bg-[#0600a8] transition-all duration-300 group"
             style={{ fontFamily: "var(--font-body)" }}
           >
