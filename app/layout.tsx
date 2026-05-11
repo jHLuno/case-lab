@@ -68,11 +68,11 @@ export default function RootLayout({
   return (
       <html lang="ru" className={`${inter.variable} ${bebasNeue.variable}`} suppressHydrationWarning>
       <head>
-        <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
-        <link rel="manifest" href="/favicons/site.webmanifest" />
+        <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico?v=2" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png?v=2" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png?v=2" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png?v=2" />
+        <link rel="manifest" href="/favicons/site.webmanifest?v=2" />
         <link rel="preload" href="/fonts/Benzin-Bold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/Benzin-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/Gilroy-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
