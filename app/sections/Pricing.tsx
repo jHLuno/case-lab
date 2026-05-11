@@ -240,7 +240,7 @@ function PricingCard({
           {/* CTA */}
           <a
             href="/contact/"
-            className={`group/btn inline-flex items-center justify-center gap-3 px-8 py-4 text-[15px] font-normal rounded-full w-full transition-all duration-300 hover:gap-4 ${
+            className={`group/btn inline-flex items-center justify-center gap-3 px-6 py-3 text-[14px] md:px-8 md:py-4 md:text-[15px] font-normal rounded-full w-full transition-all duration-300 hover:gap-4 ${
               plan.popular
                 ? "bg-white text-[#040082] hover:bg-white/90"
                 : "bg-white/10 text-white border border-white/20 hover:bg-white/20"

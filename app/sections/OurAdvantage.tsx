@@ -277,7 +277,6 @@ function TiltButton() {
       className="relative block w-full overflow-hidden cursor-pointer"
       style={{
         fontFamily: "var(--font-body)",
-        transformStyle: "preserve-3d",
       }}
       animate={{
         rotateX: tilt.x,
@@ -296,8 +295,7 @@ function TiltButton() {
     >
       {/* Button background */}
       <div
-        className="relative flex items-center justify-between bg-[#040082] text-white px-8 py-6 md:px-10 md:py-7 rounded-[20px] overflow-hidden"
-        style={{ transform: "translateZ(20px)" }}
+        className="relative flex items-center justify-between bg-[#040082] text-white px-6 py-4 md:px-10 md:py-7 rounded-[16px] md:rounded-[20px] overflow-hidden"
       >
         {/* Glare effect */}
         <div
@@ -326,19 +324,19 @@ function TiltButton() {
         />
 
         {/* Content */}
-        <div className="relative z-10 flex items-center justify-between w-full gap-4">
-          <div className="flex flex-col md:flex-row md:items-center md:gap-6">
-            <span className="text-[18px] md:text-[22px] font-normal leading-tight">
-              {isHovered ? "Забронировать сессию" : "Записаться на диагностику"}
+        <div className="relative z-10 flex items-center justify-between w-full gap-3 md:gap-4">
+          <div className="flex flex-row items-center gap-3 md:gap-6">
+            <span className="text-[15px] md:text-[22px] font-normal leading-tight whitespace-nowrap">
+              Записаться на диагностику
             </span>
-            <span className="text-white/50 text-[14px] md:text-[16px] font-light mt-1 md:mt-0">
+            <span className="hidden md:inline text-white/50 text-[14px] md:text-[16px] font-light">
               200 000 ₸ · 2 часа · Алматы
             </span>
           </div>
 
           {/* Arrow */}
           <motion.div
-            className="relative z-10 flex-shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/10 flex items-center justify-center"
+            className="relative z-10 flex-shrink-0 w-10 h-10 md:w-14 md:h-14 rounded-full bg-white/10 flex items-center justify-center"
             animate={{
               rotate: isHovered ? -45 : 0,
               scale: isHovered ? 1.1 : 1,
@@ -352,7 +350,7 @@ function TiltButton() {
               {isHovered ? (
                 <ArrowUpRight size={22} strokeWidth={2} />
               ) : (
-                <ArrowRight size={22} strokeWidth={2} />
+                <ArrowRight size={20} strokeWidth={2} />
               )}
             </motion.div>
           </motion.div>

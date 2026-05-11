@@ -31,7 +31,7 @@ export default function Footer() {
             href="/contact/"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="inline-flex items-center gap-3 bg-[#040082] text-white px-8 py-4 text-[15px] font-normal rounded-full hover:bg-[#0600a0] transition-colors duration-300"
+            className="inline-flex items-center gap-3 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] font-normal rounded-full hover:bg-[#0600a0] transition-colors duration-300"
             style={{ fontFamily: "var(--font-body)" }}
           >
             <span>Записаться на диагностику</span>

@@ -185,7 +185,7 @@ export default function Navbar() {
                   setMobileOpen(false);
                   toggleRef.current?.focus();
                 }}
-                className="inline-flex items-center gap-2 bg-white text-[#040082] rounded-full px-6 py-3.5 text-[15px] font-normal mt-6 self-start"
+                className="inline-flex items-center gap-2 bg-white text-[#040082] rounded-full px-6 py-3 text-[14px] font-normal mt-6 self-start"
                 style={{ fontFamily: "var(--font-body)" }}
               >
                 Записаться

@@ -138,7 +138,7 @@ export default function Hero() {
                 href="/contact/"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="inline-flex items-center gap-3 bg-white text-[#040082] px-8 py-4 text-[15px] font-normal rounded-full"
+                className="inline-flex items-center gap-3 bg-white text-[#040082] px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] font-normal rounded-full"
                 style={{ fontFamily: "var(--font-body)" }}
               >
                 Записаться на диагностику
