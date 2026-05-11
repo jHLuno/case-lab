@@ -37,7 +37,7 @@ export default function Clients() {
           style={{ willChange: "transform" }}
         >
           {[0, 1].map((set) => (
-            <div key={set} className="flex gap-4 md:gap-6 flex-shrink-0">
+            <div key={set} className="flex gap-4 md:gap-6 flex-shrink-0 pr-4 md:pr-6">
               {industries.map((industry) => (
                 <div
                   key={`${industry.id}-${set}`}
