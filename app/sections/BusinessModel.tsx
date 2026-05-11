@@ -213,6 +213,20 @@ export default function BusinessModel() {
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
       <div className="max-w-[1078px] mx-auto">
+        {/* Header */}
+        <div className="mb-8 md:mb-12">
+          <span
+            className="text-gray text-[11px] mb-3 block leading-[1.58]"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            Case Lab Diagnostics
+          </span>
+          <BlurRevealHeading
+            text="Что меняется после диагностики"
+            className="text-black text-[clamp(22px,4vw,54px)] font-bold leading-[1.15] uppercase tracking-[0.02em]"
+          />
+        </div>
+
         {/* Case Lab Label */}
         <div className="text-center mb-8 md:mb-12">
           <span
@@ -229,20 +243,6 @@ export default function BusinessModel() {
               LAB
             </span>
           </span>
-        </div>
-
-        {/* Header */}
-        <div className="mb-8 md:mb-12">
-          <span
-            className="text-gray text-[11px] mb-3 block leading-[1.58]"
-            style={{ fontFamily: "var(--font-body)" }}
-          >
-            Case Lab Diagnostics
-          </span>
-          <BlurRevealHeading
-            text="Что меняется после диагностики"
-            className="text-black text-[clamp(22px,4vw,54px)] font-bold leading-[1.15] uppercase tracking-[0.02em]"
-          />
         </div>
 
         {/* Before → After */}
