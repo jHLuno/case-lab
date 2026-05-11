@@ -45,7 +45,7 @@ export default function QuickLinks() {
               База знаний
             </span>
             <h2
-              className="text-black text-[clamp(24px,3.5vw,42px)] font-bold leading-[1.12] uppercase tracking-[0.02em]"
+              className="text-black text-[clamp(22px,3.5vw,42px)] font-bold leading-[1.12] uppercase tracking-[0.02em]"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               Из наблюдений

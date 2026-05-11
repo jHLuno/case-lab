@@ -378,7 +378,7 @@ export default function Evolution() {
               Эволюция проекта
             </span>
             <h2
-              className="text-black text-[clamp(22px,3vw,36px)] font-bold leading-[1.12] uppercase tracking-[0.02em] flex flex-wrap gap-x-[0.25em]"
+              className="text-black text-[clamp(20px,3vw,36px)] font-bold leading-[1.12] uppercase tracking-[0.02em] flex flex-wrap gap-x-[0.25em]"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               {"От платформы — к экосистеме".split(" ").map((word, i) => (
@@ -428,7 +428,7 @@ export default function Evolution() {
                   </div>
 
                   <h3
-                    className="text-black text-[17px] md:text-[20px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-1.5"
+                    className="text-black text-[15px] md:text-[20px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-1.5"
                     style={{ fontFamily: "var(--font-heading)" }}
                   >
                     {stage.title}

@@ -223,7 +223,7 @@ export default function BusinessModel() {
           </span>
           <BlurRevealHeading
             text="Что меняется после диагностики"
-            className="text-black text-[clamp(29px,4vw,54px)] font-bold leading-[1.15] uppercase tracking-[0.02em]"
+            className="text-black text-[clamp(22px,4vw,54px)] font-bold leading-[1.15] uppercase tracking-[0.02em]"
           />
         </div>
 
@@ -306,7 +306,7 @@ export default function BusinessModel() {
           }}
         >
           <h3
-            className="text-black text-[18px] md:text-[22px] font-normal leading-[1.25] mb-6 uppercase tracking-[0.02em]"
+            className="text-black text-[16px] md:text-[22px] font-normal leading-[1.25] mb-6 uppercase tracking-[0.02em]"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             Diagnostics brief используется как основа для

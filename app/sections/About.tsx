@@ -104,7 +104,7 @@ export default function About() {
             История
           </span>
           <h2
-            className="text-black text-[clamp(24px,3.5vw,42px)] font-bold leading-[1.12] uppercase tracking-[0.02em] break-words"
+            className="text-black text-[clamp(20px,3.5vw,42px)] font-bold leading-[1.12] uppercase tracking-[0.02em] break-words"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             {"История".split(" ").map((word, i) => (

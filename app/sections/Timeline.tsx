@@ -215,7 +215,7 @@ export default function Timeline() {
             Процесс
           </span>
           <h2
-            className="text-black text-[clamp(29px,4vw,54px)] font-bold leading-[1.15] mb-16 md:mb-24 uppercase tracking-[0.02em] flex flex-wrap gap-x-[0.25em]"
+            className="text-black text-[clamp(24px,4vw,54px)] font-bold leading-[1.15] mb-16 md:mb-24 uppercase tracking-[0.02em] flex flex-wrap gap-x-[0.25em]"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             {"Как проходит сессия".split(" ").map((word, i) => (

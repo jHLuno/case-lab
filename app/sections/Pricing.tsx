@@ -289,7 +289,7 @@ export default function Pricing() {
         <div className="mb-12 md:mb-20 text-center">
           <BlurRevealHeading
             text="Форматы диагностики"
-            className="text-black text-[clamp(29px,4.5vw,54px)] font-bold leading-[1.1] uppercase tracking-[0.02em] justify-center"
+            className="text-black text-[clamp(24px,4.5vw,54px)] font-bold leading-[1.1] uppercase tracking-[0.02em] justify-center"
           />
           <p
             className="text-black/60 text-[16px] md:text-[18px] leading-[1.3] mt-4 max-w-2xl mx-auto font-light"

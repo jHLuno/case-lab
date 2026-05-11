@@ -101,7 +101,7 @@ export default function OurAdvantage() {
             Если узнаёте себя
           </span>
           <h2
-            className="text-black text-[clamp(24px,3.5vw,42px)] font-bold leading-[1.12] uppercase tracking-[0.02em] max-w-3xl"
+            className="text-black text-[clamp(22px,3.5vw,42px)] font-bold leading-[1.12] uppercase tracking-[0.02em] max-w-3xl"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             Когда нужна диагностика?
