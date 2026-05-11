@@ -214,7 +214,7 @@ export default function BusinessModel() {
 
       <div className="max-w-[1078px] mx-auto">
         {/* Header */}
-        <div className="mb-8 md:mb-12">
+        <div className="mb-12 md:mb-12">
           <span
             className="text-gray text-[11px] mb-3 block leading-[1.58]"
             style={{ fontFamily: "var(--font-body)" }}
@@ -228,7 +228,7 @@ export default function BusinessModel() {
         </div>
 
         {/* Case Lab Label */}
-        <div className="text-center mb-10 md:mb-16">
+        <div className="text-center mb-12 md:mb-12">
           <span
             className="case-lab-badge inline-flex items-center gap-[6px]"
             style={{ willChange: "filter, opacity, transform", fontFamily: "var(--font-heading)" }}
@@ -246,7 +246,7 @@ export default function BusinessModel() {
         </div>
 
         {/* Before → After */}
-        <div ref={itemsRef} className="relative mb-14 md:mb-24">
+        <div ref={itemsRef} className="relative mb-12 md:mb-20">
           {/* Vertical dividing line — visible on all sizes */}
           <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-px pointer-events-none hidden md:block">
             <div className="absolute inset-0 bg-black/5" />
