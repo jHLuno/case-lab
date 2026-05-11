@@ -14,18 +14,18 @@ const industries = [
 
 export default function Clients() {
   return (
-    <section id="industries" aria-label="Компании" className="relative bg-white py-24 md:py-40 px-6 md:px-10">
+    <section id="industries" aria-label="Компании" className="relative bg-white py-24 md:py-40 px-6 md:px-10 overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
       <div className="max-w-[1078px] mx-auto">
         <ScrollReveal>
           <h2
-            className="text-black text-[clamp(29px,4vw,54px)] font-bold leading-[1.15] mb-12 md:mb-16 uppercase tracking-[0.02em]"
+            className="text-black text-[clamp(22px,4vw,54px)] font-bold leading-[1.15] mb-12 md:mb-16 uppercase tracking-[0.02em] break-words"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             Компании,
-            <br />
-            <span className="whitespace-nowrap">чьи кейсы мы разобрали</span>
+            <br className="hidden md:block" />
+            <span className="break-words">чьи кейсы мы разобрали</span>
           </h2>
         </ScrollReveal>
       </div>

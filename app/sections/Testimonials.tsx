@@ -141,7 +141,7 @@ export default function Testimonials() {
             Результаты диагностики
           </span>
           <h2
-            className="text-black text-[clamp(24px,4vw,54px)] font-bold leading-[1.15] mb-3 uppercase tracking-[0.02em]"
+            className="text-black text-[clamp(20px,4vw,48px)] font-bold leading-[1.15] mb-3 uppercase tracking-[0.02em] break-words"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             Что изменилось после сессии
@@ -149,7 +149,7 @@ export default function Testimonials() {
         </div>
 
         {/* Company List + Quote */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16">
           {/* Company List */}
           <div className="space-y-0">
             {testimonials.map((t, i) => (
@@ -234,7 +234,7 @@ export default function Testimonials() {
                 <div className="pr-2">
                   <blockquote
                     cite="#testimonials"
-                    className="text-black text-[18px] md:text-[24px] font-normal leading-[1.3] mb-8"
+                    className="text-black text-[16px] md:text-[24px] font-normal leading-[1.35] mb-6 md:mb-8"
                     style={{ fontFamily: "var(--font-body)" }}
                   >
                     &ldquo;{testimonials[activeIndex].quote}&rdquo;

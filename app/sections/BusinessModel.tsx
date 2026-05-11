@@ -6,6 +6,43 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+function BlurRevealWords({ text, className, style }: { text: string; className?: string; style?: React.CSSProperties }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    const words = ref.current.querySelectorAll(".bw");
+    if (words.length === 0) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        words,
+        { opacity: 0.1, y: 10, filter: "blur(4px)" },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          stagger: 0.04,
+          scrollTrigger: {
+            trigger: ref.current,
+            start: "top 85%",
+            end: "top 60%",
+            scrub: true,
+          },
+        }
+      );
+    }, ref);
+    return () => ctx.revert();
+  }, []);
+  return (
+    <p ref={ref} className={className} style={style}>
+      {text.split(" ").map((w, i) => (
+        <span key={i} className="bw inline-block mr-[0.25em]" style={{ willChange: "filter, opacity, transform" }}>
+          {w}
+        </span>
+      ))}
+    </p>
+  );
+}
+
 const beforeAfter = [
   {
     before: "Маркетинг работает, но непонятно за счёт чего",
@@ -104,31 +141,10 @@ export default function BusinessModel() {
         );
       }
 
-      // Before/after items blur reveal
+      // Arrow reveal only
       const rows = itemsRef.current?.querySelectorAll(".ba-row");
       rows?.forEach((row) => {
-        const before = row.querySelector(".ba-before");
-        const after = row.querySelector(".ba-after");
         const arrow = row.querySelector(".ba-arrow");
-
-        if (before) {
-          gsap.fromTo(
-            before,
-            { opacity: 0.2, x: -20, filter: "blur(3px)" },
-            {
-              opacity: 1,
-              x: 0,
-              filter: "blur(0px)",
-              scrollTrigger: {
-                trigger: row,
-                start: "top 85%",
-                end: "top 65%",
-                scrub: true,
-              },
-            }
-          );
-        }
-
         if (arrow) {
           gsap.fromTo(
             arrow,
@@ -140,24 +156,6 @@ export default function BusinessModel() {
                 trigger: row,
                 start: "top 80%",
                 end: "top 60%",
-                scrub: true,
-              },
-            }
-          );
-        }
-
-        if (after) {
-          gsap.fromTo(
-            after,
-            { opacity: 0.2, x: 20, filter: "blur(3px)" },
-            {
-              opacity: 1,
-              x: 0,
-              filter: "blur(0px)",
-              scrollTrigger: {
-                trigger: row,
-                start: "top 75%",
-                end: "top 55%",
                 scrub: true,
               },
             }
@@ -276,12 +274,10 @@ export default function BusinessModel() {
               >
                 {/* Before — dimmed, outdated approach */}
                 <div className="ba-before text-right md:text-right md:pr-12">
-                  <p
-                    className="text-[16px] md:text-[18px] leading-[1.3] font-light"
-                    style={{ fontFamily: "var(--font-body)", color: "rgba(0,0,0,0.3)" }}
-                  >
-                    {row.before}
-                  </p>
+                  <BlurRevealWords
+                    text={row.before}
+                    className="text-[16px] md:text-[18px] leading-[1.3] font-light text-black/30 font-body"
+                  />
                 </div>
 
                 {/* Arrow (desktop) */}
@@ -295,12 +291,10 @@ export default function BusinessModel() {
 
                 {/* After — Case Lab solution */}
                 <div className="ba-after md:pl-12">
-                  <p
-                    className="text-black text-[16px] md:text-[18px] leading-[1.3] font-normal"
-                    style={{ fontFamily: "var(--font-body)" }}
-                  >
-                    {row.after}
-                  </p>
+                  <BlurRevealWords
+                    text={row.after}
+                    className="text-[16px] md:text-[18px] leading-[1.3] font-normal text-black font-body"
+                  />
                 </div>
               </div>
             ))}

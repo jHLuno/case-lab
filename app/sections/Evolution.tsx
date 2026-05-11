@@ -90,17 +90,6 @@ export default function Evolution() {
   const segRefs = useRef<(SVGPathElement | null)[]>([]);
 
   useEffect(() => {
-    const mql = window.matchMedia("(max-width: 767px)");
-    const isMobile = mql.matches;
-
-    const handler = (e: MediaQueryListEvent) => {
-      if (e.matches !== isMobile) {
-        // Force re-mount on breakpoint change
-        ScrollTrigger.refresh();
-      }
-    };
-    mql.addEventListener("change", handler);
-
     if (!sectionRef.current) return;
 
     const ctx = gsap.context(() => {
@@ -125,7 +114,53 @@ export default function Evolution() {
         );
       }
 
-      if (isMobile) {
+      // Orbit animation on all devices via matchMedia
+      let orbitTriggers: ScrollTrigger[] = [];
+
+      const mm = gsap.matchMedia();
+
+      mm.add("(max-width: 767px)", () => {
+        // Mobile: shorter scroll distance, no pin
+        const lengths = segRefs.current.map((el) => (el ? el.getTotalLength() : 0));
+        const totalLength = lengths.reduce((a, b) => a + b, 0);
+
+        segRefs.current.forEach((el, i) => {
+          if (!el) return;
+          gsap.set(el, {
+            strokeDasharray: lengths[i],
+            strokeDashoffset: lengths[i],
+          });
+        });
+
+        const st = ScrollTrigger.create({
+          trigger: sectionRef.current,
+          start: "top 60%",
+          end: "bottom 40%",
+          scrub: true,
+          onUpdate: (self) => {
+            const p = self.progress;
+            const seg = 1 / stages.length;
+            const idx = Math.min(Math.floor(p / seg), stages.length - 1);
+            setActiveIndex(idx);
+
+            let filled = p * totalLength;
+            segRefs.current.forEach((el, i) => {
+              if (!el) return;
+              const len = lengths[i];
+              if (filled <= 0) {
+                gsap.set(el, { strokeDashoffset: len });
+              } else if (filled >= len) {
+                gsap.set(el, { strokeDashoffset: 0 });
+              } else {
+                gsap.set(el, { strokeDashoffset: len - filled });
+              }
+              filled -= len;
+            });
+          },
+        });
+        orbitTriggers.push(st);
+
+        // Mobile facts stagger
         gsap.fromTo(
           ".evo-fact",
           { opacity: 0, y: 40 },
@@ -141,7 +176,10 @@ export default function Evolution() {
             },
           }
         );
-      } else {
+      });
+
+      mm.add("(min-width: 768px)", () => {
+        // Desktop: pin with longer scroll
         const lengths = segRefs.current.map((el) => (el ? el.getTotalLength() : 0));
         const totalLength = lengths.reduce((a, b) => a + b, 0);
 
@@ -153,7 +191,7 @@ export default function Evolution() {
           });
         });
 
-        ScrollTrigger.create({
+        const st = ScrollTrigger.create({
           trigger: sectionRef.current,
           start: "top 15%",
           end: `+=${window.innerHeight * 2.5}`,
@@ -180,11 +218,11 @@ export default function Evolution() {
             });
           },
         });
-      }
+        orbitTriggers.push(st);
+      });
     }, sectionRef);
 
     return () => {
-      mql.removeEventListener("change", handler);
       ctx.revert();
     };
   }, []);

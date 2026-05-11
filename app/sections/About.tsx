@@ -137,8 +137,8 @@ export default function About() {
               <div
                 className={`relative h-full rounded-[20px] overflow-hidden flex flex-col ${
                   item.dark
-                    ? "min-h-[380px] md:min-h-0 p-8 md:p-10"
-                    : "min-h-[180px] p-8 md:p-10"
+                    ? "min-h-[320px] md:min-h-0 p-6 md:p-10"
+                    : "min-h-[160px] p-6 md:p-10"
                 }`}
                 style={{
                   background: item.dark
@@ -166,7 +166,7 @@ export default function About() {
                 {item.id === "streams" || item.id === "cases" ? (
                   <div className="mt-auto">
                     <span
-                      className={`text-[clamp(40px,4vw,56px)] font-normal leading-none block mb-2 ${
+                      className={`text-[clamp(32px,4vw,56px)] font-normal leading-none block mb-2 ${
                         item.dark ? "text-white" : "text-black group-hover:text-[#040082] transition-colors duration-500"
                       }`}
                       style={{ fontFamily: "var(--font-body)" }}
@@ -174,7 +174,7 @@ export default function About() {
                       {item.title}
                     </span>
                     <p
-                      className={`text-[13px] md:text-[14px] leading-[1.35] font-light ${
+                      className={`text-[14px] leading-[1.35] font-light ${
                           item.dark ? "text-white/50" : "text-black/60"
                       }`}
                       style={{ fontFamily: "var(--font-body)" }}
@@ -185,7 +185,7 @@ export default function About() {
                 ) : (
                   <div className="mt-auto">
                     <h3
-                      className={`text-[18px] md:text-[22px] font-normal leading-[1.25] uppercase tracking-[0.02em] mb-4 ${
+                      className={`text-[16px] md:text-[22px] font-normal leading-[1.25] uppercase tracking-[0.02em] mb-4 ${
                         item.dark ? "text-white" : "text-black"
                       }`}
                       style={{ fontFamily: "var(--font-heading)" }}
@@ -194,7 +194,7 @@ export default function About() {
                     </h3>
                     {item.body && (
                       <p
-                        className={`text-[14px] md:text-[15px] leading-[1.45] max-w-md font-light ${
+                        className={`text-[14px] leading-[1.45] max-w-md font-light ${
                         item.dark ? "text-white/50" : "text-black/60"
                         }`}
                         style={{ fontFamily: "var(--font-body)" }}

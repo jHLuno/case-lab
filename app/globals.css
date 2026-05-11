@@ -76,6 +76,10 @@
 }
 
 @layer base {
+  html, body {
+    overflow-x: hidden;
+  }
+
   html {
     scroll-behavior: auto;
   }

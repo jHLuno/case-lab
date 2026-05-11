@@ -41,16 +41,20 @@ export default function Hero() {
     <section
       ref={containerRef}
       aria-label="Главный экран"
-      className="relative min-h-screen w-full overflow-hidden bg-[#000011] flex items-end"
+      className="relative min-h-[100svh] w-full overflow-hidden bg-[#000011] flex items-end"
     >
+      {/* Poster fallback layer (always visible behind video) */}
+      <div
+        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url(/hero-poster.png)" }}
+      />
+
       {/* Background video */}
       <video
         autoPlay
         loop
         muted
         playsInline
-        preload="auto"
-        poster="/hero-poster.png"
         className="absolute inset-0 w-full h-full object-cover"
       >
         <source src="https://d7gcdwqf10x648ub.public.blob.vercel-storage.com/Video-Demo.webm" type="video/webm" />
@@ -82,7 +86,7 @@ export default function Hero() {
 
       {/* Content */}
       <div className="relative z-10 w-full px-6 md:px-10 pb-20 md:pb-32 pt-32">
-        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row items-end justify-between gap-12 md:gap-20">
+        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row items-start md:items-end justify-between gap-12 md:gap-20">
           {/* Left — Big headline + CTA */}
           <div className="flex-1">
             <motion.div
@@ -95,7 +99,7 @@ export default function Hero() {
               }}
             >
               <h1
-                className="text-white text-[clamp(32px,5vw,72px)] font-bold leading-none tracking-[0.02em] uppercase whitespace-nowrap"
+                className="text-white text-[clamp(32px,5vw,72px)] font-bold leading-none tracking-[0.02em] uppercase whitespace-normal md:whitespace-nowrap"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
                 CASE <em>LAB</em>
@@ -182,9 +186,9 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Scroll indicator */}
+      {/* Scroll indicator — desktop only */}
       <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:block"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 1 }}
