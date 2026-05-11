@@ -131,8 +131,8 @@ export default function Evolution() {
 
         ScrollTrigger.create({
           trigger: sectionRef.current,
-          start: "top 60%",
-          end: "+=700",
+          start: "top 85%",
+          end: "+=2000",
           scrub: true,
           onUpdate: (self) => {
             const p = self.progress;
@@ -166,8 +166,8 @@ export default function Evolution() {
             stagger: 0.12,
             scrollTrigger: {
               trigger: sectionRef.current,
-              start: "top 75%",
-              end: "top 35%",
+              start: "top 85%",
+              end: "top 55%",
               scrub: true,
             },
           }
@@ -358,13 +358,7 @@ export default function Evolution() {
               })}
             </svg>
 
-            {/* Mobile progress bar */}
-            <div className="md:hidden absolute left-0 right-0 bottom-[-16px] h-[2px] bg-black/5 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#040082] transition-all duration-500 ease-out rounded-full"
-                style={{ width: `${((activeIndex + 1) / stages.length) * 100}%` }}
-              />
-            </div>
+            {/* Mobile orbit + facts indicate progress via active styling; no separate progress bar */}
           </div>
         </div>
 
