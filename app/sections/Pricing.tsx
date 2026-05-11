@@ -164,7 +164,7 @@ function PricingCard({
           </>
         )}
 
-        <div className="relative z-10 p-10 md:p-10 lg:p-12 flex flex-col h-full">
+        <div className="relative z-10 px-10 py-8 md:p-10 lg:p-12 flex flex-col h-full">
           {/* Badge */}
           <span
             className="inline-flex items-center gap-1.5 border border-white/20 rounded-full px-3 py-1.5 text-white/60 text-[10px] md:text-[11px] uppercase tracking-wider mb-6 w-fit"
