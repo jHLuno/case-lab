@@ -40,7 +40,7 @@ export default function Footer() {
         </div>
 
         {/* Minimal info row */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mb-12">
+        <div className="flex flex-col md:flex-row items-start justify-between gap-8 mb-12">
           {/* Logo */}
           <div className="relative h-7 w-[160px]">
             <Image

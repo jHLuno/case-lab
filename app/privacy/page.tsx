@@ -10,7 +10,7 @@ export default function PrivacyPage() {
     <main className="min-h-screen bg-white px-8 md:px-10 py-16 md:py-40">
       <div className="max-w-[800px] mx-auto">
         <h1
-          className="text-black text-[clamp(24px,3.5vw,42px)] font-bold leading-[1.12] uppercase tracking-[0.02em] mb-12"
+            className="text-black text-[clamp(20px,3.5vw,42px)] font-bold leading-[1.12] uppercase tracking-[0.02em] mb-12"
           style={{ fontFamily: "var(--font-heading)" }}
         >
           Политика конфиденциальности
