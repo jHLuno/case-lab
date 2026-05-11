@@ -132,7 +132,7 @@ export default function Evolution() {
         ScrollTrigger.create({
           trigger: sectionRef.current,
           start: "top 85%",
-          end: "+=1800",
+          end: "+=1500",
           scrub: true,
           onUpdate: (self) => {
             const p = self.progress;
@@ -390,10 +390,13 @@ export default function Evolution() {
                 <div
                   key={stage.num}
                   className="evo-fact relative pl-6 md:pl-7 transition-all duration-700 ease-out cursor-default"
+                  className={`evo-fact relative pl-6 md:pl-7 transition-all duration-700 ease-out cursor-default ${
+                    !isActive ? "max-md:opacity-30 max-md:blur-[0.4px]" : ""
+                  }`}
                   style={{
-                    opacity: isActive ? 1 : 0.4,
-                    filter: isActive ? "blur(0px)" : "blur(0.8px)",
-                    transform: isActive ? "translateX(0)" : "translateX(-4px)",
+                    opacity: isActive ? 1 : 0.35,
+                    filter: isActive ? "blur(0px)" : "blur(0.6px)",
+                    transform: isActive ? "translateX(0)" : "translateX(-3px)",
                   }}
                 >
                   <div
