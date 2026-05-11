@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:clean": "pkill -9 -f 'next' 2>/dev/null || true; rm -rf .next && next dev",
-    "build": "pkill -9 -f 'next' 2>/dev/null || true; rm -rf .next && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
