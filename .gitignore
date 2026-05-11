@@ -14,11 +14,6 @@ dist/
 public/Video-Demo.mp4
 public/Video-Demo.webm
 
-# Unoptimized images — convert to WebP before committing
-public/*.png
-public/*.jpg
-public/*.jpeg
-
 # System files
 .DS_Store
 *.pem
