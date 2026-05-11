@@ -260,22 +260,29 @@ export default function BusinessModel() {
             />
           </div>
 
-          <div className="max-w-[1078px] mx-auto space-y-10 md:space-y-12">
+          <div className="max-w-[1078px] mx-auto space-y-4 md:space-y-12">
             {beforeAfter.map((row) => (
               <div
                 key={row.before}
-                className="ba-row grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 md:gap-0 items-start md:items-center"
+                className="ba-row rounded-[16px] border border-black/[0.06] bg-white p-5 md:p-0 md:rounded-none md:border-0 md:bg-transparent grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-2 md:gap-0 items-start md:items-center"
               >
                 {/* Before — dimmed, outdated approach */}
-                <div className="ba-before text-left md:text-right md:pr-12 pb-4 md:pb-0 border-b border-black/5 md:border-0">
+                <div className="ba-before text-left md:text-right md:pr-12 md:pb-0">
                   <span className="text-[11px] uppercase tracking-wider text-black/30 mb-1 block md:hidden" style={{ fontFamily: "var(--font-body)" }}>До</span>
                   <BlurRevealWords
                     text={row.before}
-                    className="text-[15px] md:text-[18px] leading-[1.3] font-light text-black/30 font-body"
+                    className="text-[13px] md:text-[18px] leading-[1.35] font-light text-black/40 font-body"
                   />
                 </div>
 
-                {/* Arrow (desktop) */}
+                {/* Arrow — down on mobile, right on desktop */}
+                <div className="flex md:hidden items-center justify-center py-1">
+                  <div className="w-7 h-7 rounded-full bg-[#040082]/10 flex items-center justify-center">
+                    <svg aria-hidden="true" width="12" height="12" viewBox="0 0 16 16" fill="none">
+                      <path d="M8 3v10M8 13l-4-4M8 13l4-4" stroke="#040082" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
                 <div className="hidden md:flex ba-arrow w-16 flex-shrink-0 items-center justify-center">
                   <div className="w-8 h-8 rounded-full bg-[#040082] flex items-center justify-center">
                     <svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none">
@@ -285,7 +292,7 @@ export default function BusinessModel() {
                 </div>
 
                 {/* After — Case Lab solution */}
-                <div className="ba-after md:pl-12 pt-4 md:pt-0">
+                <div className="ba-after md:pl-12 pt-1 md:pt-0">
                   <span className="text-[11px] uppercase tracking-wider text-[#040082] mb-1 block md:hidden" style={{ fontFamily: "var(--font-body)" }}>После</span>
                   <BlurRevealWords
                     text={row.after}
