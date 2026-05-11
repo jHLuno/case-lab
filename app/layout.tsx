@@ -68,6 +68,8 @@ export default function RootLayout({
   return (
       <html lang="ru" className={`${inter.variable} ${bebasNeue.variable}`} suppressHydrationWarning>
       <head>
+        <link rel="icon" type="image/png" href="/Logo.png" />
+        <link rel="apple-touch-icon" href="/Logo.png" />
         <link rel="preload" href="/fonts/Benzin-Bold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/Benzin-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/Gilroy-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
