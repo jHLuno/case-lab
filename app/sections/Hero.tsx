@@ -50,10 +50,11 @@ export default function Hero() {
         muted
         playsInline
         preload="auto"
+        poster="/hero-poster.png"
         className="absolute inset-0 w-full h-full object-cover"
       >
-        <source src="/Video-Demo.webm" type="video/webm" />
-        <source src="/Video-Demo.mp4" type="video/mp4" />
+        <source src="https://d7gcdwqf10x648ub.public.blob.vercel-storage.com/Video-Demo.webm" type="video/webm" />
+        <source src="https://d7gcdwqf10x648ub.public.blob.vercel-storage.com/Video-Demo.mp4" type="video/mp4" />
       </video>
 
       {/* Atmospheric gradient orbs overlaid on video */}
@@ -136,7 +137,7 @@ export default function Hero() {
               >
                 Записаться на диагностику
                 <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0">
-                  <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </motion.a>
               <p
