@@ -389,7 +389,6 @@ export default function Evolution() {
               return (
                 <div
                   key={stage.num}
-                  className="evo-fact relative pl-6 md:pl-7 transition-all duration-700 ease-out cursor-default"
                   className={`evo-fact relative pl-6 md:pl-7 transition-all duration-700 ease-out cursor-default ${
                     !isActive ? "max-md:opacity-30 max-md:blur-[0.4px]" : ""
                   }`}
