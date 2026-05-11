@@ -131,8 +131,8 @@ export default function Evolution() {
 
         ScrollTrigger.create({
           trigger: sectionRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
+          start: "top 95%",
+          end: "+=1200",
           scrub: true,
           onUpdate: (self) => {
             const p = self.progress;
@@ -156,19 +156,19 @@ export default function Evolution() {
           },
         });
 
-        // Mobile facts stagger
+        // Mobile facts: fade in together, activeIndex handles highlight
         gsap.fromTo(
           ".evo-fact",
-          { opacity: 0, y: 30 },
+          { opacity: 0, y: 20 },
           {
             opacity: 1,
             y: 0,
-            stagger: 0.12,
+            duration: 0.6,
+            ease: "power2.out",
             scrollTrigger: {
               trigger: sectionRef.current,
               start: "top 85%",
-              end: "top 55%",
-              scrub: true,
+              toggleActions: "play none none reverse",
             },
           }
         );
