@@ -14,9 +14,9 @@ import Timeline from "../sections/Timeline";
 
 const Testimonials = dynamic(() => import("../sections/Testimonials"), { ssr: false });
 const BusinessModel = dynamic(() => import("../sections/BusinessModel"), { ssr: false });
-const Clients = dynamic(() => import("../sections/Clients"), { ssr: false });
+const Clients = dynamic(() => import("../sections/Clients"));
 const Evolution = dynamic(() => import("../sections/Evolution"), { ssr: false });
-const QuickLinks = dynamic(() => import("../sections/QuickLinks"), { ssr: false });
+const QuickLinks = dynamic(() => import("../sections/QuickLinks"));
 
 gsap.registerPlugin(ScrollTrigger);
 

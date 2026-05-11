@@ -75,6 +75,7 @@ export default function Navbar() {
                 fill
                 className="object-contain"
                 priority
+                loading="eager"
                 sizes="(max-width: 768px) 128px, 105px"
               />
             </div>

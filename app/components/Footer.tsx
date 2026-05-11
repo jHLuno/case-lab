@@ -48,6 +48,7 @@ export default function Footer() {
               alt="Case Lab"
               fill
               className="object-contain"
+              loading="lazy"
               sizes="160px"
             />
           </div>
