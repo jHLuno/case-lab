@@ -214,9 +214,9 @@ export default function BusinessModel() {
 
       <div className="max-w-[1078px] mx-auto">
         {/* Header */}
-        <div className="mb-12 md:mb-20">
+        <div className="mb-10 md:mb-16">
           <span
-            className="text-gray text-[11px] mb-4 block leading-[1.58]"
+            className="text-gray text-[11px] mb-3 block leading-[1.58]"
             style={{ fontFamily: "var(--font-body)" }}
           >
             Case Lab Diagnostics
@@ -228,7 +228,7 @@ export default function BusinessModel() {
         </div>
 
         {/* Case Lab Label */}
-        <div className="text-center mb-12 md:mb-16">
+        <div className="text-center mb-8 md:mb-12">
           <span
             className="case-lab-badge inline-flex items-center gap-[6px]"
             style={{ willChange: "filter, opacity, transform", fontFamily: "var(--font-heading)" }}

@@ -130,7 +130,7 @@ export default function Testimonials() {
             Результаты диагностики
           </span>
           <h2
-            className="text-black text-[clamp(16px,4vw,48px)] font-bold leading-[1.15] mb-3 uppercase tracking-[0.02em]"
+            className="text-black text-[clamp(16px,4vw,48px)] font-bold leading-[1.15] mb-8 md:mb-12 uppercase tracking-[0.02em]"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             Что изменилось после сессии

@@ -364,9 +364,9 @@ export default function Evolution() {
 
         {/* Right: Facts */}
         <div className="flex-1 w-full max-w-lg">
-          <div ref={headerRef} className="mb-5 md:mb-8">
+          <div ref={headerRef} className="mb-10 md:mb-16">
             <span
-              className="text-gray text-[11px] mb-2 block leading-[1.58] uppercase tracking-wider"
+              className="text-gray text-[11px] mb-3 block leading-[1.58] uppercase tracking-wider"
               style={{ fontFamily: "var(--font-body)" }}
             >
               Эволюция проекта

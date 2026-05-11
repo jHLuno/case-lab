@@ -268,7 +268,7 @@ export default function Pricing() {
 
       <div className="max-w-[1200px] mx-auto">
         {/* Case Lab Label */}
-        <div className="text-center mb-10 md:mb-14">
+        <div className="text-center mb-6 md:mb-10">
           <span
             className="case-lab-badge inline-flex items-center gap-[6px]"
             style={{ fontFamily: "var(--font-heading)" }}
