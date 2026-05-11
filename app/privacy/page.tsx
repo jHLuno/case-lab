@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-white px-6 md:px-10 py-24 md:py-40">
+    <main className="min-h-screen bg-white px-8 md:px-10 py-16 md:py-40">
       <div className="max-w-[800px] mx-auto">
         <h1
           className="text-black text-[clamp(24px,3.5vw,42px)] font-bold leading-[1.12] uppercase tracking-[0.02em] mb-12"
@@ -16,9 +16,9 @@ export default function PrivacyPage() {
           Политика конфиденциальности
         </h1>
 
-        <div className="space-y-8 text-black/60 text-[15px] leading-[1.6] font-light" style={{ fontFamily: "var(--font-body)" }}>
+        <div className="space-y-8 text-black/60 text-[14px] md:text-[15px] leading-[1.6] font-light break-words" style={{ fontFamily: "var(--font-body)" }}>
           <section>
-            <h2 className="text-black text-[18px] font-normal mb-3 uppercase tracking-[0.02em]" style={{ fontFamily: "var(--font-heading)" }}>
+            <h2 className="text-black text-[16px] md:text-[18px] font-normal mb-3 uppercase tracking-[0.02em]" style={{ fontFamily: "var(--font-heading)" }}>
               1. Общие положения
             </h2>
             <p>
@@ -27,7 +27,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-black text-[18px] font-normal mb-3 uppercase tracking-[0.02em]" style={{ fontFamily: "var(--font-heading)" }}>
+            <h2 className="text-black text-[16px] md:text-[18px] font-normal mb-3 uppercase tracking-[0.02em]" style={{ fontFamily: "var(--font-heading)" }}>
               2. Какие данные мы собираем
             </h2>
             <p className="mb-3">
@@ -43,7 +43,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-black text-[18px] font-normal mb-3 uppercase tracking-[0.02em]" style={{ fontFamily: "var(--font-heading)" }}>
+            <h2 className="text-black text-[16px] md:text-[18px] font-normal mb-3 uppercase tracking-[0.02em]" style={{ fontFamily: "var(--font-heading)" }}>
               3. Цели обработки данных
             </h2>
             <p className="mb-3">
@@ -58,7 +58,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-black text-[18px] font-normal mb-3 uppercase tracking-[0.02em]" style={{ fontFamily: "var(--font-heading)" }}>
+            <h2 className="text-black text-[16px] md:text-[18px] font-normal mb-3 uppercase tracking-[0.02em]" style={{ fontFamily: "var(--font-heading)" }}>
               4. Передача данных третьим лицам
             </h2>
             <p>
@@ -67,7 +67,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-black text-[18px] font-normal mb-3 uppercase tracking-[0.02em]" style={{ fontFamily: "var(--font-heading)" }}>
+            <h2 className="text-black text-[16px] md:text-[18px] font-normal mb-3 uppercase tracking-[0.02em]" style={{ fontFamily: "var(--font-heading)" }}>
               5. Хранение и защита данных
             </h2>
             <p>
@@ -76,7 +76,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-black text-[18px] font-normal mb-3 uppercase tracking-[0.02em]" style={{ fontFamily: "var(--font-heading)" }}>
+            <h2 className="text-black text-[16px] md:text-[18px] font-normal mb-3 uppercase tracking-[0.02em]" style={{ fontFamily: "var(--font-heading)" }}>
               6. Ваши права
             </h2>
             <p className="mb-3">
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-black text-[18px] font-normal mb-3 uppercase tracking-[0.02em]" style={{ fontFamily: "var(--font-heading)" }}>
+            <h2 className="text-black text-[16px] md:text-[18px] font-normal mb-3 uppercase tracking-[0.02em]" style={{ fontFamily: "var(--font-heading)" }}>
               7. Cookies
             </h2>
             <p>
@@ -103,7 +103,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-black text-[18px] font-normal mb-3 uppercase tracking-[0.02em]" style={{ fontFamily: "var(--font-heading)" }}>
+            <h2 className="text-black text-[16px] md:text-[18px] font-normal mb-3 uppercase tracking-[0.02em]" style={{ fontFamily: "var(--font-heading)" }}>
               8. Контакты
             </h2>
             <p>
