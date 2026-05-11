@@ -72,7 +72,7 @@ export default function Testimonials() {
         ScrollTrigger.create({
           trigger: section,
           start: "top 15%",
-          end: "+=1000",
+          end: "+=600",
           pin: true,
           scrub: 1.2,
           id: "testimonials-mobile",
