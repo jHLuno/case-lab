@@ -143,7 +143,7 @@ export default function About() {
                 style={{
                   background: item.dark
                     ? item.id === "origin"
-                      ? `linear-gradient(165deg, rgba(4, 0, 130, 0.55) 0%, rgba(6, 6, 50, 0.58) 45%, rgba(2, 2, 25, 0.60) 100%), url(/CASElab.webp)`
+                      ? `linear-gradient(165deg, rgba(4, 0, 130, 0.70) 0%, rgba(6, 6, 50, 0.74) 45%, rgba(2, 2, 25, 0.78) 100%), url(/CASElab.webp)`
                       : "linear-gradient(165deg, rgba(4, 0, 130, 0.95) 0%, rgba(6, 6, 50, 0.98) 45%, rgba(2, 2, 25, 1) 100%)"
                     : "#fff",
                   backgroundSize: item.id === "origin" ? "cover" : undefined,
