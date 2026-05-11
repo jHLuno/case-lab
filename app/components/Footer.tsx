@@ -42,7 +42,7 @@ export default function Footer() {
         {/* Minimal info row */}
         <div className="flex flex-col md:flex-row items-start justify-between gap-8 mb-12">
           {/* Logo */}
-          <div className="relative h-7 w-[160px]">
+          <div className="relative h-7 w-[130px]">
             <Image
               src="/Logo.png"
               alt="Case Lab"
