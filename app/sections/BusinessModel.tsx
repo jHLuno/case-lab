@@ -26,10 +26,11 @@ function BlurRevealWords({ text, className, style }: { text: string; className?:
             start: "top 85%",
             end: "top 60%",
             scrub: true,
+            invalidateOnRefresh: true,
           },
         }
       );
-    }, ref);
+    }, ref.current);
     return () => ctx.revert();
   }, []);
   return (
@@ -90,10 +91,11 @@ function BlurRevealHeading({ text, className = "" }: { text: string; className?:
             start: "top 85%",
             end: "top 55%",
             scrub: true,
+            invalidateOnRefresh: true,
           },
         }
       );
-    }, ref);
+    }, ref.current);
 
     return () => ctx.revert();
   }, []);
@@ -206,6 +208,14 @@ export default function BusinessModel() {
     }, sectionRef);
 
     return () => ctx.revert();
+  }, []);
+
+  // Refresh ScrollTrigger after dynamic mount so child triggers get correct positions
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+    });
+    return () => cancelAnimationFrame(id);
   }, []);
 
   return (
