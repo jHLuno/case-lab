@@ -71,7 +71,7 @@ export default function Footer() {
           </div>
 
           {/* Social */}
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center gap-4 md:gap-6">
             <a
               href="https://instagram.com/narxoz_business_school"
               target="_blank"

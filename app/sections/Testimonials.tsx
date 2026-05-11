@@ -40,45 +40,38 @@ const testimonials = [
 
 export default function Testimonials() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const lineRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  useEffect(() => {
-    const mql = window.matchMedia("(max-width: 767px)");
-    setIsMobile(mql.matches);
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mql.addEventListener("change", handler);
-    return () => mql.removeEventListener("change", handler);
-  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
     const ctx = gsap.context(() => {
-      if (isMobile) {
-        // Mobile: simple scroll reveal, no pin
-        gsap.fromTo(
-          section.querySelectorAll(".testimonial-item"),
-          { opacity: 0, y: 40 },
-          {
-            opacity: 1,
-            y: 0,
-            stagger: 0.15,
-            scrollTrigger: {
-              trigger: section,
-              start: "top 80%",
-              end: "top 40%",
-              scrub: true,
-            },
-          }
-        );
-      } else {
+      // Staggered reveal for company items on all breakpoints
+      gsap.fromTo(
+        section.querySelectorAll(".testimonial-item"),
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.12,
+          scrollTrigger: {
+            trigger: section,
+            start: "top 80%",
+            end: "top 40%",
+            scrub: true,
+          },
+        }
+      );
+
+      // Desktop only: pin + progress-based active index
+      const mm = gsap.matchMedia();
+      mm.add("(min-width: 1024px)", () => {
         ScrollTrigger.create({
           trigger: section,
           start: "top 15%",
-          end: `+=${window.innerHeight * 3}`,
+          end: `+=${window.innerHeight * 2.5}`,
           pin: true,
           scrub: 1.2,
           id: "testimonials",
@@ -87,7 +80,6 @@ export default function Testimonials() {
             const segmentSize = 1 / testimonials.length;
             const rawIndex = progress / segmentSize;
             const index = Math.min(Math.floor(rawIndex), testimonials.length - 1);
-            // Ensure last segment fills to 100% near scroll end
             const isLastSegment = index === testimonials.length - 1;
             const segmentProgress = isLastSegment && progress > 0.98
               ? 1
@@ -105,7 +97,7 @@ export default function Testimonials() {
             });
           },
         });
-      }
+      });
     }, sectionRef);
 
     return () => ctx.revert();
@@ -113,13 +105,10 @@ export default function Testimonials() {
 
   const handleCompanyClick = (index: number) => {
     setActiveIndex(index);
-    // On mobile (no pin), manually update line widths
-    if (isMobile) {
-      lineRefs.current.forEach((line, i) => {
-        if (!line) return;
-        line.style.width = i === index ? "100%" : "0%";
-      });
-    }
+    lineRefs.current.forEach((line, i) => {
+      if (!line) return;
+      line.style.width = i === index ? "100%" : "0%";
+    });
   };
 
   return (
@@ -131,7 +120,7 @@ export default function Testimonials() {
     >
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
-      <div className="max-w-[1440px] mx-auto flex flex-col justify-center h-full">
+      <div className="max-w-[1440px] mx-auto">
         {/* Header */}
         <div className="mb-8 md:mb-12">
           <span
@@ -149,7 +138,7 @@ export default function Testimonials() {
         </div>
 
         {/* Company List + Quote */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
           {/* Company List */}
           <div className="space-y-0">
             {testimonials.map((t, i) => (
@@ -159,7 +148,7 @@ export default function Testimonials() {
                 className={`testimonial-item border-t border-black/10 py-4 transition-all duration-500 ease-out cursor-pointer select-none ${
                   activeIndex === i
                     ? "opacity-100"
-                    : "opacity-30 hover:opacity-60"
+                    : "opacity-40 hover:opacity-70"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -193,7 +182,7 @@ export default function Testimonials() {
                   </motion.div>
                 </div>
 
-                {/* Progress line — always rendered, width controlled via ref/JS */}
+                {/* Progress line */}
                 <div className="h-[2px] mt-3 relative overflow-hidden bg-black/10">
                   <div
                     ref={(el) => {
@@ -208,7 +197,7 @@ export default function Testimonials() {
               </div>
             ))}
             {/* Progress dots — desktop only */}
-            <div className="hidden md:flex items-center gap-2 mt-6">
+            <div className="hidden lg:flex items-center gap-2 mt-6">
               {testimonials.map((_, i) => (
                 <div
                   key={i}
@@ -221,7 +210,7 @@ export default function Testimonials() {
           </div>
 
           {/* Quote */}
-          <div className="testimonial-item flex items-start lg:items-center">
+          <div className="testimonial-item lg:flex lg:items-center">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeIndex}
@@ -231,15 +220,13 @@ export default function Testimonials() {
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 className="w-full"
               >
-                <div className="pr-2">
-                  <blockquote
-                    cite="#testimonials"
-                    className="text-black text-[16px] md:text-[24px] font-normal leading-[1.35] mb-6 md:mb-8"
-                    style={{ fontFamily: "var(--font-body)" }}
-                  >
-                    &ldquo;{testimonials[activeIndex].quote}&rdquo;
-                  </blockquote>
-                </div>
+                <blockquote
+                  cite="#testimonials"
+                  className="text-black text-[16px] md:text-[22px] lg:text-[24px] font-normal leading-[1.4] mb-6 break-words"
+                  style={{ fontFamily: "var(--font-body)" }}
+                >
+                  &ldquo;{testimonials[activeIndex].quote}&rdquo;
+                </blockquote>
                 <div>
                   <span
                     className="inline-block bg-[#040082]/10 text-[#040082] text-[11px] md:text-[12px] font-normal px-3 py-1.5 rounded-full mb-3 uppercase tracking-wider"
@@ -265,7 +252,6 @@ export default function Testimonials() {
           </div>
         </div>
       </div>
-
     </section>
   );
 }

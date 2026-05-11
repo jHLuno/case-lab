@@ -177,7 +177,7 @@ function PricingCard({
 
           {/* Name */}
           <h3
-            className="text-white text-[clamp(20px,3vw,36px)] font-normal uppercase leading-[1.1] tracking-[0.02em] mb-6 break-words"
+            className="text-white text-[clamp(17px,3vw,36px)] font-normal uppercase leading-[1.1] tracking-[0.02em] mb-6 whitespace-nowrap"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             {plan.name}

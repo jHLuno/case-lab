@@ -304,7 +304,7 @@ export default function Timeline() {
               >
                 {/* Left text */}
                 <div
-                  className={`flex-1 ${isLeft ? "text-right pr-60 lg:pr-[22rem]" : ""}`}
+                  className={`flex-1 ${isLeft ? "text-right pr-16 md:pr-32 lg:pr-60 xl:pr-[22rem]" : ""}`}
                 >
                   {isLeft && (
                     <>
@@ -345,7 +345,7 @@ export default function Timeline() {
 
                 {/* Right text */}
                 <div
-                  className={`flex-1 ${!isLeft ? "text-left pl-60 lg:pl-[22rem]" : ""}`}
+                  className={`flex-1 ${!isLeft ? "text-left pl-16 md:pl-32 lg:pl-60 xl:pl-[22rem]" : ""}`}
                 >
                   {!isLeft && (
                     <>

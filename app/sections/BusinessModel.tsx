@@ -209,7 +209,7 @@ export default function BusinessModel() {
   }, []);
 
   return (
-    <section ref={sectionRef} aria-label="Что меняется после диагностики" className="relative bg-white py-24 md:py-40 px-6 md:px-10">
+    <section ref={sectionRef} aria-label="Что меняется после диагностики" className="relative bg-white py-24 md:py-40 px-6 md:px-10 overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
       <div className="max-w-[1078px] mx-auto">
@@ -247,36 +247,31 @@ export default function BusinessModel() {
 
         {/* Before → After */}
         <div ref={itemsRef} className="relative mb-16 md:mb-24">
-          {/* Desktop line - centered in the 3-col grid */}
-          <div className="hidden md:block absolute left-0 right-0 top-0 bottom-0 pointer-events-none">
-            <div className="max-w-[1078px] mx-auto h-full grid grid-cols-[1fr_auto_1fr]">
-              <div />
-              <div className="relative w-px h-full">
-                <div className="absolute inset-0 bg-black/5" />
-                <div
-                  ref={lineRef}
-                  className="absolute top-0 left-0 w-full origin-top"
-                  style={{
-                    height: "100%",
-                    background: "linear-gradient(to bottom, #040082, #1a1a9e, #040082)",
-                  }}
-                />
-              </div>
-              <div />
-            </div>
+          {/* Vertical dividing line — visible on all sizes */}
+          <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-px pointer-events-none hidden md:block">
+            <div className="absolute inset-0 bg-black/5" />
+            <div
+              ref={lineRef}
+              className="absolute top-0 left-0 w-full origin-top"
+              style={{
+                height: "100%",
+                background: "linear-gradient(to bottom, #040082, #1a1a9e, #040082)",
+              }}
+            />
           </div>
 
-          <div className="max-w-[1078px] mx-auto space-y-8 md:space-y-12">
+          <div className="max-w-[1078px] mx-auto space-y-10 md:space-y-12">
             {beforeAfter.map((row) => (
               <div
                 key={row.before}
-                className="ba-row grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 md:gap-0 items-center"
+                className="ba-row grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 md:gap-0 items-start md:items-center"
               >
                 {/* Before — dimmed, outdated approach */}
-                <div className="ba-before text-right md:text-right md:pr-12">
+                <div className="ba-before text-left md:text-right md:pr-12 pb-4 md:pb-0 border-b border-black/5 md:border-0">
+                  <span className="text-[11px] uppercase tracking-wider text-black/30 mb-1 block md:hidden" style={{ fontFamily: "var(--font-body)" }}>До</span>
                   <BlurRevealWords
                     text={row.before}
-                    className="text-[16px] md:text-[18px] leading-[1.3] font-light text-black/30 font-body"
+                    className="text-[15px] md:text-[18px] leading-[1.3] font-light text-black/30 font-body"
                   />
                 </div>
 
@@ -290,10 +285,11 @@ export default function BusinessModel() {
                 </div>
 
                 {/* After — Case Lab solution */}
-                <div className="ba-after md:pl-12">
+                <div className="ba-after md:pl-12 pt-4 md:pt-0">
+                  <span className="text-[11px] uppercase tracking-wider text-[#040082] mb-1 block md:hidden" style={{ fontFamily: "var(--font-body)" }}>После</span>
                   <BlurRevealWords
                     text={row.after}
-                    className="text-[16px] md:text-[18px] leading-[1.3] font-normal text-black font-body"
+                    className="text-[15px] md:text-[18px] leading-[1.3] font-normal text-black font-body"
                   />
                 </div>
               </div>

@@ -163,15 +163,15 @@ export default function Hero() {
               ease: [0.16, 1, 0.3, 1],
               delay: 1.1,
             }}
-            className="md:max-w-[380px] md:text-right flex flex-col justify-end"
+            className="md:max-w-[380px] md:text-right flex flex-col justify-end mt-12 md:mt-0"
           >
             <p
-              className="text-white/90 text-[11px] uppercase tracking-wider mb-4 font-medium"
+              className="text-white/90 text-[11px] uppercase tracking-wider mb-6 font-medium"
               style={{ fontFamily: "var(--font-body)" }}
             >
               Уже провели диагностику
             </p>
-            <div className="flex flex-wrap md:justify-end gap-x-4 gap-y-2">
+            <div className="flex flex-wrap md:justify-end gap-x-4 gap-y-3">
               {["Hero's Journey", "inDrive", "abr", "Shetel"].map((name) => (
                 <span
                   key={name}

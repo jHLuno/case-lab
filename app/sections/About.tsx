@@ -112,7 +112,7 @@ export default function About() {
                 {word}
               </span>
             ))}{" "}
-            <span className="border-b-2 border-[#040082] pb-1 about-word inline-block" style={{ willChange: "filter, opacity, transform" }}>
+            <span className="border-b-2 border-[#040082] pb-1 mb-1 about-word inline-block" style={{ willChange: "filter, opacity, transform" }}>
               экспертизы
             </span>{" "}
             <span className="about-word inline-block" style={{ willChange: "filter, opacity, transform" }}>

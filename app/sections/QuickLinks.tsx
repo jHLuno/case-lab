@@ -31,7 +31,7 @@ const articles = [
 
 export default function QuickLinks() {
   return (
-    <section aria-label="База знаний" className="relative bg-white py-24 md:py-40 px-6 md:px-10">
+    <section aria-label="База знаний" className="relative bg-white py-24 md:py-40 px-6 md:px-10 overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
       <div className="max-w-[1200px] mx-auto">
@@ -75,7 +75,7 @@ export default function QuickLinks() {
                 {article.tag}
               </span>
               <h3
-                className="text-black text-[18px] md:text-[20px] font-normal leading-[1.25] uppercase tracking-[0.02em] mb-3 group-hover:text-[#040082] transition-colors duration-300"
+                className="text-black text-[18px] md:text-[20px] font-normal leading-[1.25] uppercase tracking-[0.02em] mb-3 group-hover:text-[#040082] transition-colors duration-300 break-words"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
                 {article.title}

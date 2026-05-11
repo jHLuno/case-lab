@@ -90,6 +90,12 @@
     color: #000000;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    word-break: break-word;
+  }
+
+  /* Ensure images and media don't overflow */
+  img, video, svg {
+    max-width: 100%;
   }
 
   h1, h2, h3, h4, h5, h6 {

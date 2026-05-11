@@ -114,13 +114,10 @@ export default function Evolution() {
         );
       }
 
-      // Orbit animation on all devices via matchMedia
-      let orbitTriggers: ScrollTrigger[] = [];
-
+      // Orbit draw animation — all breakpoints via matchMedia
       const mm = gsap.matchMedia();
 
       mm.add("(max-width: 767px)", () => {
-        // Mobile: shorter scroll distance, no pin
         const lengths = segRefs.current.map((el) => (el ? el.getTotalLength() : 0));
         const totalLength = lengths.reduce((a, b) => a + b, 0);
 
@@ -132,10 +129,10 @@ export default function Evolution() {
           });
         });
 
-        const st = ScrollTrigger.create({
+        ScrollTrigger.create({
           trigger: sectionRef.current,
-          start: "top 60%",
-          end: "bottom 40%",
+          start: "top 70%",
+          end: "bottom 30%",
           scrub: true,
           onUpdate: (self) => {
             const p = self.progress;
@@ -158,20 +155,19 @@ export default function Evolution() {
             });
           },
         });
-        orbitTriggers.push(st);
 
         // Mobile facts stagger
         gsap.fromTo(
           ".evo-fact",
-          { opacity: 0, y: 40 },
+          { opacity: 0, y: 30 },
           {
             opacity: 1,
             y: 0,
-            stagger: 0.15,
+            stagger: 0.12,
             scrollTrigger: {
               trigger: sectionRef.current,
-              start: "top 70%",
-              end: "top 30%",
+              start: "top 75%",
+              end: "top 35%",
               scrub: true,
             },
           }
@@ -179,7 +175,6 @@ export default function Evolution() {
       });
 
       mm.add("(min-width: 768px)", () => {
-        // Desktop: pin with longer scroll
         const lengths = segRefs.current.map((el) => (el ? el.getTotalLength() : 0));
         const totalLength = lengths.reduce((a, b) => a + b, 0);
 
@@ -191,7 +186,7 @@ export default function Evolution() {
           });
         });
 
-        const st = ScrollTrigger.create({
+        ScrollTrigger.create({
           trigger: sectionRef.current,
           start: "top 15%",
           end: `+=${window.innerHeight * 2.5}`,
@@ -218,7 +213,6 @@ export default function Evolution() {
             });
           },
         });
-        orbitTriggers.push(st);
       });
     }, sectionRef);
 
@@ -228,19 +222,17 @@ export default function Evolution() {
   }, []);
 
   return (
-    <section ref={sectionRef} aria-label="Эволюция проекта" className="relative bg-white py-24 md:py-40 px-6 md:px-10 overflow-hidden">
+    <section ref={sectionRef} aria-label="Эволюция проекта" className="relative bg-white py-24 md:py-40 px-6 md:px-10 overflow-hidden" style={{ overflow: "clip" }}>
       {/* Top divider */}
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
       <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-10 lg:gap-16 h-full">
         {/* Left: Horizontal Elliptical Orbit */}
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center w-full min-w-0 overflow-hidden">
           <div
-            className="relative"
+            className="relative w-full overflow-visible"
             style={{
-              width: "100%",
               maxWidth: 580,
-              height: "auto",
               aspectRatio: "580 / 400",
               transform: "rotateZ(-10deg)",
             }}
@@ -248,8 +240,8 @@ export default function Evolution() {
             {/* SVG orbit */}
             <svg
               viewBox="0 0 500 340"
-              className="absolute inset-0 w-full h-full"
-              style={{ overflow: "visible" }}
+              className="w-full h-full"
+              style={{ overflow: "visible", display: "block" }}
             >
               <defs>
                 <linearGradient id="orbitGrad" x1="0" y1="0" x2="0" y2="340">
