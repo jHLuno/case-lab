@@ -142,8 +142,12 @@ export default function About() {
                 }`}
                 style={{
                   background: item.dark
-                    ? "linear-gradient(165deg, rgba(4, 0, 130, 0.95) 0%, rgba(6, 6, 50, 0.98) 45%, rgba(2, 2, 25, 1) 100%)"
+                    ? item.id === "origin"
+                      ? `linear-gradient(165deg, rgba(4, 0, 130, 0.88) 0%, rgba(6, 6, 50, 0.92) 45%, rgba(2, 2, 25, 0.95) 100%), url(/CASElab.webp)`
+                      : "linear-gradient(165deg, rgba(4, 0, 130, 0.95) 0%, rgba(6, 6, 50, 0.98) 45%, rgba(2, 2, 25, 1) 100%)"
                     : "#fff",
+                  backgroundSize: item.id === "origin" ? "cover" : undefined,
+                  backgroundPosition: item.id === "origin" ? "center" : undefined,
                   border: item.dark ? "none" : "1px solid rgba(0,0,0,0.08)",
                 }}
               >
