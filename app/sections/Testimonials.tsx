@@ -65,8 +65,41 @@ export default function Testimonials() {
         }
       );
 
-      // Desktop only: pin + progress-based active index
+      // Pin + progress-based active index on all breakpoints
       const mm = gsap.matchMedia();
+
+      mm.add("(max-width: 1023px)", () => {
+        ScrollTrigger.create({
+          trigger: section,
+          start: "top 15%",
+          end: "+=1000",
+          pin: true,
+          scrub: 1.2,
+          id: "testimonials-mobile",
+          onUpdate: (self) => {
+            const progress = self.progress;
+            const segmentSize = 1 / testimonials.length;
+            const rawIndex = progress / segmentSize;
+            const index = Math.min(Math.floor(rawIndex), testimonials.length - 1);
+            const isLastSegment = index === testimonials.length - 1;
+            const segmentProgress = isLastSegment && progress > 0.98
+              ? 1
+              : rawIndex - index;
+
+            setActiveIndex(index);
+
+            lineRefs.current.forEach((line, i) => {
+              if (!line) return;
+              if (i === index) {
+                line.style.width = `${segmentProgress * 100}%`;
+              } else {
+                line.style.width = "0%";
+              }
+            });
+          },
+        });
+      });
+
       mm.add("(min-width: 1024px)", () => {
         ScrollTrigger.create({
           trigger: section,
@@ -120,7 +153,7 @@ export default function Testimonials() {
     >
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
-      <div className="max-w-[1440px] mx-auto">
+      <div className="max-w-[1078px] mx-auto">
         {/* Header */}
         <div className="mb-8 md:mb-12">
           <span
@@ -153,7 +186,7 @@ export default function Testimonials() {
               >
                 <div className="flex items-center justify-between">
                   <span
-                    className="text-black text-[16px] md:text-[18px] font-normal leading-[1.22]"
+                    className="text-black text-[15px] md:text-[18px] font-normal leading-[1.22]"
                     style={{ fontFamily: "var(--font-body)" }}
                   >
                     {t.name}
@@ -222,7 +255,7 @@ export default function Testimonials() {
               >
                 <blockquote
                   cite="#testimonials"
-                  className="text-black text-[16px] md:text-[22px] lg:text-[24px] font-normal leading-[1.4] mb-6 break-words"
+                  className="text-black text-[14px] md:text-[22px] lg:text-[24px] font-normal leading-[1.4] mb-6 break-words"
                   style={{ fontFamily: "var(--font-body)" }}
                 >
                   &ldquo;{testimonials[activeIndex].quote}&rdquo;
@@ -235,13 +268,13 @@ export default function Testimonials() {
                     {testimonials[activeIndex].session}
                   </span>
                   <p
-                    className="text-black text-[14px] md:text-[16px] font-normal"
+                    className="text-black text-[13px] md:text-[16px] font-normal"
                     style={{ fontFamily: "var(--font-body)" }}
                   >
                     {testimonials[activeIndex].name}
                   </p>
                   <p
-                    className="text-black/60 text-[14px] md:text-[16px] font-light"
+                    className="text-black/60 text-[13px] md:text-[16px] font-light"
                     style={{ fontFamily: "var(--font-body)" }}
                   >
                     {testimonials[activeIndex].role}
