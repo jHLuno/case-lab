@@ -33,15 +33,17 @@ export default function Clients() {
       {/* Marquee cards */}
       <div className="overflow-hidden py-3">
         <div
-          className="marquee-track flex gap-4 md:gap-6"
+          className="marquee-track flex"
           style={{ willChange: "transform" }}
         >
-          {[...industries, ...industries].map((industry, i) => (
-            <div
-              key={`${industry.id}-${i}`}
-              className="relative rounded-[16px] overflow-hidden group cursor-pointer flex-shrink-0 border border-black/[0.08] bg-white hover:border-[#040082]/30 hover:shadow-[0_12px_40px_-12px_rgba(4,0,130,0.15)] hover:scale-[1.02] transition-all duration-500"
-              style={{ width: "clamp(280px, 35vw, 400px)" }}
-            >
+          {[0, 1].map((set) => (
+            <div key={set} className="flex gap-4 md:gap-6 flex-shrink-0">
+              {industries.map((industry) => (
+                <div
+                  key={`${industry.id}-${set}`}
+                  className="relative rounded-[16px] overflow-hidden group cursor-pointer flex-shrink-0 border border-black/[0.08] bg-white hover:border-[#040082]/30 hover:shadow-[0_12px_40px_-12px_rgba(4,0,130,0.15)] hover:scale-[1.02] transition-all duration-500"
+                  style={{ width: "clamp(280px, 35vw, 400px)" }}
+                >
               <div className="aspect-[4/3] relative overflow-hidden flex flex-col items-center justify-center p-8">
                 <div
                   className="absolute inset-0 opacity-[0.04]"
@@ -70,6 +72,8 @@ export default function Clients() {
                   Кейс в разработке
                 </span>
               </div>
+            </div>
+          ))}
             </div>
           ))}
         </div>
