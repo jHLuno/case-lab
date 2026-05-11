@@ -26,6 +26,7 @@ function BlurRevealWords({ text, className, style }: { text: string; className?:
             start: "top 85%",
             end: "top 60%",
             scrub: true,
+            invalidateOnRefresh: true,
           },
         }
       );
@@ -90,6 +91,7 @@ function BlurRevealHeading({ text, className = "" }: { text: string; className?:
             start: "top 85%",
             end: "top 55%",
             scrub: true,
+            invalidateOnRefresh: true,
           },
         }
       );

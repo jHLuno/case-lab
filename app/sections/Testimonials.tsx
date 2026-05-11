@@ -61,6 +61,7 @@ export default function Testimonials() {
             start: "top 80%",
             end: "top 40%",
             scrub: true,
+            invalidateOnRefresh: true,
           },
         }
       );
@@ -76,6 +77,7 @@ export default function Testimonials() {
           pin: true,
           scrub: 1.2,
           id: "testimonials-mobile",
+          invalidateOnRefresh: true,
           onUpdate: (self) => {
             const progress = self.progress;
             const segmentSize = 1 / testimonials.length;
@@ -108,6 +110,7 @@ export default function Testimonials() {
           pin: true,
           scrub: 1.2,
           id: "testimonials",
+          invalidateOnRefresh: true,
           onUpdate: (self) => {
             const progress = self.progress;
             const segmentSize = 1 / testimonials.length;

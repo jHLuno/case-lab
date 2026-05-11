@@ -30,6 +30,11 @@ export default function HomePage() {
       ScrollTrigger.refresh();
     }, 800);
 
+    const handleResize = () => {
+      ScrollTrigger.refresh();
+    };
+    window.addEventListener("resize", handleResize);
+
     const handleAnchorClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const anchor = target.closest('a[href^="#"]');
@@ -48,6 +53,7 @@ export default function HomePage() {
     document.addEventListener("click", handleAnchorClick);
     return () => {
       document.removeEventListener("click", handleAnchorClick);
+      window.removeEventListener("resize", handleResize);
       clearTimeout(refreshTimer);
     };
   }, []);
