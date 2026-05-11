@@ -131,7 +131,7 @@ export default function Evolution() {
 
         ScrollTrigger.create({
           trigger: sectionRef.current,
-          start: "top 70%",
+          start: "top 75%",
           end: "+=1400",
           scrub: true,
           onUpdate: (self) => {
