@@ -213,20 +213,6 @@ export default function BusinessModel() {
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
       <div className="max-w-[1078px] mx-auto">
-        {/* Header */}
-        <div className="mb-10 md:mb-16">
-          <span
-            className="text-gray text-[11px] mb-3 block leading-[1.58]"
-            style={{ fontFamily: "var(--font-body)" }}
-          >
-            Case Lab Diagnostics
-          </span>
-          <BlurRevealHeading
-            text="Что меняется после диагностики"
-            className="text-black text-[clamp(22px,4vw,54px)] font-bold leading-[1.15] uppercase tracking-[0.02em]"
-          />
-        </div>
-
         {/* Case Lab Label */}
         <div className="text-center mb-8 md:mb-12">
           <span
@@ -245,8 +231,22 @@ export default function BusinessModel() {
           </span>
         </div>
 
+        {/* Header */}
+        <div className="mb-8 md:mb-12">
+          <span
+            className="text-gray text-[11px] mb-3 block leading-[1.58]"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            Case Lab Diagnostics
+          </span>
+          <BlurRevealHeading
+            text="Что меняется после диагностики"
+            className="text-black text-[clamp(22px,4vw,54px)] font-bold leading-[1.15] uppercase tracking-[0.02em]"
+          />
+        </div>
+
         {/* Before → After */}
-        <div ref={itemsRef} className="relative mb-16 md:mb-24">
+        <div ref={itemsRef} className="relative mb-12 md:mb-20">
           {/* Vertical dividing line — visible on all sizes */}
           <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-px pointer-events-none hidden md:block">
             <div className="absolute inset-0 bg-black/5" />
