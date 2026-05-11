@@ -15,18 +15,17 @@ function BlurRevealWords({ text, className, style }: { text: string; className?:
     const ctx = gsap.context(() => {
       gsap.fromTo(
         words,
-        { opacity: 0.1, y: 10, filter: "blur(4px)" },
+        { opacity: 0.1, y: 20, filter: "blur(4px)" },
         {
           opacity: 1,
           y: 0,
           filter: "blur(0px)",
-          stagger: 0.04,
+          stagger: 0.06,
           scrollTrigger: {
             trigger: ref.current,
             start: "top 85%",
-            end: "top 60%",
+            end: "top 55%",
             scrub: true,
-            invalidateOnRefresh: true,
           },
         }
       );
@@ -91,7 +90,6 @@ function BlurRevealHeading({ text, className = "" }: { text: string; className?:
             start: "top 85%",
             end: "top 55%",
             scrub: true,
-            invalidateOnRefresh: true,
           },
         }
       );

@@ -192,6 +192,7 @@ export default function Evolution() {
           end: `+=${window.innerHeight * 2.5}`,
           pin: true,
           scrub: true,
+          zIndex: 0,
           onUpdate: (self) => {
             const p = self.progress;
             const seg = 1 / stages.length;
@@ -222,7 +223,7 @@ export default function Evolution() {
   }, []);
 
   return (
-    <section ref={sectionRef} aria-label="Эволюция проекта" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-hidden z-[1]">
+    <section ref={sectionRef} aria-label="Эволюция проекта" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-hidden">
       {/* Top divider */}
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
