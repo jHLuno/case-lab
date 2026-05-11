@@ -49,13 +49,13 @@ export default function Hero() {
         style={{ backgroundImage: "url(/hero-poster.png)" }}
       />
 
-      {/* Background video */}
+      {/* Background video — desktop only; mobile shows poster to prevent crashes */}
       <video
         autoPlay
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-cover hidden md:block"
       >
         <source src="https://d7gcdwqf10x648ub.public.blob.vercel-storage.com/Video-Demo.webm" type="video/webm" />
         <source src="https://d7gcdwqf10x648ub.public.blob.vercel-storage.com/Video-Demo.mp4" type="video/mp4" />
