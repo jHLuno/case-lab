@@ -20,12 +20,12 @@ export default function Clients() {
       <div className="max-w-[1078px] mx-auto">
         <ScrollReveal>
           <h2
-            className="text-black text-[clamp(22px,4vw,54px)] font-bold leading-[1.15] mb-12 md:mb-16 uppercase tracking-[0.02em] break-words"
+            className="text-black text-[clamp(16px,4vw,54px)] font-bold leading-[1.15] mb-12 md:mb-16 uppercase tracking-[0.02em]"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             Компании,
             <br className="hidden md:block" />
-            <span className="break-words">чьи кейсы мы разобрали</span>
+            чьи кейсы мы разобрали
           </h2>
         </ScrollReveal>
       </div>

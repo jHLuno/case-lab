@@ -131,8 +131,8 @@ export default function Evolution() {
 
         ScrollTrigger.create({
           trigger: sectionRef.current,
-          start: "top 70%",
-          end: "bottom 30%",
+          start: "top 60%",
+          end: "+=700",
           scrub: true,
           onUpdate: (self) => {
             const p = self.progress;
@@ -222,19 +222,18 @@ export default function Evolution() {
   }, []);
 
   return (
-    <section ref={sectionRef} aria-label="Эволюция проекта" className="relative bg-white py-24 md:py-40 px-6 md:px-10 overflow-hidden" style={{ overflow: "clip" }}>
+    <section ref={sectionRef} aria-label="Эволюция проекта" className="relative bg-white py-24 md:py-40 px-6 md:px-10 overflow-hidden">
       {/* Top divider */}
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
       <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-10 lg:gap-16 h-full">
         {/* Left: Horizontal Elliptical Orbit */}
-        <div className="flex-1 flex items-center justify-center w-full min-w-0 overflow-hidden">
+        <div className="flex-1 flex items-center justify-center w-full min-w-0">
           <div
-            className="relative w-full overflow-visible"
+            className="relative w-full"
             style={{
               maxWidth: 580,
               aspectRatio: "580 / 400",
-              transform: "rotateZ(-10deg)",
             }}
           >
             {/* SVG orbit */}
@@ -398,9 +397,9 @@ export default function Evolution() {
                   key={stage.num}
                   className="evo-fact relative pl-6 md:pl-7 transition-all duration-700 ease-out cursor-default"
                   style={{
-                    opacity: isActive ? 1 : 0.2,
-                    filter: isActive ? "blur(0px)" : "blur(1.2px)",
-                    transform: isActive ? "translateX(0)" : "translateX(-6px)",
+                    opacity: isActive ? 1 : 0.4,
+                    filter: isActive ? "blur(0px)" : "blur(0.8px)",
+                    transform: isActive ? "translateX(0)" : "translateX(-4px)",
                   }}
                 >
                   <div

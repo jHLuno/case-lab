@@ -304,7 +304,7 @@ export default function Timeline() {
               >
                 {/* Left text */}
                 <div
-                  className={`flex-1 ${isLeft ? "text-right pr-16 md:pr-32 lg:pr-60 xl:pr-[22rem]" : ""}`}
+                  className={`flex-1 ${isLeft ? "text-right pr-8 md:pr-16 lg:pr-32 xl:pr-60" : ""}`}
                 >
                   {isLeft && (
                     <>
@@ -315,7 +315,7 @@ export default function Timeline() {
                         {step.id}
                       </span>
                       <h3
-                        className="text-black text-[18px] font-normal mb-1 leading-[1.22] uppercase tracking-[0.02em] flex flex-wrap gap-x-[0.2em] justify-end"
+                        className="text-black text-[14px] md:text-[16px] lg:text-[18px] font-normal mb-1 leading-[1.22] uppercase tracking-[0.02em] flex flex-wrap gap-x-[0.2em] justify-end"
                         style={{ fontFamily: "var(--font-heading)" }}
                       >
                         {step.title.split(" ").map((word, wi) => (
@@ -330,7 +330,7 @@ export default function Timeline() {
                       </h3>
                       {step.subtitle && (
                         <p
-                          className="text-black/60 text-[16px] leading-[1.25] font-light"
+                          className="text-black/60 text-[12px] md:text-[14px] lg:text-[16px] leading-[1.25] font-light"
                           style={{ fontFamily: "var(--font-body)" }}
                         >
                           {step.subtitle}
@@ -345,7 +345,7 @@ export default function Timeline() {
 
                 {/* Right text */}
                 <div
-                  className={`flex-1 ${!isLeft ? "text-left pl-16 md:pl-32 lg:pl-60 xl:pl-[22rem]" : ""}`}
+                  className={`flex-1 ${!isLeft ? "text-left pl-8 md:pl-16 lg:pl-32 xl:pl-60" : ""}`}
                 >
                   {!isLeft && (
                     <>
@@ -356,7 +356,7 @@ export default function Timeline() {
                         {step.id}
                       </span>
                       <h3
-                        className="text-black text-[18px] font-normal mb-1 leading-[1.22] uppercase tracking-[0.02em] flex flex-wrap gap-x-[0.2em]"
+                        className="text-black text-[14px] md:text-[16px] lg:text-[18px] font-normal mb-1 leading-[1.22] uppercase tracking-[0.02em] flex flex-wrap gap-x-[0.2em]"
                         style={{ fontFamily: "var(--font-heading)" }}
                       >
                         {step.title.split(" ").map((word, wi) => (
@@ -371,7 +371,7 @@ export default function Timeline() {
                       </h3>
                       {step.subtitle && (
                         <p
-                          className="text-black/60 text-[16px] leading-[1.25] font-light"
+                          className="text-black/60 text-[12px] md:text-[14px] lg:text-[16px] leading-[1.25] font-light"
                           style={{ fontFamily: "var(--font-body)" }}
                         >
                           {step.subtitle}
@@ -423,14 +423,14 @@ export default function Timeline() {
                   {step.id}
                 </span>
                 <h3
-                  className="text-black text-[18px] font-normal mb-1 leading-[1.22] uppercase tracking-[0.02em]"
+                  className="text-black text-[16px] font-normal mb-1 leading-[1.22] uppercase tracking-[0.02em]"
                   style={{ fontFamily: "var(--font-heading)" }}
                 >
                   {step.title}
                 </h3>
                 {step.subtitle && (
                   <p
-                    className="text-black/60 text-[16px] leading-[1.25] font-light"
+                    className="text-black/60 text-[14px] leading-[1.25] font-light"
                     style={{ fontFamily: "var(--font-body)" }}
                   >
                     {step.subtitle}

@@ -75,7 +75,7 @@ export default function QuickLinks() {
                 {article.tag}
               </span>
               <h3
-                className="text-black text-[18px] md:text-[20px] font-normal leading-[1.25] uppercase tracking-[0.02em] mb-3 group-hover:text-[#040082] transition-colors duration-300 break-words"
+                className="text-black text-[15px] md:text-[18px] lg:text-[20px] font-normal leading-[1.25] uppercase tracking-[0.02em] mb-3 group-hover:text-[#040082] transition-colors duration-300"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
                 {article.title}

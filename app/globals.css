@@ -90,7 +90,6 @@
     color: #000000;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    word-break: break-word;
   }
 
   /* Ensure images and media don't overflow */
