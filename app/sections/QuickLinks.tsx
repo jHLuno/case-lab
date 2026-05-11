@@ -7,25 +7,25 @@ const articles = [
     tag: "Поток #2",
     title: "Как inDrive выстроил локальный бренд в Казахстане",
     desc: "Разбор кейса: от стратегии до метрик. Что сработало и почему.",
-    href: "#",
+    href: "/insights/indrive-brand-kazakhstan/",
   },
   {
     tag: "Наблюдение",
     title: "Почему 70% SMB теряют деньги на одном и том же канале",
     desc: "Типичная слепая зона в маркетинге среднего бизнеса.",
-    href: "#",
+    href: "/insights/smb-channel-blind-spot/",
   },
   {
     tag: "Экспертиза",
     title: "Диагностика vs аудит: в чём разница и зачем оба",
     desc: "Зачем проводить диагностику, если уже есть аудит от прошлого агентства.",
-    href: "#",
+    href: "/insights/diagnostics-vs-audit/",
   },
   {
     tag: "Ивент",
     title: "Case Lab Meetup: позиционирование в кризис",
     desc: "Запись сессии с маркетинг-директорами FMCG и SaaS.",
-    href: "#",
+    href: "/insights/meetup-positioning-crisis/",
   },
 ];
 
@@ -65,9 +65,8 @@ export default function QuickLinks() {
           {articles.map((article) => (
             <a
               key={article.title}
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className="group bg-white p-6 md:p-8 hover:bg-[#040082]/[0.02] transition-colors duration-300 cursor-default"
+              href={article.href}
+              className="group bg-white p-6 md:p-8 hover:bg-[#040082]/[0.02] transition-colors duration-300"
             >
               <span
                 className="inline-block text-[#040082] text-[11px] uppercase tracking-wider mb-4"

@@ -54,11 +54,6 @@ export default function JsonLd() {
     "@type": "WebSite",
     name: "Case Lab",
     url: "https://caselab.kz",
-    potentialAction: {
-      "@type": "SearchAction",
-      target: "https://caselab.kz/search?q={search_term_string}",
-      "query-input": "required name=search_term_string",
-    },
   };
 
   return (

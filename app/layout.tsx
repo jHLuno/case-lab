@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     description: "Case Lab — маркетинговое агентство. Диагностика бизнеса, стратегия роста, маркетинговые гипотезы. 2 часа глубокой сессии.",
     images: [
       {
-        url: "/og-image.svg",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "Case Lab — Маркетинговая диагностика",
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Case Lab — Маркетинговая диагностика и стратегия роста",
     description: "Case Lab — маркетинговое агентство. Диагностика бизнеса, стратегия роста.",
-    images: ["/og-image.svg"],
+    images: ["/og-image.png"],
     creator: "@caselab_kz",
   },
   verification: {
