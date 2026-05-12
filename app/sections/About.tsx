@@ -160,9 +160,9 @@ export default function About() {
                   </>
                 )}
 
-                <span
+                  <span
                   className={`text-[11px] uppercase tracking-wider block mb-6 ${
-                    item.dark ? "text-white/40" : "text-[#040082]"
+                    item.dark ? "text-white/70" : "text-[#040082]"
                   }`}
                   style={{ fontFamily: "var(--font-body)" }}
                 >
