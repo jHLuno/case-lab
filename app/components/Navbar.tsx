@@ -142,6 +142,7 @@ export default function Navbar() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8, transition: { duration: 0.18, ease: "easeInOut" } }}
               transition={{ duration: 0.28, ease: "easeOut" }}
               className="relative z-10 flex shrink-0 items-center justify-between px-6 pt-5 pb-3"
             >
@@ -171,15 +172,20 @@ export default function Navbar() {
             <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto px-6 pt-10 pb-6">
               <div className="flex flex-col gap-1">
                 {navLinks.map((link, i) => (
-                  <motion.a
-                    key={link.label}
-                    href={link.href}
-                    initial={{ opacity: 0, y: 18 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.06 + 0.08, duration: 0.42 }}
-                    onClick={() => {
-                      setMobileOpen(false);
-                      toggleRef.current?.focus();
+                   <motion.a
+                     key={link.label}
+                     href={link.href}
+                     initial={{ opacity: 0, y: 18 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     exit={{
+                       opacity: 0,
+                       y: 10,
+                       transition: { duration: 0.18, delay: (navLinks.length - 1 - i) * 0.03, ease: "easeInOut" },
+                     }}
+                     transition={{ delay: i * 0.06 + 0.08, duration: 0.42 }}
+                     onClick={() => {
+                       setMobileOpen(false);
+                       toggleRef.current?.focus();
                     }}
                     className="group py-3 text-[clamp(30px,8vw,38px)] font-normal leading-[1.02] tracking-[-0.03em] text-white/92 transition-all duration-300 active:translate-x-1 active:text-white"
                     style={{ fontFamily: "var(--font-heading)" }}
@@ -196,6 +202,7 @@ export default function Navbar() {
                   href="/contact/"
                   initial={{ opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10, transition: { duration: 0.18, delay: 0.04, ease: "easeInOut" } }}
                   transition={{ delay: 0.34, duration: 0.42 }}
                   onClick={() => {
                     setMobileOpen(false);
@@ -211,6 +218,7 @@ export default function Navbar() {
                 <motion.p
                   initial={{ opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10, transition: { duration: 0.18, ease: "easeInOut" } }}
                   transition={{ delay: 0.4, duration: 0.42 }}
                   className="mt-4 max-w-[260px] text-[13px] leading-[1.45] text-white/68"
                   style={{ fontFamily: "var(--font-body)" }}
