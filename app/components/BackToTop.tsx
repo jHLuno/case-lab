@@ -29,7 +29,7 @@ export default function BackToTop() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 w-10 h-10 md:w-12 md:h-12 rounded-full
+          className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 w-10 h-10 md:w-14 md:h-14 rounded-full
                      bg-white/80 backdrop-blur-2xl
                      border border-black/15
                      shadow-[0_8px_32px_-8px_rgba(4,0,130,0.2)]
@@ -41,7 +41,7 @@ export default function BackToTop() {
           aria-label="Наверх"
           title="Наверх"
         >
-          <ArrowUp size={20} strokeWidth={2.5} className="md:w-6 md:h-6" />
+          <ArrowUp size={20} strokeWidth={2.5} className="md:w-7 md:h-7" />
         </motion.button>
       )}
     </AnimatePresence>
