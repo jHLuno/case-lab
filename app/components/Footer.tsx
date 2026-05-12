@@ -3,8 +3,10 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
+import { useLeadPopup } from "../lib/LeadPopupContext";
 
 export default function Footer() {
+  const { openPopup } = useLeadPopup();
   return (
     <footer className="relative bg-white pt-20 md:pt-32 pb-8 px-6 md:px-10 z-[2]">
       {/* Top divider */}
@@ -27,8 +29,9 @@ export default function Footer() {
           >
             Заполните форму — мы свяжемся в течение рабочего дня. Первая консультация бесплатно.
           </p>
-          <motion.a
-            href="/contact/"
+          <motion.button
+            type="button"
+            onClick={openPopup}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="inline-flex items-center gap-3 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] font-normal rounded-full hover:bg-[#0600a0] transition-colors duration-300"
@@ -36,7 +39,7 @@ export default function Footer() {
           >
             <span>Записаться на диагностику</span>
             <ArrowUpRight size={16} strokeWidth={2} />
-          </motion.a>
+          </motion.button>
         </div>
 
         {/* Minimal info row */}

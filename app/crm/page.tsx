@@ -62,7 +62,8 @@ export default function CRMPage() {
       l.name.toLowerCase().includes(q) ||
       l.email.toLowerCase().includes(q) ||
       (l.company && l.company.toLowerCase().includes(q)) ||
-      (l.phone && l.phone.toLowerCase().includes(q));
+      (l.phone && l.phone.toLowerCase().includes(q)) ||
+      (l.position && l.position.toLowerCase().includes(q));
     return matchesFilter && matchesSearch;
   });
 
@@ -199,6 +200,7 @@ export default function CRMPage() {
                   <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>Имя</th>
                   <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>Контакты</th>
                   <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal hidden md:table-cell" style={{ fontFamily: "var(--font-body)" }}>Компания</th>
+                  <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal hidden md:table-cell" style={{ fontFamily: "var(--font-body)" }}>Должность</th>
                   <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal hidden lg:table-cell" style={{ fontFamily: "var(--font-body)" }}>Сообщение</th>
                   <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>Статус</th>
                   <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>Дата</th>
@@ -207,13 +209,13 @@ export default function CRMPage() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center text-black/30 text-[14px]" style={{ fontFamily: "var(--font-body)" }}>
+                    <td colSpan={7} className="px-4 py-12 text-center text-black/30 text-[14px]" style={{ fontFamily: "var(--font-body)" }}>
                       Загрузка...
                     </td>
                   </tr>
                 ) : filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center text-black/30 text-[14px]" style={{ fontFamily: "var(--font-body)" }}>
+                    <td colSpan={7} className="px-4 py-12 text-center text-black/30 text-[14px]" style={{ fontFamily: "var(--font-body)" }}>
                       {search || filter !== "all" ? "Ничего не найдено" : "Пока нет заявок"}
                     </td>
                   </tr>
@@ -240,6 +242,11 @@ export default function CRMPage() {
                       <td className="px-4 py-3 hidden md:table-cell">
                         <span className="text-black/60 text-[13px]" style={{ fontFamily: "var(--font-body)" }}>
                           {lead.company || "—"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 hidden md:table-cell">
+                        <span className="text-black/60 text-[13px]" style={{ fontFamily: "var(--font-body)" }}>
+                          {lead.position || "—"}
                         </span>
                       </td>
                       <td className="px-4 py-3 hidden lg:table-cell max-w-[200px]">

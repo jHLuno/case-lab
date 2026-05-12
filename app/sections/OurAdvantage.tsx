@@ -5,6 +5,7 @@ import { motion, useInView } from "framer-motion";
 import { ArrowRight, ArrowUpRight, AlertTriangle, TrendingDown, HelpCircle } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useLeadPopup } from "../lib/LeadPopupContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -245,10 +246,11 @@ export default function OurAdvantage() {
 }
 
 function TiltButton() {
-  const ref = useRef<HTMLAnchorElement>(null);
+  const ref = useRef<HTMLButtonElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [glarePos, setGlarePos] = useState({ x: 50, y: 50 });
+  const { openPopup } = useLeadPopup();
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!ref.current) return;
@@ -271,9 +273,10 @@ function TiltButton() {
   };
 
   return (
-    <motion.a
+    <motion.button
       ref={ref}
-      href="/contact/"
+      type="button"
+      onClick={openPopup}
       className="relative block w-full overflow-hidden cursor-pointer"
       style={{
         fontFamily: "var(--font-body)",
@@ -356,6 +359,6 @@ function TiltButton() {
           </motion.div>
         </div>
       </div>
-    </motion.a>
+    </motion.button>
   );
 }

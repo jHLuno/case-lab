@@ -4,6 +4,7 @@ import { useRef, useEffect } from "react";
 import { ArrowRight, Check, Star, Zap } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useLeadPopup } from "../lib/LeadPopupContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -107,8 +108,10 @@ interface Plan {
 
 function PricingCard({
   plan,
+  onCta,
 }: {
   plan: Plan;
+  onCta: () => void;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -238,8 +241,9 @@ function PricingCard({
           </ul>
 
           {/* CTA */}
-          <a
-            href="/contact/"
+          <button
+            type="button"
+            onClick={onCta}
             className={`group/btn inline-flex items-center justify-center gap-3 px-6 py-3 text-[14px] md:px-8 md:py-4 md:text-[15px] font-normal rounded-full w-full transition-all duration-300 hover:gap-4 ${
               plan.popular
                 ? "bg-white text-[#040082] hover:bg-white/90"
@@ -251,7 +255,7 @@ function PricingCard({
             <span className="transition-transform duration-300 group-hover/btn:translate-x-1">
               <ArrowRight size={16} strokeWidth={2} />
             </span>
-          </a>
+          </button>
         </div>
 
       </div>
@@ -261,6 +265,7 @@ function PricingCard({
 
 export default function Pricing() {
   const sectionRef = useRef<HTMLElement>(null);
+  const { openPopup } = useLeadPopup();
 
   return (
     <section ref={sectionRef} id="diagnostics" aria-label="Форматы диагностики" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-hidden">
@@ -304,8 +309,8 @@ export default function Pricing() {
           className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8"
           style={{ perspective: "1200px" }}
         >
-          <PricingCard plan={starterPlan} />
-          <PricingCard plan={proPlan} />
+          <PricingCard plan={starterPlan} onCta={openPopup} />
+          <PricingCard plan={proPlan} onCta={openPopup} />
         </div>
 
         {/* Bottom note */}

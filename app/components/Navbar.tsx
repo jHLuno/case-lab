@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createPortal } from "react-dom";
+import { useLeadPopup } from "../lib/LeadPopupContext";
 
 const navLinks = [
   { label: "Кейсы", href: "#industries" },
@@ -17,6 +18,7 @@ const navLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { openPopup } = useLeadPopup();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -155,14 +157,15 @@ export default function Navbar() {
           </div>
 
           {/* CTA */}
-          <Link
-            href="/contact/"
+          <button
+            type="button"
+            onClick={openPopup}
             className="hidden md:inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-normal leading-none bg-[#040082] text-white hover:bg-[#0600a8] transition-all duration-300 ml-1"
             style={{ fontFamily: "var(--font-body)" }}
           >
             Записаться
             <ArrowRight size={13} strokeWidth={2.5} />
-          </Link>
+          </button>
 
           {/* Mobile menu button */}
           <motion.button
@@ -269,15 +272,15 @@ export default function Navbar() {
                     transition={{ delay: 0.34, duration: 0.42 }}
                   >
                     <motion.div whileTap={{ scale: 0.98, y: 1 }}>
-                    <Link
-                      href="/contact/"
-                      onClick={closeMobileMenu}
+                    <button
+                      type="button"
+                      onClick={() => { closeMobileMenu(); openPopup(); }}
                       className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-300 focus-visible:outline-none"
                       style={{ fontFamily: "var(--font-body)" }}
                     >
                       Записаться
                       <ArrowRight size={14} strokeWidth={2.5} className="transition-transform duration-300 group-active:translate-x-0.5 group-focus-visible:translate-x-0.5" />
-                    </Link>
+                    </button>
                     </motion.div>
                   </motion.div>
 

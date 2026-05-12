@@ -7,6 +7,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import BackToTop from "./BackToTop";
+import LeadPopup from "./LeadPopup";
+import { LeadPopupProvider } from "../lib/LeadPopupContext";
 import Hero from "../sections/Hero";
 import About from "../sections/About";
 import Pricing from "../sections/Pricing";
@@ -60,20 +62,23 @@ export default function HomePage() {
   }, []);
 
   return (
-    <main className="relative">
-      <Navbar />
-      <Hero />
-      <About />
-      <Pricing />
-      <OurAdvantage />
-      <Timeline />
-      <Testimonials />
-      <BusinessModel />
-      <Clients />
-      <Evolution />
-      <QuickLinks />
-      <Footer />
-      <BackToTop />
-    </main>
+    <LeadPopupProvider>
+      <main className="relative">
+        <Navbar />
+        <Hero />
+        <About />
+        <Pricing />
+        <OurAdvantage />
+        <Timeline />
+        <Testimonials />
+        <BusinessModel />
+        <Clients />
+        <Evolution />
+        <QuickLinks />
+        <Footer />
+        <BackToTop />
+        <LeadPopup />
+      </main>
+    </LeadPopupProvider>
   );
 }

@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowRight } from "lucide-react";
+import { useLeadPopup } from "../lib/LeadPopupContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -88,6 +89,7 @@ export default function Evolution() {
   const headerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const segRefs = useRef<(SVGPathElement | null)[]>([]);
+  const { openPopup } = useLeadPopup();
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -452,14 +454,15 @@ export default function Evolution() {
 
           {/* CTA */}
           <div className="mt-10 md:mt-16 mb-4 md:mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <a
-              href="/contact/"
+            <button
+              type="button"
+              onClick={openPopup}
               className="inline-flex items-center gap-2 bg-[#040082] text-white px-6 py-3 rounded-full text-[14px] font-normal hover:bg-[#0600a8] transition-colors duration-300 group"
               style={{ fontFamily: "var(--font-body)" }}
             >
               Начать диагностику
               <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-300" />
-            </a>
+            </button>
           </div>
         </div>
       </div>

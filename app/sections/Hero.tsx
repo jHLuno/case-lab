@@ -3,9 +3,11 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import gsap from "gsap";
+import { useLeadPopup } from "../lib/LeadPopupContext";
 
 export default function Hero() {
   const containerRef = useRef<HTMLElement>(null);
+  const { openPopup } = useLeadPopup();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -134,8 +136,9 @@ export default function Hero() {
               }}
               className="mt-8 md:mt-10"
             >
-              <motion.a
-                href="/contact/"
+              <motion.button
+                type="button"
+                onClick={openPopup}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="inline-flex items-center gap-3 bg-white text-[#040082] px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] font-normal rounded-full"
@@ -145,7 +148,7 @@ export default function Hero() {
                 <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0">
                   <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-              </motion.a>
+              </motion.button>
               <p
                 className="text-white/80 text-[12px] mt-4 font-medium max-w-lg leading-[1.5]"
                 style={{ fontFamily: "var(--font-body)" }}
