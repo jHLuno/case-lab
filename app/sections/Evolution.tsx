@@ -192,8 +192,8 @@ export default function Evolution() {
 
         ScrollTrigger.create({
           trigger: sectionRef.current,
-          start: "top top",
-          end: "bottom bottom",
+          start: "top 75%",
+          end: "bottom 35%",
           scrub: true,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
@@ -220,7 +220,7 @@ export default function Evolution() {
       });
     }, sectionRef);
 
-    // Recalculate after the browser restores scroll and sticky layout settles.
+    // Recalculate after the browser restores scroll and GSAP creates pin spacers.
     const refreshTimer = setTimeout(() => {
       ScrollTrigger.refresh();
     }, 100);
@@ -233,11 +233,11 @@ export default function Evolution() {
   }, []);
 
   return (
-    <section ref={sectionRef} aria-label="Эволюция проекта" className="relative bg-white py-16 md:py-40 px-6 md:px-10 md:min-h-[190vh] z-[1]">
+    <section ref={sectionRef} aria-label="Эволюция проекта" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-hidden z-[1]">
       {/* Top divider */}
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
-      <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-10 lg:gap-16 md:sticky md:top-[14vh]">
+      <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-10 lg:gap-16">
         {/* Left: Horizontal Elliptical Orbit */}
         <div className="flex-1 flex items-center justify-center w-full min-w-0">
           <div
