@@ -22,7 +22,7 @@ export default function CRMPage() {
   const [filter, setFilter] = useState<"all" | Lead["status"]>("all");
   const [search, setSearch] = useState("");
 
-  // Check existing session on mount
+  // Check existing session on mount + handle bfcache restoration
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -38,6 +38,20 @@ export default function CRMPage() {
       }
     };
     checkAuth();
+
+    // Reset auth when restored from back-forward cache (Chrome bfcache)
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        setIsAuthenticated(false);
+        setLeads([]);
+        setPassword("");
+        setError("");
+        setChecking(false);
+      }
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
   }, []);
 
   const fetchLeads = async () => {
