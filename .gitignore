@@ -11,10 +11,6 @@ dist/
 .env*.local
 .env
 
-# Large media files (upload to hosting/CDN separately)
-public/Video-Demo.mp4
-public/Video-Demo.webm
-
 # System files
 .DS_Store
 *.pem

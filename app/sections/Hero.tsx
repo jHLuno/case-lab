@@ -61,8 +61,8 @@ export default function Hero() {
         poster="/hero-poster.png"
         className="absolute inset-0 w-full h-full object-cover"
       >
-        <source src="https://d7gcdwqf10x648ub.public.blob.vercel-storage.com/Video-Demo.webm" type="video/webm" />
-        <source src="https://d7gcdwqf10x648ub.public.blob.vercel-storage.com/Video-Demo.mp4" type="video/mp4" />
+        <source src="/Video-Demo.webm" type="video/webm" />
+        <source src="/Video-Demo.mp4" type="video/mp4" />
       </video>
 
       {/* Atmospheric gradient orbs overlaid on video */}
