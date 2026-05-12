@@ -15,7 +15,7 @@ function BlurRevealWords({ text, className, style }: { text: string; className?:
     const ctx = gsap.context(() => {
       gsap.fromTo(
         words,
-        { opacity: 0.1, y: 20, filter: "blur(4px)" },
+        { opacity: 0.1, y: 20, filter: "blur(2px)" },
         {
           opacity: 1,
           y: 0,
@@ -23,9 +23,10 @@ function BlurRevealWords({ text, className, style }: { text: string; className?:
           stagger: 0.06,
           scrollTrigger: {
             trigger: ref.current,
-            start: "top 85%",
-            end: "top 55%",
+            start: "top 90%",
+            end: "top 50%",
             scrub: true,
+            invalidateOnRefresh: true,
           },
         }
       );
@@ -79,7 +80,7 @@ function BlurRevealHeading({ text, className = "" }: { text: string; className?:
     const ctx = gsap.context(() => {
       gsap.fromTo(
         words,
-        { opacity: 0.1, y: 20, filter: "blur(6px)" },
+        { opacity: 0.1, y: 20, filter: "blur(4px)" },
         {
           opacity: 1,
           y: 0,
@@ -87,9 +88,10 @@ function BlurRevealHeading({ text, className = "" }: { text: string; className?:
           stagger: 0.06,
           scrollTrigger: {
             trigger: ref.current,
-            start: "top 85%",
-            end: "top 55%",
+            start: "top 90%",
+            end: "top 50%",
             scrub: true,
+            invalidateOnRefresh: true,
           },
         }
       );
@@ -136,6 +138,7 @@ export default function BusinessModel() {
               start: "top 70%",
               end: "bottom 80%",
               scrub: true,
+              invalidateOnRefresh: true,
             },
           }
         );
@@ -157,6 +160,7 @@ export default function BusinessModel() {
                 start: "top 80%",
                 end: "top 60%",
                 scrub: true,
+                invalidateOnRefresh: true,
               },
             }
           );
@@ -179,6 +183,7 @@ export default function BusinessModel() {
               start: "top 90%",
               end: "top 70%",
               scrub: true,
+              invalidateOnRefresh: true,
             },
           }
         );
@@ -196,16 +201,26 @@ export default function BusinessModel() {
             filter: "blur(0px)",
             scrollTrigger: {
               trigger: item,
-              start: "top 85%",
+              start: "top 90%",
               end: "top 65%",
               scrub: true,
+              invalidateOnRefresh: true,
             },
           }
         );
       });
     }, sectionRef);
 
-    return () => ctx.revert();
+    // Critical: refresh ScrollTrigger after dynamic component mounts
+    // so that all child BlurReveal triggers recalculate their positions
+    const refreshTimer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 150);
+
+    return () => {
+      clearTimeout(refreshTimer);
+      ctx.revert();
+    };
   }, []);
 
   return (
