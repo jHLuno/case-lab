@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, RefreshCw, Search, Filter } from "lucide-react";
 
 type Lead = {
@@ -15,10 +15,19 @@ type Lead = {
 export default function CRMPage() {
   const [password, setPassword] = useState("");
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState<"all" | Lead["status"]>("all");
   const [search, setSearch] = useState("");
+
+  // Reset auth on every mount (back/forward navigation)
+  useEffect(() => {
+    setIsAuthenticated(false);
+    setLeads([]);
+    setPassword("");
+    setError("");
+  }, []);
 
   const fetchLeads = async (pwd: string) => {
     setLoading(true);
@@ -42,6 +51,7 @@ export default function CRMPage() {
 
       const data = await res.json();
       setLeads(data.leads || []);
+      setIsAuthenticated(true);
     } catch {
       setError("Ошибка соединения");
     } finally {
@@ -81,8 +91,6 @@ export default function CRMPage() {
     cancelled: "Отменена",
   };
 
-  const hasData = leads.length > 0;
-
   return (
     <>
       <head>
@@ -90,7 +98,7 @@ export default function CRMPage() {
         <title>CRM — Case Lab</title>
       </head>
       <main className="min-h-screen bg-white flex items-center justify-center px-6">
-        {!hasData ? (
+        {!isAuthenticated ? (
           <div className="w-full max-w-sm">
             <h1
               className="text-black text-[24px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-8 text-center"
@@ -157,7 +165,7 @@ export default function CRMPage() {
                     Обновить
                   </button>
                   <button
-                    onClick={() => { setPassword(""); setLeads([]); setError(""); }}
+                    onClick={() => { setIsAuthenticated(false); setPassword(""); setLeads([]); setError(""); }}
                     className="inline-flex items-center gap-1 text-black/40 text-[14px] hover:text-black transition-colors"
                     style={{ fontFamily: "var(--font-body)" }}
                   >
