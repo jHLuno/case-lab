@@ -133,7 +133,7 @@ export default function About() {
           className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 auto-rows-auto"
         >
           {bentoItems.map((item) => (
-            <motion.div key={item.id} variants={itemVariants} className={`${item.col} group cursor-pointer`}>
+            <motion.div key={item.id} variants={itemVariants} className={`${item.col}`}>
               <div
                 className={`relative h-full rounded-[20px] overflow-hidden flex flex-col ${
                   item.dark
@@ -173,7 +173,7 @@ export default function About() {
                   <div className="mt-auto">
                     <span
                       className={`text-[clamp(32px,4vw,56px)] font-normal leading-none block mb-2 ${
-                        item.dark ? "text-white" : "text-black group-hover:text-[#040082] transition-colors duration-500"
+                        item.dark ? "text-white" : "text-black"
                       }`}
                       style={{ fontFamily: "var(--font-body)" }}
                     >
@@ -213,7 +213,7 @@ export default function About() {
 
                 {item.dark && (
                   <div
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+                    className="absolute inset-0 opacity-0 pointer-events-none"
                     style={{ background: "radial-gradient(circle at 30% 20%, rgba(4, 0, 130, 0.3) 0%, transparent 50%)" }}
                   />
                 )}
