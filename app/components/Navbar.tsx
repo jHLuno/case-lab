@@ -66,7 +66,7 @@ export default function Navbar() {
         <div
           className="flex items-center justify-between md:justify-start gap-1 rounded-full
                      bg-white/40 backdrop-blur-[32px]
-                     border border-white/40
+                     border border-white/[0.08]
                      shadow-[0_8px_32px_-8px_rgba(0,0,0,0.12),inset_0_1px_0_0_rgba(255,255,255,0.6)]
                      px-3 py-2.5 md:px-2 md:py-2"
           style={{ WebkitBackdropFilter: "blur(32px)" }}
