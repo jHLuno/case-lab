@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ArrowRight } from "lucide-react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 const navLinks = [
   { label: "Кейсы", href: "#industries" },
@@ -13,9 +14,16 @@ const navLinks = [
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const closeMobileMenu = () => setMobileOpen(false);
+  const closeMobileMenuAndReturnFocus = () => {
+    setMobileOpen(false);
+    toggleRef.current?.focus();
+  };
+  const getNavHref = (href: string) => (pathname === "/" ? href : `/${href}`);
 
   // Focus trap + Escape for mobile menu
   useEffect(() => {
@@ -23,8 +31,7 @@ export default function Navbar() {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setMobileOpen(false);
-        toggleRef.current?.focus();
+        closeMobileMenuAndReturnFocus();
         return;
       }
 
@@ -53,6 +60,21 @@ export default function Navbar() {
     firstLink?.focus();
 
     return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
   }, [mobileOpen]);
 
   return (
@@ -86,7 +108,7 @@ export default function Navbar() {
             {navLinks.map((link) => (
               <a
                 key={link.label}
-                href={link.href}
+                href={getNavHref(link.href)}
                 className="px-4 py-2 text-[14px] font-normal leading-none rounded-full text-black/60 hover:text-black hover:bg-black/5 transition-all duration-300"
                 style={{ fontFamily: "var(--font-body)" }}
               >
@@ -158,10 +180,7 @@ export default function Navbar() {
               </div>
               <button
                 type="button"
-                onClick={() => {
-                  setMobileOpen(false);
-                  toggleRef.current?.focus();
-                }}
+                onClick={closeMobileMenuAndReturnFocus}
                 className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-sm transition-colors duration-300 active:bg-white/20"
                 aria-label="Закрыть меню"
               >
@@ -172,24 +191,21 @@ export default function Navbar() {
             <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto px-6 pt-10 pb-6">
               <div className="flex flex-col gap-1">
                 {navLinks.map((link, i) => (
-                   <motion.a
+                 <motion.a
                      key={link.label}
-                     href={link.href}
+                     href={getNavHref(link.href)}
                      initial={{ opacity: 0, y: 18 }}
                      animate={{ opacity: 1, y: 0 }}
                      exit={{
                        opacity: 0,
                        y: 10,
                        transition: { duration: 0.18, delay: (navLinks.length - 1 - i) * 0.03, ease: "easeInOut" },
-                     }}
-                     transition={{ delay: i * 0.06 + 0.08, duration: 0.42 }}
-                     onClick={() => {
-                       setMobileOpen(false);
-                       toggleRef.current?.focus();
-                    }}
-                    className="group py-3 text-[clamp(30px,8vw,38px)] font-normal leading-[1.02] tracking-[-0.03em] text-white/92 transition-all duration-300 active:translate-x-1 active:text-white"
-                    style={{ fontFamily: "var(--font-heading)" }}
-                  >
+                      }}
+                      transition={{ delay: i * 0.06 + 0.08, duration: 0.42 }}
+                      onClick={closeMobileMenu}
+                     className="group py-3 text-[clamp(30px,8vw,38px)] font-normal leading-[1.02] tracking-[-0.03em] text-white/92 transition-all duration-300 active:translate-x-1 active:text-white"
+                     style={{ fontFamily: "var(--font-heading)" }}
+                   >
                     <span className="inline-block border-b border-transparent pb-1 group-active:border-white/50">
                       {link.label}
                     </span>
@@ -200,17 +216,14 @@ export default function Navbar() {
               <div className="mt-auto pt-10">
                 <motion.a
                   href="/contact/"
-                  initial={{ opacity: 0, y: 18 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10, transition: { duration: 0.18, delay: 0.04, ease: "easeInOut" } }}
-                  transition={{ delay: 0.34, duration: 0.42 }}
-                  onClick={() => {
-                    setMobileOpen(false);
-                    toggleRef.current?.focus();
-                  }}
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-300 active:scale-[0.98]"
-                  style={{ fontFamily: "var(--font-body)" }}
-                >
+                   initial={{ opacity: 0, y: 18 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   exit={{ opacity: 0, y: 10, transition: { duration: 0.18, delay: 0.04, ease: "easeInOut" } }}
+                   transition={{ delay: 0.34, duration: 0.42 }}
+                   onClick={closeMobileMenu}
+                   className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-300 active:scale-[0.98]"
+                   style={{ fontFamily: "var(--font-body)" }}
+                 >
                   Записаться
                   <ArrowRight size={14} strokeWidth={2.5} />
                 </motion.a>
