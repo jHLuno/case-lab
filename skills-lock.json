@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "deepsec": {
+      "source": "vercel-labs/deepsec",
+      "sourceType": "github",
+      "skillPath": "packages/deepsec/SKILL.md",
+      "computedHash": "c31b51d2f2056e0d315e15f0cab01e5fd9eedc58619e194717493e4defe42d9b"
+    },
     "supabase": {
       "source": "supabase/agent-skills",
       "sourceType": "github",

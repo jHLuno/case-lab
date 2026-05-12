@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
 import { useLeadPopup } from "../lib/LeadPopupContext";
-import { supabase } from "../lib/supabase";
 
 const inputClass =
   "w-full px-4 py-3 rounded-[12px] border border-black/[0.08] bg-white text-black text-[15px] placeholder:text-black/30 focus:outline-none focus:border-[#040082]/30 focus:ring-1 focus:ring-[#040082]/10 transition-all duration-200";
@@ -61,15 +60,20 @@ export default function LeadPopup() {
     }
 
     try {
-      const lead = {
-        name,
-        phone,
-        position: position || null,
-        status: "new" as const,
-      };
+      const res = await fetch("/api/leads/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          phone,
+          position: position || null,
+        }),
+      });
 
-      const { error: dbError } = await (supabase.from("leads") as any).insert(lead);
-      if (dbError) throw dbError;
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Ошибка отправки");
+      }
 
       setStatus("success");
       form.reset();
