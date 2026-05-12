@@ -64,12 +64,7 @@ export default function Navbar() {
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <div
-          className="flex items-center justify-between md:justify-start gap-1 rounded-full
-                     bg-white/40 backdrop-blur-[32px]
-                     border border-white/[0.08]
-                     shadow-[0_8px_32px_-8px_rgba(0,0,0,0.12),inset_0_1px_0_0_rgba(255,255,255,0.6)]
-                     px-3 py-2.5 md:px-2 md:py-2"
-          style={{ WebkitBackdropFilter: "blur(32px)" }}
+          className="flex items-center justify-between md:justify-start gap-1 rounded-full border border-black/10 bg-white/85 backdrop-blur-xl px-3 py-2.5 md:px-2 md:py-2 shadow-sm shadow-black/5"
         >
           {/* Logo */}
           <a href="/" className="flex items-center flex-shrink-0 px-1 md:px-2">
