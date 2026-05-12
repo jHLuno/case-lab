@@ -1,12 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { useState } from "react";
 import { ArrowLeft, RefreshCw, Search, Filter } from "lucide-react";
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const CRM_PASSWORD = "caselab2026";
-const CRM_AUTH_HEADER = { "x-crm-auth": "caselab-crm-2026" };
 
 type Lead = {
   id: number;
@@ -17,47 +12,46 @@ type Lead = {
   created_at: string;
 };
 
-function getCrmSupabase() {
-  return createClient(SUPABASE_URL || "https://placeholder.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvaXJnZmJicGhjdmNlZmVhdnB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTIxNDUsImV4cCI6MjA5NDE2ODE0NX0.bMwJEE-qm3PpHFOs4LLzFsuXC5mQ1WM0e7B_7064tcQ", {
-    auth: { persistSession: false },
-    global: { headers: CRM_AUTH_HEADER },
-  });
-}
-
 export default function CRMPage() {
-  const [auth, setAuth] = useState(false);
   const [password, setPassword] = useState("");
   const [leads, setLeads] = useState<Lead[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [filter, setFilter] = useState<"all" | Lead["status"]>("all");
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    if (!auth) return;
-    loadLeads();
-  }, [auth]);
-
-  const loadLeads = async () => {
+  const fetchLeads = async (pwd: string) => {
     setLoading(true);
-    const supabase = getCrmSupabase();
-    const { data, error } = await (supabase
-      .from("leads") as any)
-      .select("*")
-      .order("created_at", { ascending: false });
+    setError("");
+    try {
+      const res = await fetch("/api/crm/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pwd }),
+      });
 
-    if (!error && data) {
-      setLeads(data as Lead[]);
+      if (!res.ok) {
+        if (res.status === 401) {
+          setError("Неверный пароль");
+        } else {
+          setError("Ошибка сервера");
+        }
+        setLeads([]);
+        return;
+      }
+
+      const data = await res.json();
+      setLeads(data.leads || []);
+    } catch {
+      setError("Ошибка соединения");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === CRM_PASSWORD) {
-      setAuth(true);
-    } else {
-      alert("Неверный пароль");
-    }
+    fetchLeads(password);
   };
 
   const filtered = leads.filter((l) => {
@@ -87,6 +81,8 @@ export default function CRMPage() {
     cancelled: "Отменена",
   };
 
+  const hasData = leads.length > 0;
+
   return (
     <>
       <head>
@@ -94,7 +90,7 @@ export default function CRMPage() {
         <title>CRM — Case Lab</title>
       </head>
       <main className="min-h-screen bg-white flex items-center justify-center px-6">
-        {!auth ? (
+        {!hasData ? (
           <div className="w-full max-w-sm">
             <h1
               className="text-black text-[24px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-8 text-center"
@@ -112,12 +108,18 @@ export default function CRMPage() {
                 className="w-full px-4 py-3 rounded-[12px] border border-black/[0.08] bg-white text-black text-[15px] placeholder:text-black/30 focus:outline-none focus:border-[#040082]/30 focus:ring-1 focus:ring-[#040082]/10 transition-all duration-200"
                 style={{ fontFamily: "var(--font-body)" }}
               />
+              {error && (
+                <p className="text-red-600 text-[13px]" style={{ fontFamily: "var(--font-body)" }}>
+                  {error}
+                </p>
+              )}
               <button
                 type="submit"
-                className="w-full bg-[#040082] text-white px-6 py-3 rounded-full text-[15px] font-normal hover:bg-[#0600a8] transition-colors duration-300"
+                disabled={loading}
+                className="w-full bg-[#040082] text-white px-6 py-3 rounded-full text-[15px] font-normal hover:bg-[#0600a8] transition-colors duration-300 disabled:opacity-60"
                 style={{ fontFamily: "var(--font-body)" }}
               >
-                Войти
+                {loading ? "Загрузка..." : "Войти"}
               </button>
             </form>
             <p className="text-center mt-4">
@@ -147,7 +149,7 @@ export default function CRMPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={loadLeads}
+                    onClick={() => fetchLeads(password)}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-black/[0.08] bg-white text-black text-[14px] hover:bg-black/5 transition-colors"
                     style={{ fontFamily: "var(--font-body)" }}
                   >
@@ -155,7 +157,7 @@ export default function CRMPage() {
                     Обновить
                   </button>
                   <button
-                    onClick={() => { setAuth(false); setPassword(""); setLeads([]); }}
+                    onClick={() => { setPassword(""); setLeads([]); setError(""); }}
                     className="inline-flex items-center gap-1 text-black/40 text-[14px] hover:text-black transition-colors"
                     style={{ fontFamily: "var(--font-body)" }}
                   >
