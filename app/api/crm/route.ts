@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const CRM_PASSWORD = process.env.CRM_PASSWORD || "caselab2026";
+const CRM_PASSWORD = process.env.CRM_PASSWORD;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
@@ -16,6 +16,13 @@ function getServiceSupabase() {
 
 export async function POST(request: Request) {
   try {
+    if (!CRM_PASSWORD) {
+      return NextResponse.json(
+        { error: "CRM not configured" },
+        { status: 503 }
+      );
+    }
+
     const { password } = await request.json();
 
     if (!password || password !== CRM_PASSWORD) {
