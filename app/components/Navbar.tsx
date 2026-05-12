@@ -6,6 +6,7 @@ import { Menu, X, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { createPortal } from "react-dom";
 
 const navLinks = [
   { label: "Кейсы", href: "#industries" },
@@ -17,6 +18,7 @@ const navLinks = [
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const closeMobileMenu = () => setMobileOpen(false);
@@ -64,6 +66,18 @@ export default function Navbar() {
   }, [mobileOpen]);
 
   useEffect(() => {
+    const node = document.createElement("div");
+    node.setAttribute("data-mobile-menu-root", "");
+    document.body.appendChild(node);
+    setPortalNode(node);
+
+    return () => {
+      node.remove();
+      setPortalNode(null);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!mobileOpen) return;
 
     const previousBodyOverflow = document.body.style.overflow;
@@ -81,6 +95,24 @@ export default function Navbar() {
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileOpen || !portalNode) return;
+
+    const siblings = Array.from(document.body.children).filter((node) => node !== portalNode);
+
+    siblings.forEach((node) => {
+      node.setAttribute("aria-hidden", "true");
+      node.setAttribute("inert", "");
+    });
+
+    return () => {
+      siblings.forEach((node) => {
+        node.removeAttribute("aria-hidden");
+        node.removeAttribute("inert");
+      });
+    };
+  }, [mobileOpen, portalNode]);
 
   return (
     <>
@@ -133,7 +165,7 @@ export default function Navbar() {
           </Link>
 
           {/* Mobile menu button */}
-          <button
+          <motion.button
             ref={toggleRef}
             type="button"
             onClick={() => setMobileOpen(true)}
@@ -141,15 +173,17 @@ export default function Navbar() {
             aria-label="Открыть меню"
             aria-expanded={mobileOpen}
             aria-controls="mobile-menu"
+            whileTap={{ scale: 0.94 }}
           >
             <Menu size={20} strokeWidth={1.5} />
-          </button>
+          </motion.button>
         </div>
       </motion.nav>
 
       {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {mobileOpen && (
+      {portalNode && createPortal(
+        <AnimatePresence>
+          {mobileOpen && (
           <motion.div
             ref={menuRef}
             id="mobile-menu"
@@ -172,6 +206,7 @@ export default function Navbar() {
               exit={{ opacity: 0, y: -8, transition: { duration: 0.18, ease: "easeInOut" } }}
               transition={{ duration: 0.28, ease: "easeOut" }}
               className="relative z-10 flex shrink-0 items-center justify-between px-6 pt-5 pb-3"
+              style={{ paddingTop: "max(20px, calc(env(safe-area-inset-top) + 8px))" }}
             >
               <div className="relative h-10 w-[154px] rounded-full border border-white/60 bg-white px-4 py-2 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)]">
                 <Image
@@ -183,17 +218,21 @@ export default function Navbar() {
                   sizes="154px"
                 />
               </div>
-              <button
+              <motion.button
                 type="button"
                 onClick={closeMobileMenuAndReturnFocus}
                 className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-sm transition-colors duration-300 active:bg-white/20"
                 aria-label="Закрыть меню"
+                whileTap={{ scale: 0.94, rotate: -6 }}
               >
                 <X size={20} strokeWidth={1.75} />
-              </button>
+              </motion.button>
             </motion.div>
 
-            <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto px-6 pt-10 pb-6">
+            <div
+              className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto px-6 pt-10 pb-6"
+              style={{ paddingBottom: "max(24px, calc(env(safe-area-inset-bottom) + 16px))" }}
+            >
               <div className="flex flex-col gap-1">
                  {navLinks.map((link, i) => (
                   <motion.div
@@ -208,16 +247,16 @@ export default function Navbar() {
                       transition={{ delay: i * 0.06 + 0.08, duration: 0.42 }}
                       className="flex"
                     >
-                     <Link
-                       href={getNavHref(link.href)}
-                       onClick={closeMobileMenu}
-                       className="group py-3 text-[clamp(30px,8vw,38px)] font-normal leading-[1.02] tracking-[-0.03em] text-white/92 transition-all duration-300 active:translate-x-1 active:text-white"
-                       style={{ fontFamily: "var(--font-heading)" }}
-                     >
-                       <span className="inline-block border-b border-transparent pb-1 group-active:border-white/50">
-                         {link.label}
-                       </span>
-                     </Link>
+                    <Link
+                      href={getNavHref(link.href)}
+                      onClick={closeMobileMenu}
+                      className="group py-3 text-[clamp(30px,8vw,38px)] font-normal leading-[1.02] tracking-[-0.03em] text-white/92 transition-all duration-300 active:translate-x-1 active:text-white focus-visible:outline-none focus-visible:text-white"
+                      style={{ fontFamily: "var(--font-heading)" }}
+                    >
+                      <span className="inline-block border-b border-transparent pb-1 group-active:border-white/50 group-focus-visible:border-white/60">
+                        {link.label}
+                      </span>
+                    </Link>
                    </motion.div>
                  ))}
                </div>
@@ -229,16 +268,18 @@ export default function Navbar() {
                     exit={{ opacity: 0, y: 10, transition: { duration: 0.18, delay: 0.04, ease: "easeInOut" } }}
                     transition={{ delay: 0.34, duration: 0.42 }}
                   >
-                   <Link
-                     href="/contact/"
-                     onClick={closeMobileMenu}
-                     className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-300 active:scale-[0.98]"
-                     style={{ fontFamily: "var(--font-body)" }}
-                   >
-                     Записаться
-                     <ArrowRight size={14} strokeWidth={2.5} />
-                   </Link>
-                 </motion.div>
+                    <motion.div whileTap={{ scale: 0.98, y: 1 }}>
+                    <Link
+                      href="/contact/"
+                      onClick={closeMobileMenu}
+                      className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-300 focus-visible:outline-none"
+                      style={{ fontFamily: "var(--font-body)" }}
+                    >
+                      Записаться
+                      <ArrowRight size={14} strokeWidth={2.5} className="transition-transform duration-300 group-active:translate-x-0.5 group-focus-visible:translate-x-0.5" />
+                    </Link>
+                    </motion.div>
+                  </motion.div>
 
                 <motion.p
                   initial={{ opacity: 0, y: 18 }}
@@ -253,8 +294,10 @@ export default function Navbar() {
               </div>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        portalNode
+      )}
     </>
   );
 }
