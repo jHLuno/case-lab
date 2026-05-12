@@ -134,6 +134,7 @@ export default function Evolution() {
           start: "top 80%",
           end: "+=1550",
           scrub: true,
+          invalidateOnRefresh: true,
           onUpdate: (self) => {
             const p = self.progress;
             const seg = 1 / stages.length;
@@ -192,6 +193,7 @@ export default function Evolution() {
           end: `+=${window.innerHeight * 2.5}`,
           pin: true,
           scrub: true,
+          invalidateOnRefresh: true,
           onUpdate: (self) => {
             const p = self.progress;
             const seg = 1 / stages.length;
@@ -216,7 +218,14 @@ export default function Evolution() {
       });
     }, sectionRef);
 
+    // Refresh ScrollTrigger after dynamic mount to recalculate positions
+    // This is critical for lazy-loaded sections where DOM settles after initial render
+    const refreshTimer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
+
     return () => {
+      clearTimeout(refreshTimer);
       ctx.revert();
     };
   }, []);
