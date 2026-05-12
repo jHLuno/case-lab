@@ -230,7 +230,7 @@ export default function Evolution() {
         {/* Left: Horizontal Elliptical Orbit */}
         <div className="flex-1 flex items-center justify-center w-full min-w-0">
           <div
-            className="relative w-full"
+            className="relative w-full overflow-hidden"
             style={{
               maxWidth: 580,
               aspectRatio: "580 / 400",
@@ -240,7 +240,7 @@ export default function Evolution() {
             <svg
               viewBox="0 0 500 340"
               className="w-full h-full"
-              style={{ overflow: "visible", display: "block" }}
+              style={{ display: "block" }}
             >
               <defs>
                 <linearGradient id="orbitGrad" x1="0" y1="0" x2="0" y2="340">
