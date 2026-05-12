@@ -68,7 +68,11 @@ export default function Navbar() {
         >
           <div
             className="absolute -inset-[50px] backdrop-blur-[50px] -z-10"
-            style={{ WebkitBackdropFilter: "blur(50px)" }}
+            style={{
+              WebkitBackdropFilter: "blur(50px)",
+              maskImage: "radial-gradient(ellipse 80% 60% at center, black 40%, transparent 85%)",
+              WebkitMaskImage: "radial-gradient(ellipse 80% 60% at center, black 40%, transparent 85%)",
+            }}
             aria-hidden="true"
           />
           {/* Logo */}
