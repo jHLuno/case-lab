@@ -173,14 +173,14 @@ export default function Navbar() {
               transition={{ duration: 0.28, ease: "easeOut" }}
               className="relative z-10 flex shrink-0 items-center justify-between px-6 pt-5 pb-3"
             >
-              <div className="relative h-8 w-[148px] rounded-full bg-white/10 px-3 py-1 backdrop-blur-sm">
+              <div className="relative h-10 w-[154px] rounded-full border border-white/60 bg-white px-4 py-2 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)]">
                 <Image
                   src="/Logo.png"
                   alt="Case Lab"
                   fill
-                  className="object-contain p-2"
+                  className="object-contain p-1.5"
                   priority
-                  sizes="148px"
+                  sizes="154px"
                 />
               </div>
               <button
