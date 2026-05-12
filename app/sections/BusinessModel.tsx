@@ -6,44 +6,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-function BlurRevealWords({ text, className, style }: { text: string; className?: string; style?: React.CSSProperties }) {
-  const ref = useRef<HTMLParagraphElement>(null);
-  useEffect(() => {
-    if (!ref.current) return;
-    const words = ref.current.querySelectorAll(".bw");
-    if (words.length === 0) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        words,
-        { opacity: 0.1, y: 20, filter: "blur(2px)" },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          stagger: 0.06,
-          scrollTrigger: {
-            trigger: ref.current,
-            start: "top 90%",
-            end: "top 50%",
-            scrub: true,
-            invalidateOnRefresh: true,
-          },
-        }
-      );
-    });
-    return () => ctx.revert();
-  }, []);
-  return (
-    <p ref={ref} className={className} style={style}>
-      {text.split(" ").map((w, i) => (
-        <span key={i} className="bw inline-block mr-[0.25em]" style={{ willChange: "filter, opacity, transform" }}>
-          {w}
-        </span>
-      ))}
-    </p>
-  );
-}
-
 const beforeAfter = [
   {
     before: "Маркетинг работает, но непонятно за счёт чего",
@@ -68,52 +30,6 @@ const useCases = [
   "брифа для агентств и подрядчиков",
   "внутренней коммуникации между собственником и командой",
 ];
-
-function BlurRevealHeading({ text, className = "" }: { text: string; className?: string }) {
-  const ref = useRef<HTMLHeadingElement>(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    const words = ref.current.querySelectorAll(".blur-word");
-    if (words.length === 0) return;
-
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        words,
-        { opacity: 0.1, y: 20, filter: "blur(4px)" },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          stagger: 0.06,
-          scrollTrigger: {
-            trigger: ref.current,
-            start: "top 90%",
-            end: "top 50%",
-            scrub: true,
-            invalidateOnRefresh: true,
-          },
-        }
-      );
-    });
-
-    return () => ctx.revert();
-  }, []);
-
-  return (
-    <h2
-      ref={ref}
-      className={`flex flex-wrap gap-x-[0.25em] ${className}`}
-      style={{ fontFamily: "var(--font-heading)" }}
-    >
-      {text.split(" ").map((word, i) => (
-        <span key={i} className="blur-word inline-block" style={{ willChange: "filter, opacity, transform" }}>
-          {word}
-        </span>
-      ))}
-    </h2>
-  );
-}
 
 export default function BusinessModel() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -167,16 +83,15 @@ export default function BusinessModel() {
         }
       });
 
-      // Case Lab badge blur reveal
+      // Case Lab badge fade-in
       const badge = sectionRef.current?.querySelector(".case-lab-badge");
       if (badge) {
         gsap.fromTo(
           badge,
-          { opacity: 0, y: 30, filter: "blur(8px)", scale: 0.9 },
+          { opacity: 0, y: 30, scale: 0.9 },
           {
             opacity: 1,
             y: 0,
-            filter: "blur(0px)",
             scale: 1,
             scrollTrigger: {
               trigger: badge,
@@ -189,16 +104,15 @@ export default function BusinessModel() {
         );
       }
 
-      // Use cases
+      // Use cases fade-in
       const ucItems = useCasesRef.current?.querySelectorAll(".use-case-item");
-      ucItems?.forEach((item, i) => {
+      ucItems?.forEach((item) => {
         gsap.fromTo(
           item,
-          { opacity: 0, y: 20, filter: "blur(4px)" },
+          { opacity: 0, y: 20 },
           {
             opacity: 1,
             y: 0,
-            filter: "blur(0px)",
             scrollTrigger: {
               trigger: item,
               start: "top 90%",
@@ -211,16 +125,7 @@ export default function BusinessModel() {
       });
     }, sectionRef);
 
-    // Critical: refresh ScrollTrigger after dynamic component mounts
-    // so that all child BlurReveal triggers recalculate their positions
-    const refreshTimer = setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 150);
-
-    return () => {
-      clearTimeout(refreshTimer);
-      ctx.revert();
-    };
+    return () => ctx.revert();
   }, []);
 
   return (
@@ -236,10 +141,12 @@ export default function BusinessModel() {
           >
             Case Lab Diagnostics
           </span>
-          <BlurRevealHeading
-            text="Что меняется после диагностики"
+          <h2
             className="text-black text-[clamp(22px,4vw,54px)] font-bold leading-[1.15] uppercase tracking-[0.02em]"
-          />
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
+            Что меняется после диагностики
+          </h2>
         </div>
 
         {/* Case Lab Label */}
@@ -284,10 +191,9 @@ export default function BusinessModel() {
                 {/* Before — dimmed, outdated approach */}
                 <div className="ba-before text-left md:text-right md:pr-12 md:pb-0">
                   <span className="text-[11px] uppercase tracking-wider text-black/30 mb-1 block md:hidden" style={{ fontFamily: "var(--font-body)" }}>До</span>
-                  <BlurRevealWords
-                    text={row.before}
-                    className="text-[13px] md:text-[18px] leading-[1.35] font-light text-black/40 font-body"
-                  />
+                  <p className="text-[13px] md:text-[18px] leading-[1.35] font-light text-black/40 font-body" style={{ fontFamily: "var(--font-body)" }}>
+                    {row.before}
+                  </p>
                 </div>
 
                 {/* Arrow — down on mobile, right on desktop */}
@@ -309,10 +215,9 @@ export default function BusinessModel() {
                 {/* After — Case Lab solution */}
                 <div className="ba-after md:pl-12 pt-1 md:pt-0">
                   <span className="text-[11px] uppercase tracking-wider text-[#040082] mb-1 block md:hidden" style={{ fontFamily: "var(--font-body)" }}>После</span>
-                  <BlurRevealWords
-                    text={row.after}
-                    className="text-[15px] md:text-[18px] leading-[1.3] font-normal text-black font-body"
-                  />
+                  <p className="text-[15px] md:text-[18px] leading-[1.3] font-normal text-black font-body" style={{ fontFamily: "var(--font-body)" }}>
+                    {row.after}
+                  </p>
                 </div>
               </div>
             ))}
@@ -338,7 +243,6 @@ export default function BusinessModel() {
               <li
                 key={uc}
                 className="use-case-item flex items-start gap-3"
-                style={{ willChange: "filter, opacity, transform" }}
               >
                 <svg
                   aria-hidden="true"
