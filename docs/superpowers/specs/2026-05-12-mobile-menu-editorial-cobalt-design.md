@@ -123,7 +123,10 @@ Motion tone:
 - preserve current focus trap and Escape handling
 - preserve keyboard accessibility
 - preserve click-to-close on nav item tap
-- preserve return focus to toggle button on close
+- return focus to the toggle button on explicit close actions such as the close button and Escape
+- do not force focus back to the toggle after activating a navigation link or CTA
+- keep section-link semantics unchanged: on the homepage they behave as section anchors, and on non-home pages they route to the matching homepage section
+- lock document scroll while the fullscreen menu is open
 
 Tap states:
 - links can brighten slightly and shift a few pixels horizontally
