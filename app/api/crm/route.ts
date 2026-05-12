@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
+import { verifyToken } from "../../lib/jwt";
 
-const CRM_PASSWORD = process.env.CRM_PASSWORD;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
@@ -14,20 +15,23 @@ function getServiceSupabase() {
   });
 }
 
-export async function POST(request: Request) {
+export async function GET() {
   try {
-    if (!CRM_PASSWORD) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("crm_auth")?.value;
+
+    if (!token) {
       return NextResponse.json(
-        { error: "CRM not configured" },
-        { status: 503 }
+        { error: "Unauthorized" },
+        { status: 401 }
       );
     }
 
-    const { password } = await request.json();
+    const isValid = await verifyToken(token);
 
-    if (!password || password !== CRM_PASSWORD) {
+    if (!isValid) {
       return NextResponse.json(
-        { error: "Invalid password" },
+        { error: "Session expired" },
         { status: 401 }
       );
     }

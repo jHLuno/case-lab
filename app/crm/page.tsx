@@ -16,32 +16,40 @@ export default function CRMPage() {
   const [password, setPassword] = useState("");
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState<"all" | Lead["status"]>("all");
   const [search, setSearch] = useState("");
 
-  // Reset auth on every mount (back/forward navigation)
+  // Check existing session on mount
   useEffect(() => {
-    setIsAuthenticated(false);
-    setLeads([]);
-    setPassword("");
-    setError("");
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/auth/check");
+        if (res.ok) {
+          setIsAuthenticated(true);
+          await fetchLeads();
+        }
+      } catch {
+        // Not authenticated
+      } finally {
+        setChecking(false);
+      }
+    };
+    checkAuth();
   }, []);
 
-  const fetchLeads = async (pwd: string) => {
+  const fetchLeads = async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/crm/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: pwd }),
-      });
+      const res = await fetch("/api/crm/");
 
       if (!res.ok) {
         if (res.status === 401) {
-          setError("Неверный пароль");
+          setIsAuthenticated(false);
+          setError("Сессия истекла. Войдите снова.");
         } else {
           setError("Ошибка сервера");
         }
@@ -51,7 +59,6 @@ export default function CRMPage() {
 
       const data = await res.json();
       setLeads(data.leads || []);
-      setIsAuthenticated(true);
     } catch {
       setError("Ошибка соединения");
     } finally {
@@ -59,9 +66,48 @@ export default function CRMPage() {
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    fetchLeads(password);
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          setError("Неверный пароль");
+        } else if (res.status === 503) {
+          setError("CRM не настроен");
+        } else {
+          setError("Ошибка сервера");
+        }
+        return;
+      }
+
+      setIsAuthenticated(true);
+      await fetchLeads();
+    } catch {
+      setError("Ошибка соединения");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // Ignore
+    }
+    setIsAuthenticated(false);
+    setPassword("");
+    setLeads([]);
+    setError("");
   };
 
   const filtered = leads.filter((l) => {
@@ -90,6 +136,16 @@ export default function CRMPage() {
     completed: "Проведена",
     cancelled: "Отменена",
   };
+
+  if (checking) {
+    return (
+      <main className="min-h-screen bg-white flex items-center justify-center">
+        <p className="text-black/40 text-[14px]" style={{ fontFamily: "var(--font-body)" }}>
+          Загрузка...
+        </p>
+      </main>
+    );
+  }
 
   return (
     <>
@@ -157,7 +213,7 @@ export default function CRMPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => fetchLeads(password)}
+                    onClick={fetchLeads}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-black/[0.08] bg-white text-black text-[14px] hover:bg-black/5 transition-colors"
                     style={{ fontFamily: "var(--font-body)" }}
                   >
@@ -165,7 +221,7 @@ export default function CRMPage() {
                     Обновить
                   </button>
                   <button
-                    onClick={() => { setIsAuthenticated(false); setPassword(""); setLeads([]); setError(""); }}
+                    onClick={handleLogout}
                     className="inline-flex items-center gap-1 text-black/40 text-[14px] hover:text-black transition-colors"
                     style={{ fontFamily: "var(--font-body)" }}
                   >
@@ -173,6 +229,12 @@ export default function CRMPage() {
                   </button>
                 </div>
               </div>
+
+              {error && (
+                <p className="text-red-600 text-[14px] mb-4" style={{ fontFamily: "var(--font-body)" }}>
+                  {error}
+                </p>
+              )}
 
               <div className="flex flex-col sm:flex-row gap-3 mb-6">
                 <div className="relative flex-1 max-w-sm">
