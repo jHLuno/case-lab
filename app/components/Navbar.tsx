@@ -67,8 +67,8 @@ export default function Navbar() {
           className="relative flex items-center justify-between md:justify-start gap-1 rounded-full border border-black/10 bg-white/85 px-3 py-2.5 md:px-2 md:py-2 shadow-sm shadow-black/5"
         >
           <div
-            className="absolute -inset-4 rounded-full backdrop-blur-[40px] -z-10"
-            style={{ WebkitBackdropFilter: "blur(40px)" }}
+            className="absolute -inset-[50px] backdrop-blur-[50px] -z-10"
+            style={{ WebkitBackdropFilter: "blur(50px)" }}
             aria-hidden="true"
           />
           {/* Logo */}
