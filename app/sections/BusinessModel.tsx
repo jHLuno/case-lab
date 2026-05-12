@@ -288,7 +288,7 @@ export default function BusinessModel() {
                 {/* After — Case Lab solution */}
                 <div className="ba-after md:pl-12 pt-1 md:pt-0">
                   <span
-                    className="inline-flex items-center justify-center bg-[#040082] text-white px-[10px] py-[4px] text-[12px] md:text-[13px] font-normal uppercase tracking-wider leading-none mb-2"
+                    className="inline-flex items-center justify-center bg-[#040082] text-white px-[10px] py-[4px] text-[12px] font-normal uppercase tracking-wider leading-none mb-2 md:hidden"
                     style={{ fontFamily: "var(--font-body)" }}
                   >
                     После
