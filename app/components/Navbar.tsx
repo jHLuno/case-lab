@@ -133,17 +133,26 @@ export default function Navbar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[60] bg-[#02020a]/95 backdrop-blur-xl flex flex-col"
+            className="fixed inset-0 z-[60] overflow-hidden bg-[#040082] text-white"
           >
-            <div className="w-full flex items-center justify-between px-6 py-5">
-              <div className="relative h-6 w-[140px]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_32%),radial-gradient(circle_at_75%_30%,rgba(120,150,255,0.22),transparent_28%),linear-gradient(180deg,#0a0f9f_0%,#040082_45%,#03045e_100%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_28%)]" />
+            <div className="absolute inset-x-0 top-0 h-px bg-white/20" />
+
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28, ease: "easeOut" }}
+              className="relative z-10 flex items-center justify-between px-6 pt-5 pb-3"
+            >
+              <div className="relative h-8 w-[148px] rounded-full bg-white/10 px-3 py-1 backdrop-blur-sm">
                 <Image
                   src="/Logo.png"
                   alt="Case Lab"
                   fill
-                  className="object-contain invert"
+                  className="object-contain p-2"
                   priority
-                  sizes="140px"
+                  sizes="148px"
                 />
               </div>
               <button
@@ -152,45 +161,63 @@ export default function Navbar() {
                   setMobileOpen(false);
                   toggleRef.current?.focus();
                 }}
-                className="text-white w-10 h-10 flex items-center justify-center"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-sm transition-colors duration-300 active:bg-white/20"
                 aria-label="Закрыть меню"
               >
-                <X size={20} strokeWidth={1.5} />
+                <X size={20} strokeWidth={1.75} />
               </button>
-            </div>
-            <div className="flex flex-col px-6 pt-12 gap-2">
-              {navLinks.map((link, i) => (
+            </motion.div>
+
+            <div className="relative z-10 flex flex-1 flex-col px-6 pt-10 pb-6">
+              <div className="flex flex-col gap-1">
+                {navLinks.map((link, i) => (
+                  <motion.a
+                    key={link.label}
+                    href={link.href}
+                    initial={{ opacity: 0, y: 18 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.06 + 0.08, duration: 0.42 }}
+                    onClick={() => {
+                      setMobileOpen(false);
+                      toggleRef.current?.focus();
+                    }}
+                    className="group py-3 text-[clamp(30px,8vw,38px)] font-normal leading-[1.02] tracking-[-0.03em] text-white/92 transition-all duration-300 active:translate-x-1 active:text-white"
+                    style={{ fontFamily: "var(--font-heading)" }}
+                  >
+                    <span className="inline-block border-b border-transparent pb-1 group-active:border-white/50">
+                      {link.label}
+                    </span>
+                  </motion.a>
+                ))}
+              </div>
+
+              <div className="mt-auto pt-10">
                 <motion.a
-                  key={link.label}
-                  href={link.href}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05 + 0.1, duration: 0.4 }}
+                  href="/contact/"
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.34, duration: 0.42 }}
                   onClick={() => {
                     setMobileOpen(false);
                     toggleRef.current?.focus();
                   }}
-                  className="text-white/90 text-[28px] font-normal leading-[1.2] py-3"
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-300 active:scale-[0.98]"
                   style={{ fontFamily: "var(--font-body)" }}
                 >
-                  {link.label}
+                  Записаться
+                  <ArrowRight size={14} strokeWidth={2.5} />
                 </motion.a>
-              ))}
-              <motion.a
-                href="/contact/"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3, duration: 0.4 }}
-                onClick={() => {
-                  setMobileOpen(false);
-                  toggleRef.current?.focus();
-                }}
-                className="inline-flex items-center gap-2 bg-white text-[#040082] rounded-full px-6 py-3 text-[14px] font-normal mt-6 self-start"
-                style={{ fontFamily: "var(--font-body)" }}
-              >
-                Записаться
-                <ArrowRight size={14} strokeWidth={2.5} />
-              </motion.a>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4, duration: 0.42 }}
+                  className="mt-4 max-w-[260px] text-[13px] leading-[1.45] text-white/68"
+                  style={{ fontFamily: "var(--font-body)" }}
+                >
+                  Диагностика маркетинга для команд, которым нужен ясный следующий шаг.
+                </motion.p>
+              </div>
             </div>
           </motion.div>
         )}
