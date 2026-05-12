@@ -8,9 +8,8 @@ import { useLeadPopup } from "../lib/LeadPopupContext";
 import { supabase } from "../lib/supabase";
 
 const inputClass =
-  "w-full h-12 px-4 rounded-[12px] border border-black/[0.08] bg-white text-black text-[15px] placeholder:text-black/30 focus:outline-none focus:border-[#040082]/40 focus:ring-2 focus:ring-[#040082]/10 transition-all duration-200";
-const labelClass = "block text-black text-[13px] font-medium mb-2";
-const fontBody = { fontFamily: "var(--font-body)" };
+  "w-full px-4 py-3 rounded-[12px] border border-black/[0.08] bg-white text-black text-[15px] placeholder:text-black/30 focus:outline-none focus:border-[#040082]/30 focus:ring-1 focus:ring-[#040082]/10 transition-all duration-200";
+const inputFont = { fontFamily: "var(--font-body)" };
 
 export default function LeadPopup() {
   const { isOpen, closePopup } = useLeadPopup();
@@ -91,100 +90,100 @@ export default function LeadPopup() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-[2px] p-6"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
           onClick={(e) => {
             if (e.target === e.currentTarget) closePopup();
           }}
         >
           <motion.div
             key="lead-popup-panel"
-            initial={{ opacity: 0, scale: 0.96, y: 16 }}
+            initial={{ opacity: 0, scale: 0.96, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 16 }}
+            exit={{ opacity: 0, scale: 0.96, y: 20 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-[420px] bg-white rounded-[20px] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.2)]"
+            className="relative w-full max-w-[440px] bg-white rounded-[20px] shadow-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={closePopup}
-              className="absolute top-5 right-5 w-10 h-10 flex items-center justify-center rounded-full bg-black/[0.04] hover:bg-black/[0.08] transition-colors text-black/30 hover:text-black/60 z-10"
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-black/5 hover:bg-black/10 transition-colors text-black/40 hover:text-black/60 z-10"
               aria-label="Закрыть"
             >
-              <X size={18} />
+              <X size={16} />
             </button>
 
             {status === "success" ? (
-              <div className="px-8 py-16 text-center">
-                <CheckCircle size={44} className="text-[#040082] mx-auto mb-6" />
+              <div className="px-8 py-12 text-center">
+                <CheckCircle size={40} className="text-[#040082] mx-auto mb-5" />
                 <h2
-                  className="text-black text-[22px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-3"
+                  className="text-black text-[20px] md:text-[24px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-3"
                   style={{ fontFamily: "var(--font-heading)" }}
                 >
                   Заявка отправлена
                 </h2>
-                <p className="text-black/60 text-[15px] leading-[1.5] font-light mb-8" style={fontBody}>
+                <p className="text-black/60 text-[14px] leading-[1.5] font-light mb-6" style={inputFont}>
                   Мы свяжемся с вами в течение рабочего дня.
                 </p>
                 <button
                   onClick={closePopup}
-                  className="inline-flex items-center gap-2 bg-[#040082] text-white px-8 py-3.5 rounded-full text-[14px] font-normal hover:bg-[#0600a8] transition-colors duration-300"
-                  style={fontBody}
+                  className="inline-flex items-center gap-2 bg-[#040082] text-white px-6 py-3 rounded-full text-[14px] font-normal hover:bg-[#0600a8] transition-colors duration-300"
+                  style={inputFont}
                 >
                   Хорошо
                   <ArrowRight size={14} />
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="px-8 pt-12 pb-8">
+              <form onSubmit={handleSubmit} className="px-8 pt-10 pb-8">
                 <h2
-                  className="text-black text-[22px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-2"
+                  className="text-black text-[20px] md:text-[24px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-2"
                   style={{ fontFamily: "var(--font-heading)" }}
                 >
                   Записаться
                 </h2>
-                <p className="text-black/50 text-[14px] leading-[1.5] font-light mb-8" style={fontBody}>
+                <p className="text-black/60 text-[14px] leading-[1.5] font-light mb-6" style={inputFont}>
                   Оставьте контакты — мы свяжемся в течение рабочего дня.
                 </p>
 
-                <div className="space-y-5">
+                <div className="space-y-4">
                   <div>
-                    <label htmlFor="popup-name" className={labelClass} style={fontBody}>
+                    <label htmlFor="popup-name" className="block text-black text-[13px] font-normal mb-1.5" style={inputFont}>
                       Имя и фамилия <span className="text-[#040082]">*</span>
                     </label>
                     <input
                       type="text" id="popup-name" name="name" required
                       placeholder="Арман Сериков"
                       className={inputClass}
-                      style={fontBody}
+                      style={inputFont}
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="popup-phone" className={labelClass} style={fontBody}>
+                    <label htmlFor="popup-phone" className="block text-black text-[13px] font-normal mb-1.5" style={inputFont}>
                       Телефон <span className="text-[#040082]">*</span>
                     </label>
                     <input
                       type="tel" id="popup-phone" name="phone" required
                       placeholder="+7 (___) ___-__-__"
                       className={inputClass}
-                      style={fontBody}
+                      style={inputFont}
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="popup-position" className={labelClass} style={fontBody}>
+                    <label htmlFor="popup-position" className="block text-black text-[13px] font-normal mb-1.5" style={inputFont}>
                       Должность
                     </label>
                     <input
                       type="text" id="popup-position" name="position"
                       placeholder="CEO, CMO, Founder..."
                       className={inputClass}
-                      style={fontBody}
+                      style={inputFont}
                     />
                   </div>
                 </div>
 
-                <p className="text-black/30 text-[12px] leading-[1.5] font-light mt-6" style={fontBody}>
+                <p className="text-black/30 text-[11px] leading-[1.5] font-light mt-4" style={inputFont}>
                   Отправляя форму, вы соглашаетесь с{" "}
                   <a href="/privacy/" className="underline hover:text-[#040082] transition-colors">
                     Политикой конфиденциальности
@@ -195,18 +194,18 @@ export default function LeadPopup() {
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="w-full mt-6 h-12 inline-flex items-center justify-center gap-2 bg-[#040082] text-white px-6 rounded-full text-[15px] font-normal hover:bg-[#0600a8] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={fontBody}
+                  className="w-full mt-5 inline-flex items-center justify-center gap-2 bg-[#040082] text-white px-6 py-3.5 rounded-full text-[14px] font-normal hover:bg-[#0600a8] transition-colors duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                  style={inputFont}
                 >
                   {status === "loading" ? (
-                    <><Loader2 size={18} className="animate-spin" /> Отправка...</>
+                    <><Loader2 size={16} className="animate-spin" /> Отправка...</>
                   ) : (
-                    <>Отправить заявку <ArrowRight size={16} /></>
+                    <>Отправить заявку <ArrowRight size={14} /></>
                   )}
                 </button>
 
                 {status === "error" && (
-                  <p className="text-red-600 text-[13px] font-light mt-4 text-center" style={fontBody}>
+                  <p className="text-red-600 text-[13px] font-light mt-3" style={inputFont}>
                     {errorMsg}
                   </p>
                 )}
