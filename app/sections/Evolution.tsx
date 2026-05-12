@@ -192,8 +192,11 @@ export default function Evolution() {
 
         ScrollTrigger.create({
           trigger: sectionRef.current,
-          start: "top 75%",
-          end: "bottom 35%",
+          start: "top 15%",
+          end: () => `+=${window.innerHeight * 2.5}`,
+          pin: true,
+          pinSpacing: true,
+          anticipatePin: 1,
           scrub: true,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
