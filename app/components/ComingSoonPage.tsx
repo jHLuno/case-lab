@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import BackToTop from "./BackToTop";
 
 type ComingSoonPageProps = {
   tag: string;
@@ -73,6 +74,7 @@ export default function ComingSoonPage({ tag, title, description }: ComingSoonPa
       </section>
 
       <Footer />
+      <BackToTop />
     </main>
   );
 }

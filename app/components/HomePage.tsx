@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import BackToTop from "./BackToTop";
 import Hero from "../sections/Hero";
 import About from "../sections/About";
 import Pricing from "../sections/Pricing";
@@ -72,6 +73,7 @@ export default function HomePage() {
       <Evolution />
       <QuickLinks />
       <Footer />
+      <BackToTop />
     </main>
   );
 }
