@@ -62,6 +62,7 @@ export default function Hero() {
         className="absolute inset-0 w-full h-full object-cover"
       >
         <source src="/Video-Demo.webm" type="video/webm" />
+        <source src="/Video-Demo.mp4" type="video/mp4" />
       </video>
 
       {/* Atmospheric gradient orbs overlaid on video */}
