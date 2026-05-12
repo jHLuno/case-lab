@@ -149,7 +149,7 @@ Expected change scope:
 
 Do not change:
 - desktop navbar layout
-- existing nav destinations
+- the intended section destinations of the existing nav items
 - existing accessibility behaviors unless required for the new layout
 
 ### Acceptance Criteria
