@@ -60,9 +60,7 @@ export default function CRMPage() {
     const matchesSearch =
       !q ||
       l.name.toLowerCase().includes(q) ||
-      l.email.toLowerCase().includes(q) ||
-      (l.company && l.company.toLowerCase().includes(q)) ||
-      (l.phone && l.phone.toLowerCase().includes(q)) ||
+      l.phone.toLowerCase().includes(q) ||
       (l.position && l.position.toLowerCase().includes(q));
     return matchesFilter && matchesSearch;
   });
@@ -167,7 +165,7 @@ export default function CRMPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Поиск по имени, email, компании..."
+              placeholder="Поиск по имени, телефону, должности..."
               className="w-full pl-9 pr-4 py-2.5 rounded-[12px] border border-black/[0.08] bg-white text-black text-[14px] placeholder:text-black/30 focus:outline-none focus:border-[#040082]/30 transition-all"
               style={{ fontFamily: "var(--font-body)" }}
             />
@@ -198,10 +196,8 @@ export default function CRMPage() {
               <thead>
                 <tr className="border-b border-black/[0.08]">
                   <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>Имя</th>
-                  <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>Контакты</th>
-                  <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal hidden md:table-cell" style={{ fontFamily: "var(--font-body)" }}>Компания</th>
+                  <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>Телефон</th>
                   <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal hidden md:table-cell" style={{ fontFamily: "var(--font-body)" }}>Должность</th>
-                  <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal hidden lg:table-cell" style={{ fontFamily: "var(--font-body)" }}>Сообщение</th>
                   <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>Статус</th>
                   <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>Дата</th>
                 </tr>
@@ -209,13 +205,13 @@ export default function CRMPage() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-black/30 text-[14px]" style={{ fontFamily: "var(--font-body)" }}>
+                    <td colSpan={5} className="px-4 py-12 text-center text-black/30 text-[14px]" style={{ fontFamily: "var(--font-body)" }}>
                       Загрузка...
                     </td>
                   </tr>
                 ) : filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-black/30 text-[14px]" style={{ fontFamily: "var(--font-body)" }}>
+                    <td colSpan={5} className="px-4 py-12 text-center text-black/30 text-[14px]" style={{ fontFamily: "var(--font-body)" }}>
                       {search || filter !== "all" ? "Ничего не найдено" : "Пока нет заявок"}
                     </td>
                   </tr>
@@ -228,30 +224,13 @@ export default function CRMPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="space-y-0.5">
-                          <a href={`mailto:${lead.email}`} className="block text-[#040082] text-[13px] hover:underline" style={{ fontFamily: "var(--font-body)" }}>
-                            {lead.email}
-                          </a>
-                          {lead.phone && (
-                            <a href={`tel:${lead.phone}`} className="block text-black/40 text-[12px] hover:text-black transition-colors" style={{ fontFamily: "var(--font-body)" }}>
-                              {lead.phone}
-                            </a>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 hidden md:table-cell">
-                        <span className="text-black/60 text-[13px]" style={{ fontFamily: "var(--font-body)" }}>
-                          {lead.company || "—"}
-                        </span>
+                        <a href={`tel:${lead.phone}`} className="text-[#040082] text-[13px] hover:underline" style={{ fontFamily: "var(--font-body)" }}>
+                          {lead.phone}
+                        </a>
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
                         <span className="text-black/60 text-[13px]" style={{ fontFamily: "var(--font-body)" }}>
                           {lead.position || "—"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 hidden lg:table-cell max-w-[200px]">
-                        <span className="text-black/40 text-[12px] line-clamp-2" style={{ fontFamily: "var(--font-body)" }}>
-                          {lead.message || "—"}
                         </span>
                       </td>
                       <td className="px-4 py-3">

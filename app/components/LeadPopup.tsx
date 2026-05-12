@@ -6,11 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
 import { useLeadPopup } from "../lib/LeadPopupContext";
 import { supabase } from "../lib/supabase";
-import emailjs from "@emailjs/browser";
-
-const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "";
-const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "";
-const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "";
 
 const inputClass =
   "w-full px-4 py-3 rounded-[12px] border border-black/[0.08] bg-white text-black text-[15px] placeholder:text-black/30 focus:outline-none focus:border-[#040082]/30 focus:ring-1 focus:ring-[#040082]/10 transition-all duration-200";
@@ -68,31 +63,13 @@ export default function LeadPopup() {
     try {
       const lead = {
         name,
-        email: `${phone}@popup.caselab.kz`,
-        company: null,
         phone,
         position: position || null,
-        message: null,
         status: "new" as const,
       };
 
       const { error: dbError } = await (supabase.from("leads") as any).insert(lead);
       if (dbError) throw dbError;
-
-      if (EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID && EMAILJS_PUBLIC_KEY) {
-        await emailjs.send(
-          EMAILJS_SERVICE_ID,
-          EMAILJS_TEMPLATE_ID,
-          {
-            from_name: name,
-            from_email: "—",
-            company: "—",
-            phone,
-            message: position ? `Должность: ${position}` : "—",
-          },
-          EMAILJS_PUBLIC_KEY
-        );
-      }
 
       setStatus("success");
       form.reset();

@@ -23,11 +23,8 @@ export const supabase = getSupabase();
 export type Lead = {
   id: number;
   name: string;
-  email: string;
-  company: string | null;
-  phone: string | null;
+  phone: string;
   position: string | null;
-  message: string | null;
   status: "new" | "contacted" | "scheduled" | "completed" | "cancelled";
   created_at: string;
 };
