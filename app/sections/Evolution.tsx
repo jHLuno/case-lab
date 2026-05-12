@@ -1,13 +1,11 @@
 "use client";
 
-import { useRef, useState, useEffect, useLayoutEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowRight } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
-
-const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 const stages = [
   {
@@ -91,10 +89,8 @@ export default function Evolution() {
   const [activeIndex, setActiveIndex] = useState(0);
   const segRefs = useRef<(SVGPathElement | null)[]>([]);
 
-  useIsomorphicLayoutEffect(() => {
+  useEffect(() => {
     if (!sectionRef.current) return;
-
-    const mm = gsap.matchMedia();
 
     const ctx = gsap.context(() => {
       // Header blur reveal
@@ -113,13 +109,14 @@ export default function Evolution() {
               start: "top 85%",
               end: "top 55%",
               scrub: true,
-              invalidateOnRefresh: true,
             },
           }
         );
       }
 
       // Orbit draw animation — all breakpoints via matchMedia
+      const mm = gsap.matchMedia();
+
       mm.add("(max-width: 767px)", () => {
         const lengths = segRefs.current.map((el) => (el ? el.getTotalLength() : 0));
         const totalLength = lengths.reduce((a, b) => a + b, 0);
@@ -193,10 +190,8 @@ export default function Evolution() {
         ScrollTrigger.create({
           trigger: sectionRef.current,
           start: "top 15%",
-          end: () => `+=${window.innerHeight * 2.5}`,
+          end: `+=${window.innerHeight * 2.5}`,
           pin: true,
-          pinSpacing: true,
-          anticipatePin: 1,
           scrub: true,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
@@ -223,14 +218,14 @@ export default function Evolution() {
       });
     }, sectionRef);
 
-    // Recalculate after the browser restores scroll and GSAP creates pin spacers.
+    // Refresh ScrollTrigger after dynamic mount to recalculate positions
+    // This is critical for lazy-loaded sections where DOM settles after initial render
     const refreshTimer = setTimeout(() => {
       ScrollTrigger.refresh();
     }, 100);
 
     return () => {
       clearTimeout(refreshTimer);
-      mm.revert();
       ctx.revert();
     };
   }, []);

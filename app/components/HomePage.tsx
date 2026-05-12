@@ -12,11 +12,11 @@ import About from "../sections/About";
 import Pricing from "../sections/Pricing";
 import OurAdvantage from "../sections/OurAdvantage";
 import Timeline from "../sections/Timeline";
-import Evolution from "../sections/Evolution";
 
 const Testimonials = dynamic(() => import("../sections/Testimonials"), { ssr: false });
 const BusinessModel = dynamic(() => import("../sections/BusinessModel"), { ssr: false });
 const Clients = dynamic(() => import("../sections/Clients"));
+const Evolution = dynamic(() => import("../sections/Evolution"), { ssr: false });
 const QuickLinks = dynamic(() => import("../sections/QuickLinks"));
 
 gsap.registerPlugin(ScrollTrigger);
