@@ -58,14 +58,14 @@ export default function Navbar() {
   return (
     <>
       <motion.nav
-        className="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-30px)] md:w-auto backdrop-blur-[40px] rounded-full overflow-hidden"
-        style={{ WebkitBackdropFilter: "blur(40px)" }}
+        className="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-30px)] md:w-auto"
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <div
-          className="flex items-center justify-between md:justify-start gap-1 rounded-full border border-black/10 bg-white/85 px-3 py-2.5 md:px-2 md:py-2 shadow-sm shadow-black/5"
+          className="relative flex items-center justify-between md:justify-start gap-1 rounded-full border border-black/10 bg-white/85 backdrop-blur-[40px] px-3 py-2.5 md:px-2 md:py-2 shadow-sm shadow-black/5"
+          style={{ WebkitBackdropFilter: "blur(40px)" }}
         >
           {/* Logo */}
           <a href="/" className="flex items-center flex-shrink-0 px-1 md:px-2">
