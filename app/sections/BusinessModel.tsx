@@ -6,6 +6,80 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+function FadeInWords({ text, className }: { text: string; className?: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    const words = ref.current.querySelectorAll(".fw");
+    if (words.length === 0) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        words,
+        { opacity: 0, y: 12 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.04,
+          duration: 0.5,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: ref.current,
+            start: "top 88%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
+    });
+    return () => ctx.revert();
+  }, []);
+  return (
+    <p ref={ref} className={className}>
+      {text.split(" ").map((w, i) => (
+        <span key={i} className="fw inline-block mr-[0.25em]">
+          {w}
+        </span>
+      ))}
+    </p>
+  );
+}
+
+function FadeInHeading({ text, className = "" }: { text: string; className?: string }) {
+  const ref = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    const words = ref.current.querySelectorAll(".fh");
+    if (words.length === 0) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        words,
+        { opacity: 0, y: 16 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.05,
+          duration: 0.6,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: ref.current,
+            start: "top 88%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
+    });
+    return () => ctx.revert();
+  }, []);
+  return (
+    <h2 ref={ref} className={`flex flex-wrap gap-x-[0.25em] ${className}`} style={{ fontFamily: "var(--font-heading)" }}>
+      {text.split(" ").map((word, i) => (
+        <span key={i} className="fh inline-block">
+          {word}
+        </span>
+      ))}
+    </h2>
+  );
+}
+
 const beforeAfter = [
   {
     before: "Маркетинг работает, но непонятно за счёт чего",
@@ -141,12 +215,10 @@ export default function BusinessModel() {
           >
             Case Lab Diagnostics
           </span>
-          <h2
+          <FadeInHeading
+            text="Что меняется после диагностики"
             className="text-black text-[clamp(22px,4vw,54px)] font-bold leading-[1.15] uppercase tracking-[0.02em]"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            Что меняется после диагностики
-          </h2>
+          />
         </div>
 
         {/* Case Lab Label */}
@@ -191,9 +263,10 @@ export default function BusinessModel() {
                 {/* Before — dimmed, outdated approach */}
                 <div className="ba-before text-left md:text-right md:pr-12 md:pb-0">
                   <span className="text-[11px] uppercase tracking-wider text-black/30 mb-1 block md:hidden" style={{ fontFamily: "var(--font-body)" }}>До</span>
-                  <p className="text-[13px] md:text-[18px] leading-[1.35] font-light text-black/40 font-body" style={{ fontFamily: "var(--font-body)" }}>
-                    {row.before}
-                  </p>
+                  <FadeInWords
+                    text={row.before}
+                    className="text-[13px] md:text-[18px] leading-[1.35] font-light text-black/40 font-body"
+                  />
                 </div>
 
                 {/* Arrow — down on mobile, right on desktop */}
@@ -215,9 +288,10 @@ export default function BusinessModel() {
                 {/* After — Case Lab solution */}
                 <div className="ba-after md:pl-12 pt-1 md:pt-0">
                   <span className="text-[11px] uppercase tracking-wider text-[#040082] mb-1 block md:hidden" style={{ fontFamily: "var(--font-body)" }}>После</span>
-                  <p className="text-[15px] md:text-[18px] leading-[1.3] font-normal text-black font-body" style={{ fontFamily: "var(--font-body)" }}>
-                    {row.after}
-                  </p>
+                  <FadeInWords
+                    text={row.after}
+                    className="text-[15px] md:text-[18px] leading-[1.3] font-normal text-black font-body"
+                  />
                 </div>
               </div>
             ))}
