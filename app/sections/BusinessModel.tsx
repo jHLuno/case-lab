@@ -287,7 +287,12 @@ export default function BusinessModel() {
 
                 {/* After — Case Lab solution */}
                 <div className="ba-after md:pl-12 pt-1 md:pt-0">
-                  <span className="text-[11px] uppercase tracking-wider text-[#040082] mb-1 block md:hidden" style={{ fontFamily: "var(--font-body)" }}>После</span>
+                  <span
+                    className="inline-flex items-center justify-center bg-[#040082] text-white px-[10px] py-[4px] text-[12px] md:text-[13px] font-normal uppercase tracking-wider leading-none mb-2"
+                    style={{ fontFamily: "var(--font-body)" }}
+                  >
+                    После
+                  </span>
                   <FadeInWords
                     text={row.after}
                     className="text-[15px] md:text-[18px] leading-[1.3] font-normal text-black font-body"
