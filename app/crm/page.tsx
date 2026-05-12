@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, RefreshCw, Search, Filter } from "lucide-react";
+import { ArrowLeft, RefreshCw, Search, Filter, Trash2, Save, X, Pencil } from "lucide-react";
 
 type Lead = {
   id: number;
   name: string;
   phone: string;
   position: string | null;
+  notes: string | null;
   status: "new" | "contacted" | "scheduled" | "completed" | "cancelled";
   created_at: string;
 };
@@ -21,6 +22,10 @@ export default function CRMPage() {
   const [error, setError] = useState("");
   const [filter, setFilter] = useState<"all" | Lead["status"]>("all");
   const [search, setSearch] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editNotes, setEditNotes] = useState("");
+  const [editStatus, setEditStatus] = useState<Lead["status"]>("new");
+  const [saving, setSaving] = useState(false);
 
   // Check existing session on mount + handle bfcache restoration
   useEffect(() => {
@@ -47,6 +52,7 @@ export default function CRMPage() {
         setPassword("");
         setError("");
         setChecking(false);
+        setEditingId(null);
       }
     };
 
@@ -122,6 +128,65 @@ export default function CRMPage() {
     setPassword("");
     setLeads([]);
     setError("");
+    setEditingId(null);
+  };
+
+  const startEdit = (lead: Lead) => {
+    setEditingId(lead.id);
+    setEditStatus(lead.status);
+    setEditNotes(lead.notes || "");
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditNotes("");
+    setEditStatus("new");
+  };
+
+  const saveLead = async (id: number) => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/crm/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: editStatus, notes: editNotes || null }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to update");
+      }
+
+      setLeads((prev) =>
+        prev.map((l) =>
+          l.id === id ? { ...l, status: editStatus, notes: editNotes || null } : l
+        )
+      );
+      setEditingId(null);
+    } catch {
+      setError("Ошибка сохранения");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteLead = async (id: number) => {
+    if (!confirm("Удалить заявку? Это действие нельзя отменить.")) return;
+
+    try {
+      const res = await fetch("/api/crm/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete");
+      }
+
+      setLeads((prev) => prev.filter((l) => l.id !== id));
+    } catch {
+      setError("Ошибка удаления");
+    }
   };
 
   const filtered = leads.filter((l) => {
@@ -131,7 +196,8 @@ export default function CRMPage() {
       !q ||
       l.name.toLowerCase().includes(q) ||
       l.phone.toLowerCase().includes(q) ||
-      (l.position && l.position.toLowerCase().includes(q));
+      (l.position && l.position.toLowerCase().includes(q)) ||
+      (l.notes && l.notes.toLowerCase().includes(q));
     return matchesFilter && matchesSearch;
   });
 
@@ -212,7 +278,7 @@ export default function CRMPage() {
           </div>
         ) : (
           <div className="min-h-screen bg-[#fafafa] px-6 md:px-10 py-8 md:py-12 w-full">
-            <div className="max-w-[1200px] mx-auto">
+            <div className="max-w-[1400px] mx-auto">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
                   <h1
@@ -257,12 +323,12 @@ export default function CRMPage() {
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Поиск по имени, телефону, должности..."
+                    placeholder="Поиск по имени, телефону, должности, заметкам..."
                     className="w-full pl-9 pr-4 py-2.5 rounded-[12px] border border-black/[0.08] bg-white text-black text-[14px] placeholder:text-black/30 focus:outline-none focus:border-[#040082]/30 transition-all"
                     style={{ fontFamily: "var(--font-body)" }}
                   />
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <Filter size={14} className="text-black/30" />
                   {(["all", "new", "contacted", "scheduled", "completed", "cancelled"] as const).map((s) => (
                     <button
@@ -286,62 +352,138 @@ export default function CRMPage() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-black/[0.08]">
-                        <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>Имя</th>
+                        <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal w-[200px]" style={{ fontFamily: "var(--font-body)" }}>Имя</th>
                         <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>Телефон</th>
                         <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal hidden md:table-cell" style={{ fontFamily: "var(--font-body)" }}>Должность</th>
-                        <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>Статус</th>
+                        <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal w-[140px]" style={{ fontFamily: "var(--font-body)" }}>Статус</th>
+                        <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal hidden lg:table-cell w-[300px]" style={{ fontFamily: "var(--font-body)" }}>Заметки</th>
                         <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>Дата</th>
+                        <th className="text-left px-4 py-3 text-black/40 text-[11px] uppercase tracking-wider font-normal w-[80px]" style={{ fontFamily: "var(--font-body)" }}></th>
                       </tr>
                     </thead>
                     <tbody>
                       {loading ? (
                         <tr>
-                          <td colSpan={5} className="px-4 py-12 text-center text-black/30 text-[14px]" style={{ fontFamily: "var(--font-body)" }}>
+                          <td colSpan={7} className="px-4 py-12 text-center text-black/30 text-[14px]" style={{ fontFamily: "var(--font-body)" }}>
                             Загрузка...
                           </td>
                         </tr>
                       ) : filtered.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="px-4 py-12 text-center text-black/30 text-[14px]" style={{ fontFamily: "var(--font-body)" }}>
+                          <td colSpan={7} className="px-4 py-12 text-center text-black/30 text-[14px]" style={{ fontFamily: "var(--font-body)" }}>
                             {search || filter !== "all" ? "Ничего не найдено" : "Пока нет заявок"}
                           </td>
                         </tr>
                       ) : (
-                        filtered.map((lead) => (
-                          <tr key={lead.id} className="border-b border-black/[0.05] hover:bg-black/[0.02] transition-colors">
-                            <td className="px-4 py-3">
-                              <span className="text-black text-[14px] font-normal" style={{ fontFamily: "var(--font-body)" }}>
-                                {lead.name}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3">
-                              <a href={`tel:${lead.phone}`} className="text-[#040082] text-[13px] hover:underline" style={{ fontFamily: "var(--font-body)" }}>
-                                {lead.phone}
-                              </a>
-                            </td>
-                            <td className="px-4 py-3 hidden md:table-cell">
-                              <span className="text-black/60 text-[13px]" style={{ fontFamily: "var(--font-body)" }}>
-                                {lead.position || "—"}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className={`px-2 py-1 rounded-full text-[11px] font-normal ${statusColors[lead.status]}`}>
-                                {statusLabels[lead.status]}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className="text-black/30 text-[12px] whitespace-nowrap" style={{ fontFamily: "var(--font-body)" }}>
-                                {new Date(lead.created_at).toLocaleDateString("ru-RU", {
-                                  day: "2-digit",
-                                  month: "2-digit",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </span>
-                            </td>
-                          </tr>
-                        ))
+                        filtered.map((lead) => {
+                          const isEditing = editingId === lead.id;
+                          return (
+                            <tr key={lead.id} className="border-b border-black/[0.05] hover:bg-black/[0.02] transition-colors">
+                              <td className="px-4 py-3">
+                                <span className="text-black text-[14px] font-normal" style={{ fontFamily: "var(--font-body)" }}>
+                                  {lead.name}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <div className="flex items-center gap-2">
+                                  <a href={`tel:${lead.phone}`} className="text-[#040082] text-[13px] hover:underline" style={{ fontFamily: "var(--font-body)" }}>
+                                    {lead.phone}
+                                  </a>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 hidden md:table-cell">
+                                <span className="text-black/60 text-[13px]" style={{ fontFamily: "var(--font-body)" }}>
+                                  {lead.position || "—"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                {isEditing ? (
+                                  <select
+                                    value={editStatus}
+                                    onChange={(e) => setEditStatus(e.target.value as Lead["status"])}
+                                    className="w-full px-2 py-1.5 rounded-[8px] border border-black/[0.12] bg-white text-black text-[12px] focus:outline-none focus:border-[#040082]/30"
+                                    style={{ fontFamily: "var(--font-body)" }}
+                                  >
+                                    {(Object.entries(statusLabels) as [Lead["status"], string][]).map(([value, label]) => (
+                                      <option key={value} value={value}>{label}</option>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  <span className={`px-2 py-1 rounded-full text-[11px] font-normal ${statusColors[lead.status]}`}>
+                                    {statusLabels[lead.status]}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 hidden lg:table-cell">
+                                {isEditing ? (
+                                  <input
+                                    type="text"
+                                    value={editNotes}
+                                    onChange={(e) => setEditNotes(e.target.value)}
+                                    placeholder="Заметки..."
+                                    className="w-full px-2 py-1.5 rounded-[8px] border border-black/[0.12] bg-white text-black text-[12px] placeholder:text-black/30 focus:outline-none focus:border-[#040082]/30"
+                                    style={{ fontFamily: "var(--font-body)" }}
+                                  />
+                                ) : (
+                                  <span className="text-black/50 text-[12px]" style={{ fontFamily: "var(--font-body)" }}>
+                                    {lead.notes || "—"}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className="text-black/30 text-[12px] whitespace-nowrap" style={{ fontFamily: "var(--font-body)" }}>
+                                  {new Date(lead.created_at).toLocaleDateString("ru-RU", {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <div className="flex items-center gap-1">
+                                  {isEditing ? (
+                                    <>
+                                      <button
+                                        onClick={() => saveLead(lead.id)}
+                                        disabled={saving}
+                                        className="p-1.5 rounded-full bg-[#040082] text-white hover:bg-[#0600a8] transition-colors disabled:opacity-50"
+                                        title="Сохранить"
+                                      >
+                                        <Save size={14} />
+                                      </button>
+                                      <button
+                                        onClick={cancelEdit}
+                                        className="p-1.5 rounded-full bg-black/5 text-black/40 hover:bg-black/10 transition-colors"
+                                        title="Отмена"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <button
+                                        onClick={() => startEdit(lead)}
+                                        className="p-1.5 rounded-full bg-black/5 text-black/40 hover:bg-black/10 hover:text-black/60 transition-colors"
+                                        title="Редактировать"
+                                      >
+                                        <Pencil size={14} />
+                                      </button>
+                                      <button
+                                        onClick={() => deleteLead(lead.id)}
+                                        className="p-1.5 rounded-full bg-black/5 text-black/40 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                        title="Удалить"
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
                       )}
                     </tbody>
                   </table>

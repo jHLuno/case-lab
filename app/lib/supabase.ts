@@ -24,6 +24,7 @@ export type Lead = {
   name: string;
   phone: string;
   position: string | null;
+  notes: string | null;
   status: "new" | "contacted" | "scheduled" | "completed" | "cancelled";
   created_at: string;
 };
