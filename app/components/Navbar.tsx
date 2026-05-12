@@ -133,7 +133,7 @@ export default function Navbar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[60] overflow-hidden bg-[#040082] text-white"
+            className="fixed inset-0 z-[60] flex flex-col overflow-hidden bg-[#040082] text-white"
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_32%),radial-gradient(circle_at_75%_30%,rgba(120,150,255,0.22),transparent_28%),linear-gradient(180deg,#0a0f9f_0%,#040082_45%,#03045e_100%)]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_28%)]" />
@@ -143,7 +143,7 @@ export default function Navbar() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.28, ease: "easeOut" }}
-              className="relative z-10 flex items-center justify-between px-6 pt-5 pb-3"
+              className="relative z-10 flex shrink-0 items-center justify-between px-6 pt-5 pb-3"
             >
               <div className="relative h-8 w-[148px] rounded-full bg-white/10 px-3 py-1 backdrop-blur-sm">
                 <Image
@@ -168,7 +168,7 @@ export default function Navbar() {
               </button>
             </motion.div>
 
-            <div className="relative z-10 flex flex-1 flex-col px-6 pt-10 pb-6">
+            <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto px-6 pt-10 pb-6">
               <div className="flex flex-col gap-1">
                 {navLinks.map((link, i) => (
                   <motion.a
