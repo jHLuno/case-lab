@@ -175,14 +175,16 @@
 
 .marquee-track {
   display: inline-flex;
+  animation: marquee 20s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
 }
 
 @media (min-width: 768px) {
   .marquee-track {
-    animation: marquee 25s linear infinite;
-  }
-  .marquee-track:hover {
-    animation-play-state: paused;
+    animation-duration: 25s;
   }
 }
 

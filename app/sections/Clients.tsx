@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { ArrowRight } from "lucide-react";
 import ScrollReveal from "../components/ScrollReveal";
 
@@ -13,6 +14,25 @@ const industries = [
 ];
 
 export default function Clients() {
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  const handleTouchStart = () => {
+    if (trackRef.current) {
+      trackRef.current.style.animationPlayState = "paused";
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (trackRef.current) {
+      // Resume after a short delay so user can finish scrolling
+      setTimeout(() => {
+        if (trackRef.current) {
+          trackRef.current.style.animationPlayState = "running";
+        }
+      }, 3000);
+    }
+  };
+
   return (
     <section id="industries" aria-label="Компании" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-clip z-[3]">
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
@@ -31,9 +51,12 @@ export default function Clients() {
       </div>
 
       {/* Marquee cards */}
-      <div className="overflow-x-auto md:overflow-hidden py-3 scrollbar-hide">
+      <div className="overflow-x-auto md:overflow-hidden py-3 scrollbar-hide touch-pan-x">
         <div
+          ref={trackRef}
           className="marquee-track flex"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
           {[0, 1].map((set) => (
             <div key={set} className="flex gap-4 md:gap-6 flex-shrink-0 pr-4 md:pr-6">
