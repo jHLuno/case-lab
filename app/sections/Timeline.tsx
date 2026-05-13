@@ -72,16 +72,15 @@ export default function Timeline() {
     if (!sectionRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Header words blur reveal
+      // Header words reveal
       const headerWords = headerRef.current?.querySelectorAll(".timeline-word");
       if (headerWords && headerWords.length > 0) {
         gsap.fromTo(
           headerWords,
-          { opacity: 0.1, y: 20, filter: "blur(6px)" },
+          { opacity: 0, y: 20 },
           {
             opacity: 1,
             y: 0,
-            filter: "blur(0px)",
             stagger: 0.08,
             scrollTrigger: {
               trigger: headerRef.current,
@@ -112,7 +111,7 @@ export default function Timeline() {
         });
       }
 
-      // Items blur reveal by word
+      // Items reveal by word
       itemRefs.current.forEach((item) => {
         if (!item) return;
         const words = item.querySelectorAll(".timeline-item-word");
@@ -122,11 +121,10 @@ export default function Timeline() {
         if (words.length > 0) {
           gsap.fromTo(
             words,
-            { opacity: 0.15, y: 15, filter: "blur(4px)" },
+            { opacity: 0, y: 15 },
             {
               opacity: 1,
               y: 0,
-              filter: "blur(0px)",
               stagger: 0.06,
               scrollTrigger: {
                 trigger: item,
@@ -207,7 +205,7 @@ export default function Timeline() {
 
       <div className="max-w-[1078px] mx-auto">
         {/* Header */}
-        <div ref={headerRef} style={{ willChange: "filter, transform, opacity" }}>
+        <div ref={headerRef}>
           <span
             className="text-gray text-[11px] mb-3 block leading-[1.58] uppercase tracking-wider"
             style={{ fontFamily: "var(--font-body)" }}
@@ -222,7 +220,6 @@ export default function Timeline() {
               <span
                 key={i}
                 className="timeline-word inline-block"
-                style={{ willChange: "filter, opacity, transform" }}
               >
                 {word}
               </span>
@@ -298,7 +295,6 @@ export default function Timeline() {
                 style={{
                   top: STEP_TOPS[i],
                   transform: "translateY(-50%)",
-                  willChange: "filter, transform, opacity",
                 }}
                 onClick={() => { /* step toggle placeholder */ }}
               >
@@ -319,10 +315,9 @@ export default function Timeline() {
                         style={{ fontFamily: "var(--font-heading)" }}
                       >
                         {step.title.split(" ").map((word, wi) => (
-                          <span
+                           <span
                             key={wi}
                             className="timeline-item-word inline-block"
-                            style={{ willChange: "filter, opacity, transform" }}
                           >
                             {word}
                           </span>
@@ -360,10 +355,9 @@ export default function Timeline() {
                         style={{ fontFamily: "var(--font-heading)" }}
                       >
                         {step.title.split(" ").map((word, wi) => (
-                          <span
+                           <span
                             key={wi}
                             className="timeline-item-word inline-block"
-                            style={{ willChange: "filter, opacity, transform" }}
                           >
                             {word}
                           </span>

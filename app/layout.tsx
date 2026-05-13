@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Bebas_Neue } from "next/font/google";
 import "./globals.css";
-import SmoothScrollProvider from "./components/SmoothScrollProvider";
 import JsonLd from "./components/JsonLd";
 
 const inter = Inter({
@@ -100,7 +99,7 @@ export default function RootLayout({
             }
           })();
         `}} />
-        <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        {children}
       </body>
     </html>
   );

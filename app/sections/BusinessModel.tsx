@@ -225,7 +225,7 @@ export default function BusinessModel() {
         <div className="text-center mb-12 md:mb-12">
           <span
             className="case-lab-badge inline-flex items-center gap-[6px]"
-            style={{ willChange: "filter, opacity, transform", fontFamily: "var(--font-heading)" }}
+            style={{ fontFamily: "var(--font-heading)" }}
           >
             <span className="text-gray text-[15px] md:text-[17px] font-normal uppercase tracking-wider">
               Подход

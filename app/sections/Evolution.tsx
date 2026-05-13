@@ -95,16 +95,15 @@ export default function Evolution() {
     if (!sectionRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Header blur reveal
+      // Header reveal
       const words = headerRef.current?.querySelectorAll(".evo-word");
       if (words && words.length > 0) {
         gsap.fromTo(
           words,
-          { opacity: 0.1, y: 20, filter: "blur(6px)" },
+          { opacity: 0, y: 20 },
           {
             opacity: 1,
             y: 0,
-            filter: "blur(0px)",
             stagger: 0.06,
             scrollTrigger: {
               trigger: headerRef.current,
@@ -219,14 +218,7 @@ export default function Evolution() {
       });
     }, sectionRef);
 
-    // Refresh ScrollTrigger after dynamic mount to recalculate positions
-    // This is critical for lazy-loaded sections where DOM settles after initial render
-    const refreshTimer = setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 100);
-
     return () => {
-      clearTimeout(refreshTimer);
       ctx.revert();
     };
   }, []);
@@ -386,7 +378,7 @@ export default function Evolution() {
               style={{ fontFamily: "var(--font-heading)" }}
             >
               {"От платформы — к экосистеме".split(" ").map((word, i) => (
-                <span key={i} className="evo-word inline-block" style={{ willChange: "filter, opacity, transform" }}>
+                <span key={i} className="evo-word inline-block">
                   {word}
                 </span>
               ))}

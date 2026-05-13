@@ -25,13 +25,14 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function HomePage() {
   useEffect(() => {
-    // Initial refresh after hydration
+    // Refresh after hydration
     ScrollTrigger.refresh();
 
     // Re-run refresh after dynamic components mount (lazy-loaded sections)
-    const refreshTimer = setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 800);
+    // Multiple refreshes to catch late-loading components on slow connections
+    const t1 = setTimeout(() => ScrollTrigger.refresh(), 500);
+    const t2 = setTimeout(() => ScrollTrigger.refresh(), 1500);
+    const t3 = setTimeout(() => ScrollTrigger.refresh(), 3000);
 
     const handleResize = () => {
       ScrollTrigger.refresh();
@@ -57,7 +58,9 @@ export default function HomePage() {
     return () => {
       document.removeEventListener("click", handleAnchorClick);
       window.removeEventListener("resize", handleResize);
-      clearTimeout(refreshTimer);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
     };
   }, []);
 
