@@ -130,19 +130,17 @@ export default function Hero() {
               }}
               className="mt-8 md:mt-10"
             >
-              <motion.button
+              <button
                 type="button"
                 onClick={openPopup}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="inline-flex items-center gap-3 bg-white text-[#040082] px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] font-normal rounded-full cursor-pointer"
+                className="inline-flex items-center gap-3 bg-white text-[#040082] px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] font-normal rounded-full cursor-pointer hover:gap-4 transition-all duration-300"
                 style={{ fontFamily: "var(--font-body)" }}
               >
                 Записаться на диагностику
                 <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0">
                   <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-              </motion.button>
+              </button>
               <p
                 className="text-white/80 text-[12px] mt-4 font-medium max-w-lg leading-[1.5]"
                 style={{ fontFamily: "var(--font-body)" }}

@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import { useLeadPopup } from "../lib/LeadPopupContext";
@@ -27,17 +26,15 @@ export default function Footer() {
           >
             Заполните форму — мы свяжемся в течение рабочего дня. Первая консультация бесплатно.
           </p>
-          <motion.button
+          <button
             type="button"
             onClick={openPopup}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="inline-flex items-center gap-3 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] font-normal rounded-full hover:bg-[#0600a0] transition-colors duration-300"
+            className="inline-flex items-center gap-3 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] font-normal rounded-full hover:bg-[#0600a0] hover:gap-4 transition-all duration-300"
             style={{ fontFamily: "var(--font-body)" }}
           >
             <span>Записаться на диагностику</span>
             <ArrowUpRight size={16} strokeWidth={2} />
-          </motion.button>
+          </button>
         </div>
 
         {/* Minimal info row */}
