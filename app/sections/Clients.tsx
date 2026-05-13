@@ -31,9 +31,9 @@ export default function Clients() {
       </div>
 
       {/* Marquee cards */}
-      <div className="overflow-x-auto md:overflow-hidden py-3 scrollbar-hide touch-pan-x">
+      <div className="overflow-hidden py-3">
         <div
-          className="marquee-track flex md:animate-marquee"
+          className="marquee-track flex"
           style={{ willChange: "transform" }}
         >
           {[0, 1].map((set) => (
