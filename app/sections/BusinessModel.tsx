@@ -95,7 +95,7 @@ export default function BusinessModel() {
           <div className="space-y-4 md:space-y-12">
             {beforeAfter.map((row, i) => (
               <ScrollReveal key={row.before} delay={i * 0.12}>
-                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-2 md:gap-0 items-start md:items-center">
+                <div className="rounded-[16px] border border-black/[0.06] bg-white p-6 md:p-0 md:rounded-none md:border-0 md:bg-transparent grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 md:gap-0 items-start md:items-center">
                   {/* Before */}
                   <div className="text-left md:text-right md:pr-12">
                     <span className="text-[11px] uppercase tracking-wider text-black/30 mb-1.5 block md:hidden" style={{ fontFamily: "var(--font-body)" }}>До</span>
