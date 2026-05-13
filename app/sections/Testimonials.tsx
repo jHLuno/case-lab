@@ -119,10 +119,11 @@ export default function Testimonials() {
                   {/* Progress line */}
                   <div className="h-[2px] mt-3 relative overflow-hidden bg-black/10">
                     <div
-                      className="absolute inset-y-0 left-0 transition-all duration-[5000ms] ease-linear"
+                      className="absolute inset-y-0 left-0"
                       style={{
                         background: "linear-gradient(90deg, #040082, #1a1a9e)",
                         width: activeIndex === i ? "100%" : "0%",
+                        transition: activeIndex === i ? "width 5000ms linear" : "none",
                       }}
                     />
                   </div>
