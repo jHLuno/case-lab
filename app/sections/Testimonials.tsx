@@ -123,7 +123,7 @@ export default function Testimonials() {
                       style={{
                         background: "linear-gradient(90deg, #040082, #1a1a9e)",
                         width: activeIndex === i ? "100%" : "0%",
-                        transition: activeIndex === i ? "width 5000ms linear" : "none",
+                        transition: activeIndex === i ? "width 4700ms linear" : "none",
                       }}
                     />
                   </div>
