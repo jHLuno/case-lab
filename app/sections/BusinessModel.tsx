@@ -118,9 +118,9 @@ export default function BusinessModel() {
 
                   {/* After — blue shape */}
                   <div className="md:pl-12 pt-1 md:pt-0">
-                    <div className="border-2 border-[#040082] rounded-[12px] px-6 py-5 md:px-7 md:py-5">
-                      <span className="text-[11px] uppercase tracking-wider text-[#040082]/60 mb-2 block md:hidden font-medium" style={{ fontFamily: "var(--font-body)" }}>После</span>
-                      <p className="text-black text-[14px] md:text-[17px] leading-[1.35] font-normal" style={{ fontFamily: "var(--font-body)" }}>
+                    <div className="border-2 border-[#040082] rounded-[12px] px-6 py-5 md:px-7 md:py-5 md:border-2 md:border-[#040082] md:bg-transparent bg-[#040082]">
+                      <span className="text-[11px] uppercase tracking-wider text-white/80 mb-2 block md:hidden font-medium" style={{ fontFamily: "var(--font-body)" }}>После</span>
+                      <p className="text-white md:text-black text-[14px] md:text-[17px] leading-[1.35] font-normal" style={{ fontFamily: "var(--font-body)" }}>
                         {row.after}
                       </p>
                     </div>
