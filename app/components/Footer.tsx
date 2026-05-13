@@ -14,15 +14,15 @@ export default function Footer() {
 
       <div className="max-w-[1078px] mx-auto">
         {/* CTA Section */}
-        <div className="text-center mb-20 md:mb-28">
+        <div className="text-center mb-20 md:mb-32">
           <h2
-            className="text-black text-[clamp(24px,4vw,48px)] font-bold leading-[1.05] uppercase tracking-[0.02em] mb-6 md:mb-6 md:max-w-none"
+            className="text-black text-[clamp(24px,4vw,48px)] font-bold leading-[1.05] uppercase tracking-[0.02em] mb-6 md:mb-8 md:max-w-none"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             <span className="md:whitespace-nowrap">Готовы обсудить задачу?</span>
           </h2>
           <p
-            className="text-black/60 text-[15px] md:text-[18px] leading-[1.4] mb-10 md:mb-10 max-w-md mx-auto font-light"
+            className="text-black/60 text-[15px] md:text-[18px] leading-[1.4] mb-10 md:mb-12 max-w-md mx-auto font-light"
             style={{ fontFamily: "var(--font-body)" }}
           >
             Заполните форму — мы свяжемся в течение рабочего дня. Первая консультация бесплатно.

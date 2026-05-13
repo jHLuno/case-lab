@@ -130,7 +130,7 @@ export default function LeadPopup() {
                 </p>
                 <button
                   onClick={closePopup}
-                  className="inline-flex items-center gap-2 bg-[#040082] text-white px-7 py-3.5 rounded-full text-[14px] font-normal hover:bg-[#0600a8] transition-colors duration-300"
+                  className="inline-flex items-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-300"
                   style={inputFont}
                 >
                   Хорошо
@@ -198,7 +198,7 @@ export default function LeadPopup() {
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="w-full mt-6 inline-flex items-center justify-center gap-2 bg-[#040082] text-white px-7 py-3.5 rounded-full text-[14px] font-normal hover:bg-[#0600a8] transition-colors duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full mt-6 inline-flex items-center justify-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
                   style={inputFont}
                 >
                   {status === "loading" ? (

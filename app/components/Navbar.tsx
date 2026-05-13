@@ -160,7 +160,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={openPopup}
-            className="hidden md:inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-normal leading-none bg-[#040082] text-white hover:bg-[#0600a8] transition-all duration-300 ml-1"
+            className="hidden md:inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-normal leading-none bg-[#040082] text-white hover:bg-[#0600a8] transition-all duration-300 ml-1"
             style={{ fontFamily: "var(--font-body)" }}
           >
             Записаться
