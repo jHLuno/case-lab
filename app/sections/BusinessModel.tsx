@@ -118,9 +118,9 @@ export default function BusinessModel() {
 
                   {/* After — blue shape */}
                   <div className="md:pl-12 pt-1 md:pt-0">
-                    <div className="bg-[#040082] rounded-[12px] px-6 py-5 md:px-7 md:py-5">
-                      <span className="text-[11px] uppercase tracking-wider text-white/80 mb-2 block md:hidden font-medium" style={{ fontFamily: "var(--font-body)" }}>После</span>
-                      <p className="text-white text-[14px] md:text-[17px] leading-[1.35] font-normal" style={{ fontFamily: "var(--font-body)" }}>
+                    <div className="border-2 border-[#040082] rounded-[12px] px-6 py-5 md:px-7 md:py-5">
+                      <span className="text-[11px] uppercase tracking-wider text-[#040082]/60 mb-2 block md:hidden font-medium" style={{ fontFamily: "var(--font-body)" }}>После</span>
+                      <p className="text-black text-[14px] md:text-[17px] leading-[1.35] font-normal" style={{ fontFamily: "var(--font-body)" }}>
                         {row.after}
                       </p>
                     </div>
@@ -149,7 +149,7 @@ export default function BusinessModel() {
               <div className="relative rounded-[16px] border border-black/[0.06] bg-white p-8 md:p-9 h-full flex flex-col">
                 {/* Number */}
                 <span
-                  className="text-[#040082] md:text-[#040082]/15 text-[40px] font-bold leading-none block mb-4 opacity-40 md:opacity-100"
+                  className="text-[#040082] text-[40px] font-bold leading-none block mb-4 opacity-30"
                   style={{ fontFamily: "var(--font-heading)" }}
                 >
                   {uc.num}

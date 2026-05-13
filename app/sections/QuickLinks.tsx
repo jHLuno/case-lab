@@ -86,7 +86,7 @@ export default function QuickLinks() {
               >
                 {article.desc}
               </p>
-                <span className="inline-flex items-center gap-2 text-gray text-[13px] font-light group-hover:text-[#040082] transition-colors duration-300" style={{ fontFamily: "var(--font-body)" }}>
+                <span className="inline-flex items-center gap-2 text-[#040082] text-[14px] md:text-[15px] font-medium group-hover:text-[#040082] transition-colors duration-300" style={{ fontFamily: "var(--font-body)" }}>
                 Читать
                 <ArrowUpRight size={14} strokeWidth={1.5} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </span>

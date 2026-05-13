@@ -131,13 +131,16 @@ export default function Testimonials() {
               ))}
 
               {/* Progress dots */}
-              <div className="hidden lg:flex items-center gap-2 mt-6">
+              <div className="flex items-center gap-2 mt-6">
                 {testimonials.map((_, i) => (
                   <div
                     key={i}
-                    className={`h-1.5 rounded-full transition-all duration-500 ${
-                      i === activeIndex ? "w-6 bg-[#040082]" : "w-1.5 bg-black/20"
-                    }`}
+                    className="h-1.5 rounded-full bg-black/20"
+                    style={{
+                      width: i === activeIndex ? 24 : 6,
+                      backgroundColor: i === activeIndex ? "#040082" : "rgba(0,0,0,0.15)",
+                      transition: "width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.4s ease",
+                    }}
                   />
                 ))}
               </div>
