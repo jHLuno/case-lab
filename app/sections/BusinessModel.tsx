@@ -1,6 +1,11 @@
 "use client";
 
+import { useRef, useEffect } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ScrollReveal from "../components/ScrollReveal";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const beforeAfter = [
   {
@@ -28,8 +33,36 @@ const useCases = [
 ];
 
 export default function BusinessModel() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const lineRef = useRef<HTMLDivElement>(null);
+  const itemsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!sectionRef.current || !lineRef.current || !itemsRef.current) return;
+
+    const ctx = gsap.context(() => {
+      // Animated center line (desktop only)
+      gsap.fromTo(
+        lineRef.current,
+        { scaleY: 0 },
+        {
+          scaleY: 1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: itemsRef.current,
+            start: "top 70%",
+            end: "bottom 80%",
+            scrub: true,
+          },
+        }
+      );
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section aria-label="Что меняется после диагностики" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-clip">
+    <section ref={sectionRef} aria-label="Что меняется после диагностики" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-clip">
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
       <div className="max-w-[1078px] mx-auto">
@@ -74,13 +107,26 @@ export default function BusinessModel() {
         {/* Before → After */}
         <div className="relative mb-12 md:mb-20">
           {/* Desktop column headers */}
-          <div className="hidden md:grid grid-cols-[1fr_auto_1fr] gap-0 items-center mb-6">
+          <div className="hidden md:grid grid-cols-[1fr_auto_1fr] gap-0 items-center mb-8">
             <span className="text-right pr-12 text-black/30 text-[12px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>До</span>
             <div className="w-16 flex-shrink-0" />
             <span className="pl-12 text-[#040082] text-[12px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>После</span>
           </div>
 
-          <div className="max-w-[1078px] mx-auto space-y-4 md:space-y-12">
+          {/* Vertical center line — desktop only */}
+          <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-px pointer-events-none hidden md:block">
+            <div className="absolute inset-0 bg-black/5" />
+            <div
+              ref={lineRef}
+              className="absolute top-0 left-0 w-full origin-top"
+              style={{
+                height: "100%",
+                background: "linear-gradient(to bottom, #040082, #1a1a9e, #040082)",
+              }}
+            />
+          </div>
+
+          <div ref={itemsRef} className="max-w-[1078px] mx-auto space-y-4 md:space-y-12">
             {beforeAfter.map((row, i) => (
               <ScrollReveal key={row.before} delay={i * 0.08}>
                 <div className="rounded-[16px] border border-black/[0.06] bg-white p-5 md:p-0 md:rounded-none md:border-0 md:bg-transparent grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-2 md:gap-0 items-start md:items-center">
