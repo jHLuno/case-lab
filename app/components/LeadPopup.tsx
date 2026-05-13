@@ -117,7 +117,7 @@ export default function LeadPopup() {
             </button>
 
             {status === "success" ? (
-              <div className="px-8 py-12 text-center">
+              <div className="px-8 py-14 text-center">
                 <CheckCircle size={40} className="text-[#040082] mx-auto mb-5" />
                 <h2
                   className="text-black text-[20px] md:text-[24px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-3"
@@ -130,7 +130,7 @@ export default function LeadPopup() {
                 </p>
                 <button
                   onClick={closePopup}
-                  className="inline-flex items-center gap-2 bg-[#040082] text-white px-6 py-3 rounded-full text-[14px] font-normal hover:bg-[#0600a8] transition-colors duration-300"
+                  className="inline-flex items-center gap-2 bg-[#040082] text-white px-7 py-3.5 rounded-full text-[14px] font-normal hover:bg-[#0600a8] transition-colors duration-300"
                   style={inputFont}
                 >
                   Хорошо
@@ -138,7 +138,7 @@ export default function LeadPopup() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="px-8 pt-10 pb-8">
+              <form onSubmit={handleSubmit} className="px-8 pt-10 pb-10">
                 <h2
                   className="text-black text-[20px] md:text-[24px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-2"
                   style={{ fontFamily: "var(--font-heading)" }}
@@ -198,7 +198,7 @@ export default function LeadPopup() {
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="w-full mt-5 inline-flex items-center justify-center gap-2 bg-[#040082] text-white px-6 py-3.5 rounded-full text-[14px] font-normal hover:bg-[#0600a8] transition-colors duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full mt-6 inline-flex items-center justify-center gap-2 bg-[#040082] text-white px-7 py-3.5 rounded-full text-[14px] font-normal hover:bg-[#0600a8] transition-colors duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
                   style={inputFont}
                 >
                   {status === "loading" ? (

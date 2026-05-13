@@ -31,9 +31,9 @@ export default function Clients() {
       </div>
 
       {/* Marquee cards */}
-      <div className="overflow-hidden py-3">
+      <div className="overflow-x-auto md:overflow-hidden py-3 scrollbar-hide touch-pan-x">
         <div
-          className="marquee-track flex"
+          className="marquee-track flex md:animate-marquee"
           style={{ willChange: "transform" }}
         >
           {[0, 1].map((set) => (
@@ -83,7 +83,7 @@ export default function Clients() {
         <ScrollReveal delay={0.2}>
           <a
             href="#insights"
-            className="inline-flex items-center gap-2 bg-[#040082] text-white px-6 py-3 rounded-full text-[14px] font-normal hover:bg-[#0600a8] transition-all duration-300 group"
+            className="inline-flex items-center gap-2 bg-[#040082] text-white px-7 py-3.5 rounded-full text-[14px] font-normal hover:bg-[#0600a8] transition-colors duration-300 group"
             style={{ fontFamily: "var(--font-body)" }}
           >
             Все кейсы

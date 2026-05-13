@@ -167,7 +167,7 @@ function PricingCard({
           </>
         )}
 
-        <div className="relative z-10 px-9 py-9 md:p-10 lg:p-12 flex flex-col h-full">
+        <div className="relative z-10 p-8 md:p-10 lg:p-12 flex flex-col h-full">
           {/* Badge */}
           <span
             className="inline-flex items-center gap-1.5 border border-white/20 rounded-full px-3 py-1.5 text-white/60 text-[10px] md:text-[11px] uppercase tracking-wider mb-6 w-fit"
@@ -244,7 +244,7 @@ function PricingCard({
           <button
             type="button"
             onClick={onCta}
-            className={`group/btn inline-flex items-center justify-center gap-3 px-6 py-3 text-[14px] md:px-8 md:py-4 md:text-[15px] font-normal rounded-full w-full transition-all duration-300 hover:gap-4 ${
+            className={`group/btn inline-flex items-center justify-center gap-3 px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] font-normal rounded-full w-full transition-all duration-300 hover:gap-4 ${
               plan.popular
                 ? "bg-white text-[#040082] hover:bg-white/90"
                 : "bg-white/10 text-white border border-white/20 hover:bg-white/20"

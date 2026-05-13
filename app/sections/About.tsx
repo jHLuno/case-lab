@@ -112,7 +112,7 @@ export default function About() {
                 {word}
               </span>
             ))}{" "}
-            <span className="border-b-2 border-[#040082] pb-0 md:pb-1 mb-0 md:mb-1 about-word inline-block" style={{ willChange: "filter, opacity, transform" }}>
+            <span className="border-b-2 border-[#040082] pb-1 md:pb-1.5 mb-1 md:mb-0 about-word inline-block" style={{ willChange: "filter, opacity, transform" }}>
               экспертизы
             </span>{" "}
             <span className="about-word inline-block mt-1 md:mt-0" style={{ willChange: "filter, opacity, transform" }}>
@@ -137,8 +137,8 @@ export default function About() {
               <div
                 className={`relative h-full rounded-[20px] overflow-hidden flex flex-col ${
                   item.dark
-                    ? "min-h-[320px] md:min-h-0 p-6 md:p-10"
-                    : "min-h-[160px] p-6 md:p-10"
+                    ? "min-h-[320px] md:min-h-0 p-8 md:p-10"
+                    : "min-h-[160px] p-8 md:p-10"
                 }`}
                 style={{
                   background: item.dark

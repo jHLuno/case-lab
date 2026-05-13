@@ -164,7 +164,7 @@ export default function Evolution() {
               <button
                 type="button"
                 onClick={openPopup}
-                className="inline-flex items-center gap-2 bg-[#040082] text-white px-6 py-3 rounded-full text-[14px] font-normal hover:bg-[#0600a8] transition-colors duration-300 group"
+                className="inline-flex items-center gap-2 bg-[#040082] text-white px-7 py-3.5 rounded-full text-[14px] font-normal hover:bg-[#0600a8] transition-colors duration-300 group"
                 style={{ fontFamily: "var(--font-body)" }}
               >
                 Начать диагностику

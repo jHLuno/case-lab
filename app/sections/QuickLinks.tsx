@@ -61,12 +61,12 @@ export default function QuickLinks() {
         </div>
 
         {/* Articles grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-black/[0.08] rounded-[12px] overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-px md:bg-black/[0.08] md:rounded-[12px] md:overflow-hidden">
           {articles.map((article) => (
             <a
               key={article.title}
               href={article.href}
-              className="group bg-white p-6 md:p-8 hover:bg-[#040082]/[0.02] transition-colors duration-300"
+              className="group bg-white p-6 md:p-8 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] md:shadow-none rounded-[12px] md:rounded-none hover:bg-[#040082]/[0.02] transition-colors duration-300"
             >
               <span
                 className="inline-block text-[#040082] text-[11px] uppercase tracking-wider mb-4"

@@ -79,7 +79,7 @@ export default function BusinessModel() {
                 <div className="rounded-[16px] border border-black/[0.06] bg-white p-5 md:p-0 md:rounded-none md:border-0 md:bg-transparent grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-2 md:gap-0 items-start md:items-center">
                   {/* Before */}
                   <div className="text-left md:text-right md:pr-12">
-                    <span className="text-[11px] uppercase tracking-wider text-black/30 mb-1 block md:hidden" style={{ fontFamily: "var(--font-body)" }}>До</span>
+
                     <p className="text-[13px] md:text-[18px] leading-[1.35] font-light text-black/40" style={{ fontFamily: "var(--font-body)" }}>
                       {row.before}
                     </p>
@@ -101,17 +101,13 @@ export default function BusinessModel() {
                     </div>
                   </div>
 
-                  {/* After */}
+                  {/* After — blue shape */}
                   <div className="md:pl-12 pt-1 md:pt-0">
-                    <span
-                      className="inline-flex items-center justify-center bg-[#040082] text-white px-[10px] py-[4px] text-[12px] font-normal uppercase tracking-wider leading-none mb-2 md:hidden"
-                      style={{ fontFamily: "var(--font-body)" }}
-                    >
-                      После
-                    </span>
-                    <p className="text-[15px] md:text-[18px] leading-[1.3] font-normal text-black" style={{ fontFamily: "var(--font-body)" }}>
-                      {row.after}
-                    </p>
+                    <div className="bg-[#040082] rounded-[12px] px-5 py-4 md:px-6 md:py-5">
+                      <p className="text-white text-[14px] md:text-[17px] leading-[1.35] font-normal" style={{ fontFamily: "var(--font-body)" }}>
+                        {row.after}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </ScrollReveal>
