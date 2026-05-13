@@ -132,9 +132,10 @@ export default function Evolution() {
 
         ScrollTrigger.create({
           trigger: sectionRef.current,
-          start: "top 80%",
-          end: "+=1550",
-          scrub: true,
+          start: "top 15%",
+          end: "+=600",
+          pin: true,
+          scrub: 1.2,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
             const p = self.progress;
@@ -190,9 +191,10 @@ export default function Evolution() {
 
         ScrollTrigger.create({
           trigger: sectionRef.current,
-          start: "top 60%",
-          end: "bottom 20%",
-          scrub: true,
+          start: "top 15%",
+          end: `+=${window.innerHeight * 2.5}`,
+          pin: true,
+          scrub: 1.2,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
             const p = self.progress;
