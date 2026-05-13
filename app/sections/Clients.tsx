@@ -118,7 +118,7 @@ export default function Clients() {
         <ScrollReveal delay={0.2}>
           <a
             href="#insights"
-            className="inline-flex items-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-300 group"
+            className="inline-flex items-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-300 group"
             style={{ fontFamily: "var(--font-body)" }}
           >
             Все кейсы

@@ -14,15 +14,15 @@ export default function Footer() {
 
       <div className="max-w-[1078px] mx-auto">
         {/* CTA Section */}
-        <div className="text-center mb-20 md:mb-32">
+        <div className="text-center mb-20 md:mb-28">
           <h2
-            className="text-black text-[clamp(24px,4vw,48px)] font-bold leading-[1.05] uppercase tracking-[0.02em] mb-6 md:mb-8 md:max-w-none"
+            className="text-black text-[clamp(24px,4vw,48px)] font-bold leading-[1.05] uppercase tracking-[0.02em] mb-6 md:mb-6 md:max-w-none"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             <span className="md:whitespace-nowrap">Готовы обсудить задачу?</span>
           </h2>
           <p
-            className="text-black/60 text-[15px] md:text-[18px] leading-[1.4] mb-10 md:mb-12 max-w-md mx-auto font-light"
+            className="text-black/60 text-[15px] md:text-[18px] leading-[1.4] mb-10 md:mb-10 max-w-md mx-auto font-light"
             style={{ fontFamily: "var(--font-body)" }}
           >
             Заполните форму — мы свяжемся в течение рабочего дня. Первая консультация бесплатно.
@@ -32,7 +32,7 @@ export default function Footer() {
             onClick={openPopup}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="inline-flex items-center gap-3 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] font-normal rounded-full hover:bg-[#0600a0] transition-colors duration-300"
+            className="inline-flex items-center gap-3 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] font-normal rounded-full hover:bg-[#0600a0] transition-colors duration-300"
             style={{ fontFamily: "var(--font-body)" }}
           >
             <span>Записаться на диагностику</span>

@@ -244,7 +244,7 @@ function PricingCard({
           <button
             type="button"
             onClick={onCta}
-            className={`group/btn inline-flex items-center justify-center gap-3 px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] font-normal rounded-full w-full transition-all duration-300 hover:gap-4 ${
+            className={`group/btn inline-flex items-center justify-center gap-3 px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] font-normal rounded-full w-full transition-all duration-300 hover:gap-4 ${
               plan.popular
                 ? "bg-white text-[#040082] hover:bg-white/90"
                 : "bg-white/10 text-white border border-white/20 hover:bg-white/20"
