@@ -1,9 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
-import dynamic from "next/dynamic";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import BackToTop from "./BackToTop";
@@ -14,56 +10,13 @@ import About from "../sections/About";
 import Pricing from "../sections/Pricing";
 import OurAdvantage from "../sections/OurAdvantage";
 import Timeline from "../sections/Timeline";
-
-const Testimonials = dynamic(() => import("../sections/Testimonials"), { ssr: false });
-const BusinessModel = dynamic(() => import("../sections/BusinessModel"), { ssr: false });
-const Clients = dynamic(() => import("../sections/Clients"));
-const Evolution = dynamic(() => import("../sections/Evolution"), { ssr: false });
-const QuickLinks = dynamic(() => import("../sections/QuickLinks"));
-
-gsap.registerPlugin(ScrollTrigger);
+import Testimonials from "../sections/Testimonials";
+import BusinessModel from "../sections/BusinessModel";
+import Clients from "../sections/Clients";
+import Evolution from "../sections/Evolution";
+import QuickLinks from "../sections/QuickLinks";
 
 export default function HomePage() {
-  useEffect(() => {
-    // Refresh after hydration
-    ScrollTrigger.refresh();
-
-    // Re-run refresh after dynamic components mount (lazy-loaded sections)
-    // Multiple refreshes to catch late-loading components on slow connections
-    const t1 = setTimeout(() => ScrollTrigger.refresh(), 500);
-    const t2 = setTimeout(() => ScrollTrigger.refresh(), 1500);
-    const t3 = setTimeout(() => ScrollTrigger.refresh(), 3000);
-
-    const handleResize = () => {
-      ScrollTrigger.refresh();
-    };
-    window.addEventListener("resize", handleResize);
-
-    const handleAnchorClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const anchor = target.closest('a[href^="#"]');
-      if (anchor) {
-        const href = anchor.getAttribute("href");
-        if (href && href !== "#") {
-          e.preventDefault();
-          const element = document.querySelector(href);
-          if (element) {
-            element.scrollIntoView({ behavior: "smooth" });
-          }
-        }
-      }
-    };
-
-    document.addEventListener("click", handleAnchorClick);
-    return () => {
-      document.removeEventListener("click", handleAnchorClick);
-      window.removeEventListener("resize", handleResize);
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-    };
-  }, []);
-
   return (
     <LeadPopupProvider>
       <main className="relative">
