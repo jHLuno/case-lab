@@ -45,19 +45,13 @@ export default function Hero() {
       aria-label="Главный экран"
       className="relative min-h-[100svh] w-full overflow-hidden bg-[#000011] flex items-end"
     >
-      {/* Poster fallback layer (always visible behind video) */}
-      <div
-        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url(/hero-poster.png)" }}
-      />
-
-      {/* Background video — preload=metadata on mobile prevents OOM crash */}
+      {/* Background video */}
       <video
         autoPlay
         loop
         muted
         playsInline
-        preload="metadata"
+        preload="auto"
         poster="/hero-poster.png"
         className="absolute inset-0 w-full h-full object-cover"
       >
