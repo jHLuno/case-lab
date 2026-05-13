@@ -73,36 +73,40 @@ export default function BusinessModel() {
 
         {/* Before → After */}
         <div className="relative mb-12 md:mb-20">
+          {/* Desktop column headers */}
+          <div className="hidden md:grid grid-cols-[1fr_auto_1fr] gap-0 items-center mb-6">
+            <span className="text-right pr-12 text-black/30 text-[12px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>До</span>
+            <div className="w-16 flex-shrink-0" />
+            <span className="pl-12 text-[#040082] text-[12px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>После</span>
+          </div>
+
           <div className="max-w-[1078px] mx-auto space-y-4 md:space-y-12">
             {beforeAfter.map((row, i) => (
               <ScrollReveal key={row.before} delay={i * 0.08}>
                 <div className="rounded-[16px] border border-black/[0.06] bg-white p-5 md:p-0 md:rounded-none md:border-0 md:bg-transparent grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-2 md:gap-0 items-start md:items-center">
                   {/* Before */}
                   <div className="text-left md:text-right md:pr-12">
-
+                    <span className="text-[11px] uppercase tracking-wider text-black/30 mb-1.5 block md:hidden" style={{ fontFamily: "var(--font-body)" }}>До</span>
                     <p className="text-[13px] md:text-[18px] leading-[1.35] font-light text-black/40" style={{ fontFamily: "var(--font-body)" }}>
                       {row.before}
                     </p>
                   </div>
 
                   {/* Arrow — down on mobile, right on desktop */}
-                  <div className="flex md:hidden items-center justify-center py-1">
-                    <div className="w-7 h-7 rounded-full bg-[#040082]/10 flex items-center justify-center">
-                      <svg aria-hidden="true" width="12" height="12" viewBox="0 0 16 16" fill="none">
-                        <path d="M8 3v10M8 13l-4-4M8 13l4-4" stroke="#040082" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
+                  <div className="flex md:hidden items-center justify-center py-2">
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" fill="none">
+                      <path d="M8 3v10M8 13l-4-4M8 13l4-4" stroke="#040082" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </div>
                   <div className="hidden md:flex w-16 flex-shrink-0 items-center justify-center">
-                    <div className="w-8 h-8 rounded-full bg-[#040082] flex items-center justify-center">
-                      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none">
-                        <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
+                    <svg aria-hidden="true" width="24" height="24" viewBox="0 0 16 16" fill="none">
+                      <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="#040082" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </div>
 
                   {/* After — blue shape */}
                   <div className="md:pl-12 pt-1 md:pt-0">
+                    <span className="text-[11px] uppercase tracking-wider text-[#040082] mb-1.5 block md:hidden" style={{ fontFamily: "var(--font-body)" }}>После</span>
                     <div className="bg-[#040082] rounded-[12px] px-6 py-5 md:px-7 md:py-5">
                       <p className="text-white text-[14px] md:text-[17px] leading-[1.35] font-normal" style={{ fontFamily: "var(--font-body)" }}>
                         {row.after}
