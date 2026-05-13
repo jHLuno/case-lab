@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 import { ArrowRight } from "lucide-react";
 import ScrollReveal from "../components/ScrollReveal";
 
@@ -14,16 +13,6 @@ const industries = [
 ];
 
 export default function Clients() {
-  const marqueeRef = useRef<HTMLDivElement>(null);
-
-  const handleTouchStart = () => {
-    marqueeRef.current?.classList.add("is-touching");
-  };
-
-  const handleTouchEnd = () => {
-    marqueeRef.current?.classList.remove("is-touching");
-  };
-
   return (
     <section id="industries" aria-label="Компании" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-clip z-[3]">
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
@@ -44,10 +33,7 @@ export default function Clients() {
       {/* Marquee cards */}
       <div className="overflow-x-auto md:overflow-hidden py-3 scrollbar-hide">
         <div
-          ref={marqueeRef}
           className="marquee-track flex"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
         >
           {[0, 1].map((set) => (
             <div key={set} className="flex gap-4 md:gap-6 flex-shrink-0 pr-4 md:pr-6">

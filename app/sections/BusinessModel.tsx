@@ -98,7 +98,7 @@ export default function BusinessModel() {
                 <div className="rounded-[16px] border border-black/[0.06] bg-white p-6 md:p-0 md:rounded-none md:border-0 md:bg-transparent grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 md:gap-0 items-start md:items-center">
                   {/* Before */}
                   <div className="text-left md:text-right md:pr-12">
-                    <span className="text-[11px] uppercase tracking-wider text-black/30 mb-1.5 block md:hidden" style={{ fontFamily: "var(--font-body)" }}>До</span>
+                    <span className="text-[11px] uppercase tracking-wider text-black/50 mb-1.5 block md:hidden font-medium" style={{ fontFamily: "var(--font-body)" }}>До</span>
                     <p className="text-[13px] md:text-[18px] leading-[1.35] font-light text-black/40" style={{ fontFamily: "var(--font-body)" }}>
                       {row.before}
                     </p>
@@ -149,7 +149,7 @@ export default function BusinessModel() {
               <div className="relative rounded-[16px] border border-black/[0.06] bg-white p-8 md:p-9 h-full flex flex-col">
                 {/* Number */}
                 <span
-                  className="text-[#040082]/15 text-[40px] font-bold leading-none block mb-4"
+                  className="text-[#040082] md:text-[#040082]/15 text-[40px] font-bold leading-none block mb-4 opacity-40 md:opacity-100"
                   style={{ fontFamily: "var(--font-heading)" }}
                 >
                   {uc.num}
