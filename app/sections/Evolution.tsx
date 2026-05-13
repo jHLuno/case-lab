@@ -131,12 +131,6 @@ export default function Evolution() {
                       >
                         {stage.year}
                       </span>
-                      <span
-                        className="text-black/[0.12] text-[11px] font-light"
-                        style={{ fontFamily: "var(--font-body)" }}
-                      >
-                        {stage.num}
-                      </span>
                     </div>
 
                     <h3
