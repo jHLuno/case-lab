@@ -31,7 +31,7 @@ const articles = [
 
 export default function QuickLinks() {
   return (
-    <section id="insights" aria-label="База знаний" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-hidden z-[2]">
+    <section id="insights" aria-label="База знаний" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-clip z-[2]">
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
       <div className="max-w-[1200px] mx-auto">
