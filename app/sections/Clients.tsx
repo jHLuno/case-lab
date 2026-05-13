@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import ScrollReveal from "../components/ScrollReveal";
 
@@ -14,24 +14,37 @@ const industries = [
 ];
 
 export default function Clients() {
-  const trackRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isTouching, setIsTouching] = useState(false);
 
-  const handleTouchStart = () => {
-    if (trackRef.current) {
-      trackRef.current.style.animationPlayState = "paused";
-    }
-  };
+  // JS-based auto-scroll on mobile only
+  useEffect(() => {
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (!isMobile || !containerRef.current) return;
 
-  const handleTouchEnd = () => {
-    if (trackRef.current) {
-      // Resume after a short delay so user can finish scrolling
-      setTimeout(() => {
-        if (trackRef.current) {
-          trackRef.current.style.animationPlayState = "running";
-        }
-      }, 3000);
-    }
-  };
+    let animId: number;
+    const speed = 0.5; // px per frame
+
+    const scroll = () => {
+      if (!containerRef.current || isTouching) {
+        animId = requestAnimationFrame(scroll);
+        return;
+      }
+
+      containerRef.current.scrollLeft += speed;
+
+      // Loop: when reaching end, jump back to start
+      const maxScroll = containerRef.current.scrollWidth - containerRef.current.clientWidth;
+      if (containerRef.current.scrollLeft >= maxScroll) {
+        containerRef.current.scrollLeft = 0;
+      }
+
+      animId = requestAnimationFrame(scroll);
+    };
+
+    animId = requestAnimationFrame(scroll);
+    return () => cancelAnimationFrame(animId);
+  }, [isTouching]);
 
   return (
     <section id="industries" aria-label="Компании" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-clip z-[3]">
@@ -51,13 +64,13 @@ export default function Clients() {
       </div>
 
       {/* Marquee cards */}
-      <div className="overflow-x-auto md:overflow-hidden py-3 scrollbar-hide touch-pan-x">
-        <div
-          ref={trackRef}
-          className="marquee-track flex"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
+      <div
+        ref={containerRef}
+        className="overflow-x-auto md:overflow-hidden py-3 scrollbar-hide"
+        onTouchStart={() => setIsTouching(true)}
+        onTouchEnd={() => setTimeout(() => setIsTouching(false), 3000)}
+      >
+        <div className="marquee-track flex">
           {[0, 1].map((set) => (
             <div key={set} className="flex gap-4 md:gap-6 flex-shrink-0 pr-4 md:pr-6">
               {industries.map((industry) => (
