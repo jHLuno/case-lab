@@ -122,7 +122,7 @@ export default function OurAdvantage() {
             return (
               <div
                 key={pain.id}
-                className="pain-card relative group cursor-pointer h-full"
+                className="pain-card relative group cursor-default h-full"
                 style={{
                   opacity: 0,
                   transformStyle: "preserve-3d",
