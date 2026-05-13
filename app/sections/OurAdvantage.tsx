@@ -133,7 +133,7 @@ export default function OurAdvantage() {
                 onTouchEnd={() => setHoveredIndex(null)}
               >
                 <motion.div
-                      className="relative rounded-[16px] border border-black/[0.08] bg-white p-8 md:p-10 overflow-hidden flex flex-col h-full"
+                      className="relative rounded-[16px] border border-black/[0.08] bg-white p-9 md:p-10 overflow-hidden flex flex-col h-full"
                   animate={{
                     y: isHovered ? -6 : 0,
                     rotateX: isHovered ? -2 : 0,

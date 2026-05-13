@@ -178,7 +178,9 @@
   animation: marquee 20s linear infinite;
 }
 
-.marquee-track:hover {
+.marquee-track:hover,
+.marquee-track:active,
+.marquee-track.is-touching {
   animation-play-state: paused;
 }
 

@@ -103,7 +103,7 @@ export default function BusinessModel() {
 
                   {/* After — blue shape */}
                   <div className="md:pl-12 pt-1 md:pt-0">
-                    <div className="bg-[#040082] rounded-[12px] px-5 py-4 md:px-6 md:py-5">
+                    <div className="bg-[#040082] rounded-[12px] px-6 py-5 md:px-7 md:py-5">
                       <p className="text-white text-[14px] md:text-[17px] leading-[1.35] font-normal" style={{ fontFamily: "var(--font-body)" }}>
                         {row.after}
                       </p>

@@ -26,12 +26,13 @@ export default function Timeline() {
   const fillLineRef = useRef<HTMLDivElement>(null);
   const mobileDotRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Mobile-only scroll animations with proper cleanup
+  // Mobile scroll animations (fill line + dots)
   useEffect(() => {
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    if (!isMobile || !sectionRef.current) return;
+    if (!sectionRef.current) return;
 
-    const ctx = gsap.context(() => {
+    const mm = gsap.matchMedia();
+
+    mm.add("(max-width: 767px)", () => {
       if (fillLineRef.current) {
         gsap.to(fillLineRef.current, {
           scaleY: 1,
@@ -63,9 +64,9 @@ export default function Timeline() {
           }
         );
       });
-    }, sectionRef);
+    });
 
-    return () => ctx.revert();
+    return () => mm.revert();
   }, []);
 
   useEffect(() => {

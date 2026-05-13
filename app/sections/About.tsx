@@ -137,8 +137,8 @@ export default function About() {
               <div
                 className={`relative h-full rounded-[20px] overflow-hidden flex flex-col ${
                   item.dark
-                    ? "min-h-[320px] md:min-h-0 p-8 md:p-10"
-                    : "min-h-[160px] p-8 md:p-10"
+                    ? "min-h-[320px] md:min-h-0 p-9 md:p-10"
+                    : "min-h-[160px] p-9 md:p-10"
                 }`}
                 style={{
                   background: item.dark
