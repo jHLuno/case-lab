@@ -161,7 +161,7 @@ export default function Hero() {
               ease: [0.16, 1, 0.3, 1],
               delay: 1.1,
             }}
-            className="flex items-end gap-3 md:gap-4 mt-12 md:mt-0 self-end"
+            className="flex items-center gap-3 md:gap-4 mt-12 md:mt-0 self-end"
           >
             <Image
               src="/Narxoz%20University%20Logo%20White.png"
@@ -176,7 +176,7 @@ export default function Hero() {
               alt="Narxoz Business School"
               width={180}
               height={50}
-              className="h-[16px] md:h-[22px] w-auto opacity-90"
+              className="h-[12px] md:h-[18px] w-auto opacity-90"
               priority
             />
           </motion.div>
