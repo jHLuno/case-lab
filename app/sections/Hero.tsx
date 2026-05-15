@@ -176,7 +176,7 @@ export default function Hero() {
               alt="Narxoz Business School"
               width={180}
               height={50}
-              className="h-[9px] md:h-[13px] w-auto opacity-90"
+              className="h-[10px] md:h-[14px] w-auto opacity-90"
               priority
             />
           </motion.div>
