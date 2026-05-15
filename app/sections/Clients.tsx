@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 import ScrollReveal from "../components/ScrollReveal";
 
@@ -13,38 +13,88 @@ const industries = [
   { id: 6, title: "Citix", abbr: "CX" },
 ];
 
+const AUTO_SCROLL_SPEED = 1.5; // px per frame (~90px/s at 60fps)
+const RESUME_DELAY = 3000; // ms after user stops interacting
+
 export default function Clients() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isTouching, setIsTouching] = useState(false);
+  const isAutoScrollingRef = useRef(true);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastScrollLeftRef = useRef(0);
+  const halfWidthRef = useRef(0);
 
-  // JS-based auto-scroll on mobile only
   useEffect(() => {
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
     if (!isMobile || !containerRef.current) return;
 
     let animId: number;
-    const speed = 0.5; // px per frame
+    const el = containerRef.current;
 
-    const scroll = () => {
-      if (!containerRef.current || isTouching) {
-        animId = requestAnimationFrame(scroll);
+    const updateHalfWidth = () => {
+      if (el) halfWidthRef.current = el.scrollWidth / 2;
+    };
+    updateHalfWidth();
+    window.addEventListener("resize", updateHalfWidth);
+
+    const tick = () => {
+      if (!el) {
+        animId = requestAnimationFrame(tick);
         return;
       }
 
-      containerRef.current.scrollLeft += speed;
-
-      // Loop: when reaching end, jump back to start
-      const maxScroll = containerRef.current.scrollWidth - containerRef.current.clientWidth;
-      if (containerRef.current.scrollLeft >= maxScroll) {
-        containerRef.current.scrollLeft = 0;
+      // User is touching — just track position, don't auto-scroll
+      if (!isAutoScrollingRef.current) {
+        lastScrollLeftRef.current = el.scrollLeft;
+        animId = requestAnimationFrame(tick);
+        return;
       }
 
-      animId = requestAnimationFrame(scroll);
+      // Detect if user scrolled via momentum/wheel while auto-scroll was active
+      const expected = lastScrollLeftRef.current + AUTO_SCROLL_SPEED;
+      const diff = Math.abs(el.scrollLeft - expected);
+      if (diff > AUTO_SCROLL_SPEED * 5) {
+        isAutoScrollingRef.current = false;
+        lastScrollLeftRef.current = el.scrollLeft;
+        if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+        resumeTimerRef.current = setTimeout(() => {
+          isAutoScrollingRef.current = true;
+        }, RESUME_DELAY);
+        animId = requestAnimationFrame(tick);
+        return;
+      }
+
+      el.scrollLeft += AUTO_SCROLL_SPEED;
+      lastScrollLeftRef.current = el.scrollLeft;
+
+      // Seamless loop — jump back when passing half the duplicated track
+      if (el.scrollLeft >= halfWidthRef.current) {
+        el.scrollLeft -= halfWidthRef.current;
+        lastScrollLeftRef.current = el.scrollLeft;
+      }
+
+      animId = requestAnimationFrame(tick);
     };
 
-    animId = requestAnimationFrame(scroll);
-    return () => cancelAnimationFrame(animId);
-  }, [isTouching]);
+    animId = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", updateHalfWidth);
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    };
+  }, []);
+
+  const handleTouchStart = () => {
+    isAutoScrollingRef.current = false;
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+  };
+
+  const handleTouchEnd = () => {
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = setTimeout(() => {
+      isAutoScrollingRef.current = true;
+    }, RESUME_DELAY);
+  };
 
   return (
     <section id="industries" aria-label="Компании" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-clip z-[3]">
@@ -63,12 +113,12 @@ export default function Clients() {
         </ScrollReveal>
       </div>
 
-      {/* Marquee cards */}
+      {/* Marquee cards — JS auto-scroll on mobile, CSS on desktop */}
       <div
         ref={containerRef}
         className="overflow-x-auto md:overflow-hidden py-3 scrollbar-hide"
-        onTouchStart={() => setIsTouching(true)}
-        onTouchEnd={() => setTimeout(() => setIsTouching(false), 3000)}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
         <div className="marquee-track flex">
           {[0, 1].map((set) => (
@@ -79,36 +129,36 @@ export default function Clients() {
                   className="relative rounded-[16px] overflow-hidden group cursor-pointer flex-shrink-0 border border-black/[0.08] bg-white hover:border-[#040082]/30 hover:shadow-[0_12px_40px_-12px_rgba(4,0,130,0.15)] hover:scale-[1.02] transition-all duration-500"
                   style={{ width: "clamp(280px, 35vw, 400px)" }}
                 >
-              <div className="aspect-[4/3] relative overflow-hidden flex flex-col items-center justify-center p-8">
-                <div
-                  className="absolute inset-0 opacity-[0.04]"
-                  style={{
-                    background: `linear-gradient(135deg, #040082 0%, #1a1a9e 50%, #040082 100%)`,
-                  }}
-                />
-                <span
-                  className="relative z-10 text-[clamp(48px,6vw,80px)] font-bold leading-none text-black/8 select-none"
-                  style={{ fontFamily: "var(--font-heading)" }}
-                >
-                  {industry.abbr}
-                </span>
-              </div>
-              <div className="p-5 md:p-6 border-t border-black/5">
-                <span
-                  className="text-black text-[18px] md:text-[22px] font-normal leading-[1.15] block"
-                  style={{ fontFamily: "var(--font-heading)" }}
-                >
-                  {industry.title}
-                </span>
-                <span
-                  className="text-gray text-[12px] md:text-[13px] font-light mt-1 block"
-                  style={{ fontFamily: "var(--font-body)" }}
-                >
-                  Кейс в разработке
-                </span>
-              </div>
-            </div>
-          ))}
+                  <div className="aspect-[4/3] relative overflow-hidden flex flex-col items-center justify-center p-8">
+                    <div
+                      className="absolute inset-0 opacity-[0.04]"
+                      style={{
+                        background: `linear-gradient(135deg, #040082 0%, #1a1a9e 50%, #040082 100%)`,
+                      }}
+                    />
+                    <span
+                      className="relative z-10 text-[clamp(48px,6vw,80px)] font-bold leading-none text-black/8 select-none"
+                      style={{ fontFamily: "var(--font-heading)" }}
+                    >
+                      {industry.abbr}
+                    </span>
+                  </div>
+                  <div className="p-5 md:p-6 border-t border-black/5">
+                    <span
+                      className="text-black text-[18px] md:text-[22px] font-normal leading-[1.15] block"
+                      style={{ fontFamily: "var(--font-heading)" }}
+                    >
+                      {industry.title}
+                    </span>
+                    <span
+                      className="text-gray text-[12px] md:text-[13px] font-light mt-1 block"
+                      style={{ fontFamily: "var(--font-body)" }}
+                    >
+                      Кейс в разработке
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           ))}
         </div>
@@ -130,7 +180,6 @@ export default function Clients() {
           </a>
         </ScrollReveal>
       </div>
-
     </section>
   );
 }
