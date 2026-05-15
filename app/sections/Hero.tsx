@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import gsap from "gsap";
 import { useLeadPopup } from "../lib/LeadPopupContext";
 
@@ -151,7 +152,7 @@ export default function Hero() {
             </motion.div>
           </div>
 
-          {/* Right — Social proof */}
+          {/* Right — Partner logos */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -160,24 +161,31 @@ export default function Hero() {
               ease: [0.16, 1, 0.3, 1],
               delay: 1.1,
             }}
-            className="md:max-w-[380px] md:text-right flex flex-col justify-end mt-12 md:mt-0"
+            className="flex flex-col items-start md:items-end gap-6 mt-12 md:mt-0"
           >
             <p
-              className="text-white/90 text-[11px] uppercase tracking-wider mb-6 font-medium"
+              className="text-white/50 text-[11px] uppercase tracking-wider font-medium"
               style={{ fontFamily: "var(--font-body)" }}
             >
-              Уже провели диагностику
+              Организовано при поддержке
             </p>
-            <div className="flex flex-wrap md:justify-end gap-x-4 gap-y-3">
-              {["Hero's Journey", "inDrive", "abr", "Shetel"].map((name) => (
-                <span
-                  key={name}
-                  className="text-white/90 text-[14px] font-medium"
-                  style={{ fontFamily: "var(--font-body)" }}
-                >
-                  {name}
-                </span>
-              ))}
+            <div className="flex flex-col items-start md:items-end gap-5">
+              <Image
+                src="/Narxoz University Logo White.png"
+                alt="Narxoz University"
+                width={200}
+                height={60}
+                className="w-[160px] md:w-[200px] h-auto opacity-90"
+                priority
+              />
+              <Image
+                src="/NBS LOGO FULL WHITE.png"
+                alt="Narxoz Business School"
+                width={180}
+                height={50}
+                className="w-[140px] md:w-[180px] h-auto opacity-90"
+                priority
+              />
             </div>
           </motion.div>
         </div>
