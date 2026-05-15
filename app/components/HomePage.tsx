@@ -24,12 +24,12 @@ export default function HomePage() {
       <main className="relative">
         <Navbar />
         <Hero />
-        <About />
+        <BusinessModel />
         <Pricing />
         <OurAdvantage />
+        <About />
         <Timeline />
         <Testimonials />
-        <BusinessModel />
         <Clients />
         <Evolution />
         <QuickLinks />
