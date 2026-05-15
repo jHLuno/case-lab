@@ -161,26 +161,24 @@ export default function Hero() {
               ease: [0.16, 1, 0.3, 1],
               delay: 1.1,
             }}
-            className="flex flex-col items-start md:items-end gap-5 mt-12 md:mt-0"
+            className="flex items-end gap-4 md:gap-6 mt-12 md:mt-0 self-end"
           >
-            <div className="flex flex-col items-start md:items-end gap-5">
-              <Image
-                src="/Narxoz University Logo White.png"
-                alt="Narxoz University"
-                width={200}
-                height={60}
-                className="w-[160px] md:w-[200px] h-auto opacity-90"
-                priority
-              />
-              <Image
-                src="/NBS LOGO FULL WHITE.png"
-                alt="Narxoz Business School"
-                width={180}
-                height={50}
-                className="w-[140px] md:w-[180px] h-auto opacity-90"
-                priority
-              />
-            </div>
+            <Image
+              src="/Narxoz%20University%20Logo%20White.png"
+              alt="Narxoz University"
+              width={200}
+              height={60}
+              className="h-[28px] md:h-[36px] w-auto opacity-90"
+              priority
+            />
+            <Image
+              src="/NBS%20LOGO%20FULL%20WHITE.png"
+              alt="Narxoz Business School"
+              width={180}
+              height={50}
+              className="h-[28px] md:h-[36px] w-auto opacity-90"
+              priority
+            />
           </motion.div>
         </div>
       </div>
