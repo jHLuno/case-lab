@@ -106,7 +106,7 @@ export default function Clients() {
             className="text-black text-[clamp(16px,4vw,54px)] font-bold leading-[1.15] mb-12 md:mb-16 uppercase tracking-[0.02em]"
             style={{ fontFamily: "var(--font-heading)" }}
           >
-            Разобранные кейсы компаний на Case Lab
+            Разобранные кейсы компаний на Case <em>Lab</em>
           </h2>
         </ScrollReveal>
       </div>
