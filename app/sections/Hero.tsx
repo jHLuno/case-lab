@@ -161,14 +161,8 @@ export default function Hero() {
               ease: [0.16, 1, 0.3, 1],
               delay: 1.1,
             }}
-            className="flex flex-col items-start md:items-end gap-6 mt-12 md:mt-0"
+            className="flex flex-col items-start md:items-end gap-5 mt-12 md:mt-0"
           >
-            <p
-              className="text-white/50 text-[11px] uppercase tracking-wider font-medium"
-              style={{ fontFamily: "var(--font-body)" }}
-            >
-              Организовано при поддержке
-            </p>
             <div className="flex flex-col items-start md:items-end gap-5">
               <Image
                 src="/Narxoz University Logo White.png"
