@@ -168,7 +168,7 @@ export default function Hero() {
               alt="Narxoz University"
               width={200}
               height={60}
-              className="h-[14px] md:h-[22px] w-auto opacity-90"
+              className="max-w-[50px] md:max-w-[70px] h-auto opacity-90"
               priority
             />
             <Image
@@ -176,7 +176,7 @@ export default function Hero() {
               alt="Narxoz Business School"
               width={180}
               height={50}
-              className="h-[14px] md:h-[22px] w-auto opacity-90"
+              className="max-w-[70px] md:max-w-[100px] h-auto opacity-90"
               priority
             />
           </motion.div>
