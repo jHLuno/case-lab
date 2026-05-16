@@ -27,9 +27,9 @@ export default function HomePage() {
         <ClientsPain />
         <Pricing />
         <BeforeAfter />
-        <About />
         <Timeline />
         <Testimonials />
+        <About />
         <Cases />
         <Evolution />
         <News />
