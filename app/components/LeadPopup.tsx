@@ -138,7 +138,7 @@ export default function LeadPopup() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="px-10 pt-10 pb-14">
+              <form onSubmit={handleSubmit} className="px-10 pt-14 pb-14">
                 <h2
                   className="text-black text-[20px] md:text-[24px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-3"
                   style={{ fontFamily: "var(--font-heading)" }}
