@@ -55,7 +55,7 @@ export default function BeforeAfter() {
               Case Lab Diagnostics
             </span>
             <h2
-              className="text-black text-[clamp(22px,3.5vw,42px)] font-bold leading-[1.12] uppercase tracking-[0.02em]"
+              className="text-black text-[clamp(22px,4vw,54px)] font-bold leading-[1.15] uppercase tracking-[0.02em]"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               Что меняется после диагностики

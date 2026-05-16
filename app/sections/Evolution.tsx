@@ -43,7 +43,7 @@ export default function Evolution() {
       {/* Top divider */}
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
-      <div className="max-w-[1078px] mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-10 lg:gap-16">
+      <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-10 lg:gap-16">
         {/* Left: Stage indicator */}
         <div className="flex-1 flex items-center justify-center w-full min-w-0">
           <ScrollReveal>
@@ -95,7 +95,7 @@ export default function Evolution() {
                 Эволюция проекта
               </span>
               <h2
-                className="text-black text-[clamp(22px,3.5vw,42px)] font-bold leading-[1.12] uppercase tracking-[0.02em]"
+                className="text-black text-[clamp(20px,3vw,36px)] font-bold leading-[1.12] uppercase tracking-[0.02em]"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
                 От платформы — к экосистеме

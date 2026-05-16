@@ -34,7 +34,7 @@ export default function News() {
     <section id="news" aria-label="База знаний" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-clip z-[3]">
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
-      <div className="max-w-[1078px] mx-auto">
+      <div className="max-w-[1200px] mx-auto">
         {/* Header */}
         <div className="flex items-start justify-between mb-12 md:mb-20">
           <div>

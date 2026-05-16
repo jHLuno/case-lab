@@ -86,7 +86,7 @@ export default function ClientsPain() {
       {/* Gradient divider */}
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
-      <div className="max-w-[1078px] mx-auto">
+      <div className="max-w-[1200px] mx-auto">
         {/* Header */}
         <motion.div
           ref={headerRef}
@@ -96,7 +96,7 @@ export default function ClientsPain() {
           className="mb-12 md:mb-20"
         >
           <span
-            className="text-gray text-[11px] mb-3 block leading-[1.58] uppercase tracking-wider font-normal"
+            className="text-[#040082] text-[11px] mb-3 block leading-[1.58] uppercase tracking-wider font-normal"
             style={{ fontFamily: "var(--font-body)" }}
           >
             Если узнаёте себя
