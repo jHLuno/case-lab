@@ -46,12 +46,6 @@ export default function Hero() {
       aria-label="Главный экран"
       className="relative min-h-[100svh] w-full overflow-hidden bg-[#000011] flex items-end"
     >
-      {/* Background image */}
-      <div
-        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/hero-poster.png')" }}
-      />
-
       {/* Atmospheric gradient orbs */}
       <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] rounded-full bg-[#040082]/40 blur-[120px] hero-orb-1" />
       <div className="absolute top-[10%] right-[-15%] w-[70vw] h-[70vw] rounded-full bg-[#0a1a6e]/30 blur-[100px] hero-orb-2" />
