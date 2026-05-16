@@ -3,42 +3,15 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import gsap from "gsap";
 import { useLeadPopup } from "../lib/LeadPopupContext";
+
+const Silk = dynamic(() => import("../components/Silk"), { ssr: false });
 
 export default function Hero() {
   const containerRef = useRef<HTMLElement>(null);
   const { openPopup } = useLeadPopup();
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.to(".hero-orb-1", {
-        x: 30,
-        y: -20,
-        duration: 10,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-      gsap.to(".hero-orb-2", {
-        x: -25,
-        y: 35,
-        duration: 12,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-      gsap.to(".hero-orb-3", {
-        x: 20,
-        y: 15,
-        duration: 9,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-    }, containerRef);
-    return () => ctx.revert();
-  }, []);
 
   return (
     <section
@@ -46,10 +19,16 @@ export default function Hero() {
       aria-label="Главный экран"
       className="relative min-h-[100svh] w-full overflow-hidden bg-[#000011] flex items-end"
     >
-      {/* Atmospheric gradient orbs */}
-      <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] rounded-full bg-[#040082]/40 blur-[120px] hero-orb-1" />
-      <div className="absolute top-[10%] right-[-15%] w-[70vw] h-[70vw] rounded-full bg-[#0a1a6e]/30 blur-[100px] hero-orb-2" />
-      <div className="absolute bottom-[-30%] left-[25%] w-[60vw] h-[60vw] rounded-full bg-[#0d2d7a]/25 blur-[140px] hero-orb-3" />
+      {/* Silk background */}
+      <div className="absolute inset-0 w-full h-full">
+        <Silk
+          speed={5.1}
+          scale={1}
+          color="#040082"
+          noiseIntensity={0.6}
+          rotation={1.3}
+        />
+      </div>
 
       {/* Subtle grid overlay */}
       <div
