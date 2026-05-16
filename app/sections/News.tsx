@@ -42,7 +42,7 @@ export default function News() {
               className="text-gray text-[11px] mb-3 block leading-[1.58] uppercase tracking-wider"
               style={{ fontFamily: "var(--font-body)" }}
             >
-              База знаний
+              Статьи
             </span>
             <h2
               className="text-black text-[clamp(22px,3.5vw,42px)] font-bold leading-[1.12] uppercase tracking-[0.02em]"
