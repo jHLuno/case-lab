@@ -46,21 +46,13 @@ export default function Hero() {
       aria-label="Главный экран"
       className="relative min-h-[100svh] w-full overflow-hidden bg-[#000011] flex items-end"
     >
-      {/* Background video */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="auto"
-        poster="/hero-poster.png"
-        className="absolute inset-0 w-full h-full object-cover"
-      >
-        <source src="/Video-Demo.webm" type="video/webm" />
-        <source src="/Video-Demo.mp4" type="video/mp4" />
-      </video>
+      {/* Background image */}
+      <div
+        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/hero-poster.png')" }}
+      />
 
-      {/* Atmospheric gradient orbs overlaid on video */}
+      {/* Atmospheric gradient orbs */}
       <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] rounded-full bg-[#040082]/40 blur-[120px] hero-orb-1" />
       <div className="absolute top-[10%] right-[-15%] w-[70vw] h-[70vw] rounded-full bg-[#0a1a6e]/30 blur-[100px] hero-orb-2" />
       <div className="absolute bottom-[-30%] left-[25%] w-[60vw] h-[60vw] rounded-full bg-[#0d2d7a]/25 blur-[140px] hero-orb-3" />
