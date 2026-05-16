@@ -14,6 +14,7 @@ const ClientsPain = dynamic(() => import("../sections/ClientsPain"), { ssr: fals
 const Timeline = dynamic(() => import("../sections/Timeline"), { ssr: false });
 const Testimonials = dynamic(() => import("../sections/Testimonials"), { ssr: false });
 const BeforeAfter = dynamic(() => import("../sections/BeforeAfter"), { ssr: false });
+const Team = dynamic(() => import("../sections/Team"), { ssr: false });
 const Cases = dynamic(() => import("../sections/Cases"), { ssr: false });
 const Evolution = dynamic(() => import("../sections/Evolution"), { ssr: false });
 const News = dynamic(() => import("../sections/News"), { ssr: false });
@@ -29,6 +30,7 @@ export default function HomePage() {
         <BeforeAfter />
         <Timeline />
         <Testimonials />
+        <Team />
         <About />
         <Cases />
         <Evolution />
