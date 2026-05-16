@@ -47,7 +47,7 @@ export default function Team() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           {team.map((member, i) => (
             <ScrollReveal key={member.name} delay={i * 0.12}>
-              <div className="flex flex-col items-start">
+              <div className="flex flex-col items-center text-center">
                 {/* Avatar */}
                 <div
                   className={`w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mb-5 ${
