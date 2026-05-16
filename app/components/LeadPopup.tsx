@@ -105,19 +105,19 @@ export default function LeadPopup() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 20 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-[440px] bg-white rounded-[20px] shadow-2xl overflow-hidden"
+            className="relative w-full max-w-[500px] bg-white rounded-[20px] shadow-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={closePopup}
-              className="absolute top-5 right-5 w-10 h-10 flex items-center justify-center rounded-full bg-black/5 hover:bg-black/10 transition-colors text-black/40 hover:text-black/60 z-10"
+              className="absolute top-10 right-10 w-10 h-10 flex items-center justify-center rounded-full bg-black/5 hover:bg-black/10 transition-colors text-black/40 hover:text-black/60 z-10"
               aria-label="Закрыть"
             >
               <X size={20} />
             </button>
 
             {status === "success" ? (
-              <div className="px-10 py-16 text-center">
+              <div className="px-10 py-16 pt-14 text-center">
                 <CheckCircle size={40} className="text-[#040082] mx-auto mb-5" />
                 <h2
                   className="text-black text-[20px] md:text-[24px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-3"
@@ -138,7 +138,7 @@ export default function LeadPopup() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="px-10 pt-12 pb-12">
+              <form onSubmit={handleSubmit} className="px-10 pt-10 pb-14">
                 <h2
                   className="text-black text-[20px] md:text-[24px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-3"
                   style={{ fontFamily: "var(--font-heading)" }}
