@@ -117,7 +117,7 @@ export default function LeadPopup() {
             </button>
 
             {status === "success" ? (
-              <div className="px-8 py-14 text-center">
+              <div className="px-10 py-16 text-center">
                 <CheckCircle size={40} className="text-[#040082] mx-auto mb-5" />
                 <h2
                   className="text-black text-[20px] md:text-[24px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-3"
@@ -138,20 +138,20 @@ export default function LeadPopup() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="px-8 pt-10 pb-10">
+              <form onSubmit={handleSubmit} className="px-10 pt-12 pb-12">
                 <h2
-                  className="text-black text-[20px] md:text-[24px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-2"
+                  className="text-black text-[20px] md:text-[24px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-3"
                   style={{ fontFamily: "var(--font-heading)" }}
                 >
                   Записаться
                 </h2>
-                <p className="text-black/60 text-[14px] leading-[1.5] font-light mb-6" style={inputFont}>
+                <p className="text-black/60 text-[14px] leading-[1.5] font-light mb-8" style={inputFont}>
                   Оставьте контакты — мы свяжемся в течение рабочего дня.
                 </p>
 
-                <div className="space-y-4">
+                <div className="space-y-5">
                   <div>
-                    <label htmlFor="popup-name" className="block text-black text-[13px] font-normal mb-1.5" style={inputFont}>
+                    <label htmlFor="popup-name" className="block text-black text-[13px] font-normal mb-2" style={inputFont}>
                       Имя и фамилия <span className="text-[#040082]">*</span>
                     </label>
                     <input
@@ -163,7 +163,7 @@ export default function LeadPopup() {
                   </div>
 
                   <div>
-                    <label htmlFor="popup-phone" className="block text-black text-[13px] font-normal mb-1.5" style={inputFont}>
+                    <label htmlFor="popup-phone" className="block text-black text-[13px] font-normal mb-2" style={inputFont}>
                       Телефон <span className="text-[#040082]">*</span>
                     </label>
                     <input
@@ -175,7 +175,7 @@ export default function LeadPopup() {
                   </div>
 
                   <div>
-                    <label htmlFor="popup-position" className="block text-black text-[13px] font-normal mb-1.5" style={inputFont}>
+                    <label htmlFor="popup-position" className="block text-black text-[13px] font-normal mb-2" style={inputFont}>
                       Должность
                     </label>
                     <input
@@ -187,7 +187,7 @@ export default function LeadPopup() {
                   </div>
                 </div>
 
-                <p className="text-black/30 text-[11px] leading-[1.5] font-light mt-4" style={inputFont}>
+                <p className="text-black/30 text-[11px] leading-[1.5] font-light mt-5" style={inputFont}>
                   Отправляя форму, вы соглашаетесь с{" "}
                   <a href="/privacy/" className="underline hover:text-[#040082] transition-colors">
                     Политикой конфиденциальности
@@ -198,7 +198,7 @@ export default function LeadPopup() {
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="w-full mt-6 inline-flex items-center justify-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full mt-8 inline-flex items-center justify-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
                   style={inputFont}
                 >
                   {status === "loading" ? (
