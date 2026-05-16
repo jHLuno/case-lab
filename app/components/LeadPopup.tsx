@@ -110,10 +110,10 @@ export default function LeadPopup() {
           >
             <button
               onClick={closePopup}
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-black/5 hover:bg-black/10 transition-colors text-black/40 hover:text-black/60 z-10"
+              className="absolute top-5 right-5 w-10 h-10 flex items-center justify-center rounded-full bg-black/5 hover:bg-black/10 transition-colors text-black/40 hover:text-black/60 z-10"
               aria-label="Закрыть"
             >
-              <X size={16} />
+              <X size={20} />
             </button>
 
             {status === "success" ? (
@@ -198,7 +198,7 @@ export default function LeadPopup() {
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="w-full mt-8 inline-flex items-center justify-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full mt-6 inline-flex items-center justify-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
                   style={inputFont}
                 >
                   {status === "loading" ? (
