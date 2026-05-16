@@ -102,12 +102,20 @@ export default function Cases() {
 
       <div className="max-w-[1078px] mx-auto">
         <ScrollReveal>
-          <h2
-            className="text-black text-[clamp(16px,4vw,54px)] font-bold leading-[1.15] mb-12 md:mb-16 uppercase tracking-[0.02em]"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            Разобранные кейсы компаний на Case <em>Lab</em>
-          </h2>
+          <div className="mb-12 md:mb-16">
+            <span
+              className="text-gray text-[11px] mb-3 block leading-[1.58] uppercase tracking-wider"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              Кейсы
+            </span>
+            <h2
+              className="text-black text-[clamp(22px,3.5vw,42px)] font-bold leading-[1.12] uppercase tracking-[0.02em] max-w-md"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              Разобранные кейсы компаний на Case <em>Lab</em>
+            </h2>
+          </div>
         </ScrollReveal>
       </div>
 
