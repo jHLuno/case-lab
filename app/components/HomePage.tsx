@@ -24,9 +24,9 @@ export default function HomePage() {
       <main className="relative">
         <Navbar />
         <Hero />
-        <BusinessModel />
-        <Pricing />
         <OurAdvantage />
+        <Pricing />
+        <BusinessModel />
         <About />
         <Timeline />
         <Testimonials />
