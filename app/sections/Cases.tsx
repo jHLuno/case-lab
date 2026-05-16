@@ -110,7 +110,7 @@ export default function Cases() {
               Кейсы
             </span>
             <h2
-              className="text-black text-[clamp(22px,3.5vw,42px)] font-bold leading-[1.12] uppercase tracking-[0.02em]"
+              className="text-black text-[clamp(22px,3vw,32px)] font-bold leading-[1.12] uppercase tracking-[0.02em]"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               Разобранные кейсы компаний на Case <em>Lab</em>
