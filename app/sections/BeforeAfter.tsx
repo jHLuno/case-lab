@@ -39,7 +39,7 @@ const useCases = [
   },
 ];
 
-export default function BusinessModel() {
+export default function BeforeAfter() {
   return (
     <section aria-label="Что меняется после диагностики" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-clip">
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />

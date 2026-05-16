@@ -16,7 +16,7 @@ const industries = [
 const AUTO_SCROLL_SPEED = 1.5; // px per frame (~90px/s at 60fps)
 const RESUME_DELAY = 3000; // ms after user stops interacting
 
-export default function Clients() {
+export default function Cases() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isAutoScrollingRef = useRef(true);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -97,7 +97,7 @@ export default function Clients() {
   };
 
   return (
-    <section id="industries" aria-label="Компании" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-clip z-[3]">
+    <section id="cases" aria-label="Кейсы" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-clip z-[3]">
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
       <div className="max-w-[1078px] mx-auto">
@@ -165,7 +165,7 @@ export default function Clients() {
       <div className="max-w-[1078px] mx-auto mt-8">
         <ScrollReveal delay={0.2}>
           <a
-            href="#insights"
+            href="#news"
             className="inline-flex items-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-300 group"
             style={{ fontFamily: "var(--font-body)" }}
           >

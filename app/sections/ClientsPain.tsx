@@ -39,7 +39,7 @@ const pains = [
   },
 ];
 
-export default function OurAdvantage() {
+export default function ClientsPain() {
   const headerRef = useRef(null);
   const headerInView = useInView(headerRef, { once: true, margin: "-100px" });
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);

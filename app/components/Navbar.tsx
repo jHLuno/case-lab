@@ -10,7 +10,7 @@ import { createPortal } from "react-dom";
 import { useLeadPopup } from "../lib/LeadPopupContext";
 
 const navLinks = [
-  { label: "Кейсы", href: "#industries" },
+  { label: "Кейсы", href: "#cases" },
   { label: "Подход", href: "#diagnostics" },
   { label: "Процесс", href: "#process" },
   { label: "Результаты", href: "#testimonials" },

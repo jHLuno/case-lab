@@ -10,13 +10,13 @@ import Hero from "../sections/Hero";
 import About from "../sections/About";
 import Pricing from "../sections/Pricing";
 
-const OurAdvantage = dynamic(() => import("../sections/OurAdvantage"), { ssr: false });
+const ClientsPain = dynamic(() => import("../sections/ClientsPain"), { ssr: false });
 const Timeline = dynamic(() => import("../sections/Timeline"), { ssr: false });
 const Testimonials = dynamic(() => import("../sections/Testimonials"), { ssr: false });
-const BusinessModel = dynamic(() => import("../sections/BusinessModel"), { ssr: false });
-const Clients = dynamic(() => import("../sections/Clients"), { ssr: false });
+const BeforeAfter = dynamic(() => import("../sections/BeforeAfter"), { ssr: false });
+const Cases = dynamic(() => import("../sections/Cases"), { ssr: false });
 const Evolution = dynamic(() => import("../sections/Evolution"), { ssr: false });
-const QuickLinks = dynamic(() => import("../sections/QuickLinks"), { ssr: false });
+const News = dynamic(() => import("../sections/News"), { ssr: false });
 
 export default function HomePage() {
   return (
@@ -24,15 +24,15 @@ export default function HomePage() {
       <main className="relative">
         <Navbar />
         <Hero />
-        <OurAdvantage />
+        <ClientsPain />
         <Pricing />
-        <BusinessModel />
+        <BeforeAfter />
         <About />
         <Timeline />
         <Testimonials />
-        <Clients />
+        <Cases />
         <Evolution />
-        <QuickLinks />
+        <News />
         <Footer />
         <BackToTop />
         <LeadPopup />
