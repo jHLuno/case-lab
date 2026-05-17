@@ -29,7 +29,7 @@ export default function Footer() {
           <button
             type="button"
             onClick={openPopup}
-            className="inline-flex items-center gap-3 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] font-normal rounded-full hover:bg-[#0600a0] hover:gap-4 transition-all duration-300"
+            className="inline-flex items-center gap-3 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] font-normal rounded-full hover:bg-[#0600a0] hover:gap-4 transition-[gap,background-color] duration-200"
             style={{ fontFamily: "var(--font-body)" }}
           >
             <span>Записаться на диагностику</span>
@@ -55,7 +55,7 @@ export default function Footer() {
           <div>
             <a
               href="mailto:hello@caselab.kz"
-              className="text-black/60 text-[15px] hover:text-black transition-colors duration-300 font-light"
+              className="text-black/60 text-[15px] hover:text-black transition-colors duration-200 font-light"
               style={{ fontFamily: "var(--font-body)" }}
             >
               hello@caselab.kz
@@ -68,7 +68,7 @@ export default function Footer() {
               href="https://instagram.com/narxoz_business_school"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray text-[15px] font-light hover:text-black transition-colors duration-300"
+              className="text-gray text-[15px] font-light hover:text-black transition-colors duration-200"
               style={{ fontFamily: "var(--font-body)" }}
             >
               Instagram Narxoz
@@ -77,7 +77,7 @@ export default function Footer() {
               href="https://instagram.com/kosnazzar"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray text-[15px] font-light hover:text-black transition-colors duration-300"
+              className="text-gray text-[15px] font-light hover:text-black transition-colors duration-200"
               style={{ fontFamily: "var(--font-body)" }}
             >
               Instagram Kosnazzar
@@ -86,7 +86,7 @@ export default function Footer() {
               href="https://www.linkedin.com/in/daniyar-kosnazarov-300806110/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray text-[15px] font-light hover:text-black transition-colors duration-300"
+              className="text-gray text-[15px] font-light hover:text-black transition-colors duration-200"
               style={{ fontFamily: "var(--font-body)" }}
             >
               LinkedIn
@@ -97,7 +97,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pt-6 border-t border-black/5">
           <span
-            className="text-black/20 text-[12px] font-light"
+            className="text-black/50 text-[12px] font-light"
             style={{ fontFamily: "var(--font-body)" }}
           >
             &copy; 2026 Case Lab. Все права защищены.
@@ -105,7 +105,7 @@ export default function Footer() {
           <div className="flex items-center gap-6">
             <a
               href="/privacy/"
-              className="text-black/20 text-[12px] font-light hover:text-black/40 transition-colors duration-300"
+              className="text-black/50 text-[12px] font-light hover:text-black/70 transition-colors duration-200"
               style={{ fontFamily: "var(--font-body)" }}
             >
               Политика конфиденциальности

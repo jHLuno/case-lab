@@ -7,7 +7,7 @@ import { X, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
 import { useLeadPopup } from "../lib/LeadPopupContext";
 
 const inputClass =
-  "w-full px-4 py-3 rounded-[12px] border border-black/[0.08] bg-white text-black text-[15px] placeholder:text-black/30 focus:outline-none focus:border-[#040082]/30 focus:ring-1 focus:ring-[#040082]/10 transition-all duration-200";
+  "w-full px-4 py-3 rounded-[12px] border border-black/[0.08] bg-white text-black text-[15px] placeholder:text-black/30 focus:outline-none focus:border-[#040082]/30 focus:ring-1 focus:ring-[#040082]/10 transition-[border-color,box-shadow] duration-200";
 const inputFont = { fontFamily: "var(--font-body)" };
 
 export default function LeadPopup() {
@@ -130,7 +130,7 @@ export default function LeadPopup() {
                 </p>
                 <button
                   onClick={closePopup}
-                  className="inline-flex items-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-300"
+                  className="inline-flex items-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-200"
                   style={inputFont}
                 >
                   Хорошо
@@ -187,7 +187,7 @@ export default function LeadPopup() {
                   </div>
                 </div>
 
-                <p className="text-black/30 text-[11px] leading-[1.5] font-light mt-5" style={inputFont}>
+                <p className="text-black/50 text-[11px] leading-[1.5] font-light mt-5" style={inputFont}>
                   Отправляя форму, вы соглашаетесь с{" "}
                   <a href="/privacy/" className="underline hover:text-[#040082] transition-colors">
                     Политикой конфиденциальности
@@ -198,7 +198,7 @@ export default function LeadPopup() {
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="w-full mt-6 inline-flex items-center justify-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full mt-6 inline-flex items-center justify-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                   style={inputFont}
                 >
                   {status === "loading" ? (

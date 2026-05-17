@@ -122,9 +122,8 @@ export default function ClientsPain() {
             return (
               <div
                 key={pain.id}
-                className="pain-card relative group cursor-default h-full"
+                className="pain-card relative group cursor-default h-full gsap-hidden"
                 style={{
-                  opacity: 0,
                   transformStyle: "preserve-3d",
                 }}
                 onMouseEnter={() => setHoveredIndex(i)}

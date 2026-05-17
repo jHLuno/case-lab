@@ -148,7 +148,7 @@ export default function Navbar() {
               <Link
                 key={link.label}
                 href={getNavHref(link.href)}
-                className="px-4 py-2 text-[14px] font-normal leading-none rounded-full text-black/60 hover:text-black hover:bg-black/5 transition-all duration-300"
+                className="px-4 py-2 text-[14px] font-normal leading-none rounded-full text-black/60 hover:text-black hover:bg-black/5 transition-colors duration-200"
                 style={{ fontFamily: "var(--font-body)" }}
               >
                 {link.label}
@@ -160,7 +160,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={openPopup}
-            className="hidden md:inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-normal leading-none bg-[#040082] text-white hover:bg-[#0600a8] transition-all duration-300 ml-1"
+            className="hidden md:inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-normal leading-none bg-[#040082] text-white hover:bg-[#0600a8] transition-colors duration-200 ml-1"
             style={{ fontFamily: "var(--font-body)" }}
           >
             Записаться
@@ -172,7 +172,7 @@ export default function Navbar() {
             ref={toggleRef}
             type="button"
             onClick={() => setMobileOpen(true)}
-            className="md:hidden flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 text-black/60 hover:bg-black/5 transition-colors duration-300"
+            className="md:hidden flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 text-black/60 hover:bg-black/5 transition-colors duration-200"
             aria-label="Открыть меню"
             aria-expanded={mobileOpen}
             aria-controls="mobile-menu"
@@ -206,7 +206,7 @@ export default function Navbar() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8, transition: { duration: 0.18, ease: "easeInOut" } }}
+              exit={{ opacity: 0, y: -8, transition: { duration: 0.18, ease: [0.32, 0, 0.67, 0] } }}
               transition={{ duration: 0.28, ease: "easeOut" }}
               className="relative z-10 flex shrink-0 items-center justify-between px-6 pt-5 pb-3"
               style={{ paddingTop: "max(20px, calc(env(safe-area-inset-top) + 8px))" }}
@@ -224,7 +224,7 @@ export default function Navbar() {
               <motion.button
                 type="button"
                 onClick={closeMobileMenuAndReturnFocus}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-sm transition-colors duration-300 active:bg-white/20"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-sm transition-colors duration-200 active:bg-white/20"
                 aria-label="Закрыть меню"
                 whileTap={{ scale: 0.94, rotate: -6 }}
               >
@@ -245,7 +245,7 @@ export default function Navbar() {
                       exit={{
                         opacity: 0,
                        y: 10,
-                       transition: { duration: 0.18, delay: (navLinks.length - 1 - i) * 0.03, ease: "easeInOut" },
+                        transition: { duration: 0.18, delay: (navLinks.length - 1 - i) * 0.03, ease: [0.32, 0, 0.67, 0] },
                       }}
                       transition={{ delay: i * 0.06 + 0.08, duration: 0.42 }}
                       className="flex"
@@ -253,7 +253,7 @@ export default function Navbar() {
                     <Link
                       href={getNavHref(link.href)}
                       onClick={closeMobileMenu}
-                      className="group py-3 text-[clamp(30px,8vw,38px)] font-normal leading-[1.02] tracking-[-0.03em] text-white/92 transition-all duration-300 active:translate-x-1 active:text-white focus-visible:outline-none focus-visible:text-white"
+                      className="group py-3 text-[clamp(30px,8vw,38px)] font-normal leading-[1.02] tracking-[-0.03em] text-white/92 transition-[color,transform] duration-200 active:translate-x-1 active:text-white focus-visible:outline-none focus-visible:text-white"
                       style={{ fontFamily: "var(--font-heading)" }}
                     >
                       <span className="inline-block border-b border-transparent pb-1 group-active:border-white/50 group-focus-visible:border-white/60">
@@ -268,18 +268,18 @@ export default function Navbar() {
                  <motion.div
                     initial={{ opacity: 0, y: 18 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10, transition: { duration: 0.18, delay: 0.04, ease: "easeInOut" } }}
+                     exit={{ opacity: 0, y: 10, transition: { duration: 0.18, delay: 0.04, ease: [0.32, 0, 0.67, 0] } }}
                     transition={{ delay: 0.34, duration: 0.42 }}
                   >
                     <motion.div whileTap={{ scale: 0.98, y: 1 }}>
                     <button
                       type="button"
                       onClick={() => { closeMobileMenu(); openPopup(); }}
-                      className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-300 focus-visible:outline-none"
+                      className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200 focus-visible:outline-none"
                       style={{ fontFamily: "var(--font-body)" }}
                     >
                       Записаться
-                      <ArrowRight size={14} strokeWidth={2.5} className="transition-transform duration-300 group-active:translate-x-0.5 group-focus-visible:translate-x-0.5" />
+                      <ArrowRight size={14} strokeWidth={2.5} className="transition-transform duration-200 group-active:translate-x-0.5 group-focus-visible:translate-x-0.5" />
                     </button>
                     </motion.div>
                   </motion.div>
@@ -287,7 +287,7 @@ export default function Navbar() {
                 <motion.p
                   initial={{ opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10, transition: { duration: 0.18, ease: "easeInOut" } }}
+                  exit={{ opacity: 0, y: 10, transition: { duration: 0.18, ease: [0.32, 0, 0.67, 0] } }}
                   transition={{ delay: 0.4, duration: 0.42 }}
                   className="mt-4 max-w-[260px] text-[13px] leading-[1.45] text-white/68"
                   style={{ fontFamily: "var(--font-body)" }}

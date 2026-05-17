@@ -87,7 +87,7 @@ export default function BeforeAfter() {
         <div className="relative mb-16 md:mb-24">
           {/* Desktop column headers */}
           <div className="hidden md:grid grid-cols-[1fr_auto_1fr] gap-0 items-center mb-8">
-            <span className="text-right pr-12 text-black/30 text-[12px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>До</span>
+            <span className="text-right pr-12 text-black/50 text-[12px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>До</span>
             <div className="w-16 flex-shrink-0" />
             <span className="pl-12 text-[#040082] text-[12px] uppercase tracking-wider font-normal" style={{ fontFamily: "var(--font-body)" }}>После</span>
           </div>
@@ -99,7 +99,7 @@ export default function BeforeAfter() {
                   {/* Before */}
                   <div className="text-left md:text-right md:pr-12">
                     <span className="text-[11px] uppercase tracking-wider text-black/50 mb-1.5 block md:hidden font-medium" style={{ fontFamily: "var(--font-body)" }}>До</span>
-                    <p className="text-[13px] md:text-[18px] leading-[1.35] font-light text-black/40" style={{ fontFamily: "var(--font-body)" }}>
+                    <p className="text-[13px] md:text-[18px] leading-[1.35] font-light text-black/60" style={{ fontFamily: "var(--font-body)" }}>
                       {row.before}
                     </p>
                   </div>

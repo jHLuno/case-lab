@@ -96,7 +96,9 @@ export default function RootLayout({
             }
           })();
         `}} />
-        {children}
+        <main id="main">
+          {children}
+        </main>
       </body>
     </html>
   );

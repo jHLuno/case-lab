@@ -37,7 +37,7 @@ export default function BackToTop() {
                      text-black/60 hover:text-[#040082]
                      hover:bg-white/95 hover:shadow-[0_12px_40px_-8px_rgba(4,0,130,0.3)]
                      hover:-translate-y-1
-                     transition-all duration-300 cursor-pointer"
+                     transition-[background-color,box-shadow,transform,color] duration-200 cursor-pointer"
           aria-label="Наверх"
           title="Наверх"
         >

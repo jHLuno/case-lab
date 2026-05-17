@@ -108,17 +108,17 @@ export default function About() {
             style={{ fontFamily: "var(--font-heading)" }}
           >
             {"История".split(" ").map((word, i) => (
-              <span key={i} className="about-word inline-block" style={{ willChange: "filter, opacity, transform" }}>
+              <span key={i} className="about-word inline-block">
                 {word}
               </span>
             ))}{" "}
-            <span className="border-b-2 border-[#040082] pb-1 md:pb-1.5 mb-1 md:mb-0 about-word inline-block" style={{ willChange: "filter, opacity, transform" }}>
+            <span className="border-b-2 border-[#040082] pb-1 md:pb-1.5 mb-1 md:mb-0 about-word inline-block">
               экспертизы
             </span>{" "}
-            <span className="about-word inline-block mt-1 md:mt-0" style={{ willChange: "filter, opacity, transform" }}>
+            <span className="about-word inline-block mt-1 md:mt-0">
               Case
             </span>{" "}
-            <span className="about-word inline-block" style={{ willChange: "filter, opacity, transform" }}>
+            <span className="about-word inline-block">
               Lab
             </span>
           </h2>
@@ -231,7 +231,7 @@ export default function About() {
         >
           <a
             href="#news"
-            className="inline-flex items-center gap-2 text-black text-[15px] font-normal hover:gap-3 transition-all duration-300 group"
+            className="inline-flex items-center gap-2 text-black text-[15px] font-normal hover:gap-3 transition-[gap] duration-200 group"
             style={{ fontFamily: "var(--font-body)" }}
           >
             Компании в разборе

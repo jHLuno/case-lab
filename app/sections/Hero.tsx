@@ -17,7 +17,7 @@ export default function Hero() {
     <section
       ref={containerRef}
       aria-label="Главный экран"
-      className="relative min-h-[100svh] w-full overflow-hidden bg-[#000011] flex items-end"
+      className="relative min-h-[100dvh] w-full overflow-hidden bg-[#000011] flex items-end"
     >
       {/* Silk background */}
       <div className="absolute inset-0 w-full h-full">
@@ -54,12 +54,12 @@ export default function Hero() {
           {/* Left — Big headline + CTA */}
           <div className="flex-1">
             <motion.div
-              initial={{ opacity: 0, y: 60 }}
+              initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
-                duration: 1.2,
+                duration: 0.8,
                 ease: [0.16, 1, 0.3, 1],
-                delay: 0.3,
+                delay: 0.2,
               }}
             >
               <h1
@@ -70,12 +70,12 @@ export default function Hero() {
               </h1>
             </motion.div>
             <motion.div
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
-                duration: 1,
+                duration: 0.7,
                 ease: [0.16, 1, 0.3, 1],
-                delay: 0.6,
+                delay: 0.35,
               }}
               className="mt-4 md:mt-6"
             >
@@ -87,19 +87,19 @@ export default function Hero() {
               </p>
             </motion.div>
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
-                duration: 1,
+                duration: 0.7,
                 ease: [0.16, 1, 0.3, 1],
-                delay: 0.9,
+                delay: 0.5,
               }}
               className="mt-8 md:mt-10"
             >
               <button
                 type="button"
                 onClick={openPopup}
-                className="inline-flex items-center gap-3 bg-white text-[#040082] px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] font-normal rounded-full cursor-pointer hover:gap-4 transition-all duration-300"
+                className="inline-flex items-center gap-3 bg-white text-[#040082] px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] font-normal rounded-full cursor-pointer hover:gap-4 transition-[gap,transform] duration-200"
                 style={{ fontFamily: "var(--font-body)" }}
               >
                 Записаться на диагностику
@@ -111,20 +111,20 @@ export default function Hero() {
                 className="text-white/80 text-[12px] mt-4 font-medium max-w-lg leading-[1.5]"
                 style={{ fontFamily: "var(--font-body)" }}
               >
-                Офлайн в Алматы. Дата сессии — в течение 24 часов после заявки.
-                Интервью с командой + анализ + brief с точками роста — через 48 часов
+                Офлайн в Алматы. Дата сессии — в течение 24ч после заявки.<br />
+                Интервью + анализ + brief с точками роста — через 48 часов
               </p>
             </motion.div>
           </div>
 
           {/* Right — Partner logos */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
-              duration: 1,
+              duration: 0.7,
               ease: [0.16, 1, 0.3, 1],
-              delay: 1.1,
+              delay: 0.65,
             }}
             className="flex items-center gap-3 md:gap-4 mt-12 md:mt-0 self-end"
           >

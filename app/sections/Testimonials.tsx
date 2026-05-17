@@ -72,7 +72,7 @@ export default function Testimonials() {
                 <div
                   key={t.name}
                   onClick={() => setActiveIndex(i)}
-                  className={`border-t border-black/10 py-4 transition-all duration-500 ease-out cursor-pointer select-none ${
+                  className={`border-t border-black/10 py-4 transition-opacity duration-200 ease-out cursor-pointer select-none ${
                     activeIndex === i
                       ? "opacity-100"
                       : "opacity-40 hover:opacity-70"

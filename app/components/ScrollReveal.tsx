@@ -20,10 +20,10 @@ export default function ScrollReveal({
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   const directions = {
-    up: { y: 60, x: 0 },
-    down: { y: -60, x: 0 },
-    left: { x: 60, y: 0 },
-    right: { x: -60, y: 0 },
+    up: { y: 24, x: 0 },
+    down: { y: -24, x: 0 },
+    left: { x: 24, y: 0 },
+    right: { x: -24, y: 0 },
   };
 
   return (
@@ -39,7 +39,7 @@ export default function ScrollReveal({
           : { opacity: 0, ...directions[direction] }
       }
       transition={{
-        duration: 0.9,
+        duration: 0.6,
         delay,
         ease: [0.16, 1, 0.3, 1],
       }}

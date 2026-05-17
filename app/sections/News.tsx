@@ -66,7 +66,7 @@ export default function News() {
             <a
               key={article.title}
               href={article.href}
-              className="group bg-white p-6 md:p-8 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] md:shadow-none rounded-[12px] md:rounded-none hover:bg-[#040082]/[0.02] transition-colors duration-300"
+              className="group bg-white p-6 md:p-8 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] md:shadow-none rounded-[12px] md:rounded-none hover:bg-[#040082]/[0.02] transition-colors duration-200"
             >
               <span
                 className="inline-block text-[#040082] text-[11px] uppercase tracking-wider mb-4"
@@ -75,7 +75,7 @@ export default function News() {
                 {article.tag}
               </span>
               <h3
-                className="text-black text-[15px] md:text-[18px] lg:text-[20px] font-normal leading-[1.25] uppercase tracking-[0.02em] mb-3 group-hover:text-[#040082] transition-colors duration-300"
+                className="text-black text-[15px] md:text-[18px] lg:text-[20px] font-normal leading-[1.25] uppercase tracking-[0.02em] mb-3 group-hover:text-[#040082] transition-colors duration-200"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
                 {article.title}
@@ -86,9 +86,9 @@ export default function News() {
               >
                 {article.desc}
               </p>
-                <span className="inline-flex items-center gap-2 text-[#040082] text-[14px] md:text-[15px] font-medium group-hover:text-[#040082] transition-colors duration-300" style={{ fontFamily: "var(--font-body)" }}>
+                <span className="inline-flex items-center gap-2 text-[#040082] text-[14px] md:text-[15px] font-medium group-hover:text-[#040082] transition-colors duration-200" style={{ fontFamily: "var(--font-body)" }}>
                 Читать
-                <ArrowUpRight size={14} strokeWidth={1.5} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                <ArrowUpRight size={14} strokeWidth={1.5} className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </span>
             </a>
           ))}

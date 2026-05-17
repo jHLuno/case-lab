@@ -36,7 +36,7 @@
 @theme {
   /* Colors */
   --color-white: #ffffff;
-  --color-black: #000000;
+  --color-black: #0a0a0a;
   --color-blue: #040082;
   --color-blue-light: #1a1a9e;
   --color-blue-dark: #020060;
@@ -87,7 +87,7 @@
   body {
     font-family: var(--font-body);
     background-color: #ffffff;
-    color: #000000;
+    color: #0a0a0a;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -136,7 +136,7 @@
     font-size: 16px;
     font-weight: 400;
     line-height: 1.25;
-    transition: all 0.3s ease;
+    transition: background-color 0.2s ease, gap 0.2s ease;
   }
 
   .divider-gradient {
@@ -212,4 +212,16 @@
 /* Remove default outline for mouse users */
 :focus:not(:focus-visible) {
   outline: none;
+}
+
+/* GSAP animated elements — hidden until JS animates them */
+.gsap-hidden {
+  opacity: 0;
+}
+
+/* Fallback: show content if JS is disabled */
+@media (scripting: none) {
+  .gsap-hidden {
+    opacity: 1 !important;
+  }
 }

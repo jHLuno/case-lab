@@ -34,7 +34,7 @@ export default function ComingSoonPage({ tag, title, description }: ComingSoonPa
           {/* Back link */}
           <Link
             href="/#news"
-            className="inline-flex items-center gap-2 text-black/40 text-[13px] font-light mb-8 hover:text-[#040082] transition-colors"
+            className="inline-flex items-center gap-2 text-black/60 text-[13px] font-light mb-8 hover:text-[#040082] transition-colors"
             style={{ fontFamily: "var(--font-body)" }}
           >
             <ArrowLeft size={14} />
@@ -70,7 +70,7 @@ export default function ComingSoonPage({ tag, title, description }: ComingSoonPa
             <div className="flex items-center gap-3 mb-4">
               <div className="w-2 h-2 rounded-full bg-[#040082] animate-pulse" />
               <span
-                className="text-black/40 text-[12px] uppercase tracking-wider font-medium"
+                className="text-black/60 text-[12px] uppercase tracking-wider font-medium"
                 style={{ fontFamily: "var(--font-body)" }}
               >
                 В подготовке

@@ -45,7 +45,7 @@ function BlurRevealHeading({ text, className = "" }: { text: string; className?:
       style={{ fontFamily: "var(--font-heading)" }}
     >
       {text.split(" ").map((word, i) => (
-        <span key={i} className="blur-word inline-block" style={{ willChange: "filter, opacity, transform" }}>
+        <span key={i} className="blur-word inline-block">
           {word}
         </span>
       ))}
@@ -139,8 +139,7 @@ function PricingCard({
   return (
     <div
       ref={cardRef}
-      className="relative h-full"
-      style={{ opacity: 0 }}
+      className="relative h-full gsap-hidden"
     >
       <div
         className={`relative rounded-[20px] overflow-hidden flex flex-col h-full ${
@@ -243,7 +242,7 @@ function PricingCard({
           <button
             type="button"
             onClick={onCta}
-            className={`group/btn inline-flex items-center justify-center gap-3 px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] font-normal rounded-full w-full transition-all duration-300 hover:gap-4 ${
+            className={`group/btn inline-flex items-center justify-center gap-3 px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] font-normal rounded-full w-full transition-[gap,background-color,transform] duration-200 hover:gap-4 ${
               plan.popular
                 ? "bg-white text-[#040082] hover:bg-white/90"
                 : "bg-white/10 text-white border border-white/20 hover:bg-white/20"
@@ -251,7 +250,7 @@ function PricingCard({
             style={{ fontFamily: "var(--font-body)" }}
           >
             <span>{plan.cta}</span>
-            <span className="transition-transform duration-300 group-hover/btn:translate-x-1">
+            <span className="transition-transform duration-200 group-hover/btn:translate-x-1">
               <ArrowRight size={16} strokeWidth={2} />
             </span>
           </button>
@@ -315,10 +314,11 @@ export default function Pricing() {
         {/* Bottom note */}
         <div className="mt-12 md:mt-16 text-center">
           <p
-            className="text-black/60 text-[14px] font-light"
+            className="text-black/60 text-[14px] font-light leading-[1.5]"
             style={{ fontFamily: "var(--font-body)" }}
           >
-            Оба пакета — офлайн в Алматы. Дата сессии — в течение 24 часов после заявки.
+            Оба пакета — офлайн в Алматы.<br />
+            Дата сессии — в течение 24 часов после заявки.
           </p>
         </div>
       </div>

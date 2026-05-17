@@ -48,7 +48,7 @@ export default function Team() {
           {team.map((member, i) => (
             <ScrollReveal key={member.name} delay={i * 0.12}>
               <div
-                className={`relative flex flex-col items-center text-center p-8 md:p-10 rounded-[20px] border transition-all duration-300 ${
+                className={`relative flex flex-col items-center text-center p-8 md:p-10 rounded-[20px] border transition-[border-color,box-shadow] duration-200 ${
                   member.lead
                     ? "border-[#040082]/20 bg-[#040082]/[0.02] shadow-[0_8px_32px_-8px_rgba(4,0,130,0.1)]"
                     : "border-black/[0.06] bg-white"
