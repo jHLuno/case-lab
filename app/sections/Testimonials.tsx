@@ -10,21 +10,18 @@ const testimonials = [
     quote:
       "За два дня стратегической сессии мы получили не просто направление, а конкретный рабочий план действий на год. Были определены основные периоды активности, ключевые маркетинговые акценты и логика запуска кампаний. Команда быстро синхронизировалась и перешла к реализации.",
     role: "Генеральный директор, Adili Digital Print",
-    session: "Апрель 2026",
   },
   {
     name: "Турлан Абиш",
     quote:
       "Мы привлекли Данияра в момент, когда нужно было «пересобрать» бренд заново. После сессии внутри команды появилось общее понимание и уверенность в направлении. Многие решения, которые раньше обсуждались долго и без финала, стали очевидными.",
     role: "Директор, Arigato Travel",
-    session: "Апрель 2026",
   },
   {
     name: "Жанна Нуртаева",
     quote:
       "По итогам работы мы получили чёткое позиционирование, единую логику коммуникаций и практическую маркетинговую рамку. Это не просто стратегический документ, а рабочий инструмент для принятия управленческих решений и усиления рыночных позиций.",
     role: "CEO & Founder, 71 East Hotel / Сәт",
-    session: "Апрель 2026",
   },
 ];
 
@@ -154,18 +151,12 @@ export default function Testimonials() {
                 >
                   <blockquote
                     cite="#testimonials"
-                    className="text-black text-[14px] md:text-[22px] lg:text-[24px] font-normal leading-[1.4] mb-6 break-words"
+                    className="text-black text-[13px] md:text-[18px] lg:text-[20px] font-normal leading-[1.5] mb-6 break-words"
                     style={{ fontFamily: "var(--font-body)" }}
                   >
                     &ldquo;{testimonials[activeIndex].quote}&rdquo;
                   </blockquote>
                   <div>
-                    <span
-                      className="inline-block bg-[#040082]/10 text-[#040082] text-[11px] md:text-[12px] font-normal px-3 py-1.5 rounded-full mb-3 uppercase tracking-wider"
-                      style={{ fontFamily: "var(--font-body)" }}
-                    >
-                      {testimonials[activeIndex].session}
-                    </span>
                     <p
                       className="text-black text-[13px] md:text-[16px] font-normal"
                       style={{ fontFamily: "var(--font-body)" }}
