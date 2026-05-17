@@ -53,10 +53,7 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
     creator: "@caselab_kz",
   },
-  verification: {
-    google: "your-google-verification-code",
-    yandex: "your-yandex-verification-code",
-  },
+
 };
 
 export default function RootLayout({
