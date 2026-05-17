@@ -29,7 +29,7 @@ const bentoItems = [
     id: "cases",
     label: "Кейсы",
     title: "5",
-    body: "команий, меняющих стандарты рынка",
+    body: "компаний, меняющих стандарты рынка",
     col: "md:col-span-3",
     dark: false,
   },

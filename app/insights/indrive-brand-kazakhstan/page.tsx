@@ -1,16 +1,16 @@
 import ComingSoonPage, { buildComingSoonMetadata } from "../../components/ComingSoonPage";
 
 export const metadata = buildComingSoonMetadata(
-  "Как inDrive выстроил локальный бренд в Казахстане",
-  "Placeholder-страница будущего разбора кейса inDrive от Case Lab."
+  "Коллаборации, селебрити, импакт — три кейса с NBS",
+  "Как abr превратила коллаборации в трафик, inDrive выбирает амбассадоров по данным, а BLVD дошёл до Cannes Lions."
 );
 
 export default function Page() {
   return (
     <ComingSoonPage
       tag="Поток #2"
-      title="Как inDrive выстроил локальный бренд в Казахстане"
-      description="Разбор кейса: от стратегии до метрик. Что сработало, почему это дало результат и какие выводы можно забрать себе."
+      title="Коллаборации, селебрити, импакт — три кейса с NBS"
+      description="Как abr превратила коллаборации в трафик, inDrive выбирает амбассадоров по данным, а BLVD дошёл до Cannes Lions."
     />
   );
 }
