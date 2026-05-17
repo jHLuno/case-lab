@@ -64,7 +64,7 @@ export default function Testimonials() {
         </ScrollReveal>
 
         {/* Company List + Quote */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
           {/* Company List */}
           <ScrollReveal>
             <div className="space-y-0">
@@ -139,7 +139,7 @@ export default function Testimonials() {
 
           {/* Quote */}
           <ScrollReveal delay={0.15}>
-            <div className="lg:flex lg:items-start min-h-[220px] md:min-h-[280px]">
+            <div className="lg:flex lg:items-start min-h-[220px] md:min-h-[280px] pt-4 lg:pt-0">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeIndex}
@@ -151,7 +151,7 @@ export default function Testimonials() {
                 >
                   <blockquote
                     cite="#testimonials"
-                    className="text-black text-[13px] md:text-[18px] lg:text-[20px] font-normal leading-[1.5] mb-6 break-words"
+                    className="text-black text-[15px] md:text-[18px] lg:text-[20px] font-normal leading-[1.5] mb-6 break-words"
                     style={{ fontFamily: "var(--font-body)" }}
                   >
                     &ldquo;{testimonials[activeIndex].quote}&rdquo;
