@@ -5,13 +5,13 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 const articles = [
   {
     tag: "Поток #2",
-    title: "Как inDrive выстроил локальный бренд в Казахстане",
-    desc: "Разбор кейса: от стратегии до метрик. Что сработало и почему.",
+    title: "Коллаборации, селебрити, импакт — три кейса с NBS",
+    desc: "Как abr превратила коллаборации в трафик, inDrive выбирает амбассадоров по данным, а BLVD дошёл до Cannes Lions.",
     href: "/insights/indrive-brand-kazakhstan/",
   },
   {
     tag: "Наблюдение",
-    title: "Почему 70% SMB теряют деньги на одном и том же канале",
+    title: "Почему 70% СМБ теряют деньги на одном и том же канале",
     desc: "Типичная слепая зона в маркетинге среднего бизнеса.",
     href: "/insights/smb-channel-blind-spot/",
   },
@@ -22,9 +22,9 @@ const articles = [
     href: "/insights/diagnostics-vs-audit/",
   },
   {
-    tag: "Ивент",
-    title: "Case Lab Meetup: позиционирование в кризис",
-    desc: "Запись сессии с маркетинг-директорами FMCG и SaaS.",
+    tag: "Поток #1",
+    title: "Первый поток: 3 кейса, которые повлияли на рынок",
+    desc: "Shetel, ZimaBlue, Hero's Journey — системный разбор проектов, которые повлияли на бизнес и индустрию.",
     href: "/insights/meetup-positioning-crisis/",
   },
 ];

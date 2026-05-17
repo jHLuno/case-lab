@@ -1,20 +1,63 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import ScrollReveal from "../components/ScrollReveal";
 
 const industries = [
-  { id: 1, title: "Hero's Journey", abbr: "HJ" },
-  { id: 2, title: "abr", abbr: "abr" },
-  { id: 3, title: "inDrive", abbr: "ID" },
-  { id: 4, title: "Shetel", abbr: "SH" },
-  { id: 5, title: "ZimaBlue", abbr: "ZB" },
-  { id: 6, title: "Citix", abbr: "CX" },
+  {
+    id: 1,
+    title: "Hero's Journey",
+    speaker: "Диана Тажимова",
+    initials: "ДТ",
+    photo: "/Диана%20Тажимова%20(Hero's%20Journey).webp",
+    objectPos: "center 20%",
+  },
+  {
+    id: 2,
+    title: "abr",
+    speaker: "Салтанат Муса",
+    initials: "СМ",
+    photo: "/Салтанат%20Муса(abr).webp",
+    objectPos: "center 20%",
+  },
+  {
+    id: 3,
+    title: "inDrive",
+    speaker: "Алексей Понтус",
+    initials: "АП",
+    photo: "/Алексей%20Понтус%20(InDriver).webp",
+    objectPos: "center 20%",
+  },
+  {
+    id: 4,
+    title: "Shetel",
+    speaker: "Нурсултан Магзумов",
+    initials: "НМ",
+    photo: "/Нурсултан%20Магзумов%20(Shetel)%20.webp",
+    objectPos: "center top",
+  },
+  {
+    id: 5,
+    title: "ZimaBlue",
+    speaker: "Фарангиза Шукашева",
+    initials: "ФШ",
+    photo: "/Фарангиза%20Шукашева%20(ZimaBlue).webp",
+    objectPos: "center 20%",
+  },
+  {
+    id: 6,
+    title: "Citix",
+    speaker: "Леонид Нигматуллин",
+    initials: "ЛН",
+    photo: "/Леонид%20Нигматуллин%20(Citix).webp",
+    objectPos: "center top",
+  },
 ];
 
-const AUTO_SCROLL_SPEED = 1.5; // px per frame (~90px/s at 60fps)
-const RESUME_DELAY = 3000; // ms after user stops interacting
+const AUTO_SCROLL_SPEED = 1.5;
+const RESUME_DELAY = 3000;
 
 export default function Cases() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -42,14 +85,12 @@ export default function Cases() {
         return;
       }
 
-      // User is touching — just track position, don't auto-scroll
       if (!isAutoScrollingRef.current) {
         lastScrollLeftRef.current = el.scrollLeft;
         animId = requestAnimationFrame(tick);
         return;
       }
 
-      // Detect if user scrolled via momentum/wheel while auto-scroll was active
       const expected = lastScrollLeftRef.current + AUTO_SCROLL_SPEED;
       const diff = Math.abs(el.scrollLeft - expected);
       if (diff > AUTO_SCROLL_SPEED * 5) {
@@ -66,7 +107,6 @@ export default function Cases() {
       el.scrollLeft += AUTO_SCROLL_SPEED;
       lastScrollLeftRef.current = el.scrollLeft;
 
-      // Seamless loop — jump back when passing half the duplicated track
       if (el.scrollLeft >= halfWidthRef.current) {
         el.scrollLeft -= halfWidthRef.current;
         lastScrollLeftRef.current = el.scrollLeft;
@@ -111,7 +151,7 @@ export default function Cases() {
         </ScrollReveal>
       </div>
 
-      {/* Marquee cards — JS auto-scroll on mobile, CSS on desktop */}
+      {/* Marquee cards */}
       <div
         ref={containerRef}
         className="overflow-x-auto md:overflow-hidden py-3 scrollbar-hide"
@@ -127,20 +167,26 @@ export default function Cases() {
                   className="relative rounded-[16px] overflow-hidden group cursor-pointer flex-shrink-0 border border-black/[0.08] bg-white hover:border-[#040082]/30 hover:shadow-[0_12px_40px_-12px_rgba(4,0,130,0.15)] hover:scale-[1.02] transition-all duration-500"
                   style={{ width: "clamp(280px, 35vw, 400px)" }}
                 >
-                  <div className="aspect-[4/3] relative overflow-hidden flex flex-col items-center justify-center p-8">
+                  {/* Photo with blue overlay */}
+                  <div className="aspect-[4/3] relative overflow-hidden">
+                    <Image
+                      src={industry.photo}
+                      alt={industry.speaker}
+                      fill
+                      className="object-cover"
+                      style={{ objectPosition: industry.objectPos }}
+                      sizes="(max-width: 768px) 280px, 400px"
+                    />
+                    {/* Blue gradient overlay — stronger at bottom, fades to transparent at top */}
                     <div
-                      className="absolute inset-0 opacity-[0.04]"
+                      className="absolute inset-0"
                       style={{
-                        background: `linear-gradient(135deg, #040082 0%, #1a1a9e 50%, #040082 100%)`,
+                        background: "linear-gradient(0deg, rgba(4,0,130,0.7) 0%, rgba(4,0,130,0.3) 40%, transparent 100%)",
                       }}
                     />
-                    <span
-                      className="relative z-10 text-[clamp(48px,6vw,80px)] font-bold leading-none text-black/8 select-none"
-                      style={{ fontFamily: "var(--font-heading)" }}
-                    >
-                      {industry.abbr}
-                    </span>
                   </div>
+
+                  {/* Info */}
                   <div className="p-5 md:p-6 border-t border-black/5">
                     <span
                       className="text-black text-[18px] md:text-[22px] font-normal leading-[1.15] block"
@@ -152,7 +198,7 @@ export default function Cases() {
                       className="text-gray text-[12px] md:text-[13px] font-light mt-1 block"
                       style={{ fontFamily: "var(--font-body)" }}
                     >
-                      Кейс в разработке
+                      {industry.speaker}
                     </span>
                   </div>
                 </div>
