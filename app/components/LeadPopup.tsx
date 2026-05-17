@@ -22,6 +22,11 @@ export default function LeadPopup() {
     const html = document.documentElement;
     const prevHtml = html.style.overflow;
     html.style.overflow = "hidden";
+    // iOS Safari: prevent background scroll
+    document.body.style.position = "fixed";
+    document.body.style.inset = "0";
+    document.body.style.width = "100%";
+    const scrollY = window.scrollY;
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") closePopup();
@@ -31,6 +36,10 @@ export default function LeadPopup() {
     return () => {
       document.body.style.overflow = prev;
       html.style.overflow = prevHtml;
+      document.body.style.position = "";
+      document.body.style.inset = "";
+      document.body.style.width = "";
+      window.scrollTo(0, scrollY);
       document.removeEventListener("keydown", onKey);
     };
   }, [isOpen, closePopup]);
@@ -94,7 +103,7 @@ export default function LeadPopup() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overscroll-none touch-none"
           onClick={(e) => {
             if (e.target === e.currentTarget) closePopup();
           }}
@@ -105,7 +114,7 @@ export default function LeadPopup() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 20 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-[500px] bg-white rounded-[20px] shadow-2xl overflow-hidden"
+            className="relative w-full max-w-[500px] bg-white rounded-[20px] shadow-2xl overflow-y-auto max-h-[90vh] touch-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <button
