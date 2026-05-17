@@ -139,7 +139,7 @@ export default function Testimonials() {
 
           {/* Quote */}
           <ScrollReveal delay={0.15}>
-            <div className="lg:flex lg:items-center">
+            <div className="lg:flex lg:items-start min-h-[220px] md:min-h-[280px]">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeIndex}
