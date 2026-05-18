@@ -186,9 +186,6 @@
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
   }
-  .marquee-track:hover {
-    animation-play-state: paused;
-  }
 }
 
 /* Scrollbar hide utility */

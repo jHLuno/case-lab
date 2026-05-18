@@ -164,8 +164,8 @@ export default function Cases() {
               {industries.map((industry) => (
                 <div
                   key={`${industry.id}-${set}`}
-                  className="relative rounded-[16px] overflow-hidden group cursor-pointer flex-shrink-0 border border-black/[0.08] bg-white hover:border-[#040082]/30 hover:shadow-[0_12px_40px_-12px_rgba(4,0,130,0.15)] hover:scale-[1.02] transition-[scale,border-color,box-shadow] duration-500"
-                  style={{ width: "clamp(280px, 35vw, 400px)" }}
+                  className="relative rounded-[16px] overflow-hidden group cursor-pointer flex-shrink-0 border border-black/[0.08] bg-white hover:border-[#040082]/30 hover:shadow-[0_12px_40px_-12px_rgba(4,0,130,0.15)] hover:scale-[1.02] transition-[scale,border-color,box-shadow] duration-500 will-change-transform"
+                  style={{ width: "clamp(280px, 35vw, 400px)", contain: "layout style paint" }}
                 >
                   {/* Photo with blue overlay */}
                   <div className="aspect-[4/3] relative overflow-hidden">
@@ -176,12 +176,14 @@ export default function Cases() {
                       className="object-cover"
                       style={{ objectPosition: industry.objectPos }}
                       sizes="(max-width: 768px) 280px, 400px"
+                      loading={set === 0 ? "eager" : "lazy"}
                     />
-                    {/* Blue gradient overlay — stronger at bottom, fades to transparent at top */}
+                    {/* Blue gradient overlay */}
                     <div
-                      className="absolute inset-0"
+                      className="absolute inset-0 pointer-events-none"
                       style={{
                         background: "linear-gradient(0deg, rgba(4,0,130,0.7) 0%, rgba(4,0,130,0.3) 40%, transparent 100%)",
+                        willChange: "transform",
                       }}
                     />
                   </div>
