@@ -85,35 +85,36 @@ export default function Evolution() {
               </AnimatePresence>
             </div>
 
-            {/* Title */}
-            <AnimatePresence mode="wait">
-              <motion.h3
-                key={`title-${activeIndex}`}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="text-black text-[clamp(18px,3vw,32px)] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-4"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                {stages[activeIndex].title}
-              </motion.h3>
-            </AnimatePresence>
+            {/* Title + Description — fixed height to prevent layout shift */}
+            <div className="min-h-[140px] md:min-h-[120px] flex flex-col items-center justify-start">
+              <AnimatePresence mode="wait">
+                <motion.h3
+                  key={`title-${activeIndex}`}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                  className="text-black text-[clamp(18px,3vw,32px)] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-4"
+                  style={{ fontFamily: "var(--font-heading)" }}
+                >
+                  {stages[activeIndex].title}
+                </motion.h3>
+              </AnimatePresence>
 
-            {/* Description */}
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={`desc-${activeIndex}`}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.35, delay: 0.04, ease: [0.16, 1, 0.3, 1] }}
-                className="text-black/60 text-[14px] md:text-[16px] leading-[1.6] font-light max-w-xl mx-auto"
-                style={{ fontFamily: "var(--font-body)" }}
-              >
-                {stages[activeIndex].desc}
-              </motion.p>
-            </AnimatePresence>
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={`desc-${activeIndex}`}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.35, delay: 0.04, ease: [0.16, 1, 0.3, 1] }}
+                  className="text-black/60 text-[14px] md:text-[16px] leading-[1.6] font-light max-w-xl mx-auto"
+                  style={{ fontFamily: "var(--font-body)" }}
+                >
+                  {stages[activeIndex].desc}
+                </motion.p>
+              </AnimatePresence>
+            </div>
 
             {/* Progress dots */}
             <div className="flex items-center gap-3 mt-10 md:mt-12">
