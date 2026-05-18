@@ -73,6 +73,15 @@ export default function LeadPopup() {
       return;
     }
 
+    // Validate Kazakhstan phone number
+    const cleanPhone = phone.replace(/[\s\-\(\)]/g, "");
+    const kzPhoneRegex = /^(\+?7|8)(7\d{2})\d{7}$/;
+    if (!kzPhoneRegex.test(cleanPhone)) {
+      setStatus("error");
+      setErrorMsg("Введите казахстанский номер: +7 7XX XXX XX XX");
+      return;
+    }
+
     try {
       const res = await fetch("/api/leads/", {
         method: "POST",
