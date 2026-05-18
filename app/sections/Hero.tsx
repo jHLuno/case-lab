@@ -126,7 +126,7 @@ export default function Hero() {
               ease: [0.16, 1, 0.3, 1],
               delay: 0.65,
             }}
-            className="flex items-center gap-3 md:gap-4 mt-12 md:mt-0 self-end"
+            className="flex items-center gap-3 md:gap-4 mt-12 md:mt-0 self-start md:self-end"
           >
             <Image
               src="/Narxoz%20University%20Logo%20White.png"
