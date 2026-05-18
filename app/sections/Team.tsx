@@ -8,7 +8,7 @@ const team = [
     name: "Асылбек Нугуманов",
     role: "Маркетолог Narxoz Business School",
     photo: "/asylbek-nugumanov.webp",
-    objectPos: "center 80%",
+    objectPos: "center 30%",
     scale: "100%",
   },
   {
