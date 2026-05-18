@@ -86,7 +86,7 @@ export default function Evolution() {
             </div>
 
             {/* Title + Description — fixed height to prevent layout shift */}
-            <div className="min-h-[180px] md:min-h-[140px] flex flex-col items-center justify-start">
+            <div className="min-h-[150px] md:min-h-[140px] flex flex-col items-center justify-center">
               <AnimatePresence mode="wait">
                 <motion.h3
                   key={`title-${activeIndex}`}
