@@ -14,14 +14,14 @@ const team = [
   },
   {
     name: "Асылбек Нугуманов",
-    role: "Маркетолог Narxoz Business School",
+    role: "Маркетолог Narxoz Business School\nКоординатор проекта Case Lab",
     photo: "/asylbek-nugumanov.webp",
     objectPos: "center 15%",
     scale: "100%",
   },
   {
     name: "Амиржан Жампеисов",
-    role: "Маркетолог",
+    role: "CEO Founder's Hub\nex-Founder ARN Labs\nКоординатор проекта Case Lab",
     photo: "/amirkhan-zhampeisov.webp",
     objectPos: "center 20%",
     scale: "140%",
