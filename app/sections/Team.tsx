@@ -6,7 +6,7 @@ import ScrollReveal from "../components/ScrollReveal";
 const team = [
   {
     name: "Данияр Косназаров",
-    role: "Советник президента Университета Нархоз\nОснователь Case Lab\nex-CMO Qazaq Republic, KPMG\nОпыт консультирования 50+ компаний",
+    role: "Советник президента Нархоз\nОснователь Case Lab\nex-CMO Qazaq Republic, KPMG\n50+ компаний в консалтинге",
     photo: "/daniyar-kosnazarov.webp",
     objectPos: "center 20%",
     scale: "140%",
@@ -51,13 +51,13 @@ export default function Team() {
           </div>
         </ScrollReveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 md:items-end">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           {team.map((member, i) => (
             <ScrollReveal key={member.name} delay={i * 0.12}>
               <div
-                className={`relative flex flex-col items-center text-center p-8 md:p-10 rounded-[20px] border transition-[border-color,box-shadow] duration-200 ${
+                className={`relative flex flex-col items-center text-center p-8 md:p-10 rounded-[20px] border transition-[border-color,box-shadow] duration-200 h-full ${
                   member.lead
-                    ? "border-[#040082]/20 bg-[#040082]/[0.02] shadow-[0_8px_32px_-8px_rgba(4,0,130,0.1)] md:-mt-6"
+                    ? "border-[#040082]/20 bg-[#040082]/[0.02] shadow-[0_8px_32px_-8px_rgba(4,0,130,0.1)]"
                     : "border-black/[0.06] bg-white"
                 }`}
               >
