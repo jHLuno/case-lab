@@ -117,7 +117,7 @@ export default function Evolution() {
             </div>
 
             {/* Progress dots */}
-            <div className="flex items-center gap-3 mt-6 md:mt-12">
+            <div className="flex items-center gap-3 mt-4 md:mt-12">
               {stages.map((_, i) => (
                 <button
                   key={i}
@@ -137,7 +137,7 @@ export default function Evolution() {
 
         {/* CTA */}
         <ScrollReveal delay={0.2}>
-          <div className="mt-8 md:mt-16 text-center">
+          <div className="mt-4 md:mt-16 text-center">
             <button
               type="button"
               onClick={openPopup}
