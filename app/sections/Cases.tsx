@@ -164,7 +164,7 @@ export default function Cases() {
               {industries.map((industry) => (
                 <div
                   key={`${industry.id}-${set}`}
-                  className="relative rounded-[16px] overflow-hidden group cursor-pointer flex-shrink-0 border border-black/[0.08] bg-white hover:border-[#040082]/30 hover:shadow-[0_12px_40px_-12px_rgba(4,0,130,0.15)] hover:scale-[1.02] transition-all duration-500"
+                  className="relative rounded-[16px] overflow-hidden group cursor-pointer flex-shrink-0 border border-black/[0.08] bg-white hover:border-[#040082]/30 hover:shadow-[0_12px_40px_-12px_rgba(4,0,130,0.15)] hover:scale-[1.02] transition-[scale,border-color,box-shadow] duration-500"
                   style={{ width: "clamp(280px, 35vw, 400px)" }}
                 >
                   {/* Photo with blue overlay */}
