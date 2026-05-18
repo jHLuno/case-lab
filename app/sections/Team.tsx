@@ -6,7 +6,7 @@ import ScrollReveal from "../components/ScrollReveal";
 const team = [
   {
     name: "Данияр Косназаров",
-    role: "Советник президента\nУниверситета Нархоз\nОснователь Case Lab\nex-CMO Qazaq Republic, KPMG\n50+ компаний в консалтинге",
+    role: "Советник президента Narxoz University\nОснователь Case Lab\nex-CMO Qazaq Republic, KPMG\n50+ компаний в консалтинге",
     photo: "/daniyar-kosnazarov.webp",
     objectPos: "center 20%",
     scale: "140%",
