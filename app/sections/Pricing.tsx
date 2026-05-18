@@ -244,8 +244,8 @@ function PricingCard({
             onClick={onCta}
             className={`group/btn inline-flex items-center justify-center gap-3 px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] font-normal rounded-full w-full transition-[gap,background-color,transform] duration-200 hover:gap-4 ${
               plan.popular
-                ? "bg-white text-[#040082] hover:bg-white/90"
-                : "bg-white/10 text-white border border-white/20 hover:bg-white/20"
+                ? "bg-white/10 text-white border border-white/20 hover:bg-white/20"
+                : "bg-white text-[#040082] hover:bg-white/90"
             }`}
             style={{ fontFamily: "var(--font-body)" }}
           >
