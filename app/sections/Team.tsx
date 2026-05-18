@@ -51,7 +51,7 @@ export default function Team() {
           </div>
         </ScrollReveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 md:items-end">
           {team.map((member, i) => (
             <ScrollReveal key={member.name} delay={i * 0.12}>
               <div
