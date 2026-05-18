@@ -111,7 +111,7 @@ export default function Hero() {
                 className="text-white/80 text-[12px] mt-4 font-medium max-w-lg leading-[1.5]"
                 style={{ fontFamily: "var(--font-body)" }}
               >
-                Офлайн в Алматы. Дата сессии — в течение 24ч после заявки.<br />
+                Офлайн в Алматы.<br />
                 Интервью + анализ + brief с точками роста — через 48 часов
               </p>
             </motion.div>
