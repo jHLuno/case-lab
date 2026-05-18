@@ -191,9 +191,29 @@ export default function LeadPopup() {
                     </label>
                     <input
                       type="tel" id="popup-phone" name="phone" required
-                      placeholder="+7 (___) ___-__-__"
+                      placeholder="+7 7XX XXX XX XX"
+                      defaultValue="+77"
                       className={inputClass}
                       style={inputFont}
+                      onKeyDown={(e) => {
+                        const input = e.currentTarget;
+                        // Prevent deleting the +77 prefix
+                        if ((e.key === "Backspace" || e.key === "Delete") && input.selectionStart !== null && input.selectionStart <= 3) {
+                          e.preventDefault();
+                        }
+                      }}
+                      onChange={(e) => {
+                        let val = e.target.value;
+                        // Ensure starts with +77
+                        if (!val.startsWith("+77")) {
+                          val = "+77" + val.replace(/^\+?7?7?/, "");
+                        }
+                        // Only allow digits after +77
+                        val = "+77" + val.slice(3).replace(/\D/g, "");
+                        // Max length: +77XXXXXXXXX (12 chars)
+                        if (val.length > 12) val = val.slice(0, 12);
+                        e.target.value = val;
+                      }}
                     />
                   </div>
 
