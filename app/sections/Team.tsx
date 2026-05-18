@@ -5,19 +5,19 @@ import ScrollReveal from "../components/ScrollReveal";
 
 const team = [
   {
+    name: "Данияр Косназаров",
+    role: "Советник президента Университета Нархоз\nОснователь Case Lab\nex-CMO Qazaq Republic, KPMG\nОпыт консультирования 50+ компаний",
+    photo: "/daniyar-kosnazarov.webp",
+    objectPos: "center 20%",
+    scale: "140%",
+    lead: true,
+  },
+  {
     name: "Асылбек Нугуманов",
     role: "Маркетолог Narxoz Business School",
     photo: "/asylbek-nugumanov.webp",
     objectPos: "center 15%",
     scale: "100%",
-  },
-  {
-    name: "Данияр Косназаров",
-    role: "Советник президента Университета Нархоз / Исследователь поколений Z и Альфа",
-    photo: "/daniyar-kosnazarov.webp",
-    objectPos: "center 20%",
-    scale: "140%",
-    lead: true,
   },
   {
     name: "Амиржан Жампеисов",
@@ -83,7 +83,7 @@ export default function Team() {
 
                 {/* Role */}
                 <p
-                  className="text-black/50 text-[14px] leading-[1.5] font-light"
+                  className="text-black/50 text-[14px] leading-[1.5] font-light whitespace-pre-line"
                   style={{ fontFamily: "var(--font-body)" }}
                 >
                   {member.role}
