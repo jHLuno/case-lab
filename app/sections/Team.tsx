@@ -8,7 +8,7 @@ const team = [
     name: "Асылбек Нугуманов",
     role: "Маркетолог Narxoz Business School",
     photo: "/asylbek-nugumanov.webp",
-    objectPos: "center 30%",
+    objectPos: "center 15%",
     scale: "100%",
   },
   {
@@ -16,7 +16,7 @@ const team = [
     role: "Советник президента Университета Нархоз / Исследователь поколений Z и Альфа",
     photo: "/daniyar-kosnazarov.webp",
     objectPos: "center 20%",
-    scale: "100%",
+    scale: "140%",
     lead: true,
   },
   {
