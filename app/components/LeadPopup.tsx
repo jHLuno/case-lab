@@ -144,7 +144,7 @@ export default function LeadPopup() {
                 </p>
                 <button
                   onClick={closePopup}
-                  className="inline-flex items-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-200"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-200"
                   style={inputFont}
                 >
                   Хорошо
