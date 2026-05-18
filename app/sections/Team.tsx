@@ -21,7 +21,7 @@ const team = [
   },
   {
     name: "Амиржан Жампеисов",
-    role: "CEO Founder's Hub\nex-Founder ARN Labs\nКоординатор проекта Case Lab",
+    role: "CEO Founder's Hub\nex-Founder ARN Labs\nКоординатор проекта Case Lab\nРазвитие стартапов и работа\nс предпринимательскими проектами",
     photo: "/amirkhan-zhampeisov.webp",
     objectPos: "center 20%",
     scale: "140%",
