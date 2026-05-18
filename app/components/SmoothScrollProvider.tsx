@@ -13,13 +13,12 @@ export default function SmoothScrollProvider({
   children: React.ReactNode;
 }) {
   const lenisRef = useRef<Lenis | null>(null);
+  const rafIdRef = useRef<number>(0);
 
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical",
-      gestureOrientation: "vertical",
       smoothWheel: true,
       wheelMultiplier: 1,
       touchMultiplier: 2,
@@ -29,16 +28,15 @@ export default function SmoothScrollProvider({
 
     lenis.on("scroll", ScrollTrigger.update);
 
-    const rafCallback = (time: number) => {
-      lenis.raf(time * 1000);
-    };
-    gsap.ticker.add(rafCallback);
-
-    gsap.ticker.lagSmoothing(0);
+    function raf(time: number) {
+      lenis.raf(time);
+      rafIdRef.current = requestAnimationFrame(raf);
+    }
+    rafIdRef.current = requestAnimationFrame(raf);
 
     return () => {
+      cancelAnimationFrame(rafIdRef.current);
       lenis.destroy();
-      gsap.ticker.remove(rafCallback);
     };
   }, []);
 
