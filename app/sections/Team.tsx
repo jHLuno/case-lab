@@ -8,17 +8,23 @@ const team = [
     name: "Асылбек Нугуманов",
     role: "Маркетолог Narxoz Business School",
     photo: "/asylbek-nugumanov.webp",
+    objectPos: "center 60%",
+    scale: "100%",
   },
   {
     name: "Данияр Косназаров",
     role: "Советник президента Университета Нархоз / Исследователь поколений Z и Альфа",
     photo: "/daniyar-kosnazarov.webp",
+    objectPos: "center 20%",
+    scale: "100%",
     lead: true,
   },
   {
     name: "Амиржан Жампеисов",
     role: "Маркетолог",
     photo: "/amirkhan-zhampeisov.webp",
+    objectPos: "center 20%",
+    scale: "140%",
   },
 ];
 
@@ -62,6 +68,7 @@ export default function Team() {
                     alt={member.name}
                     fill
                     className="object-cover"
+                    style={{ objectPosition: member.objectPos, scale: member.scale }}
                     sizes="96px"
                   />
                 </div>
