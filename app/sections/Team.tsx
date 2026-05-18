@@ -1,23 +1,24 @@
 "use client";
 
+import Image from "next/image";
 import ScrollReveal from "../components/ScrollReveal";
 
 const team = [
   {
     name: "Асылбек Нугуманов",
-    role: "Маркетолог",
-    initials: "АН",
+    role: "Маркетолог Narxoz Business School",
+    photo: "/asylbek-nugumanov.webp",
   },
   {
     name: "Данияр Косназаров",
-    role: "Маркетолог",
-    initials: "ДК",
+    role: "Советник президента Университета Нархоз / Исследователь поколений Z и Альфа",
+    photo: "/daniyar-kosnazarov.webp",
     lead: true,
   },
   {
     name: "Амиржан Жампеисов",
     role: "Маркетолог",
-    initials: "АЖ",
+    photo: "/amirkhan-zhampeisov.webp",
   },
 ];
 
@@ -54,20 +55,15 @@ export default function Team() {
                     : "border-black/[0.06] bg-white"
                 }`}
               >
-                {/* Avatar */}
-                <div
-                  className={`w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center mb-6 ${
-                    member.lead
-                      ? "bg-[#040082] text-white"
-                      : "bg-black/[0.04] text-black/40"
-                  }`}
-                >
-                  <span
-                    className="text-[22px] md:text-[26px] font-bold leading-none"
-                    style={{ fontFamily: "var(--font-heading)" }}
-                  >
-                    {member.initials}
-                  </span>
+                {/* Photo */}
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden mb-6 relative">
+                  <Image
+                    src={member.photo}
+                    alt={member.name}
+                    fill
+                    className="object-cover"
+                    sizes="96px"
+                  />
                 </div>
 
                 {/* Name */}
