@@ -112,7 +112,7 @@ export default function Hero() {
                 style={{ fontFamily: "var(--font-body)" }}
               >
                 Офлайн в Алматы.<br />
-                Интервью + анализ + brief с точками роста — через 48 часов
+                Глубокая сессия с командой — стратегия, точки роста, план действий
               </p>
             </motion.div>
           </div>
