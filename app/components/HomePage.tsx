@@ -5,6 +5,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import BackToTop from "./BackToTop";
 import LeadPopup from "./LeadPopup";
+import SmoothScrollProvider from "./SmoothScrollProvider";
 import { LeadPopupProvider } from "../lib/LeadPopupContext";
 import Hero from "../sections/Hero";
 import About from "../sections/About";
@@ -22,23 +23,25 @@ const News = dynamic(() => import("../sections/News"), { ssr: false });
 export default function HomePage() {
   return (
     <LeadPopupProvider>
-      <main className="relative">
-        <Navbar />
-        <Hero />
-        <ClientsPain />
-        <Pricing />
-        <BeforeAfter />
-        <Timeline />
-        <Testimonials />
-        <Team />
-        <About />
-        <Cases />
-        <Evolution />
-        <News />
-        <Footer />
-        <BackToTop />
-        <LeadPopup />
-      </main>
+      <SmoothScrollProvider>
+        <div className="relative">
+          <Navbar />
+          <Hero />
+          <ClientsPain />
+          <Pricing />
+          <BeforeAfter />
+          <Timeline />
+          <Testimonials />
+          <Team />
+          <About />
+          <Cases />
+          <Evolution />
+          <News />
+          <Footer />
+          <BackToTop />
+          <LeadPopup />
+        </div>
+      </SmoothScrollProvider>
     </LeadPopupProvider>
   );
 }
