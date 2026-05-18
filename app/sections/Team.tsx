@@ -5,19 +5,19 @@ import ScrollReveal from "../components/ScrollReveal";
 
 const team = [
   {
+    name: "Асылбек Нугуманов",
+    role: "Маркетолог Narxoz Business School",
+    photo: "/asylbek-nugumanov.webp",
+    objectPos: "center 15%",
+    scale: "100%",
+  },
+  {
     name: "Данияр Косназаров",
     role: "Советник президента Университета Нархоз / Исследователь поколений Z и Альфа",
     photo: "/daniyar-kosnazarov.webp",
     objectPos: "center 20%",
     scale: "140%",
     lead: true,
-  },
-  {
-    name: "Асылбек Нугуманов",
-    role: "Маркетолог Narxoz Business School",
-    photo: "/asylbek-nugumanov.webp",
-    objectPos: "center 15%",
-    scale: "100%",
   },
   {
     name: "Амиржан Жампеисов",
@@ -57,7 +57,7 @@ export default function Team() {
               <div
                 className={`relative flex flex-col items-center text-center p-8 md:p-10 rounded-[20px] border transition-[border-color,box-shadow] duration-200 ${
                   member.lead
-                    ? "border-[#040082]/20 bg-[#040082]/[0.02] shadow-[0_8px_32px_-8px_rgba(4,0,130,0.1)]"
+                    ? "border-[#040082]/20 bg-[#040082]/[0.02] shadow-[0_8px_32px_-8px_rgba(4,0,130,0.1)] md:-mt-6"
                     : "border-black/[0.06] bg-white"
                 }`}
               >
