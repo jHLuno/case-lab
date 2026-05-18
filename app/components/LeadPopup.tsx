@@ -17,16 +17,19 @@ export default function LeadPopup() {
 
   useEffect(() => {
     if (!isOpen) return;
+    const scrollY = window.scrollY;
     const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     const html = document.documentElement;
     const prevHtml = html.style.overflow;
+
+    document.body.style.overflow = "hidden";
     html.style.overflow = "hidden";
     // iOS Safari: prevent background scroll
     document.body.style.position = "fixed";
-    document.body.style.inset = "0";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
     document.body.style.width = "100%";
-    const scrollY = window.scrollY;
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") closePopup();
@@ -37,7 +40,9 @@ export default function LeadPopup() {
       document.body.style.overflow = prev;
       html.style.overflow = prevHtml;
       document.body.style.position = "";
-      document.body.style.inset = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
       document.body.style.width = "";
       window.scrollTo(0, scrollY);
       document.removeEventListener("keydown", onKey);
