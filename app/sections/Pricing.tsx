@@ -317,7 +317,8 @@ export default function Pricing() {
             className="text-black/60 text-[14px] font-light leading-[1.5]"
             style={{ fontFamily: "var(--font-body)" }}
           >
-            Оба пакета — офлайн в Алматы.
+            Оба пакета — офлайн в Алматы.<br />
+            Результат сессии — готовый план действий с точками роста.
           </p>
         </div>
       </div>
