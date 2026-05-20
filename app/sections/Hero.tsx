@@ -111,7 +111,7 @@ export default function Hero() {
                 className="text-white/80 text-[12px] mt-4 font-medium max-w-lg leading-[1.5]"
                 style={{ fontFamily: "var(--font-body)" }}
               >
-                Офлайн в Алматы.<br />
+                Офлайн в Алматы или онлайн — по желанию.<br />
                 Глубокая сессия с командой — стратегия, точки роста, план действий
               </p>
             </motion.div>
