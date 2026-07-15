@@ -56,7 +56,7 @@ function BlurRevealHeading({ text, className = "" }: { text: string; className?:
 const starterPlan = {
   name: "Диагностика",
   badge: "01 — DX",
-  originalPrice: "200 000 ₸",
+  originalPrice: "250 000 ₸",
   price: "175 000 ₸",
   priceNote: "Первые 5 консультаций",
   features: [
