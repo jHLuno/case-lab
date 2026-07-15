@@ -57,7 +57,7 @@ const starterPlan = {
   name: "Диагностика",
   badge: "01 — DX",
   originalPrice: "200 000 ₸",
-  price: "145 000 ₸",
+  price: "175 000 ₸",
   priceNote: "Первые 5 консультаций",
   features: [
     "2 часа структурированного интервью",

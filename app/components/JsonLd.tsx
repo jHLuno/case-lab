@@ -43,7 +43,7 @@ export default function JsonLd() {
     },
     offers: {
       "@type": "Offer",
-      price: "145000",
+      price: "175000",
       priceCurrency: "KZT",
       availability: "https://schema.org/InStock",
     },
