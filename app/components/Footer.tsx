@@ -4,7 +4,11 @@ import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import { useLeadPopup } from "../lib/LeadPopupContext";
 
-export default function Footer() {
+type FooterProps = {
+  accent?: "blue" | "emerald";
+};
+
+export default function Footer({ accent = "blue" }: FooterProps) {
   const { openPopup } = useLeadPopup();
   return (
     <footer className="relative bg-white pt-20 md:pt-32 pb-8 px-6 md:px-10 z-[2]">
@@ -29,7 +33,7 @@ export default function Footer() {
           <button
             type="button"
             onClick={openPopup}
-            className="inline-flex items-center gap-3 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] font-normal rounded-full hover:bg-[#0600a0] hover:gap-4 transition-[gap,background-color] duration-200"
+            className={`inline-flex items-center gap-3 px-7 py-3.5 text-[14px] font-normal text-white rounded-full hover:gap-4 transition-[gap,background-color] duration-200 md:px-10 md:py-5 md:text-[15px] ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a0]"}`}
             style={{ fontFamily: "var(--font-body)" }}
           >
             <span>Записаться на диагностику</span>

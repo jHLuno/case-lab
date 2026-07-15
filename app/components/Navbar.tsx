@@ -16,7 +16,11 @@ const navLinks = [
   { label: "Результаты", href: "#testimonials" },
 ];
 
-export default function Navbar() {
+type NavbarProps = {
+  accent?: "blue" | "emerald";
+};
+
+export default function Navbar({ accent = "blue" }: NavbarProps) {
   const pathname = usePathname();
   const { openPopup } = useLeadPopup();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -160,7 +164,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={openPopup}
-            className="hidden md:inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-normal leading-none bg-[#040082] text-white hover:bg-[#0600a8] transition-colors duration-200 ml-1"
+            className={`hidden md:inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-normal leading-none text-white transition-colors duration-200 ml-1 ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a8]"}`}
             style={{ fontFamily: "var(--font-body)" }}
           >
             Записаться
