@@ -42,9 +42,9 @@ export default function Footer({ accent = "blue" }: FooterProps) {
         </div>
 
         {/* Minimal info row */}
-        <div className="flex flex-col md:flex-row items-start justify-between gap-8 mb-12">
+        <div className="flex flex-col items-start gap-8 mb-12 md:grid md:grid-cols-3 md:items-center">
           {/* Logo */}
-          <div className="relative h-7 w-[130px]">
+          <div className="relative h-7 w-[130px] md:justify-self-start">
             <Image
               src="/Logo.png"
               alt="Case Lab"
@@ -56,7 +56,7 @@ export default function Footer({ accent = "blue" }: FooterProps) {
           </div>
 
           {/* Contact */}
-          <div>
+          <div className="w-full text-center">
             <a
               href="mailto:hello@caselab.kz"
               className="text-black/60 text-[15px] hover:text-black transition-colors duration-200 font-light"
@@ -67,7 +67,7 @@ export default function Footer({ accent = "blue" }: FooterProps) {
           </div>
 
           {/* Social */}
-          <div className="flex flex-wrap items-center gap-4 md:gap-6">
+          <div className="flex flex-wrap items-center gap-4 md:gap-6 md:justify-self-end">
             <a
               href="https://instagram.com/caselabkz"
               target="_blank"

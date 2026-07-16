@@ -11,8 +11,8 @@ export default function EVPProMinimalFooter() {
   return (
     <footer className="relative bg-[#043B2C] px-6 pb-8 pt-5 md:px-10 md:pb-10 md:pt-6">
       <div className="mx-auto max-w-[1078px]">
-        <div className="flex flex-col items-start justify-between gap-8 border-b border-white/10 pb-8 md:flex-row md:items-center">
-          <div className="relative h-7 w-[130px]">
+        <div className="flex flex-col items-start gap-8 border-b border-white/10 pb-8 md:grid md:grid-cols-3 md:items-center">
+          <div className="relative h-7 w-[130px] md:justify-self-start">
             <Image
               src="/logo green.png"
               alt="Case Lab"
@@ -25,13 +25,13 @@ export default function EVPProMinimalFooter() {
 
           <a
             href="mailto:hello@caselab.kz"
-            className="text-[15px] font-light text-white/60 transition-colors duration-200 hover:text-white"
+            className="w-full text-center text-[15px] font-light text-white/60 transition-colors duration-200 hover:text-white"
             style={{ fontFamily: "var(--font-body)" }}
           >
             hello@caselab.kz
           </a>
 
-          <div className="flex flex-wrap items-center gap-5 md:gap-6">
+          <div className="flex flex-wrap items-center gap-5 md:gap-6 md:justify-self-end">
             {socialLinks.map((link) => (
               <a
                 key={link.label}
