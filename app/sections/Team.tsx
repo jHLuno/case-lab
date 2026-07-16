@@ -25,6 +25,7 @@ const team = [
     photo: "/amirzhan-zhampeisov.webp",
     objectPos: "center top",
     scale: "140%",
+    origin: "top center",
   },
 ];
 
@@ -68,7 +69,11 @@ export default function Team() {
                     alt={member.name}
                     fill
                     className="object-cover"
-                    style={{ objectPosition: member.objectPos, scale: member.scale }}
+                    style={{
+                      objectPosition: member.objectPos,
+                      scale: member.scale,
+                      transformOrigin: member.origin ?? "center",
+                    }}
                     sizes="96px"
                   />
                 </div>
