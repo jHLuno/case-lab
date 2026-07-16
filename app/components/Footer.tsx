@@ -69,22 +69,13 @@ export default function Footer({ accent = "blue" }: FooterProps) {
           {/* Social */}
           <div className="flex flex-wrap items-center gap-4 md:gap-6">
             <a
-              href="https://instagram.com/narxoz_business_school"
+              href="https://instagram.com/caselabkz"
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray text-[15px] font-light hover:text-black transition-colors duration-200"
               style={{ fontFamily: "var(--font-body)" }}
             >
-              Instagram Narxoz
-            </a>
-            <a
-              href="https://instagram.com/kosnazzar"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray text-[15px] font-light hover:text-black transition-colors duration-200"
-              style={{ fontFamily: "var(--font-body)" }}
-            >
-              Instagram Kosnazzar
+              Instagram Case Lab
             </a>
             <a
               href="https://www.linkedin.com/in/daniyar-kosnazarov-300806110/"

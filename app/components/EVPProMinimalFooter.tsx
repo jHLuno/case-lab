@@ -3,8 +3,7 @@
 import Image from "next/image";
 
 const socialLinks = [
-  { label: "Instagram Narxoz", href: "https://instagram.com/narxoz_business_school" },
-  { label: "Instagram Kosnazzar", href: "https://instagram.com/kosnazzar" },
+  { label: "Instagram Case Lab", href: "https://instagram.com/caselabkz" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/daniyar-kosnazarov-300806110/" },
 ];
 
