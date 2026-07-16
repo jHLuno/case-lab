@@ -24,7 +24,7 @@ const team = [
     role: "CEO Founder's Hub\nex-Founder ARN Labs\nКоординатор проекта Case Lab\nРазвитие стартапов и работа\nс предпринимательскими проектами",
     photo: "/amirzhan-zhampeisov.webp",
     objectPos: "center top",
-    scale: "115%",
+    scale: "140%",
   },
 ];
 
