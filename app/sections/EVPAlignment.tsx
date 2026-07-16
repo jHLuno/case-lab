@@ -37,8 +37,9 @@ function HighlightWord({
   scrollProgress: number;
   shouldReduceMotion: boolean | null;
 }) {
-  const start = index / alignmentWords.length;
-  const wordProgress = Math.min(Math.max((scrollProgress - start) / 0.07, 0), 1);
+  const fadeWindow = 0.07;
+  const start = (index / (alignmentWords.length - 1)) * (1 - fadeWindow);
+  const wordProgress = Math.min(Math.max((scrollProgress - start) / fadeWindow, 0), 1);
   const opacity = shouldReduceMotion ? 1 : 0.35 + wordProgress * 0.65;
 
   return (
