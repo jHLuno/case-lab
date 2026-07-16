@@ -53,7 +53,7 @@ export default function EVPProClosing() {
           className="group mt-9 inline-flex min-h-11 items-center gap-3 rounded-full bg-[#075C43] px-7 py-3 text-[15px] font-medium text-white transition-[background-color,transform] duration-200 hover:bg-[#0a7a58] active:scale-[0.98] md:mt-11 md:px-9 md:py-4"
           style={{ fontFamily: "var(--font-body)" }}
         >
-          Записаться на EVP Pro
+          Забронировать место
           <ArrowRight size={16} strokeWidth={2} aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-1" />
         </button>
       </div>
