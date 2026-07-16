@@ -56,19 +56,32 @@ export default function EVPProClosing() {
       <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(94,188,143,0.18),transparent_34%)]" />
 
       <div data-evp-reveal className="relative z-10 mx-auto max-w-[900px] text-center">
-        <div className="flex flex-wrap justify-center gap-3 md:gap-4">
-          {eventMeta.map((item) => (
-            <div
-              key={item.label}
-              className="inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white/5 px-4 py-2 backdrop-blur-sm md:px-5 md:py-2.5"
-              style={{ fontFamily: "var(--font-body)" }}
-            >
-              <span className="flex h-[14px] w-[14px] shrink-0 items-center justify-center text-white/60" aria-hidden="true">
-                <item.icon size={14} strokeWidth={1.5} />
-              </span>
-              <span className="translate-y-px text-[13px] leading-none text-white/85 md:text-[14px]">{item.value}</span>
-            </div>
-          ))}
+        <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4">
+          {eventMeta.map((item, index) => {
+            const isCenter = index === 1;
+            return (
+              <div
+                key={item.label}
+                className={`inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm ${
+                  isCenter
+                    ? "px-5 py-2.5 md:px-7 md:py-3"
+                    : "px-3.5 py-1.5 md:px-4 md:py-2"
+                }`}
+                style={{ fontFamily: "var(--font-body)" }}
+              >
+                <span className="flex h-[14px] w-[14px] shrink-0 items-center justify-center text-white/60" aria-hidden="true">
+                  <item.icon size={14} strokeWidth={1.5} />
+                </span>
+                <span
+                  className={`translate-y-px leading-none text-white/85 ${
+                    isCenter ? "text-[14px] md:text-[16px]" : "text-[12px] md:text-[13px]"
+                  }`}
+                >
+                  {item.value}
+                </span>
+              </div>
+            );
+          })}
         </div>
 
         <h2
