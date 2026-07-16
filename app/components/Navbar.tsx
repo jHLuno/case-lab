@@ -18,9 +18,10 @@ const navLinks = [
 
 type NavbarProps = {
   accent?: "blue" | "emerald";
+  logoSrc?: string;
 };
 
-export default function Navbar({ accent = "blue" }: NavbarProps) {
+export default function Navbar({ accent = "blue", logoSrc = "/Logo.png" }: NavbarProps) {
   const pathname = usePathname();
   const { openPopup } = useLeadPopup();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -135,7 +136,7 @@ export default function Navbar({ accent = "blue" }: NavbarProps) {
           <Link href="/" className="flex items-center flex-shrink-0 px-1 md:px-2">
             <div className="relative w-32 h-11 md:w-[105px] md:h-[33px]">
               <Image
-                src="/Logo.png"
+                src={logoSrc}
                 alt="Case Lab"
                 fill
                 className="object-contain"
@@ -217,7 +218,7 @@ export default function Navbar({ accent = "blue" }: NavbarProps) {
             >
               <div className="relative h-10 w-[154px] rounded-full border border-white/60 bg-white px-4 py-2 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)]">
                 <Image
-                  src="/Logo.png"
+                  src={logoSrc}
                   alt="Case Lab"
                   fill
                   className="object-contain p-1.5"

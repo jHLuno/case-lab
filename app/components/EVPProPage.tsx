@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import EVPProNavbar from "./EVPProNavbar";
-import EVPProFooter from "./EVPProFooter";
+import EVPProMinimalFooter from "./EVPProMinimalFooter";
 import BackToTop from "./BackToTop";
 import LeadPopup from "./LeadPopup";
 import { LeadPopupProvider } from "../lib/LeadPopupContext";
@@ -62,7 +62,7 @@ export default function EVPProPage() {
         <EVPProProof />
         <EVPProFAQ />
         <EVPProClosing />
-        <EVPProFooter />
+        <EVPProMinimalFooter />
         <BackToTop />
         <LeadPopup />
       </div>

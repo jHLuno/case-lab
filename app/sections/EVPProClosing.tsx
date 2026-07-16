@@ -1,56 +1,95 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { ArrowRight } from "lucide-react";
-import { useReducedMotion } from "framer-motion";
+import { ArrowRight, Calendar, Clock, MapPin } from "lucide-react";
 import { useLeadPopup } from "../lib/LeadPopupContext";
 
-const Dither = dynamic(() => import("../components/Dither"), { ssr: false });
+const eventMeta = [
+  { icon: Calendar, label: "Дата", value: "25 сентября" },
+  { icon: Clock, label: "Время", value: "11:00–17:00" },
+  { icon: MapPin, label: "Место", value: "Алматы, Narxoz Business School" },
+];
 
 export default function EVPProClosing() {
   const { openPopup } = useLeadPopup();
-  const shouldReduceMotion = useReducedMotion();
 
   return (
     <section
       aria-labelledby="evp-closing-title"
-      className="relative isolate overflow-hidden bg-gradient-to-b from-[#043B2C] via-[#06170f] to-black px-6 py-20 text-white md:px-10 md:py-40"
+      className="relative isolate overflow-hidden bg-[#043B2C] px-6 pb-4 pt-24 text-white md:px-10 md:pb-6 md:pt-32 lg:pb-8 lg:pt-40"
     >
-      {!shouldReduceMotion && (
-        <span aria-hidden="true" className="absolute inset-0 z-0 opacity-40">
-          <Dither
-            waveColor={[0.027450980392156862, 0.3607843137254902, 0.2627450980392157]}
-            disableAnimation={false}
-            enableMouseInteraction={false}
-            mouseRadius={0.3}
-            colorNum={4}
-            pixelSize={2}
-            waveAmplitude={0.28}
-            waveFrequency={1.6}
-            waveSpeed={0.008}
-          />
-        </span>
-      )}
-      <div aria-hidden="true" className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_100%,rgba(94,188,143,0.22),transparent_45%)]" />
+      {/* Scattered center glows */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <div
+          className="absolute h-[45%] w-[45%] rounded-full opacity-25 blur-[80px]"
+          style={{
+            left: "18%",
+            top: "22%",
+            background: "radial-gradient(circle, rgba(94,188,143,0.7) 0%, transparent 70%)",
+          }}
+        />
+        <div
+          className="absolute h-[38%] w-[38%] rounded-full opacity-20 blur-[70px]"
+          style={{
+            left: "52%",
+            top: "35%",
+            background: "radial-gradient(circle, rgba(211,160,255,0.6) 0%, transparent 70%)",
+          }}
+        />
+        <div
+          className="absolute h-[32%] w-[32%] rounded-full opacity-22 blur-[60px]"
+          style={{
+            left: "36%",
+            top: "48%",
+            background: "radial-gradient(circle, rgba(17,119,84,0.8) 0%, transparent 70%)",
+          }}
+        />
+        <div
+          className="absolute h-[28%] w-[28%] rounded-full opacity-18 blur-[55px]"
+          style={{
+            left: "68%",
+            top: "14%",
+            background: "radial-gradient(circle, rgba(129,231,176,0.6) 0%, transparent 70%)",
+          }}
+        />
+      </div>
 
-      <div data-evp-reveal className="relative z-10 mx-auto max-w-[1078px]">
-        <p className="text-[14px] text-white/70" style={{ fontFamily: "var(--font-body)" }}>
-          25 сентября · 11:00-17:00 · Алматы, Narxoz Business School
-        </p>
+      <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(94,188,143,0.18),transparent_34%)]" />
+
+      <div data-evp-reveal className="relative z-10 mx-auto max-w-[900px] text-center">
+        <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+          {eventMeta.map((item) => (
+            <div
+              key={item.label}
+              className="inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white/5 px-4 py-2 backdrop-blur-sm md:px-5 md:py-2.5"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              <span className="flex h-[14px] w-[14px] shrink-0 items-center justify-center text-white/60" aria-hidden="true">
+                <item.icon size={14} strokeWidth={1.5} />
+              </span>
+              <span className="translate-y-px text-[13px] leading-none text-white/85 md:text-[14px]">{item.value}</span>
+            </div>
+          ))}
+        </div>
+
         <h2
           id="evp-closing-title"
-          className="mt-6 max-w-[14ch] text-[clamp(30px,5vw,68px)] font-bold leading-[1.04] tracking-[0.02em] uppercase"
+          className="mt-8 text-[clamp(32px,5.2vw,72px)] font-bold uppercase leading-[1.05] tracking-[0.02em] md:mt-10"
           style={{ fontFamily: "var(--font-heading)" }}
         >
-          Соберите компанию, которую выбирают сильные люди
+          Привлекайте лучших
         </h2>
-        <p className="mt-7 max-w-[52ch] text-[16px] leading-[1.5] text-white/78 md:text-[19px]" style={{ fontFamily: "var(--font-body)" }}>
+
+        <p
+          className="mx-auto mt-6 max-w-[52ch] text-[17px] leading-[1.5] text-white/75 md:mt-8 md:text-[21px]"
+          style={{ fontFamily: "var(--font-body)" }}
+        >
           Приходите командой, чтобы за одну сессию начать говорить с рынком труда одним голосом.
         </p>
+
         <button
           type="button"
           onClick={openPopup}
-          className="group mt-9 inline-flex min-h-11 items-center gap-3 rounded-full bg-[#075C43] px-7 py-3 text-[15px] font-medium text-white transition-[background-color,transform] duration-200 hover:bg-[#0a7a58] active:scale-[0.98] md:mt-11 md:px-9 md:py-4"
+          className="group mx-auto mt-8 inline-flex min-h-11 items-center gap-3 rounded-full bg-white px-7 py-3.5 text-[15px] font-medium text-[#075C43] transition-[background-color,transform,gap] duration-200 hover:gap-4 hover:bg-white/90 active:scale-[0.98] md:mt-10 md:px-9 md:py-4"
           style={{ fontFamily: "var(--font-body)" }}
         >
           Забронировать место
