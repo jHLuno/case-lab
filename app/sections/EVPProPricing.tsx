@@ -45,6 +45,7 @@ export default function EVPProPricing() {
 
   return (
     <section
+      id="pricing"
       aria-labelledby="evp-pricing-title"
       className="relative isolate overflow-hidden bg-[#043B2C] px-6 py-14 text-white md:px-10 md:py-20"
     >

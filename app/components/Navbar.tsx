@@ -9,19 +9,28 @@ import { usePathname } from "next/navigation";
 import { createPortal } from "react-dom";
 import { useLeadPopup } from "../lib/LeadPopupContext";
 
-const navLinks = [
+const defaultNavLinks = [
   { label: "Кейсы", href: "#cases" },
   { label: "Подход", href: "#diagnostics" },
   { label: "Процесс", href: "#process" },
   { label: "Результаты", href: "#testimonials" },
 ];
 
+type NavLink = { label: string; href: string };
+
 type NavbarProps = {
   accent?: "blue" | "emerald";
   logoSrc?: string;
+  navLinks?: NavLink[];
+  basePath?: string;
 };
 
-export default function Navbar({ accent = "blue", logoSrc = "/Logo.png" }: NavbarProps) {
+export default function Navbar({
+  accent = "blue",
+  logoSrc = "/Logo.png",
+  navLinks = defaultNavLinks,
+  basePath = "/",
+}: NavbarProps) {
   const pathname = usePathname();
   const { openPopup } = useLeadPopup();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -33,7 +42,7 @@ export default function Navbar({ accent = "blue", logoSrc = "/Logo.png" }: Navba
     setMobileOpen(false);
     toggleRef.current?.focus();
   };
-  const getNavHref = (href: string) => (pathname === "/" ? href : `/${href}`);
+  const getNavHref = (href: string) => (pathname === basePath ? href : `${basePath}${href}`);
 
   // Focus trap + Escape for mobile menu
   useEffect(() => {
@@ -280,7 +289,7 @@ export default function Navbar({ accent = "blue", logoSrc = "/Logo.png" }: Navba
                     <button
                       type="button"
                       onClick={() => { closeMobileMenu(); openPopup(); }}
-                      className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200 focus-visible:outline-none"
+                      className={`group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[14px] font-normal transition-transform duration-200 focus-visible:outline-none ${accent === "emerald" ? "text-[#075C43]" : "text-[#040082]"}`}
                       style={{ fontFamily: "var(--font-body)" }}
                     >
                       Записаться

@@ -35,7 +35,7 @@ export default function EVPProFAQ() {
   const [openItem, setOpenItem] = useState<number | null>(0);
 
   return (
-    <section aria-labelledby="evp-faq-title" className="bg-white px-6 py-24 md:px-10 md:py-40">
+    <section id="faq" aria-labelledby="evp-faq-title" className="bg-white px-6 py-24 md:px-10 md:py-40">
       <div data-evp-reveal className="text-center">
         <h2
           id="evp-faq-title"

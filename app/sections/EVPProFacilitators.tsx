@@ -85,7 +85,7 @@ function FacilitatorPortrait({ facilitator }: { facilitator: (typeof facilitator
 
 export default function EVPProFacilitators() {
   return (
-    <section aria-labelledby="evp-facilitators-title" className="relative bg-white px-6 pb-12 pt-10 md:px-10 md:pb-20 md:pt-16">
+    <section id="facilitators" aria-labelledby="evp-facilitators-title" className="relative bg-white px-6 pb-12 pt-10 md:px-10 md:pb-20 md:pt-16">
       <div className="absolute top-0 left-0 h-px w-full divider-gradient" />
 
       <div className="relative mx-auto max-w-[1440px]">
