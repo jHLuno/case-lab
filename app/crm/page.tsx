@@ -13,8 +13,16 @@ type Lead = {
   created_at: string;
 };
 
+type Source = "main" | "evp-pro";
+
+const sourceTabs: { value: Source; label: string }[] = [
+  { value: "main", label: "Сайт" },
+  { value: "evp-pro", label: "EVP Pro" },
+];
+
 export default function CRMPage() {
   const [password, setPassword] = useState("");
+  const [source, setSource] = useState<Source>("main");
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -60,11 +68,21 @@ export default function CRMPage() {
     return () => window.removeEventListener("pageshow", handlePageShow);
   }, []);
 
-  const fetchLeads = async () => {
+  const switchSource = async (next: Source) => {
+    if (next === source) return;
+    setSource(next);
+    setFilter("all");
+    setSearch("");
+    setEditingId(null);
+    await fetchLeads(next);
+  };
+
+  const fetchLeads = async (sourceOverride?: Source) => {
+    const activeSource = sourceOverride ?? source;
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/crm/");
+      const res = await fetch(`/api/crm/?source=${activeSource}`);
 
       if (!res.ok) {
         if (res.status === 401) {
@@ -149,7 +167,7 @@ export default function CRMPage() {
       const res = await fetch("/api/crm/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: editStatus, notes: editNotes || null }),
+        body: JSON.stringify({ id, source, status: editStatus, notes: editNotes || null }),
       });
 
       if (!res.ok) {
@@ -176,7 +194,7 @@ export default function CRMPage() {
       const res = await fetch("/api/crm/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ id, source }),
       });
 
       if (!res.ok) {
@@ -228,13 +246,8 @@ export default function CRMPage() {
   }
 
   return (
-    <>
-      <head>
-        <meta name="robots" content="noindex, nofollow" />
-        <title>CRM — Case Lab</title>
-      </head>
-      <main className="min-h-screen bg-white flex items-center justify-center px-6">
-        {!isAuthenticated ? (
+    <main className="min-h-screen bg-white flex items-center justify-center px-6">
+      {!isAuthenticated ? (
           <div className="w-full max-w-sm">
             <h1
               className="text-black text-[24px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-8 text-center"
@@ -293,7 +306,7 @@ export default function CRMPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={fetchLeads}
+                    onClick={() => fetchLeads()}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-black/[0.08] bg-white text-black text-[14px] hover:bg-black/5 transition-colors"
                     style={{ fontFamily: "var(--font-body)" }}
                   >
@@ -308,6 +321,23 @@ export default function CRMPage() {
                     <ArrowLeft size={14} /> Выйти
                   </button>
                 </div>
+              </div>
+
+              <div className="flex items-center gap-2 mb-6">
+                {sourceTabs.map((tab) => (
+                  <button
+                    key={tab.value}
+                    onClick={() => switchSource(tab.value)}
+                    className={`px-4 py-2 rounded-full text-[13px] transition-all ${
+                      source === tab.value
+                        ? "bg-black text-white"
+                        : "bg-white text-black/50 border border-black/[0.08] hover:bg-black/5"
+                    }`}
+                    style={{ fontFamily: "var(--font-body)" }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
 
               {error && (
@@ -491,8 +521,7 @@ export default function CRMPage() {
               </div>
             </div>
           </div>
-        )}
-      </main>
-    </>
+      )}
+    </main>
   );
 }

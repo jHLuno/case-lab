@@ -10,8 +10,13 @@ const inputClass =
   "w-full px-4 py-3 rounded-[12px] border border-black/[0.08] bg-white text-black text-[15px] placeholder:text-black/30 focus:outline-none focus:border-[#040082]/30 focus:ring-1 focus:ring-[#040082]/10 transition-[border-color,box-shadow] duration-200";
 const inputFont = { fontFamily: "var(--font-body)" };
 
+const endpointBySource = {
+  main: "/api/leads/",
+  "evp-pro": "/api/evp-pro-leads/",
+} as const;
+
 export default function LeadPopup() {
-  const { isOpen, closePopup } = useLeadPopup();
+  const { isOpen, source, closePopup } = useLeadPopup();
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -83,7 +88,7 @@ export default function LeadPopup() {
     }
 
     try {
-      const res = await fetch("/api/leads/", {
+      const res = await fetch(endpointBySource[source], {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { verifyToken } from "../../../lib/jwt";
+import { resolveCrmTable } from "../../../lib/crm-tables";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -30,10 +31,15 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { id, status, notes } = body;
+    const { id, status, notes, source } = body;
 
     if (!id) {
       return NextResponse.json({ error: "ID required" }, { status: 400 });
+    }
+
+    const table = resolveCrmTable(source);
+    if (!table) {
+      return NextResponse.json({ error: "Invalid source" }, { status: 400 });
     }
 
     const updateData: Record<string, unknown> = {};
@@ -46,7 +52,7 @@ export async function POST(request: Request) {
 
     const supabase = getServiceSupabase();
     const { error } = await supabase
-      .from("leads")
+      .from(table)
       .update(updateData)
       .eq("id", id);
 

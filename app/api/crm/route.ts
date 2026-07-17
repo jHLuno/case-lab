@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { verifyToken } from "../../lib/jwt";
+import { resolveCrmTable } from "../../lib/crm-tables";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -15,7 +16,7 @@ function getServiceSupabase() {
   });
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("crm_auth")?.value;
@@ -36,9 +37,16 @@ export async function GET() {
       );
     }
 
+    const { searchParams } = new URL(request.url);
+    const table = resolveCrmTable(searchParams.get("source"));
+
+    if (!table) {
+      return NextResponse.json({ error: "Invalid source" }, { status: 400 });
+    }
+
     const supabase = getServiceSupabase();
     const { data, error } = await supabase
-      .from("leads")
+      .from(table)
       .select("*")
       .order("created_at", { ascending: false });
 
