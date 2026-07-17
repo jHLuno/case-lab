@@ -1,11 +1,11 @@
 import { SignJWT, jwtVerify } from "jose";
 
 function getSecret(): Uint8Array {
-  const pwd = process.env.CRM_PASSWORD;
-  if (!pwd || pwd.length < 8) {
-    throw new Error("CRM_PASSWORD must be set and at least 8 characters");
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("JWT_SECRET must be set and at least 32 characters");
   }
-  return new TextEncoder().encode(pwd);
+  return new TextEncoder().encode(secret);
 }
 
 export async function createToken(): Promise<string> {
