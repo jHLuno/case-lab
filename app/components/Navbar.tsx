@@ -23,6 +23,7 @@ type NavbarProps = {
   logoSrc?: string;
   navLinks?: NavLink[];
   basePath?: string;
+  ctaLabel?: string;
 };
 
 export default function Navbar({
@@ -30,6 +31,7 @@ export default function Navbar({
   logoSrc = "/Logo.png",
   navLinks = defaultNavLinks,
   basePath = "/",
+  ctaLabel = "Записаться",
 }: NavbarProps) {
   const pathname = usePathname();
   const { openPopup } = useLeadPopup();
@@ -177,7 +179,7 @@ export default function Navbar({
             className={`hidden md:inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] leading-none text-white transition-colors duration-200 ml-1 ${accent === "emerald" ? "font-medium bg-[#075C43] hover:bg-[#064B36]" : "font-normal bg-[#040082] hover:bg-[#0600a8]"}`}
             style={{ fontFamily: "var(--font-body)" }}
           >
-            Записаться
+            {ctaLabel}
             <ArrowRight size={13} strokeWidth={2.5} />
           </button>
 
@@ -292,7 +294,7 @@ export default function Navbar({
                       className={`group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[14px] transition-transform duration-200 focus-visible:outline-none ${accent === "emerald" ? "font-medium text-[#075C43]" : "font-normal text-[#040082]"}`}
                       style={{ fontFamily: "var(--font-body)" }}
                     >
-                      Записаться
+                      {ctaLabel}
                       <ArrowRight size={14} strokeWidth={2.5} className="transition-transform duration-200 group-active:translate-x-0.5 group-focus-visible:translate-x-0.5" />
                     </button>
                     </motion.div>

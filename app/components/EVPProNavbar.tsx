@@ -14,6 +14,7 @@ export default function EVPProNavbar() {
       logoSrc="/logo green black.png"
       navLinks={evpProNavLinks}
       basePath="/evp-pro/"
+      ctaLabel="Забронировать место"
     />
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, FormEvent, useState } from "react";
+import { useEffect, useRef, FormEvent, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
@@ -30,6 +30,8 @@ export default function LeadPopup() {
     ? "underline hover:text-[#075C43] transition-colors"
     : "underline hover:text-[#040082] transition-colors";
   const buttonWeightClass = isEvpPro ? "font-medium" : "font-normal";
+  const panelRef = useRef<HTMLDivElement>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -47,10 +49,39 @@ export default function LeadPopup() {
     document.body.style.right = "0";
     document.body.style.width = "100%";
 
+    const getFocusable = () =>
+      panelRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closePopup();
+      if (e.key === "Escape") {
+        closePopup();
+        return;
+      }
+
+      if (e.key === "Tab") {
+        const focusable = getFocusable();
+        if (!focusable || focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     document.addEventListener("keydown", onKey);
+
+    previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
+    const initialTarget =
+      panelRef.current?.querySelector<HTMLElement>("input") ?? getFocusable()?.[0];
+    initialTarget?.focus();
 
     return () => {
       document.body.style.overflow = prev;
@@ -62,6 +93,8 @@ export default function LeadPopup() {
       document.body.style.width = "";
       window.scrollTo(0, scrollY);
       document.removeEventListener("keydown", onKey);
+      previouslyFocusedRef.current?.focus();
+      previouslyFocusedRef.current = null;
     };
   }, [isOpen, closePopup]);
 
@@ -71,6 +104,13 @@ export default function LeadPopup() {
       setErrorMsg("");
     }
   }, [isOpen]);
+
+  // The submit button unmounts on success, dropping keyboard focus to <body>;
+  // move it onto the confirmation button so the trap keeps working.
+  useEffect(() => {
+    if (status !== "success") return;
+    panelRef.current?.querySelector<HTMLElement>("button:not([aria-label])")?.focus();
+  }, [status]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -140,6 +180,10 @@ export default function LeadPopup() {
         >
           <motion.div
             key="lead-popup-panel"
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="lead-popup-title"
             initial={{ opacity: 0, scale: 0.96, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 20 }}
@@ -159,6 +203,7 @@ export default function LeadPopup() {
               <div className="px-6 py-14 pt-14 md:px-10 md:py-16 text-center">
                 <CheckCircle size={40} className={`${accentTextClass} mx-auto mb-5`} />
                 <h2
+                  id="lead-popup-title"
                   className="text-black text-[20px] md:text-[24px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-3"
                   style={{ fontFamily: "var(--font-heading)" }}
                 >
@@ -179,10 +224,11 @@ export default function LeadPopup() {
             ) : (
               <form onSubmit={handleSubmit} className="px-6 pt-14 pb-10 md:px-10 md:pt-14 md:pb-14">
                 <h2
+                  id="lead-popup-title"
                   className="text-black text-[20px] md:text-[24px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-3"
                   style={{ fontFamily: "var(--font-heading)" }}
                 >
-                  Записаться
+                  {isEvpPro ? "Забронировать место" : "Записаться"}
                 </h2>
                 <p className="text-black/60 text-[14px] leading-[1.5] font-light mb-8" style={inputFont}>
                   Оставьте контакты — мы свяжемся в течение рабочего дня.

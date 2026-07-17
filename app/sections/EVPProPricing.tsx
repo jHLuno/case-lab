@@ -110,7 +110,7 @@ export default function EVPProPricing() {
                 <div className="relative z-10 mt-7" style={{ fontFamily: "var(--font-body)" }}>
                   <p className="text-[clamp(28px,3vw,38px)] leading-none">{tier.total}</p>
                   <div className="mt-3 flex min-h-[26px] flex-wrap items-center gap-x-3 gap-y-2">
-                    <p className="text-[13px] text-white/55 md:text-[14px]">{tier.perPerson}</p>
+                    <p className="text-[13px] text-white/65 md:text-[14px]">{tier.perPerson}</p>
                     {tier.savings && (
                       <span
                         className={`rounded-full border px-2.5 py-0.5 text-[11px] ${
@@ -130,13 +130,13 @@ export default function EVPProPricing() {
                     }`}
                     style={{ fontFamily: "var(--font-body)" }}
                   >
-                    <Users size={15} strokeWidth={2} aria-hidden="true" className="mt-[2px] shrink-0 text-white/50" />
+                    <Users size={15} strokeWidth={2} aria-hidden="true" className="mt-[2px] shrink-0 text-white/60" />
                     {tier.benefit}
                   </p>
 
                   <div>
                     <p
-                      className="text-[11px] uppercase tracking-[0.14em] text-white/45"
+                      className="text-[11px] uppercase tracking-[0.14em] text-white/60"
                       style={{ fontFamily: "var(--font-body)" }}
                     >
                       В формат входит
@@ -144,7 +144,7 @@ export default function EVPProPricing() {
                     <ul className="mt-3 space-y-2" style={{ fontFamily: "var(--font-body)" }}>
                       {included.map((item) => (
                         <li key={item} className="flex items-start gap-2.5 text-[14px] text-white/70 md:text-[15px]">
-                          <Check size={14} strokeWidth={2.5} className="mt-[3px] shrink-0 text-white/45" aria-hidden="true" />
+                          <Check size={14} strokeWidth={2.5} className="mt-[3px] shrink-0 text-white/60" aria-hidden="true" />
                           {item}
                         </li>
                       ))}
@@ -162,7 +162,7 @@ export default function EVPProPricing() {
                   }`}
                   style={{ fontFamily: "var(--font-body)" }}
                 >
-                  Купить билет
+                  Забронировать место
                   <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
                 </button>
               </article>

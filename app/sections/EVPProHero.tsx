@@ -87,8 +87,8 @@ export default function EVPProHero() {
               className="evp-hero-enter evp-hero-enter-delay-2 mt-8 inline-flex cursor-pointer items-center gap-3 rounded-full bg-white px-7 py-3.5 text-[14px] font-medium text-[#075C43] transition-[gap,transform] duration-200 hover:gap-4 md:mt-10 md:px-10 md:py-5 md:text-[15px]"
               style={{ fontFamily: "var(--font-body)" }}
             >
-              Записаться на EVP Pro
-              <ArrowRight size={16} strokeWidth={1.5} aria-hidden="true" />
+              Забронировать место
+              <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
             </button>
         </div>
 

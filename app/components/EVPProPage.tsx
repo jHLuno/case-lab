@@ -58,8 +58,8 @@ export default function EVPProPage() {
         <EVPProSession />
         <EVPProAudience />
         <EVPProFacilitators />
-        <EVPProPricing />
         <EVPProProof />
+        <EVPProPricing />
         <EVPProFAQ />
         <EVPProClosing />
         <EVPProMinimalFooter />
