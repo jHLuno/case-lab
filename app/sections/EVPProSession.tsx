@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
+import { useState } from "react";
 import EVPProcessCubes from "../components/EVPProcessCubes";
 
 const stages = [
@@ -25,24 +24,6 @@ const stages = [
 
 export default function EVPProSession() {
   const [activeStage, setActiveStage] = useState(0);
-  const stageRefs = useRef<Array<HTMLLIElement | null>>([]);
-  const shouldReduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (shouldReduceMotion) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const activeEntry = entries.find((entry) => entry.isIntersecting);
-        if (!activeEntry) return;
-        setActiveStage(Number(activeEntry.target.getAttribute("data-stage-index")));
-      },
-      { rootMargin: "-38% 0px -55% 0px", threshold: 0 }
-    );
-
-    stageRefs.current.forEach((stage) => stage && observer.observe(stage));
-    return () => observer.disconnect();
-  }, [shouldReduceMotion]);
 
   return (
     <section aria-labelledby="evp-session-title" className="bg-white px-4 py-14 md:px-10 md:py-20">
@@ -68,11 +49,10 @@ export default function EVPProSession() {
             return (
               <li
                 key={stage.title}
-                ref={(element) => {
-                  stageRefs.current[index] = element;
-                }}
-                data-stage-index={index}
-                className={`group grid grid-cols-[88px_minmax(0,1fr)] items-center gap-7 border-b-2 border-dashed border-black/80 py-6 pl-4 md:grid-cols-[160px_minmax(0,1fr)] md:gap-10 md:py-7 md:pl-6 ${isActive ? "is-active" : ""}`}
+                onMouseEnter={() => setActiveStage(index)}
+                onFocus={() => setActiveStage(index)}
+                tabIndex={0}
+                className="group grid cursor-default grid-cols-[88px_minmax(0,1fr)] items-center gap-7 border-b-2 border-dashed border-black/80 py-6 pl-4 md:grid-cols-[160px_minmax(0,1fr)] md:gap-10 md:py-7 md:pl-6"
               >
                 <span
                   className={`justify-self-center text-[clamp(42px,5.5vw,80px)] leading-none tracking-[-0.05em] transition-colors duration-500 ${isActive ? "text-[#075C43]" : "text-black/20"}`}
