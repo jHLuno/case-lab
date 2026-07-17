@@ -6,8 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
 import { useLeadPopup } from "../lib/LeadPopupContext";
 
-const inputClass =
-  "w-full px-4 py-3 rounded-[12px] border border-black/[0.08] bg-white text-black text-[15px] placeholder:text-black/30 focus:outline-none focus:border-[#040082]/30 focus:ring-1 focus:ring-[#040082]/10 transition-[border-color,box-shadow] duration-200";
 const inputFont = { fontFamily: "var(--font-body)" };
 
 const endpointBySource = {
@@ -19,6 +17,18 @@ export default function LeadPopup() {
   const { isOpen, source, closePopup } = useLeadPopup();
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+
+  const isEvpPro = source === "evp-pro";
+  const inputClass = isEvpPro
+    ? "w-full px-4 py-3 rounded-[12px] border border-black/[0.08] bg-white text-black text-[15px] placeholder:text-black/30 focus:outline-none focus:border-[#075C43]/30 focus:ring-1 focus:ring-[#075C43]/10 transition-[border-color,box-shadow] duration-200"
+    : "w-full px-4 py-3 rounded-[12px] border border-black/[0.08] bg-white text-black text-[15px] placeholder:text-black/30 focus:outline-none focus:border-[#040082]/30 focus:ring-1 focus:ring-[#040082]/10 transition-[border-color,box-shadow] duration-200";
+  const accentTextClass = isEvpPro ? "text-[#075C43]" : "text-[#040082]";
+  const accentButtonClass = isEvpPro
+    ? "bg-[#075C43] hover:bg-[#064B36]"
+    : "bg-[#040082] hover:bg-[#0600a8]";
+  const accentLinkClass = isEvpPro
+    ? "underline hover:text-[#075C43] transition-colors"
+    : "underline hover:text-[#040082] transition-colors";
 
   useEffect(() => {
     if (!isOpen) return;
@@ -146,7 +156,7 @@ export default function LeadPopup() {
 
             {status === "success" ? (
               <div className="px-6 py-14 pt-14 md:px-10 md:py-16 text-center">
-                <CheckCircle size={40} className="text-[#040082] mx-auto mb-5" />
+                <CheckCircle size={40} className={`${accentTextClass} mx-auto mb-5`} />
                 <h2
                   className="text-black text-[20px] md:text-[24px] font-bold leading-[1.15] uppercase tracking-[0.02em] mb-3"
                   style={{ fontFamily: "var(--font-heading)" }}
@@ -158,7 +168,7 @@ export default function LeadPopup() {
                 </p>
                 <button
                   onClick={closePopup}
-                  className="w-full inline-flex items-center justify-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-200"
+                  className={`w-full inline-flex items-center justify-center gap-2 text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal transition-colors duration-200 ${accentButtonClass}`}
                   style={inputFont}
                 >
                   Хорошо
@@ -180,7 +190,7 @@ export default function LeadPopup() {
                 <div className="space-y-5">
                   <div>
                     <label htmlFor="popup-name" className="block text-black text-[13px] font-normal mb-2" style={inputFont}>
-                      Имя и фамилия <span className="text-[#040082]">*</span>
+                      Имя и фамилия <span className={accentTextClass}>*</span>
                     </label>
                     <input
                       type="text" id="popup-name" name="name" required
@@ -192,7 +202,7 @@ export default function LeadPopup() {
 
                   <div>
                     <label htmlFor="popup-phone" className="block text-black text-[13px] font-normal mb-2" style={inputFont}>
-                      Телефон <span className="text-[#040082]">*</span>
+                      Телефон <span className={accentTextClass}>*</span>
                     </label>
                     <input
                       type="tel" id="popup-phone" name="phone" required
@@ -237,7 +247,7 @@ export default function LeadPopup() {
 
                 <p className="text-black/50 text-[11px] leading-[1.5] font-light mt-5" style={inputFont}>
                   Отправляя форму, вы соглашаетесь с{" "}
-                  <a href="/privacy/" className="underline hover:text-[#040082] transition-colors">
+                  <a href="/privacy/" className={accentLinkClass}>
                     Политикой конфиденциальности
                   </a>
                   .
@@ -246,7 +256,7 @@ export default function LeadPopup() {
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="w-full mt-6 inline-flex items-center justify-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className={`w-full mt-6 inline-flex items-center justify-center gap-2 text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${accentButtonClass}`}
                   style={inputFont}
                 >
                   {status === "loading" ? (
