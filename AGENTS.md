@@ -25,8 +25,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## Commands And Conventions
 
 - Use npm: `npm run dev`, `npm run build`, `npm run start`, `npx tsc --noEmit --incremental false`.
-- `npm run lint` is broken because Next 16 removed `next lint`; `npx eslint .` also scans generated `.worktrees` output without ignores. Repair lint command/config before relying on lint CI. ESLint flat config is `eslint.config.mjs`; legacy `.eslintrc.json` is likely ignored.
-- No application test runner or test suite exists. Do not mistake vendored `.agents/skills/deepsec` tests for application coverage.
+- `npm run lint` is broken because Next 16 removed `next lint`; `npx eslint .` also scans generated `.worktrees` output without ignores. Repair lint command/config before relying on lint CI. ESLint flat config is `eslint.config.mjs`.
+- No application test runner or test suite exists.
 - Follow strict TypeScript and existing component patterns. Recent commits use lowercase Conventional Commits, often scoped: `fix(popup): ...`, `feat(team): ...`, `chore: ...`.
 
 ## Data And Security
@@ -36,4 +36,4 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Preserve RLS on `public.leads`; never expose `SUPABASE_SERVICE_ROLE_KEY` through `NEXT_PUBLIC_*` or client code. Current anon INSERT policy is `WITH CHECK (true)`, so direct Supabase inserts bypass API validation and rate limiting. Treat database-side validation and shared abuse protection as hardening backlog.
 - Current rate limiter is per-process, unbounded, five requests per 15 minutes, and keyed from forwarded IP headers. Do not treat it as durable multi-instance protection.
 - `public/_headers` defines CSP and security headers, but effectiveness depends on deployment host honoring this file; Next config does not configure headers. CSP currently permits inline and eval scripts.
-- `next@16.2.4` and production `deepsec` dependency tree have known `npm audit` findings. Update framework/dependencies deliberately; keep scanner tooling out of production runtime.
+- `next@16.2.4` has known `npm audit` findings. Update framework/dependencies deliberately.
