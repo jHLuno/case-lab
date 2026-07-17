@@ -155,7 +155,7 @@ export default function EVPProPricing() {
                 <button
                   type="button"
                   onClick={openPopup}
-                  className={`relative z-10 mt-9 inline-flex min-h-11 items-center justify-center gap-3 rounded-full px-6 py-3 text-[14px] transition-[background-color,gap] duration-200 hover:gap-4 md:text-[15px] ${
+                  className={`relative z-10 mt-9 inline-flex min-h-11 items-center justify-center gap-3 rounded-full px-6 py-3 text-[14px] font-medium transition-[background-color,gap] duration-200 hover:gap-4 md:text-[15px] ${
                     tier.highlighted
                       ? "bg-white text-[#075C43] hover:bg-white/90"
                       : "border border-white/30 text-white hover:bg-white/10"

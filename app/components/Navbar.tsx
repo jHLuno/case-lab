@@ -174,7 +174,7 @@ export default function Navbar({
           <button
             type="button"
             onClick={openPopup}
-            className={`hidden md:inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-normal leading-none text-white transition-colors duration-200 ml-1 ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a8]"}`}
+            className={`hidden md:inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] leading-none text-white transition-colors duration-200 ml-1 ${accent === "emerald" ? "font-medium bg-[#075C43] hover:bg-[#064B36]" : "font-normal bg-[#040082] hover:bg-[#0600a8]"}`}
             style={{ fontFamily: "var(--font-body)" }}
           >
             Записаться
@@ -289,7 +289,7 @@ export default function Navbar({
                     <button
                       type="button"
                       onClick={() => { closeMobileMenu(); openPopup(); }}
-                      className={`group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[14px] font-normal transition-transform duration-200 focus-visible:outline-none ${accent === "emerald" ? "text-[#075C43]" : "text-[#040082]"}`}
+                      className={`group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[14px] transition-transform duration-200 focus-visible:outline-none ${accent === "emerald" ? "font-medium text-[#075C43]" : "font-normal text-[#040082]"}`}
                       style={{ fontFamily: "var(--font-body)" }}
                     >
                       Записаться

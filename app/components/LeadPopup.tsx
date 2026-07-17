@@ -29,6 +29,7 @@ export default function LeadPopup() {
   const accentLinkClass = isEvpPro
     ? "underline hover:text-[#075C43] transition-colors"
     : "underline hover:text-[#040082] transition-colors";
+  const buttonWeightClass = isEvpPro ? "font-medium" : "font-normal";
 
   useEffect(() => {
     if (!isOpen) return;
@@ -168,7 +169,7 @@ export default function LeadPopup() {
                 </p>
                 <button
                   onClick={closePopup}
-                  className={`w-full inline-flex items-center justify-center gap-2 text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal transition-colors duration-200 ${accentButtonClass}`}
+                  className={`w-full inline-flex items-center justify-center gap-2 text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full transition-colors duration-200 ${buttonWeightClass} ${accentButtonClass}`}
                   style={inputFont}
                 >
                   Хорошо
@@ -256,7 +257,7 @@ export default function LeadPopup() {
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className={`w-full mt-6 inline-flex items-center justify-center gap-2 text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full font-normal transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${accentButtonClass}`}
+                  className={`w-full mt-6 inline-flex items-center justify-center gap-2 text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${buttonWeightClass} ${accentButtonClass}`}
                   style={inputFont}
                 >
                   {status === "loading" ? (
