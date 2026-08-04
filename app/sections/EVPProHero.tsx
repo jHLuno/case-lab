@@ -79,7 +79,7 @@ export default function EVPProHero() {
               className="evp-hero-enter evp-hero-enter-delay-1 mt-6 max-w-[62ch] text-[16px] leading-[1.5] text-white/82 md:mt-8 md:text-[19px]"
               style={{ fontFamily: "var(--font-body)" }}
             >
-              Практическая сессия о EVP: как собрать единое предложение работодателя, чтобы HR, маркетинг, PR и руководители говорили с рынком труда одним голосом.
+              Практическая сессия о EVP: как собрать единое предложение работодателя, который строит лучший HR бренд страны, чтобы HR, маркетинг, PR и руководители говорили с рынком труда одним голосом.
             </p>
             <button
               type="button"
