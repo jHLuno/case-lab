@@ -133,7 +133,7 @@ export default function EVPProAudience() {
 
             <div className="flex flex-col gap-3 px-4 py-5 md:px-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <div role="tablist" aria-label="Аудитории EVP Pro" className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                <div role="tablist" aria-label="Аудитории EVP PRO" className="flex flex-wrap items-center gap-x-5 gap-y-2">
                   {audiences.map((item, index) => {
                     const isActive = index === activeAudience;
                     return (

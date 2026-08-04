@@ -56,7 +56,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("EVP Pro lead API error:", err);
+    console.error("EVP PRO lead API error:", err);
     return NextResponse.json(
       { error: "Server error" },
       { status: 500 }

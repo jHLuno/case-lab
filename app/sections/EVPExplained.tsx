@@ -27,13 +27,13 @@ export default function EVPExplained() {
             className="max-w-[38ch] text-[clamp(22px,2.3vw,34px)] leading-[1.22] text-black"
             style={{ fontFamily: "var(--font-body)" }}
           >
-            EVP объединяет то, что компания обещает людям, то, как она работает внутри, и то, что о ней слышит рынок.
+            За шесть часов <span className="text-[#075C43]">EVP PRO</span> вы найдёте ответ на главный вопрос: почему талантливые специалисты должны работать именно у вас.
           </p>
           <p
             className="mt-5 max-w-[58ch] text-[16px] leading-[1.5] text-black/65 md:mt-6 md:text-[18px]"
             style={{ fontFamily: "var(--font-body)" }}
           >
-            Когда эти части сходятся, компания становится понятным и сильным выбором для нужных ей людей.
+            На его основе создадите сильное позиционирование работодателя и план развития HR-бренда, связанный с конкретными задачами бизнеса.
           </p>
           <p
             className="mt-8 text-[15px] font-bold uppercase tracking-[0.05em] text-[#075C43] md:mt-10 md:text-[17px]"

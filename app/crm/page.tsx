@@ -17,7 +17,7 @@ type Source = "main" | "evp-pro";
 
 const sourceTabs: { value: Source; label: string }[] = [
   { value: "main", label: "Сайт" },
-  { value: "evp-pro", label: "EVP Pro" },
+  { value: "evp-pro", label: "EVP PRO" },
 ];
 
 export default function CRMPage() {

@@ -98,7 +98,7 @@ export default function EVPProFacilitators() {
             className="max-w-[13ch] text-[clamp(29px,4.4vw,56px)] font-bold leading-[1.06] tracking-[0.02em] uppercase text-black"
             style={{ fontFamily: "var(--font-heading)" }}
           >
-            Кто проведёт <span className="text-[#075C43]">EVP Pro</span>
+            Кто проведёт <span className="text-[#075C43]">EVP PRO</span>
           </h2>
           <p
             className="mt-5 max-w-[46ch] text-[15px] leading-[1.5] text-black/55 md:text-[17px]"

@@ -73,13 +73,13 @@ export default function EVPProHero() {
               className="evp-hero-enter max-w-[16ch] text-[clamp(30px,5.4vw,76px)] font-bold uppercase leading-[1.02] tracking-[0.02em]"
               style={{ fontFamily: "var(--font-heading)" }}
             >
-              EVP Pro: Как <span className="whitespace-normal md:whitespace-nowrap">хантить лучших?</span>
+              EVP PRO: Как <span className="whitespace-normal md:whitespace-nowrap">хантить лучших?</span>
             </h1>
             <p
               className="evp-hero-enter evp-hero-enter-delay-1 mt-6 max-w-[62ch] text-[16px] leading-[1.5] text-white/82 md:mt-8 md:text-[19px]"
               style={{ fontFamily: "var(--font-body)" }}
             >
-              Практическая сессия о EVP: как собрать единое предложение работодателя, который строит лучший HR бренд страны, чтобы HR, маркетинг, PR и руководители говорили с рынком труда одним голосом.
+              Практическая сессия о EVP: как создать лучший HR бренд страны, чтобы сильные люди выбирали вашу компанию.
             </p>
             <button
               type="button"
