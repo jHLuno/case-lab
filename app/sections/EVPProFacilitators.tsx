@@ -13,6 +13,16 @@ const facilitators = [
     photo: "/daniyar-kosnazarov.webp",
     position: "center 20%",
     scale: "140%",
+    secret: false,
+  },
+  {
+    name: "Арман Шокпаров",
+    role: "Приглашённый эксперт",
+    description: "Основатель On-Point и сооснователь People Consulting. Хедхантер и эксперт по привлечению, развитию и мобильности талантов.",
+    photo: "/arman-shokparov.webp",
+    position: "center 24%",
+    scale: "100%",
+    secret: false,
   },
   {
     name: "Амиржан Жампеисов",
@@ -21,6 +31,16 @@ const facilitators = [
     photo: "/amirzhan-zhampeisov.webp",
     position: "center 15%",
     scale: "100%",
+    secret: false,
+  },
+  {
+    name: "Тайный Гость",
+    role: "Специальный гость",
+    description: "Имя и тема выступления будут раскрыты позже.",
+    photo: "",
+    position: "center",
+    scale: "100%",
+    secret: true,
   },
 ];
 
@@ -30,10 +50,7 @@ function FacilitatorPortrait({ facilitator }: { facilitator: (typeof facilitator
   const [colorProgress, setColorProgress] = useState(0);
 
   useEffect(() => {
-    if (shouldReduceMotion) {
-      setColorProgress(1);
-      return;
-    }
+    if (shouldReduceMotion) return;
 
     let frame: number | undefined;
     const updateProgress = () => {
@@ -62,23 +79,31 @@ function FacilitatorPortrait({ facilitator }: { facilitator: (typeof facilitator
     };
   }, [shouldReduceMotion]);
 
+  const visibleColorProgress = shouldReduceMotion ? 1 : colorProgress;
+
   return (
     <div
       ref={portraitRef}
       className="evp-facilitator-portrait relative aspect-[4/3] overflow-hidden rounded-[24px] bg-[#075C43]/10"
     >
-      <Image
-        src={facilitator.photo}
-        alt={facilitator.name}
-        fill
-        sizes="(max-width: 767px) 100vw, 50vw"
-        className="evp-facilitator-image object-cover"
-        style={{
-          objectPosition: facilitator.position,
-          scale: facilitator.scale,
-          filter: `grayscale(${Math.round((1 - colorProgress) * 100)}%)`,
-        }}
-      />
+      {facilitator.secret ? (
+        <div className="flex h-full items-center justify-center bg-[#075C43] text-[clamp(100px,14vw,190px)] leading-none text-white/90" aria-hidden="true">
+          ?
+        </div>
+      ) : (
+        <Image
+          src={facilitator.photo}
+          alt={facilitator.name}
+          fill
+          sizes="(max-width: 767px) 100vw, 50vw"
+          className="evp-facilitator-image object-cover"
+          style={{
+            objectPosition: facilitator.position,
+            scale: facilitator.scale,
+            filter: `grayscale(${Math.round((1 - visibleColorProgress) * 100)}%)`,
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -104,11 +129,11 @@ export default function EVPProFacilitators() {
             className="mt-5 max-w-[46ch] text-[15px] leading-[1.5] text-black/55 md:text-[17px]"
             style={{ fontFamily: "var(--font-body)" }}
           >
-            Два взгляда на одну задачу: стратегия бренда и опыт работы с командами и основателями.
+            Четыре эксперта: стратегия бренда, найм, команды и предпринимательский опыт.
           </p>
         </div>
 
-        <div className="mt-14 grid gap-14 md:mt-20 md:grid-cols-2 md:gap-x-16 md:gap-y-0">
+        <div className="mt-14 grid gap-14 md:mt-20 md:grid-cols-2 md:gap-x-16 md:gap-y-24">
           {facilitators.map((facilitator, index) => (
             <article
               key={facilitator.name}
