@@ -6,7 +6,7 @@ import { useReducedMotion } from "framer-motion";
 
 const voices = [
   {
-    role: "Руководитель",
+    role: "CEO",
     gap: "Говорит о росте бизнеса, но не формулирует, какую роль в этом играет человек.",
   },
   {
@@ -23,7 +23,7 @@ const voices = [
   },
 ];
 
-const alignmentStatement = "Без единого EVP руководитель, HR, маркетинг и PR рассказывают о компании по-разному. Рынок труда слышит не одну сильную историю, а несколько несвязанных голосов.";
+const alignmentStatement = "Без единого EVP CEO, HR, маркетинг и PR рассказывают о компании по-разному. Рынок труда слышит не одну сильную историю, а несколько несвязанных голосов.";
 const alignmentWords = alignmentStatement.split(" ");
 
 function HighlightWord({

@@ -12,7 +12,6 @@ import EVPAlignment from "../sections/EVPAlignment";
 import EVPProSession from "../sections/EVPProSession";
 import EVPProAudience from "../sections/EVPProAudience";
 import EVPProFacilitators from "../sections/EVPProFacilitators";
-import EVPProProof from "../sections/EVPProProof";
 import EVPProPricing from "../sections/EVPProPricing";
 import EVPProFAQ from "../sections/EVPProFAQ";
 import EVPProClosing from "../sections/EVPProClosing";
@@ -58,7 +57,6 @@ export default function EVPProPage() {
         <EVPProSession />
         <EVPProAudience />
         <EVPProFacilitators />
-        <EVPProProof />
         <EVPProPricing />
         <EVPProFAQ />
         <EVPProClosing />

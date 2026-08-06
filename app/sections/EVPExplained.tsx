@@ -4,21 +4,24 @@ export default function EVPExplained() {
       aria-labelledby="evp-explained-title"
       className="bg-white px-6 py-12 md:px-10 md:py-14"
     >
-      <div className="mx-auto grid max-w-[1440px] gap-10 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-20 lg:gap-28">
-        <div data-evp-reveal className="max-w-[360px]">
+      <div className="mx-auto grid max-w-[1440px] gap-10 md:grid-cols-[minmax(380px,0.9fr)_minmax(0,1.1fr)] md:gap-20 lg:gap-28">
+        <div data-evp-reveal className="max-w-[400px]">
           <h2
             id="evp-explained-title"
-            className="max-w-[12ch] text-[clamp(28px,3.1vw,46px)] font-bold leading-[1.06] tracking-[0.02em] uppercase text-black"
+            className="text-[clamp(28px,3.1vw,46px)] font-bold leading-[1.06] tracking-[0.02em] uppercase text-black"
             style={{ fontFamily: "var(--font-heading)" }}
           >
-            EVP - <span className="text-[#075C43]">{"{ НЕ }"}</span>{" "}
-            <span className="whitespace-nowrap">HR-СЛОГАН.</span>
+            <span className="whitespace-nowrap">
+              EVP — <span className="text-[#075C43]">{"{ПРИЧИНА}"}</span>
+            </span>
+            <br />
+            <span className="whitespace-nowrap">ВЫБРАТЬ ВАС.</span>
           </h2>
           <p
             className="mt-5 max-w-[30ch] text-[15px] leading-[1.5] text-black/65 md:text-[17px]"
             style={{ fontFamily: "var(--font-body)" }}
           >
-            Это причина, по которой сильные люди выбирают вашу компанию, остаются в ней и рекомендуют её другим.
+            Это то, благодаря чему сильные люди выбирают вашу компанию, остаются в ней и рекомендуют её другим.
           </p>
         </div>
 
@@ -34,12 +37,6 @@ export default function EVPExplained() {
             style={{ fontFamily: "var(--font-body)" }}
           >
             На его основе создадите сильное позиционирование работодателя и план развития HR-бренда, связанный с конкретными задачами бизнеса.
-          </p>
-          <p
-            className="mt-8 text-[15px] font-bold uppercase tracking-[0.05em] text-[#075C43] md:mt-10 md:text-[17px]"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            Наём. Удержание. Репутация.
           </p>
         </div>
       </div>

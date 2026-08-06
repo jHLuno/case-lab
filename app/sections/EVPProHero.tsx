@@ -79,7 +79,7 @@ export default function EVPProHero() {
               className="evp-hero-enter evp-hero-enter-delay-1 mt-6 max-w-[62ch] text-[16px] leading-[1.5] text-white/82 md:mt-8 md:text-[19px]"
               style={{ fontFamily: "var(--font-body)" }}
             >
-              Практическая сессия о EVP: как создать лучший HR бренд страны, чтобы сильные люди выбирали вашу компанию.
+              Как создать сильный HR-бренд, чтобы сильные люди выбирали вашу компанию, оставались в ней и рекомендовали её другим.
             </p>
             <button
               type="button"
