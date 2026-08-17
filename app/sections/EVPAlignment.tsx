@@ -56,7 +56,6 @@ export default function EVPAlignment() {
 
   useEffect(() => {
     if (shouldReduceMotion) {
-      setScrollProgress(1);
       return;
     }
 
@@ -87,6 +86,8 @@ export default function EVPAlignment() {
     };
   }, [shouldReduceMotion]);
 
+  const displayProgress = shouldReduceMotion ? 1 : scrollProgress;
+
   return (
     <section
       aria-labelledby="evp-alignment-title"
@@ -116,7 +117,7 @@ export default function EVPAlignment() {
                 key={`${word}-${index}`}
                 word={word}
                 index={index}
-                scrollProgress={scrollProgress}
+                scrollProgress={displayProgress}
                 shouldReduceMotion={shouldReduceMotion}
               />
             ))}

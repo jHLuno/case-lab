@@ -87,6 +87,8 @@ export default function Navbar({
     const node = document.createElement("div");
     node.setAttribute("data-mobile-menu-root", "");
     document.body.appendChild(node);
+    // The portal target must be available to render before the menu can mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPortalNode(node);
 
     return () => {
@@ -111,6 +113,8 @@ export default function Navbar({
   }, [mobileOpen]);
 
   useEffect(() => {
+    // Navigation should always close an open mobile menu.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileOpen(false);
   }, [pathname]);
 
@@ -179,7 +183,7 @@ export default function Navbar({
             className={`hidden md:inline-flex items-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-[14px] font-normal leading-none text-white transition-colors duration-200 ml-1 ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a8]"}`}
             style={{ fontFamily: "var(--font-body)" }}
           >
-            Записаться
+             {ctaLabel}
             <ArrowRight size={13} strokeWidth={2.5} />
           </button>
 
@@ -294,7 +298,7 @@ export default function Navbar({
                       className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200 focus-visible:outline-none"
                       style={{ fontFamily: "var(--font-body)" }}
                     >
-                      Записаться
+                       {ctaLabel}
                       <ArrowRight size={14} strokeWidth={2.5} className="transition-transform duration-200 group-active:translate-x-0.5 group-focus-visible:translate-x-0.5" />
                     </button>
                     </motion.div>

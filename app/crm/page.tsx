@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ArrowLeft, RefreshCw, Search, Filter, Trash2, Save, X, Pencil } from "lucide-react";
+import Link from "next/link";
 
 type Lead = {
   id: number;
@@ -35,6 +36,33 @@ export default function CRMPage() {
   const [editStatus, setEditStatus] = useState<Lead["status"]>("new");
   const [saving, setSaving] = useState(false);
 
+  const fetchLeads = useCallback(async (sourceOverride?: Source) => {
+    const activeSource = sourceOverride ?? source;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/crm/?source=${activeSource}`);
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          setIsAuthenticated(false);
+          setError("Сессия истекла. Войдите снова.");
+        } else {
+          setError("Ошибка сервера");
+        }
+        setLeads([]);
+        return;
+      }
+
+      const data = await res.json();
+      setLeads(data.leads || []);
+    } catch {
+      setError("Ошибка соединения");
+    } finally {
+      setLoading(false);
+    }
+  }, [source]);
+
   // Check existing session on mount + handle bfcache restoration
   useEffect(() => {
     const checkAuth = async () => {
@@ -66,42 +94,14 @@ export default function CRMPage() {
 
     window.addEventListener("pageshow", handlePageShow);
     return () => window.removeEventListener("pageshow", handlePageShow);
-  }, []);
+  }, [fetchLeads]);
 
-  const switchSource = async (next: Source) => {
+  const switchSource = (next: Source) => {
     if (next === source) return;
     setSource(next);
     setFilter("all");
     setSearch("");
     setEditingId(null);
-    await fetchLeads(next);
-  };
-
-  const fetchLeads = async (sourceOverride?: Source) => {
-    const activeSource = sourceOverride ?? source;
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch(`/api/crm/?source=${activeSource}`);
-
-      if (!res.ok) {
-        if (res.status === 401) {
-          setIsAuthenticated(false);
-          setError("Сессия истекла. Войдите снова.");
-        } else {
-          setError("Ошибка сервера");
-        }
-        setLeads([]);
-        return;
-      }
-
-      const data = await res.json();
-      setLeads(data.leads || []);
-    } catch {
-      setError("Ошибка соединения");
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -280,13 +280,13 @@ export default function CRMPage() {
               </button>
             </form>
             <p className="text-center mt-4">
-              <a
+              <Link
                 href="/"
                 className="inline-flex items-center gap-1 text-black/40 text-[14px] hover:text-black transition-colors"
                 style={{ fontFamily: "var(--font-body)" }}
               >
                 <ArrowLeft size={14} /> На сайт
-              </a>
+              </Link>
             </p>
           </div>
         ) : (

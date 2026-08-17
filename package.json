@@ -7,7 +7,7 @@
     "dev:clean": "pkill -9 -f 'next' 2>/dev/null || true; rm -rf .next && next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

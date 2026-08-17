@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
 const takeaways = [
@@ -38,11 +39,15 @@ export default function EVPProAudience() {
 
         <div className="mt-14 grid gap-10 md:mt-20 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1fr)] lg:items-center lg:gap-20">
           <div data-evp-reveal>
-            <div
-              aria-label="Место для фотографии"
-              data-evp-photo-slot
-              className="aspect-[1.05] w-full rounded-[10px] bg-[#f5f6f8]"
-            />
+            <div className="relative aspect-[1.05] w-full">
+              <Image
+                src="/images/evp-pro-worksheets.webp"
+                alt="Рабочие материалы сессии EVP PRO"
+                fill
+                sizes="(max-width: 1023px) 100vw, 46vw"
+                className="object-contain"
+              />
+            </div>
           </div>
 
           <div className="flex flex-col gap-8 md:gap-10">

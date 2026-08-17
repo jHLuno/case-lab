@@ -32,6 +32,11 @@ export default function LeadPopup() {
   const buttonWeightClass = isEvpPro ? "font-medium" : "font-normal";
   const panelRef = useRef<HTMLDivElement>(null);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+  const resetAndClose = () => {
+    setStatus("idle");
+    setErrorMsg("");
+    closePopup();
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -56,6 +61,8 @@ export default function LeadPopup() {
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        setStatus("idle");
+        setErrorMsg("");
         closePopup();
         return;
       }
@@ -97,13 +104,6 @@ export default function LeadPopup() {
       previouslyFocusedRef.current = null;
     };
   }, [isOpen, closePopup]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setStatus("idle");
-      setErrorMsg("");
-    }
-  }, [isOpen]);
 
   // The submit button unmounts on success, dropping keyboard focus to <body>;
   // move it onto the confirmation button so the trap keeps working.
@@ -156,9 +156,9 @@ export default function LeadPopup() {
 
       setStatus("success");
       form.reset();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatus("error");
-      setErrorMsg(err?.message || "Ошибка отправки. Попробуйте позже.");
+      setErrorMsg(err instanceof Error ? err.message : "Ошибка отправки. Попробуйте позже.");
     }
   };
 
@@ -175,7 +175,7 @@ export default function LeadPopup() {
           transition={{ duration: 0.2 }}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overscroll-none touch-none"
           onClick={(e) => {
-            if (e.target === e.currentTarget) closePopup();
+            if (e.target === e.currentTarget) resetAndClose();
           }}
         >
           <motion.div
@@ -192,7 +192,7 @@ export default function LeadPopup() {
             onClick={(e) => e.stopPropagation()}
           >
             <button
-              onClick={closePopup}
+              onClick={resetAndClose}
               className="absolute top-4 right-4 md:top-10 md:right-10 w-10 h-10 flex items-center justify-center rounded-full bg-black/5 hover:bg-black/10 transition-colors text-black/40 hover:text-black/60 z-10"
               aria-label="Закрыть"
             >
@@ -213,7 +213,7 @@ export default function LeadPopup() {
                   Мы свяжемся с вами в течение рабочего дня.
                 </p>
                 <button
-                  onClick={closePopup}
+                  onClick={resetAndClose}
                   className={`w-full inline-flex items-center justify-center gap-2 text-white px-7 py-3.5 text-[14px] md:px-8 md:py-4 md:text-[15px] rounded-full transition-colors duration-200 ${buttonWeightClass} ${accentButtonClass}`}
                   style={inputFont}
                 >
