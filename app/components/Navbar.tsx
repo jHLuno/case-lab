@@ -24,6 +24,7 @@ type NavbarProps = {
   navLinks?: NavLink[];
   basePath?: string;
   ctaLabel?: string;
+  ctaHref?: string;
 };
 
 export default function Navbar({
@@ -32,6 +33,7 @@ export default function Navbar({
   navLinks = defaultNavLinks,
   basePath = "/",
   ctaLabel = "Записаться",
+  ctaHref,
 }: NavbarProps) {
   const pathname = usePathname();
   const { openPopup } = useLeadPopup();
@@ -44,7 +46,10 @@ export default function Navbar({
     setMobileOpen(false);
     toggleRef.current?.focus();
   };
-  const getNavHref = (href: string) => (pathname === basePath ? href : `${basePath}${href}`);
+  const getNavHref = (href: string) => {
+    if (/^(?:[a-z]+:|#)/i.test(href)) return href;
+    return pathname === basePath ? href : `${basePath}${href}`;
+  };
 
   // Focus trap + Escape for mobile menu
   useEffect(() => {
@@ -177,15 +182,26 @@ export default function Navbar({
           </div>
 
           {/* CTA */}
-          <button
-            type="button"
-            onClick={openPopup}
-            className={`hidden md:inline-flex items-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-[14px] font-normal leading-none text-white transition-colors duration-200 ml-1 ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a8]"}`}
-            style={{ fontFamily: "var(--font-body)" }}
-          >
-             {ctaLabel}
-            <ArrowRight size={13} strokeWidth={2.5} />
-          </button>
+          {ctaHref ? (
+            <a
+              href={getNavHref(ctaHref)}
+              className={`hidden md:inline-flex items-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-[14px] font-normal leading-none text-white transition-colors duration-200 ml-1 ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a8]"}`}
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              {ctaLabel}
+              <ArrowRight size={13} strokeWidth={2.5} />
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={openPopup}
+              className={`hidden md:inline-flex items-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-[14px] font-normal leading-none text-white transition-colors duration-200 ml-1 ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a8]"}`}
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              {ctaLabel}
+              <ArrowRight size={13} strokeWidth={2.5} />
+            </button>
+          )}
 
           {/* Mobile menu button */}
           <motion.button
@@ -292,15 +308,27 @@ export default function Navbar({
                     transition={{ delay: 0.34, duration: 0.42 }}
                   >
                     <motion.div whileTap={{ scale: 0.98, y: 1 }}>
-                    <button
-                      type="button"
-                      onClick={() => { closeMobileMenu(); openPopup(); }}
-                      className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200 focus-visible:outline-none"
-                      style={{ fontFamily: "var(--font-body)" }}
-                    >
-                       {ctaLabel}
-                      <ArrowRight size={14} strokeWidth={2.5} className="transition-transform duration-200 group-active:translate-x-0.5 group-focus-visible:translate-x-0.5" />
-                    </button>
+                    {ctaHref ? (
+                      <a
+                        href={getNavHref(ctaHref)}
+                        onClick={closeMobileMenu}
+                        className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200 focus-visible:outline-none"
+                        style={{ fontFamily: "var(--font-body)" }}
+                      >
+                        {ctaLabel}
+                        <ArrowRight size={14} strokeWidth={2.5} className="transition-transform duration-200 group-active:translate-x-0.5 group-focus-visible:translate-x-0.5" />
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => { closeMobileMenu(); openPopup(); }}
+                        className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200 focus-visible:outline-none"
+                        style={{ fontFamily: "var(--font-body)" }}
+                      >
+                        {ctaLabel}
+                        <ArrowRight size={14} strokeWidth={2.5} className="transition-transform duration-200 group-active:translate-x-0.5 group-focus-visible:translate-x-0.5" />
+                      </button>
+                    )}
                     </motion.div>
                   </motion.div>
 

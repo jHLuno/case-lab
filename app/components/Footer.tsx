@@ -6,9 +6,19 @@ import { useLeadPopup } from "../lib/LeadPopupContext";
 
 type FooterProps = {
   accent?: "blue" | "emerald";
+  ctaHeading?: string;
+  ctaDescription?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
 };
 
-export default function Footer({ accent = "blue" }: FooterProps) {
+export default function Footer({
+  accent = "blue",
+  ctaHeading = "Готовы обсудить задачу?",
+  ctaDescription = "Заполните форму — мы свяжемся в течение рабочего дня. Первая консультация бесплатно.",
+  ctaLabel = "Записаться на диагностику",
+  ctaHref,
+}: FooterProps) {
   const { openPopup } = useLeadPopup();
   return (
     <footer className="relative bg-white pt-20 md:pt-32 pb-8 px-6 md:px-10 z-[2]">
@@ -22,23 +32,34 @@ export default function Footer({ accent = "blue" }: FooterProps) {
             className="text-black text-[clamp(24px,4vw,48px)] font-bold leading-[1.05] uppercase tracking-[0.02em] mb-6 md:mb-6 md:max-w-none"
             style={{ fontFamily: "var(--font-heading)" }}
           >
-            <span className="md:whitespace-nowrap">Готовы обсудить задачу?</span>
+            <span className="md:whitespace-nowrap">{ctaHeading}</span>
           </h2>
           <p
             className="text-black/60 text-[15px] md:text-[18px] leading-[1.4] mb-10 md:mb-10 max-w-md mx-auto font-light"
             style={{ fontFamily: "var(--font-body)" }}
           >
-            Заполните форму — мы свяжемся в течение рабочего дня. Первая консультация бесплатно.
+            {ctaDescription}
           </p>
-          <button
-            type="button"
-            onClick={openPopup}
-            className={`inline-flex items-center gap-3 px-7 py-3.5 text-[14px] font-normal text-white rounded-full hover:gap-4 transition-[gap,background-color] duration-200 md:px-10 md:py-5 md:text-[15px] ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a0]"}`}
-            style={{ fontFamily: "var(--font-body)" }}
-          >
-            <span>Записаться на диагностику</span>
-            <ArrowUpRight size={16} strokeWidth={2} />
-          </button>
+          {ctaHref ? (
+            <a
+              href={ctaHref}
+              className={`inline-flex items-center gap-3 px-7 py-3.5 text-[14px] font-normal text-white rounded-full hover:gap-4 transition-[gap,background-color] duration-200 md:px-10 md:py-5 md:text-[15px] ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a0]"}`}
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              <span>{ctaLabel}</span>
+              <ArrowUpRight size={16} strokeWidth={2} />
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={openPopup}
+              className={`inline-flex items-center gap-3 px-7 py-3.5 text-[14px] font-normal text-white rounded-full hover:gap-4 transition-[gap,background-color] duration-200 md:px-10 md:py-5 md:text-[15px] ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a0]"}`}
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              <span>{ctaLabel}</span>
+              <ArrowUpRight size={16} strokeWidth={2} />
+            </button>
+          )}
         </div>
 
         {/* Minimal info row */}

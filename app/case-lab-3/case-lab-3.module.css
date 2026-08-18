@@ -1,0 +1,945 @@
+.hero {
+  overflow: hidden;
+  background: #fff;
+  color: #fff;
+  padding: 8px;
+}
+
+.heroShell {
+  width: 100%;
+}
+
+.contentShell {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 1320px);
+  margin: 0 auto;
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.heroLead,
+.heroImage,
+.heroFact,
+.heroSignal {
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 28px;
+}
+
+.heroLead {
+  grid-column: span 7;
+  grid-row: span 2;
+  display: flex;
+  min-height: 560px;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(24px, 4vw, 58px);
+  background: linear-gradient(135deg, #261044 0%, #61127e 52%, #ed3ab0 155%);
+}
+
+.heroLead::after {
+  position: absolute;
+  right: -10%;
+  bottom: -34%;
+  width: 68%;
+  height: 70%;
+  border: 1px solid rgba(255, 255, 255, .24);
+  border-radius: 50%;
+  box-shadow: 0 0 0 24px rgba(255, 255, 255, .06), 0 0 0 56px rgba(255, 255, 255, .035);
+  content: "";
+  transform: rotate(-17deg);
+}
+
+.heroKicker,
+.heroImageLabel,
+.heroFact span,
+.heroPrice span,
+.heroBottomLine,
+.sectionKicker,
+.proofLabel,
+.caseRole,
+.caseIndex,
+.archiveCardBody span {
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.heroKicker {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  color: rgba(255, 255, 255, .6);
+}
+
+.heroTitle {
+  position: relative;
+  z-index: 1;
+  max-width: 9ch;
+  margin: 22px 0 0;
+  font-family: var(--font-heading);
+  font-size: clamp(42px, 6vw, 88px);
+  line-height: .94;
+  letter-spacing: -.035em;
+  text-wrap: balance;
+}
+
+.heroCopy {
+  position: relative;
+  z-index: 1;
+  max-width: 43ch;
+  margin: 24px 0 0;
+  color: rgba(255, 255, 255, .72);
+  font-size: clamp(16px, 1.5vw, 19px);
+  line-height: 1.45;
+}
+
+.heroCtaRow {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 42px;
+}
+
+.heroCta,
+.ticketCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  width: fit-content;
+  border-radius: 999px;
+  background: #fff;
+  color: #160f43;
+  padding: 14px 20px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  transition: transform .2s ease, background-color .2s ease;
+}
+
+.heroCta {
+  padding-right: 76px;
+  padding-left: 76px;
+  font-size: 16px;
+}
+
+.heroCta:hover,
+.ticketCta:hover {
+  background: #cfcaff;
+  transform: translateY(-2px);
+}
+
+.heroPrice {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+}
+
+.heroPrice strong {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.heroPrice span {
+  color: rgba(255, 255, 255, .55);
+  letter-spacing: .04em;
+  text-transform: none;
+}
+
+.heroImage {
+  grid-column: span 5;
+  min-height: 340px;
+  border-color: transparent;
+  border-radius: 28px;
+  background: #17122f;
+}
+
+.heroImage::before {
+  position: absolute;
+  z-index: 1;
+  inset: 12%;
+  border: 1px solid rgba(255, 255, 255, .34);
+  border-radius: 50%;
+  box-shadow: 0 0 0 18px rgba(255, 255, 255, .07), 0 0 0 42px rgba(255, 255, 255, .04);
+  content: "";
+  pointer-events: none;
+}
+
+.heroImageOverlay,
+.proofMediaShade,
+.speakerVisualShade,
+.archiveImageShade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(9, 6, 27, .03) 35%, rgba(9, 6, 27, .86) 100%);
+  pointer-events: none;
+}
+
+.heroImageLabel {
+  position: absolute;
+  bottom: 17px;
+  left: 18px;
+  color: rgba(255, 255, 255, .82);
+}
+
+.heroRail {
+  grid-column: span 5;
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 14px;
+}
+
+.heroFact,
+.heroSignal {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 180px;
+  padding: 18px;
+  background: rgba(255, 255, 255, .06);
+  border-radius: 22px;
+}
+
+.heroFact svg {
+  color: #afa8ff;
+}
+
+.heroFact span {
+  margin-top: 18px;
+  color: rgba(255, 255, 255, .48);
+  letter-spacing: .08em;
+}
+
+.heroFact strong {
+  margin-top: 6px;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.heroSignal {
+  grid-column: span 2;
+  min-height: 146px;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+  background: #e5c7ff;
+  color: #210b42;
+}
+
+.heroSignal::before {
+  position: absolute;
+  top: 50%;
+  left: 28%;
+  width: 240px;
+  height: 240px;
+  border: 1px solid rgba(33, 11, 66, .32);
+  border-radius: 50%;
+  box-shadow: 0 0 0 19px rgba(33, 11, 66, .08), 0 0 0 44px rgba(33, 11, 66, .05);
+  content: "";
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.heroSignalNumber {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-heading);
+  font-size: clamp(70px, 9vw, 120px);
+  line-height: .72;
+  letter-spacing: -.06em;
+}
+
+.heroSignal p {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 3px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.18;
+  text-align: right;
+}
+
+.heroBottomLine {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  overflow: hidden;
+  margin-top: 16px;
+  color: rgba(255, 255, 255, .48);
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+
+.caseRoomKicker {
+  margin: 0 0 14px;
+  color: #c8d9f3;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.caseRoomBrand {
+  position: relative;
+  display: inline-block;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: clamp(18px, 1.5vw, 22px);
+  letter-spacing: -.015em;
+  text-transform: none;
+}
+
+.caseRoomRoman {
+  position: absolute;
+  top: -.38em;
+  left: calc(100% + .45em);
+  color: #c8d9f3;
+  font-size: .68em;
+  letter-spacing: .14em;
+}
+
+.caseRoomTitle {
+  max-width: none;
+  margin: 0;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: clamp(38px, 4.8vw, 68px);
+  font-weight: 700;
+  line-height: .98;
+  letter-spacing: -.02em;
+  text-transform: none;
+  text-wrap: balance;
+}
+
+.caseRoomTitle span {
+  display: block;
+  white-space: nowrap;
+}
+
+.caseRoomCopy {
+  max-width: 54ch;
+  margin: 22px 0 0;
+  color: rgba(255, 255, 255, .72);
+  font-size: clamp(17px, 1.4vw, 20px);
+  line-height: 1.5;
+}
+
+.caseRoomShape {
+  position: relative;
+  display: flex;
+  min-height: min(74svh, 900px);
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: clamp(28px, 5vw, 64px);
+}
+
+.caseRoomShapeStatic {
+  background: #040082;
+}
+
+.caseRoomGradient {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+}
+
+.caseRoomShapeContent,
+.caseRoomShapeFooter {
+  position: relative;
+  z-index: 2;
+}
+
+.caseRoomShapeContent {
+  padding-top: clamp(28px, 4vw, 56px);
+}
+
+.caseRoomShapeFooter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 24px;
+  margin-top: 48px;
+}
+
+.caseRoomDetails {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.caseRoomDetails strong {
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: clamp(32px, 3.5vw, 52px);
+  font-weight: 400;
+  line-height: .8;
+  letter-spacing: -.05em;
+}
+
+.caseRoomDetails span {
+  color: rgba(255, 255, 255, .7);
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: .11em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.caseRoomPurchase {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.caseRoomPurchase p {
+  margin: 0;
+  color: rgba(255, 255, 255, .68);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.caseRoomCases {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+  padding: 0;
+}
+
+.caseRoomCase {
+  position: relative;
+  display: flex;
+  min-height: 128px;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  overflow: hidden;
+  padding: 16px;
+  border-radius: 18px;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.caseRoomCase::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(4, 0, 130, .98) 0%, rgba(4, 0, 130, .88) 38%, rgba(4, 0, 130, .34) 68%, rgba(4, 0, 130, 0) 100%);
+  content: "";
+}
+
+.caseRoomCase img {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+}
+
+.caseRoomCase strong,
+.caseRoomCase > span:not(.caseRoomCaseArrow) {
+  position: relative;
+  z-index: 2;
+}
+
+.caseRoomCase strong {
+  max-width: 18ch;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: clamp(15px, 1.25vw, 18px);
+  font-weight: 400;
+  letter-spacing: -.025em;
+  line-height: 1.05;
+}
+
+.caseRoomCase span {
+  max-width: 18ch;
+  color: rgba(255, 255, 255, .86);
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.caseRoomCase .caseRoomCaseFeaturedDescription {
+  font-size: clamp(14px, 1.5vw, 18px);
+  font-weight: 500;
+  letter-spacing: -.02em;
+  line-height: 1.08;
+}
+
+.caseRoomCaseArrow {
+  position: absolute;
+  z-index: 3;
+  right: 16px;
+  bottom: 14px;
+  display: grid;
+  width: 50px;
+  height: 50px;
+  place-items: center;
+  border-radius: 50%;
+  border: 0;
+  outline: 0;
+  background: #fff;
+  color: #040082;
+  box-shadow: none;
+}
+
+.proofSection,
+.speakersSection,
+.archiveSection {
+  background: #fff;
+  color: #0a0a16;
+  padding: clamp(84px, 12vw, 180px) 24px;
+}
+
+.sectionIntro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(240px, .9fr);
+  column-gap: clamp(30px, 8vw, 140px);
+  align-items: end;
+}
+
+.sectionIntro h2,
+.sectionIntroWide h2,
+.archiveIntro h2,
+.ticketGrid h2 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(32px, 5vw, 68px);
+  line-height: .97;
+  letter-spacing: -.035em;
+  text-wrap: balance;
+}
+
+.sectionIntro h2 {
+  grid-row: span 2;
+  max-width: 9ch;
+}
+
+.sectionIntro > p:last-child,
+.archiveIntro > p:last-child,
+.sectionIntroWide > p:last-child {
+  max-width: 48ch;
+  margin: 0;
+  color: #4f4e5b;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.sectionKicker {
+  margin: 0 0 16px;
+  color: #040082;
+  letter-spacing: .1em;
+}
+
+.proofGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 64px;
+}
+
+.proofCard {
+  overflow: hidden;
+  border-radius: 26px;
+  background: #fff;
+}
+
+.proofMedia {
+  position: relative;
+  min-height: clamp(260px, 35vw, 460px);
+  overflow: hidden;
+  border-radius: 26px 26px 0 0;
+  background: #17122f;
+}
+
+.proofPlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .65);
+  border-radius: 999px;
+  color: #fff;
+  transform: translate(-50%, -50%);
+}
+
+.proofLabel {
+  position: absolute;
+  bottom: 18px;
+  left: 20px;
+  color: rgba(255, 255, 255, .82);
+}
+
+.proofCard h3 {
+  min-height: 76px;
+  margin: 0;
+  padding: 20px;
+  font-family: var(--font-heading);
+  font-size: clamp(20px, 2vw, 30px);
+  line-height: 1;
+  letter-spacing: -.025em;
+}
+
+.proofNote {
+  margin: 18px 0 0;
+  color: #676672;
+  font-size: 13px;
+}
+
+.speakersSection {
+  padding-top: 0;
+}
+
+.sectionIntroWide {
+  max-width: 820px;
+}
+
+.sectionIntroWide h2 {
+  max-width: 10ch;
+}
+
+.speakerVisualGrid {
+  display: grid;
+  grid-template-columns: 1.3fr .85fr .85fr;
+  gap: 12px;
+  margin-top: 68px;
+}
+
+.speakerVisualFeature {
+  grid-row: span 2;
+}
+
+.speakerVisual {
+  position: relative;
+  min-height: 250px;
+  overflow: hidden;
+  border-radius: 26px;
+  background: #161433;
+}
+
+.speakerVisualFeature .speakerVisual {
+  min-height: 540px;
+}
+
+.speakerVisual figcaption {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  color: rgba(255, 255, 255, .82);
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.caseList {
+  margin-top: 14px;
+}
+
+.caseRow {
+  display: grid;
+  grid-template-columns: 58px minmax(190px, .85fr) minmax(0, 1.4fr);
+  gap: 20px;
+  align-items: start;
+  margin-top: 10px;
+  padding: 24px;
+  border: 1px solid rgba(10, 10, 22, .12);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .5);
+}
+
+.caseRow:last-child {
+  border-bottom: 1px solid rgba(10, 10, 22, .12);
+}
+
+.caseIndex {
+  color: #040082;
+  letter-spacing: .08em;
+}
+
+.caseRow h3,
+.caseTitle {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(20px, 2.4vw, 30px);
+  line-height: 1;
+  letter-spacing: -.025em;
+}
+
+.caseRole,
+.caseDescription {
+  margin: 8px 0 0;
+  color: #676672;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.caseRole {
+  font-size: 10px;
+  letter-spacing: .04em;
+  text-transform: none;
+}
+
+.archiveSection {
+  padding-top: clamp(84px, 10vw, 140px);
+  padding-right: 0;
+  padding-bottom: clamp(84px, 10vw, 140px);
+}
+
+.archiveIntro {
+  width: min(100% - 24px, 1320px);
+  margin: 0 auto 56px;
+}
+
+.archiveIntro h2 {
+  max-width: 9ch;
+}
+
+.archiveIntro > p:last-child {
+  margin-top: 18px;
+}
+
+.archiveViewport {
+  overflow: hidden;
+}
+
+.archiveTrack {
+  display: flex;
+  width: max-content;
+  gap: 14px;
+  animation: case-lab-3-marquee 36s linear infinite;
+}
+
+.archiveCard {
+  width: clamp(280px, 32vw, 390px);
+  overflow: hidden;
+  border-radius: 20px;
+  background: #fff;
+}
+
+.archiveImage {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #1a1638;
+}
+
+.archiveCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 18px;
+}
+
+.archiveCardBody strong {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.archiveCardBody span {
+  color: #73717d;
+  font-size: 10px;
+  letter-spacing: .04em;
+  text-transform: none;
+}
+
+.ticketSection {
+  background: #0b0920;
+  color: #fff;
+  padding: clamp(84px, 12vw, 170px) 24px;
+}
+
+.ticketGrid {
+  display: grid;
+  grid-template-columns: 1.15fr .85fr;
+  gap: clamp(30px, 8vw, 140px);
+  align-items: end;
+}
+
+.ticketGrid h2 {
+  max-width: 8ch;
+}
+
+.ticketCopy {
+  max-width: 44ch;
+  margin: 28px 0 0;
+  color: rgba(255, 255, 255, .68);
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.ticketCta {
+  margin-top: 30px;
+}
+
+.ticketPriceBlock {
+  padding: 26px;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 26px;
+  background: #18133c;
+}
+
+.ticketPriceTop,
+.ticketPriceBottom {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ticketPriceTop {
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, .16);
+}
+
+.ticketPriceBottom {
+  padding-top: 16px;
+  color: rgba(255, 255, 255, .5);
+}
+
+.ticketPriceTop span,
+.ticketPriceBottom span {
+  font-family: var(--font-body);
+  font-size: 12px;
+}
+
+.ticketPriceTop strong,
+.ticketPriceBottom strong {
+  font-family: var(--font-heading);
+  font-size: clamp(30px, 4vw, 52px);
+  font-weight: 400;
+  line-height: .9;
+}
+
+.ticketPriceTop strong {
+  color: #afa8ff;
+}
+
+.ticketPriceBlock ul {
+  display: grid;
+  gap: 12px;
+  margin: 34px 0 0;
+  padding: 24px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, .16);
+  list-style: none;
+}
+
+.ticketPriceBlock li {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  color: rgba(255, 255, 255, .76);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.ticketPriceBlock li svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #afa8ff;
+}
+
+@keyframes case-lab-3-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-50% - 7px)); }
+}
+
+@media (max-width: 900px) {
+  .caseRoomShapeFooter { display: flex; align-items: flex-start; flex-direction: column; }
+  .caseRoomPurchase { display: flex; align-items: flex-end; gap: 18px; }
+  .caseRoomPurchase { flex-wrap: wrap; }
+  .heroLead { grid-column: span 8; }
+  .heroImage { grid-column: span 4; }
+  .heroRail { grid-column: span 4; grid-template-columns: 1fr; }
+  .heroSignal { grid-column: span 1; }
+  .sectionIntro { grid-template-columns: 1fr; gap: 20px; }
+  .sectionIntro h2 { grid-row: auto; }
+  .speakerVisualGrid { grid-template-columns: 1fr 1fr; }
+  .speakerVisualFeature { grid-row: auto; grid-column: span 2; }
+  .speakerVisualFeature .speakerVisual { min-height: 370px; }
+  .ticketGrid { grid-template-columns: 1fr 1fr; gap: 34px; }
+}
+
+@media (max-width: 640px) {
+  .caseRoomTitle { font-size: clamp(20px, 5.6vw, 30px); }
+  .caseRoomTitle span { white-space: normal; }
+  .caseRoomCopy { font-size: 17px; }
+  .caseRoomShape { min-height: min(76svh, 680px); border-radius: 28px; padding: 24px 12px; }
+  .caseRoomCases { grid-template-columns: 1fr; }
+  .caseRoomCases { margin-top: 10px; padding: 0; }
+  .caseRoomCase { min-height: 84px; }
+  .caseRoomPurchase { align-items: flex-start; flex-direction: column; }
+  .caseRoomPurchase p { text-align: left; }
+  .heroGrid { display: flex; flex-direction: column; }
+  .heroLead { min-height: 520px; padding: 28px 22px; }
+  .heroTitle { font-size: clamp(42px, 14vw, 64px); }
+  .heroImage { min-height: 300px; }
+  .heroRail { display: grid; grid-template-columns: 1fr 1fr; }
+  .heroSignal { grid-column: span 2; min-height: 124px; }
+  .heroBottomLine { justify-content: flex-start; overflow-x: auto; padding-bottom: 5px; }
+  .proofSection,
+  .speakersSection,
+  .archiveSection,
+  .ticketSection { padding-right: 16px; padding-left: 16px; }
+  .proofGrid { grid-template-columns: 1fr; margin-top: 42px; }
+  .proofCard h3 { min-height: 0; }
+  .speakerVisualGrid { grid-template-columns: 1fr; margin-top: 42px; }
+  .speakerVisualFeature { grid-column: auto; }
+  .speakerVisualFeature .speakerVisual,
+  .speakerVisual { min-height: 320px; }
+  .caseRow { grid-template-columns: 34px 1fr; gap: 11px; }
+  .caseRow > div:last-child { grid-column: 2; }
+  .archiveSection { padding-right: 0; }
+  .archiveIntro { width: calc(100% - 16px); margin-left: 0; }
+  .ticketGrid { grid-template-columns: 1fr; gap: 48px; }
+}
+
+@media (min-width: 768px) {
+  .caseRoomShape { border-radius: 36px; }
+}
+
+@media (min-width: 1024px) {
+  .hero { padding: 12px; }
+  .caseRoomShape { border-radius: 40px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archiveTrack { animation-play-state: paused; }
+  .heroCta,
+  .ticketCta { transition: none; }
+}
