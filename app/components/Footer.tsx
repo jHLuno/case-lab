@@ -118,13 +118,20 @@ export default function Footer({
           >
             &copy; 2026 Case Lab. Все права защищены.
           </span>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             <a
               href="/privacy/"
               className="text-black/50 text-[12px] font-light hover:text-black/70 transition-colors duration-200"
               style={{ fontFamily: "var(--font-body)" }}
             >
               Политика конфиденциальности
+            </a>
+            <a
+              href="/offer/"
+              className="text-black/50 text-[12px] font-light hover:text-black/70 transition-colors duration-200"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              Договор оферты
             </a>
           </div>
         </div>
