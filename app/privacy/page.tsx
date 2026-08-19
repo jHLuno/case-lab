@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Политика конфиденциальности и обработки персональных данных — Case Lab",
@@ -20,6 +22,15 @@ export default function PrivacyPage() {
         className="max-w-[800px] mx-auto text-black/60 text-[14px] md:text-[15px] leading-[1.6] font-light break-words"
         style={{ fontFamily: "var(--font-body)" }}
       >
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-black/60 text-[13px] font-light mb-8 hover:text-[#040082] transition-colors"
+          style={{ fontFamily: "var(--font-body)" }}
+        >
+          <ArrowLeft size={14} aria-hidden="true" />
+          Назад на главную
+        </Link>
+
         <h1
           className="text-black text-[clamp(20px,3.5vw,42px)] font-bold leading-[1.12] uppercase tracking-[0.02em] mb-8"
           style={{ fontFamily: "var(--font-heading)" }}
