@@ -39,6 +39,7 @@ export default function Testimonials() {
   return (
     <section
       id="testimonials"
+      tabIndex={-1}
       aria-label="Результаты сессий"
       className="relative bg-white py-16 md:py-40 px-6 md:px-10"
     >

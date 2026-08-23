@@ -19,6 +19,7 @@ export default function CaseLab3Navbar() {
       ctaLabel="Купить билет"
       ctaHref={caseLab3CheckoutHref}
       hideOnScroll
+      menuDescription="Событие для маркетологов и команд, которым важны реальные решения."
     />
   );
 }

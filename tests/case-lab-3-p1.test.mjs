@@ -4,7 +4,7 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-const [layoutSource, globalsSource, navbarSource, casesSource, scrollRevealSource, proofSource, ticketsSource, faqSource, checkoutSource, pageSource, jsonLdSource, sitemapSource, caseLabStyles, heroSource] = await Promise.all([
+const [layoutSource, globalsSource, navbarSource, casesSource, scrollRevealSource, proofSource, ticketsSource, faqSource, checkoutSource, pageSource, jsonLdSource, sitemapSource, caseLabStyles, heroSource, speakersSource] = await Promise.all([
   read("app/layout.tsx"),
   read("app/globals.css"),
   read("app/components/Navbar.tsx"),
@@ -19,6 +19,7 @@ const [layoutSource, globalsSource, navbarSource, casesSource, scrollRevealSourc
   read("public/sitemap.xml"),
   read("app/case-lab-3/case-lab-3.module.css"),
   read("app/sections/CaseLab3Hero.tsx"),
+  read("app/sections/CaseLab3Speakers.tsx"),
 ]);
 
 test("Case Lab 3 has no video-related promise or player implementation", () => {
@@ -27,10 +28,12 @@ test("Case Lab 3 has no video-related promise or player implementation", () => {
   }
 });
 
-test("mobile speaker copy stays readable and short viewports use the mobile layout", () => {
+test("mobile speaker copy stays readable and short viewports use the semantic mobile layout", () => {
   assert.match(globalsSource, /--color-blue/);
-  assert.match(caseLabStyles, /\.speakerMobileCase p:last-child\s*\{[^}]*color:\s*#4f4e5b/s);
-  assert.match(caseLabStyles, /@media \(max-width: 767px\), \(min-width: 768px\) and \(max-height: 700px\)/);
+  assert.match(caseLabStyles, /\.speakerAccessibleCase p:last-child\s*\{[^}]*color:\s*#4f4e5b/s);
+  assert.match(caseLabStyles, /@media \(max-width: 767px\), \(min-width: 768px\) and \(max-height: 700px\)[\s\S]*?\.speakerAccessibleCases\s*\{[\s\S]*?position:\s*static/s);
+  assert.match(caseLabStyles, /@media \(max-width: 767px\), \(min-width: 768px\) and \(max-height: 700px\)[\s\S]*?\.speakerAccessibleVisual\s*\{[\s\S]*?min-height:\s*280px/s);
+  assert.match(speakersSource, /<ul>[\s\S]*?cases\.map\([\s\S]*?<li\b[\s\S]*?<article\b[^>]*className=\{styles\.speakerAccessibleCase\}/);
 });
 
 test("marquee exposes a pause control and stops for reduced motion", () => {
@@ -70,6 +73,7 @@ test("all cases points to the homepage archive and the event is internally linke
 
 test("event metadata is route-specific and does not expose the service offer", () => {
   assert.match(pageSource, /"@type": "Event"/);
+  assert.match(pageSource, /twitter/);
   assert.match(pageSource, /2026-09-24T10:00:00\+05:00/);
   assert.match(pageSource, /2026-09-24T14:00:00\+05:00/);
   assert.match(pageSource, /Жандосова 55\/10/);
@@ -79,5 +83,6 @@ test("event metadata is route-specific and does not expose the service offer", (
   assert.match(heroSource, /10:00/);
   assert.match(heroSource, /14:00/);
   assert.match(heroSource, /Жандосова 55\/10/i);
-  assert.match(jsonLdSource, /usePathname|case-lab-3/);
+  assert.doesNotMatch(jsonLdSource, /usePathname|case-lab-3/);
+  assert.match(jsonLdSource, /@type\":\s*\"Organization\"/);
 });

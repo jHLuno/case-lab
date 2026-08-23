@@ -29,7 +29,7 @@ export default function CaseLab3FAQ() {
   const [openItem, setOpenItem] = useState<number | null>(0);
 
   return (
-    <section id="faq" className={styles.faqSection} aria-labelledby="case-lab-3-faq-title">
+    <section id="faq" tabIndex={-1} className={styles.faqSection} aria-labelledby="case-lab-3-faq-title">
       <div className={styles.faqShell}>
         <ScrollReveal>
           <div className={styles.faqIntro}>

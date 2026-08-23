@@ -15,6 +15,7 @@ export default function EVPProNavbar() {
       navLinks={evpProNavLinks}
       basePath="/evp-pro/"
       ctaLabel="Забронировать место"
+      menuDescription="Практическая сессия по EVP для руководителей и команд."
     />
   );
 }

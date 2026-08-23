@@ -44,8 +44,8 @@
   --color-gray-light: #f5f5f5;
 
   /* Typography */
-  --font-heading: 'Benzin', var(--font-bebas), 'Oswald', 'Impact', ui-sans-serif, system-ui, sans-serif;
-  --font-body: 'Gilroy', var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: 'Benzin', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Gilroy', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-roobert: var(--font-body);
 
   /* Text scale */
@@ -109,6 +109,10 @@
     font-family: var(--font-body);
     line-height: 1.25;
   }
+
+  :where(main[id], section[id]) {
+    scroll-margin-top: 7rem;
+  }
 }
 
 @layer utilities {
@@ -168,6 +172,40 @@
   .marquee-track {
     animation: none !important;
   }
+
+  :where(
+    .motion-control,
+    .motion-control *,
+    .motion-control::before,
+    .motion-control::after,
+    button,
+    button *,
+    button::before,
+    button::after,
+    a,
+    a *,
+    a::before,
+    a::after,
+    [role="button"],
+    [role="button"] *,
+    [role="button"]::before,
+    [role="button"]::after
+  ) {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  :where(
+    .motion-control *,
+    button,
+    button *,
+    a,
+    a *,
+    [role="button"],
+    [role="button"] *
+  ) {
+    transform: none !important;
+  }
 }
 
 /* Marquee animation for Clients section */
@@ -212,9 +250,9 @@
 
 /* Focus-visible ring for keyboard navigation */
 :focus-visible {
-  outline: 3px solid #040082;
+  outline: 3px solid var(--cl-focus, #040082);
   outline-offset: 3px;
-  box-shadow: 0 0 0 5px #ffffff;
+  box-shadow: 0 0 0 5px var(--cl-focus-contrast, #ffffff);
 }
 
 /* Remove default outline for mouse users */

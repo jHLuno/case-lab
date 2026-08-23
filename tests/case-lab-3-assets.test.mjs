@@ -40,14 +40,23 @@ test("hero fill images have positioned parents and defer secondary loading", () 
   assert.match(heroCards[2], /loading="lazy"/);
 });
 
-test("hidden mobile fill-image parents stay positioned outside the mobile media query", () => {
+test("semantic speaker image parents stay positioned outside the mobile media query", () => {
   const baseStyles = caseLabStyles.split("@media (max-width: 767px)")[0];
 
-  assert.match(baseStyles, /\.speakerMobileVisual\s*\{[^}]*position:\s*relative/);
+  assert.match(baseStyles, /\.speakerAccessibleCase,\s*\.speakerAccessibleVisual\s*\{[^}]*position:\s*relative/s);
 });
 
-test("mobile speaker fill-image parents declare position inline", () => {
-  assert.match(speakersSource, /<figure className=\{styles\.speakerMobileVisual\} style=\{\{ position: "relative" \}\}>/);
+test("semantic speaker tree supplies the responsive fill-image figures", () => {
+  assert.match(
+    speakersSource,
+    /<div className=\{styles\.speakerAccessibleCases\}[^>]*>[\s\S]*?<ul>[\s\S]*?cases\.map\([\s\S]*?<article className=\{styles\.speakerAccessibleCase\}>[\s\S]*?<figure className=\{styles\.speakerAccessibleVisual\}>[\s\S]*?<Image src=\{item\.image\} alt=\{item\.alt\} fill/,
+  );
+});
+
+test("speaker motion uses a const observer and aligned crossfade durations", () => {
+  assert.match(speakersSource, /const observer = new IntersectionObserver\(/);
+  assert.match(speakersSource, /outgoingCopy[\s\S]*duration: visualTransitionDuration/);
+  assert.match(speakersSource, /incomingCopy[\s\S]*duration: visualTransitionDuration/);
 });
 
 test("hero left text uses the same inset as the main heading", () => {
@@ -67,5 +76,7 @@ test("hero case cards give their text a 20px inset", () => {
 test("Case Lab 3 cases headline uses the shared left inset", () => {
   assert.match(pageSource, /<Cases alignToCaseLab \/>/);
   assert.match(casesSource, /alignToCaseLab\s*=\s*false/);
-  assert.match(casesSource, /ml-4 md:ml-10/);
+  assert.match(casesSource, /const caseLabShell = `max-w-\[1078px\] \$\{alignToCaseLab \? "ml-4 md:ml-10" : "mx-auto"\}`/);
+  assert.equal((casesSource.match(/caseLabShell/g) ?? []).length, 4);
+  assert.match(casesSource, /text-\[clamp\(24px,4vw,54px\)\]/);
 });

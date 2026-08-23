@@ -24,17 +24,19 @@ export default function HomePage() {
     <LeadPopupProvider>
       <div className="relative">
         <Navbar />
-        <Hero />
-        <ClientsPain />
-        <Pricing />
-        <BeforeAfter />
-        <Timeline />
-        <Testimonials />
-        <Team />
-        <About />
-        <Cases />
-        <Evolution />
-        <News />
+        <main id="main" tabIndex={-1}>
+          <Hero />
+          <ClientsPain />
+          <Pricing />
+          <BeforeAfter />
+          <Timeline />
+          <Testimonials />
+          <Team />
+          <About />
+          <Cases />
+          <Evolution />
+          <News />
+        </main>
         <Footer />
         <BackToTop />
         <LeadPopup />

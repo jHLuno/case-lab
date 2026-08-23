@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Menu, X, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,6 +27,7 @@ type NavbarProps = {
   ctaLabel?: string;
   ctaHref?: string | null;
   hideOnScroll?: boolean;
+  menuDescription?: string;
 };
 
 export default function Navbar({
@@ -37,9 +38,11 @@ export default function Navbar({
   ctaLabel = "Записаться",
   ctaHref,
   hideOnScroll = false,
+  menuDescription = "Диагностика маркетинга для команд, которым нужен ясный следующий шаг.",
 }: NavbarProps) {
   const pathname = usePathname();
   const { openPopup } = useLeadPopup();
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [navHidden, setNavHidden] = useState(false);
   const [focusWithin, setFocusWithin] = useState(false);
@@ -50,11 +53,39 @@ export default function Navbar({
   const closeMobileMenu = () => setMobileOpen(false);
   const closeMobileMenuAndReturnFocus = () => {
     setMobileOpen(false);
-    toggleRef.current?.focus();
+    requestAnimationFrame(() => {
+      toggleRef.current?.focus();
+    });
   };
   const getNavHref = (href: string) => {
     if (/^(?:[a-z]+:|#)/i.test(href)) return href;
     return pathname === basePath ? href : `${basePath}${href}`;
+  };
+  const focusHashTarget = (href: string) => {
+    let hash = href.startsWith("#") ? href : "";
+
+    if (!hash) {
+      try {
+        const url = new URL(href, window.location.origin);
+        const currentPath = window.location.pathname.replace(/\/$/, "");
+        const targetPath = url.pathname.replace(/\/$/, "");
+
+        if (url.origin !== window.location.origin || targetPath !== currentPath) return;
+        hash = url.hash;
+      } catch {
+        return;
+      }
+    }
+
+    if (!hash) return;
+
+    requestAnimationFrame(() => {
+      document.querySelector<HTMLElement>(hash)?.focus({ preventScroll: true });
+    });
+  };
+  const handleMobileLinkClick = (href: string) => {
+    closeMobileMenu();
+    focusHashTarget(getNavHref(href));
   };
 
   // Focus trap + Escape for mobile menu
@@ -174,16 +205,16 @@ export default function Navbar({
   return (
     <>
         <motion.nav
-          className="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-30px)] md:w-auto"
+          className="motion-control fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-30px)] md:w-auto"
           initial={false}
-          animate={{ y: navHidden && !focusWithin ? -120 : 0, opacity: 1 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { y: navHidden && !focusWithin ? -120 : 0, opacity: 1 }}
           onFocusCapture={() => setFocusWithin(true)}
           onBlurCapture={(event) => {
             if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
               setFocusWithin(false);
             }
           }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.6, ease: "easeOut" }}
       >
         <div
           className="flex items-center justify-between md:justify-start gap-1 rounded-full border border-black/10 bg-white/85 backdrop-blur-xl px-3 py-2.5 md:px-2 md:py-2 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.15)]"
@@ -256,7 +287,7 @@ export default function Navbar({
             aria-label="Открыть меню"
             aria-expanded={mobileOpen}
             aria-controls="mobile-menu"
-            whileTap={{ scale: 0.94 }}
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.94 }}
           >
             <Menu size={20} strokeWidth={1.5} />
           </motion.button>
@@ -276,7 +307,7 @@ export default function Navbar({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3 }}
             className="fixed inset-0 z-[60] flex flex-col overflow-hidden bg-[#040082] text-white"
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_32%),radial-gradient(circle_at_75%_30%,rgba(120,150,255,0.22),transparent_28%),linear-gradient(180deg,#0a0f9f_0%,#040082_45%,#03045e_100%)]" />
@@ -284,10 +315,10 @@ export default function Navbar({
             <div className="absolute inset-x-0 top-0 h-px bg-white/20" />
 
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8, transition: { duration: 0.18, ease: [0.32, 0, 0.67, 0] } }}
-              transition={{ duration: 0.28, ease: "easeOut" }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -8, transition: { duration: 0.18, ease: [0.32, 0, 0.67, 0] } }}
+              transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.28, ease: "easeOut" }}
               className="relative z-10 flex shrink-0 items-center justify-between px-6 pt-5 pb-3"
               style={{ paddingTop: "max(20px, calc(env(safe-area-inset-top) + 8px))" }}
             >
@@ -306,7 +337,7 @@ export default function Navbar({
                 onClick={closeMobileMenuAndReturnFocus}
                 className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-sm transition-colors duration-200 active:bg-white/20"
                 aria-label="Закрыть меню"
-                whileTap={{ scale: 0.94, rotate: -6 }}
+                whileTap={shouldReduceMotion ? undefined : { scale: 0.94, rotate: -6 }}
               >
                 <X size={20} strokeWidth={1.75} />
               </motion.button>
@@ -320,19 +351,19 @@ export default function Navbar({
                  {navLinks.map((link, i) => (
                   <motion.div
                       key={link.label}
-                      initial={{ opacity: 0, y: 18 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{
+                      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
+                      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                      exit={shouldReduceMotion ? { opacity: 0 } : {
                         opacity: 0,
-                       y: 10,
+                        y: 10,
                         transition: { duration: 0.18, delay: (navLinks.length - 1 - i) * 0.03, ease: [0.32, 0, 0.67, 0] },
                       }}
-                      transition={{ delay: i * 0.06 + 0.08, duration: 0.42 }}
+                      transition={shouldReduceMotion ? { duration: 0 } : { delay: i * 0.06 + 0.08, duration: 0.42 }}
                       className="flex"
                     >
                     <Link
                       href={getNavHref(link.href)}
-                      onClick={closeMobileMenu}
+                      onClick={() => handleMobileLinkClick(link.href)}
                        className="group py-3 text-[clamp(30px,8vw,38px)] font-normal leading-[1.02] tracking-[-0.03em] text-white/92 transition-[color,transform] duration-200 active:translate-x-1 active:text-white focus-visible:text-white"
                       style={{ fontFamily: "var(--font-heading)" }}
                     >
@@ -346,16 +377,16 @@ export default function Navbar({
 
                <div className="mt-auto pt-10">
                  <motion.div
-                    initial={{ opacity: 0, y: 18 }}
-                    animate={{ opacity: 1, y: 0 }}
-                     exit={{ opacity: 0, y: 10, transition: { duration: 0.18, delay: 0.04, ease: [0.32, 0, 0.67, 0] } }}
-                    transition={{ delay: 0.34, duration: 0.42 }}
+                     initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
+                     animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                     exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10, transition: { duration: 0.18, delay: 0.04, ease: [0.32, 0, 0.67, 0] } }}
+                     transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.34, duration: 0.42 }}
                   >
-                    <motion.div whileTap={{ scale: 0.98, y: 1 }}>
+                     <motion.div whileTap={shouldReduceMotion ? undefined : { scale: 0.98, y: 1 }}>
                     {ctaHref ? (
                       <a
                         href={getNavHref(ctaHref)}
-                        onClick={closeMobileMenu}
+                         onClick={() => handleMobileLinkClick(ctaHref)}
                          className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200"
                         style={{ fontFamily: "var(--font-body)" }}
                       >
@@ -373,7 +404,7 @@ export default function Navbar({
                     ) : (
                       <button
                         type="button"
-                        onClick={() => { closeMobileMenu(); openPopup(); }}
+                         onClick={() => { closeMobileMenu(); openPopup(); }}
                          className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200"
                         style={{ fontFamily: "var(--font-body)" }}
                       >
@@ -385,14 +416,14 @@ export default function Navbar({
                   </motion.div>
 
                 <motion.p
-                  initial={{ opacity: 0, y: 18 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10, transition: { duration: 0.18, ease: [0.32, 0, 0.67, 0] } }}
-                  transition={{ delay: 0.4, duration: 0.42 }}
+                   initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
+                   animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                   exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10, transition: { duration: 0.18, ease: [0.32, 0, 0.67, 0] } }}
+                   transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.4, duration: 0.42 }}
                   className="mt-4 max-w-[260px] text-[13px] leading-[1.45] text-white/68"
                   style={{ fontFamily: "var(--font-body)" }}
                 >
-                  Диагностика маркетинга для команд, которым нужен ясный следующий шаг.
+                   {menuDescription}
                 </motion.p>
               </div>
             </div>

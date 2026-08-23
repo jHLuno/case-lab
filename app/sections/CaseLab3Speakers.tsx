@@ -1,12 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useLayoutEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useEffect, useRef } from "react";
 import styles from "../case-lab-3/case-lab-3.module.css";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const cases = [
   {
@@ -44,138 +40,156 @@ const caseStates = [
   [2, 0, 1],
 ] as const;
 
+const loadSpeakerMotion = async () => {
+  const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
+    import("gsap"),
+    import("gsap/ScrollTrigger"),
+  ]);
+  gsap.registerPlugin(ScrollTrigger);
+  return { gsap, ScrollTrigger };
+};
+
 export default function CaseLab3Speakers() {
   const sceneRef = useRef<HTMLDivElement | null>(null);
-  const stageRef = useRef<HTMLDivElement | null>(null);
   const featureLayersRef = useRef<(HTMLElement | null)[]>([]);
   const supportingLayersOneRef = useRef<(HTMLElement | null)[]>([]);
   const supportingLayersTwoRef = useRef<(HTMLElement | null)[]>([]);
   const copyLayersRef = useRef<(HTMLElement | null)[]>([]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const scene = sceneRef.current;
-    const stage = stageRef.current;
 
-    if (!scene || !stage) return;
+    if (
+      !scene ||
+      typeof IntersectionObserver === "undefined" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) return;
 
+    let cancelled = false;
     let revertMedia: (() => void) | undefined;
-    const context = gsap.context(() => {
-      const media = gsap.matchMedia();
-      revertMedia = () => media.revert();
+    let context: { revert: () => void } | undefined;
+    const triggers: Array<{ kill: () => void }> = [];
 
-      media.add("(min-width: 768px)", () => {
-        const slots = [
-          featureLayersRef.current,
-          supportingLayersOneRef.current,
-          supportingLayersTwoRef.current,
-        ];
-        let activeCopyState = 0;
+    const setupMotion = async () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-        const setCopyAriaState = (stateIndex: number) => {
-          copyLayersRef.current.forEach((layer, caseIndex) => {
-            if (layer) layer.setAttribute("aria-hidden", String(caseIndex !== stateIndex));
-          });
-        };
+      try {
+        const { gsap, ScrollTrigger } = await loadSpeakerMotion();
+        if (cancelled || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-        const setState = (stateIndex: number) => {
-          const state = caseStates[stateIndex];
+        context = gsap.context(() => {
+          const media = gsap.matchMedia();
+          revertMedia = () => media.revert();
 
-          slots.forEach((slot, slotIndex) => {
-            slot.forEach((layer, caseIndex) => {
-              if (layer) {
-                gsap.set(layer, {
-                  opacity: caseIndex === state[slotIndex] ? 1 : 0,
-                  scale: 1,
+          media.add("(min-width: 768px)", () => {
+            const slots = [
+              featureLayersRef.current,
+              supportingLayersOneRef.current,
+              supportingLayersTwoRef.current,
+            ];
+            let activeCopyState = 0;
+
+            const setCopyAriaState = (stateIndex: number) => {
+              copyLayersRef.current.forEach((layer, caseIndex) => {
+                if (layer) layer.setAttribute("aria-hidden", String(caseIndex !== stateIndex));
+              });
+            };
+
+            const setState = (stateIndex: number) => {
+              const state = caseStates[stateIndex];
+
+              slots.forEach((slot, slotIndex) => {
+                slot.forEach((layer, caseIndex) => {
+                  if (layer) {
+                    gsap.set(layer, {
+                      opacity: caseIndex === state[slotIndex] ? 1 : 0,
+                      scale: 1,
+                    });
+                  }
                 });
-              }
+              });
+
+              copyLayersRef.current.forEach((layer, caseIndex) => {
+                if (!layer) return;
+                gsap.set(layer, { opacity: caseIndex === stateIndex ? 1 : 0, y: 0 });
+                layer.setAttribute("aria-hidden", String(caseIndex !== stateIndex));
+              });
+            };
+
+            setState(0);
+
+            const timeline = gsap.timeline({ defaults: { ease: "power2.inOut" } });
+            const copyStateThresholds: number[] = [];
+            const stateHoldDuration = 0.8;
+            const visualTransitionDuration = 0.32;
+
+            // Give every visible case the same amount of scroll before crossfading.
+            timeline.to({}, { duration: stateHoldDuration });
+
+            caseStates.slice(1).forEach((state, transitionIndex) => {
+              const fromState = caseStates[transitionIndex];
+              const transitionStart = timeline.duration();
+
+              slots.forEach((slot, slotIndex) => {
+                const outgoing = slot[fromState[slotIndex]];
+                const incoming = slot[state[slotIndex]];
+                if (outgoing) timeline.to(outgoing, { opacity: 0, scale: 1.035, duration: visualTransitionDuration }, transitionStart);
+                if (incoming) timeline.fromTo(incoming, { opacity: 0, scale: 0.985 }, { opacity: 1, scale: 1, duration: visualTransitionDuration }, transitionStart);
+              });
+
+              const outgoingCopy = copyLayersRef.current[transitionIndex];
+              const incomingCopy = copyLayersRef.current[transitionIndex + 1];
+              if (outgoingCopy) timeline.to(outgoingCopy, { opacity: 0, y: 10, duration: visualTransitionDuration }, transitionStart);
+              if (incomingCopy) timeline.fromTo(incomingCopy, { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: visualTransitionDuration }, transitionStart);
+              const transitionEnd = timeline.duration();
+              copyStateThresholds.push((transitionStart + transitionEnd) / 2);
+              timeline.to({}, { duration: stateHoldDuration });
+            });
+
+            triggers.push(ScrollTrigger.create({
+              animation: timeline,
+              trigger: scene,
+              start: "top top",
+              end: "bottom bottom",
+              scrub: 1,
+              invalidateOnRefresh: true,
+            }));
+
+            timeline.eventCallback("onUpdate", () => {
+              // Switch the accessible copy at the midpoint of each visual crossfade.
+              const nextCopyState = copyStateThresholds.reduce(
+                (stateIndex, threshold, index) => (timeline.time() >= threshold ? index + 1 : stateIndex),
+                0,
+              );
+              if (nextCopyState === activeCopyState) return;
+              activeCopyState = nextCopyState;
+              setCopyAriaState(nextCopyState);
             });
           });
+        }, scene);
+      } catch {
+        // Leave the first CSS state visible if motion dependencies cannot load.
+      }
+    };
 
-          copyLayersRef.current.forEach((layer, caseIndex) => {
-            if (!layer) return;
-            gsap.set(layer, { opacity: caseIndex === stateIndex ? 1 : 0, y: 0 });
-            layer.setAttribute("aria-hidden", String(caseIndex !== stateIndex));
-          });
-        };
-
-        setState(0);
-
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-          let activeState = 0;
-
-          ScrollTrigger.create({
-            trigger: scene,
-            start: "top top",
-            end: "bottom bottom",
-            invalidateOnRefresh: true,
-            onUpdate: (self) => {
-              const nextState = Math.min(caseStates.length - 1, Math.floor(self.progress * caseStates.length));
-              if (nextState === activeState) return;
-              activeState = nextState;
-              setState(nextState);
-            },
-          });
-          return;
-        }
-
-        const timeline = gsap.timeline({ defaults: { ease: "power2.inOut" } });
-        const copyStateThresholds: number[] = [];
-        const stateHoldDuration = 0.8;
-        const visualTransitionDuration = 0.32;
-
-        // Give every visible case the same amount of scroll before crossfading.
-        timeline.to({}, { duration: stateHoldDuration });
-
-        caseStates.slice(1).forEach((state, transitionIndex) => {
-          const fromState = caseStates[transitionIndex];
-          const transitionStart = timeline.duration();
-
-          slots.forEach((slot, slotIndex) => {
-            const outgoing = slot[fromState[slotIndex]];
-            const incoming = slot[state[slotIndex]];
-            if (outgoing) timeline.to(outgoing, { opacity: 0, scale: 1.035, duration: visualTransitionDuration }, transitionStart);
-            if (incoming) timeline.fromTo(incoming, { opacity: 0, scale: 0.985 }, { opacity: 1, scale: 1, duration: visualTransitionDuration }, transitionStart);
-          });
-
-          const outgoingCopy = copyLayersRef.current[transitionIndex];
-          const incomingCopy = copyLayersRef.current[transitionIndex + 1];
-          if (outgoingCopy) timeline.to(outgoingCopy, { opacity: 0, y: 10, duration: 0.24 }, transitionStart);
-          if (incomingCopy) timeline.fromTo(incomingCopy, { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.24 }, transitionStart);
-          const transitionEnd = timeline.duration();
-          copyStateThresholds.push((transitionStart + transitionEnd) / 2);
-          timeline.to({}, { duration: stateHoldDuration });
-        });
-
-        ScrollTrigger.create({
-          animation: timeline,
-          trigger: scene,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 1,
-          invalidateOnRefresh: true,
-        });
-
-        timeline.eventCallback("onUpdate", () => {
-          // Switch the accessible copy at the midpoint of each visual crossfade.
-          const nextCopyState = copyStateThresholds.reduce(
-            (stateIndex, threshold, index) => (timeline.time() >= threshold ? index + 1 : stateIndex),
-            0,
-          );
-          if (nextCopyState === activeCopyState) return;
-          activeCopyState = nextCopyState;
-          setCopyAriaState(nextCopyState);
-        });
-      });
-    }, scene);
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer?.disconnect();
+      void setupMotion();
+    }, { rootMargin: "200px 0px" });
+    observer.observe(scene);
 
     return () => {
+      cancelled = true;
+      observer?.disconnect();
+      triggers.forEach((trigger) => trigger.kill());
       revertMedia?.();
-      context.revert();
+      context?.revert();
     };
   }, []);
 
   return (
-    <section id="case-lab-3-speakers" className={styles.speakersSection} aria-labelledby="case-lab-3-speakers-title">
+    <section id="case-lab-3-speakers" tabIndex={-1} className={styles.speakersSection} aria-labelledby="case-lab-3-speakers-title">
       <div className={styles.contentShell}>
         <div className={styles.sectionIntroWide}>
           <h2 id="case-lab-3-speakers-title">Кейсы и спикеры, которые принимали решения.</h2>
@@ -185,7 +199,7 @@ export default function CaseLab3Speakers() {
         </div>
 
         <div ref={sceneRef} className={styles.speakerScene} aria-hidden="true">
-          <div ref={stageRef} className={styles.speakerStage}>
+          <div className={styles.speakerStage}>
             <div className={styles.speakerStageGrid}>
               <div className={`${styles.speakerStageSlot} ${styles.speakerStageFeature}`}>
                 {cases.map((item, caseIndex) => (
@@ -254,39 +268,26 @@ export default function CaseLab3Speakers() {
           </div>
         </div>
 
-          <div className={styles.speakerMobileCases} aria-hidden="true">
-          {cases.map((item) => (
-            <article key={`mobile-${item.company}`} className={styles.speakerMobileCase}>
-              <figure className={styles.speakerMobileVisual} style={{ position: "relative" }}>
-                <Image src={item.image} alt={item.alt} fill sizes="100vw" className="object-cover" />
-                <div className={styles.speakerVisualShade} aria-hidden="true" />
-                <figcaption>
-                  <span>{item.company}</span>
-                </figcaption>
-              </figure>
-              <div className={styles.speakerMobileCopy}>
-                <h3>{item.title}</h3>
-                <p className={styles.speakerMobileRole}>{item.role}</p>
-                <p>{item.description}</p>
-              </div>
-            </article>
-          ))}
-          </div>
-
-          <div className={styles.speakerAccessibleCases} aria-label="Спикеры и кейсы Case Lab III">
-            <ul>
-              {cases.map((item) => (
-                <li key={`accessible-${item.company}`}>
-                  <article>
-                    <strong>{item.company}</strong>
+        <div className={styles.speakerAccessibleCases} aria-label="Спикеры и кейсы Case Lab III">
+          <ul>
+            {cases.map((item) => (
+              <li key={`accessible-${item.company}`}>
+                <article className={styles.speakerAccessibleCase}>
+                  <figure className={styles.speakerAccessibleVisual}>
+                    <Image src={item.image} alt={item.alt} fill sizes="100vw" className="object-cover" />
+                    <div className={styles.speakerVisualShade} aria-hidden="true" />
+                    <figcaption><strong>{item.company}</strong></figcaption>
+                  </figure>
+                  <div className={styles.speakerAccessibleCopy}>
                     <span>{item.role}</span>
                     <h3>{item.title}</h3>
                     <p>{item.description}</p>
-                  </article>
-                </li>
-              ))}
-            </ul>
-          </div>
+                  </div>
+                </article>
+              </li>
+            ))}
+          </ul>
+        </div>
         </div>
     </section>
   );

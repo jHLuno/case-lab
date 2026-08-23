@@ -51,15 +51,17 @@ export default function EVPProPage() {
     <LeadPopupProvider source="evp-pro">
       <div ref={pageRef} className="relative">
         <EVPProNavbar />
-        <EVPProHero />
-        <EVPExplained />
-        <EVPAlignment />
-        <EVPProSession />
-        <EVPProAudience />
-        <EVPProFacilitators />
-        <EVPProPricing />
-        <EVPProFAQ />
-        <EVPProClosing />
+        <main id="main" tabIndex={-1}>
+          <EVPProHero />
+          <EVPExplained />
+          <EVPAlignment />
+          <EVPProSession />
+          <EVPProAudience />
+          <EVPProFacilitators />
+          <EVPProPricing />
+          <EVPProFAQ />
+          <EVPProClosing />
+        </main>
         <EVPProMinimalFooter />
         <BackToTop />
         <LeadPopup />

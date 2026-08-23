@@ -24,10 +24,11 @@ export function buildComingSoonMetadata(title: string, description: string): Met
 
 export default function ComingSoonPage({ tag, title, description }: ComingSoonPageProps) {
   return (
-    <main className="relative min-h-screen bg-white">
+    <div className="relative min-h-screen bg-white">
       <Navbar />
 
-      <section className="relative px-6 md:px-10 pt-32 md:pt-40 pb-24 md:pb-32 overflow-hidden">
+      <main id="main" tabIndex={-1}>
+        <section className="relative px-6 md:px-10 pt-32 md:pt-40 pb-24 md:pb-32 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
         <div className="max-w-[720px] mx-auto">
@@ -90,10 +91,11 @@ export default function ComingSoonPage({ tag, title, description }: ComingSoonPa
             </p>
           </div>
         </div>
-      </section>
+        </section>
+      </main>
 
       <Footer />
       <BackToTop />
-    </main>
+    </div>
   );
 }

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
 import styles from "../case-lab-3/case-lab-3.module.css";
 
 const testimonials = [
@@ -32,6 +33,7 @@ export default function CaseLab3Proof() {
   return (
     <section
       id="case-lab-3-proof"
+      tabIndex={-1}
       className={styles.proofSection}
       aria-labelledby="case-lab-3-proof-title"
     >
@@ -68,6 +70,10 @@ export default function CaseLab3Proof() {
                   <blockquote>
                     &laquo;{testimonial.quote}&raquo;
                   </blockquote>
+                  <span className={styles.testimonialReviewLabel} aria-hidden="true">
+                    Посмотреть отзыв
+                    <ArrowUpRight size={16} strokeWidth={2} />
+                  </span>
                 </div>
               </article>
             );

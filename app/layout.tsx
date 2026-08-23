@@ -1,21 +1,7 @@
 import type { Metadata } from "next";
-import { Inter, Bebas_Neue } from "next/font/google";
+import { headers } from "next/headers";
 import "./globals.css";
 import JsonLd from "./components/JsonLd";
-
-const inter = Inter({
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-inter",
-  display: "swap",
-  weight: ["300", "400", "500", "600"],
-});
-
-const bebasNeue = Bebas_Neue({
-  subsets: ["latin"],
-  variable: "--font-bebas",
-  display: "swap",
-  weight: ["400"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://caselab.kz"),
@@ -56,55 +42,33 @@ export const metadata: Metadata = {
 
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
-      <html lang="ru" className={`${inter.variable} ${bebasNeue.variable}`} suppressHydrationWarning>
+      <html lang="ru" suppressHydrationWarning>
       <head>
         <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico?v=2" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png?v=2" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png?v=2" />
         <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png?v=2" />
         <link rel="manifest" href="/favicons/site.webmanifest?v=2" />
-        <link rel="preload" href="/fonts/Benzin-Bold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/Benzin-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/Gilroy-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/Gilroy-Medium.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
       <body className="antialiased" suppressHydrationWarning>
-        <JsonLd />
-        <script dangerouslySetInnerHTML={{__html: `
-          (function() {
-            function clean() {
-              document.querySelectorAll('[bis_skin_checked]').forEach(function(el) {
-                el.removeAttribute('bis_skin_checked');
-              });
-            }
-            clean();
-            if (typeof MutationObserver !== 'undefined') {
-              var obs = new MutationObserver(function(mutations) {
-                mutations.forEach(function(m) {
-                  if (m.type === 'attributes' && m.attributeName === 'bis_skin_checked') {
-                    m.target.removeAttribute('bis_skin_checked');
-                  }
-                });
-              });
-              obs.observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['bis_skin_checked'] });
-            }
-          })();
-        `}} />
+        <JsonLd nonce={nonce} />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-white focus:px-4 focus:py-3 focus:text-[#040082]"
         >
           Перейти к содержимому
         </a>
-        <main id="main" tabIndex={-1}>
+        <div tabIndex={-1}>
           {children}
-        </main>
+        </div>
       </body>
     </html>
   );

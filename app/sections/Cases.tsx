@@ -75,6 +75,7 @@ export default function Cases({ alignToCaseLab = false }: CasesProps) {
   const [pageHidden, setPageHidden] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(true);
   const shouldAutoAnimate = !isPaused && !interactionPaused && isInView && !pageHidden && !prefersReducedMotion;
+  const caseLabShell = `max-w-[1078px] ${alignToCaseLab ? "ml-4 md:ml-10" : "mx-auto"}`;
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
@@ -166,13 +167,13 @@ export default function Cases({ alignToCaseLab = false }: CasesProps) {
   };
 
   return (
-    <section id="cases" aria-label="Кейсы" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-clip z-[3]">
+    <section id="cases" tabIndex={-1} aria-label="Кейсы" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-clip z-[3]">
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
-      <div className={`max-w-[1078px] ${alignToCaseLab ? "ml-4 md:ml-10" : "mx-auto"}`}>
+      <div className={caseLabShell}>
         <ScrollReveal>
           <h2
-            className="text-black text-[clamp(16px,4vw,54px)] font-bold leading-[1.15] mb-12 md:mb-16 uppercase tracking-[0.02em]"
+            className="text-black text-[clamp(24px,4vw,54px)] font-bold leading-[1.15] mb-12 md:mb-16 uppercase tracking-[0.02em]"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             Разобранные кейсы компаний на Case <em>Lab</em>
@@ -188,7 +189,7 @@ export default function Cases({ alignToCaseLab = false }: CasesProps) {
         onFocusCapture={() => setInteractionPaused(true)}
         onBlurCapture={handleRegionBlur}
       >
-        <div className="mx-auto mb-2 flex max-w-[1078px] justify-end px-6 md:px-10">
+        <div className={`${caseLabShell} mb-2 flex justify-end`}>
           <button
             type="button"
             className="rounded-full border border-[#040082]/25 px-4 py-2 text-[12px] text-[#040082] transition-colors hover:bg-[#040082] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
@@ -214,14 +215,14 @@ export default function Cases({ alignToCaseLab = false }: CasesProps) {
               {industries.map((industry) => (
                 <div
                   key={`${industry.id}-${set}`}
-                  className="relative rounded-[16px] overflow-hidden group cursor-pointer flex-shrink-0 border border-black/[0.08] bg-white hover:border-[#040082]/30 hover:shadow-[0_12px_40px_-12px_rgba(4,0,130,0.15)] hover:scale-[1.02] transition-[scale,border-color,box-shadow] duration-500 will-change-transform"
+                  className="relative flex-shrink-0 overflow-hidden rounded-[16px] border border-black/[0.08] bg-white"
                   style={{ width: "clamp(280px, 35vw, 400px)", contain: "layout style paint" }}
                 >
                   {/* Photo with blue overlay */}
                   <div className="aspect-[4/3] relative overflow-hidden">
                     <Image
                       src={industry.photo}
-                      alt={set === 0 ? industry.speaker : ""}
+                      alt=""
                       fill
                       className="object-cover"
                       style={{ objectPosition: industry.objectPos }}
@@ -261,7 +262,7 @@ export default function Cases({ alignToCaseLab = false }: CasesProps) {
         </div>
       </div>
 
-      <div className="max-w-[1078px] mx-auto mt-8">
+      <div className={`${caseLabShell} mt-8`}>
         <ScrollReveal delay={0.2}>
           <Link
             href="/#news"

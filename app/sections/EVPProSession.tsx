@@ -34,7 +34,7 @@ export default function EVPProSession() {
   const [activeStage, setActiveStage] = useState(0);
 
   return (
-    <section id="session" aria-labelledby="evp-session-title" className="bg-white px-4 py-14 md:px-10 md:py-20">
+    <section id="session" tabIndex={-1} aria-labelledby="evp-session-title" className="bg-white px-4 py-14 md:px-10 md:py-20">
       <div className="mx-auto max-w-[1440px] rounded-[6px] border-2 border-[#075C43] px-5 py-8 md:px-12 md:py-14">
         <header className="relative pb-9 pl-4 md:pb-14 md:pl-6 md:pr-40">
           <div className="relative">

@@ -4,14 +4,16 @@ import { ArrowUpRight } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useReducedMotion } from "framer-motion";
-import SpecularButton from "../components/SpecularButton";
+import { useState } from "react";
 import styles from "../case-lab-3/case-lab-3.module.css";
+import GrainientBoundary from "../components/GrainientBoundary";
 import { caseLab3CheckoutHref } from "../lib/caseLab3";
 
 const Grainient = dynamic(() => import("../components/Grainient"), { ssr: false });
 
 export default function CaseLab3Hero() {
   const shouldReduceMotion = useReducedMotion();
+  const [grainientFailed, setGrainientFailed] = useState(false);
   const checkoutHref = caseLab3CheckoutHref;
 
   return (
@@ -19,31 +21,34 @@ export default function CaseLab3Hero() {
       <div className={styles.heroShell}>
         <div className={`${styles.caseRoomShape} ${shouldReduceMotion ? styles.caseRoomShapeStatic : ""}`}>
           <div className={styles.caseRoomGradient} aria-hidden="true">
-            {!shouldReduceMotion && (
-              <Grainient
-                color1="#eb9ae9"
-                color2="#040082"
-                color3="#ab6ae9"
-                timeSpeed={1.6}
-                colorBalance={-0.5}
-                warpStrength={0.7}
-                warpFrequency={3.4}
-                warpSpeed={0.3}
-                warpAmplitude={20}
-                blendAngle={-23}
-                blendSoftness={0}
-                rotationAmount={210}
-                noiseScale={2}
-                grainAmount={0.1}
-                grainScale={2}
-                grainAnimated={false}
-                contrast={1.5}
-                gamma={1}
-                saturation={1}
-                centerX={0}
-                centerY={0}
-                zoom={0.9}
-              />
+            {!shouldReduceMotion && !grainientFailed && (
+              <GrainientBoundary>
+                <Grainient
+                  onError={() => setGrainientFailed(true)}
+                  color1="#eb9ae9"
+                  color2="#040082"
+                  color3="#ab6ae9"
+                  timeSpeed={1.6}
+                  colorBalance={-0.5}
+                  warpStrength={0.7}
+                  warpFrequency={3.4}
+                  warpSpeed={0.3}
+                  warpAmplitude={20}
+                  blendAngle={-23}
+                  blendSoftness={0}
+                  rotationAmount={210}
+                  noiseScale={2}
+                  grainAmount={0.1}
+                  grainScale={2}
+                  grainAnimated={false}
+                  contrast={1.5}
+                  gamma={1}
+                  saturation={1}
+                  centerX={0}
+                  centerY={0}
+                  zoom={0.9}
+                />
+              </GrainientBoundary>
             )}
           </div>
           <div className={`${styles.caseRoomShapeContent} ${styles.caseLabHeroHeading}`}>
@@ -72,29 +77,10 @@ export default function CaseLab3Hero() {
             </div>
             <div className={styles.caseRoomPurchase}>
               {checkoutHref ? (
-                <SpecularButton
-                  size="lg"
-                  radius={999}
-                  tint="#ffffff"
-                  tintOpacity={1}
-                  textColor="#160f43"
-                  lineColor="#040082"
-                  baseColor="#afa8ff"
-                  intensity={1}
-                  shineSize={10}
-                  shineFade={40}
-                  thickness={3}
-                  speed={0.35}
-                  followMouse
-                  proximity={250}
-                  autoAnimate={false}
-                  className={styles.heroCta}
-                  style={{ fontSize: "16px" }}
-                  onClick={() => window.location.assign(checkoutHref)}
-                >
+                <a href={checkoutHref} className={styles.heroCta}>
                   Купить билет
                   <ArrowUpRight size={20} strokeWidth={2} aria-hidden="true" />
-                </SpecularButton>
+                </a>
               ) : (
                 <p className={styles.checkoutUnavailable} role="status">
                   Покупка билетов временно недоступна.

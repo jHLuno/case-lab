@@ -115,7 +115,7 @@
 **Что происходит:** desktop запускает бесконечную CSS-анимацию, mobile меняет `scrollLeft` каждый animation frame. Нет pause/play, остановки при focus или hover. Reduced-motion CSS прямо сохраняет 25-секундную анимацию; browser test показал движение `scrollLeft` и в reduced mode.  
 **Влияние:** пользователи с vestibular/attention disorders не могут остановить движение; контент уезжает во время чтения; расходуются CPU и батарея.  
 **Стандарт:** WCAG 2.2.2 Pause, Stop, Hide; WCAG 2.3.3 как улучшенный ориентир.  
-**Как исправить:** при reduced motion выводить статичный/manual-scroll список; добавить видимую pause/play кнопку; автоматически ставить паузу при hover, keyboard focus, pointer/touch interaction и `document.hidden`; останавливать RAF, когда секция вне viewport.  
+**Как исправить:** при reduced motion выводить статичный/manual-scroll список; автоматически ставить паузу при hover, keyboard focus, pointer/touch interaction и `document.hidden`; останавливать RAF, когда секция вне viewport.  
 **Рекомендуемая команда:** `$impeccable animate`.
 
 ### P1-05. Ключевой контент невидим без JavaScript или при hydration failure

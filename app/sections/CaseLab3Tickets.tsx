@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowUpRight, Check } from "lucide-react";
 import ScrollReveal from "../components/ScrollReveal";
 import styles from "../case-lab-3/case-lab-3.module.css";
@@ -13,7 +11,7 @@ const included = [
 
 export default function CaseLab3Tickets() {
   return (
-    <section id="tickets" className={styles.ticketSection} aria-labelledby="case-lab-3-tickets-title">
+    <section id="tickets" tabIndex={-1} className={styles.ticketSection} aria-labelledby="case-lab-3-tickets-title">
       <div className={styles.contentShell}>
         <div className={styles.ticketGrid}>
           <ScrollReveal>

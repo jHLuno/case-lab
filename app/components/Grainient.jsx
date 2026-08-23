@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useEffectEvent, useRef } from 'react';
 import { Renderer, Program, Mesh, Triangle } from 'ogl';
 import './Grainient.css';
 
@@ -127,122 +127,169 @@ const Grainient = ({
   color1 = '#FF9FFC',
   color2 = '#5227FF',
   color3 = '#B497CF',
-  className = ''
+  className = '',
+  onError = /** @type {((error: unknown) => void) | undefined} */ (undefined)
 }) => {
   const containerRef = useRef(null);
+  const reportError = useEffectEvent(error => {
+    if (onError) onError(error);
+  });
 
   // Effect 1: build WebGL context once, pause when offscreen / tab hidden
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const renderer = new Renderer({
-      webgl: 2,
-      alpha: true,
-      antialias: false,
-      dpr: Math.min(window.devicePixelRatio || 1, 2)
-    });
-
-    const gl = renderer.gl;
-    const canvas = gl.canvas;
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.style.display = 'block';
-    container.appendChild(canvas);
-
-    const geometry = new Triangle(gl);
-    const program = new Program(gl, {
-      vertex,
-      fragment,
-      uniforms: {
-        iTime:           { value: 0 },
-        iResolution:     { value: new Float32Array([1, 1]) },
-        uTimeSpeed:      { value: 0.25 },
-        uColorBalance:   { value: 0.0 },
-        uWarpStrength:   { value: 1.0 },
-        uWarpFrequency:  { value: 5.0 },
-        uWarpSpeed:      { value: 2.0 },
-        uWarpAmplitude:  { value: 50.0 },
-        uBlendAngle:     { value: 0.0 },
-        uBlendSoftness:  { value: 0.05 },
-        uRotationAmount: { value: 500.0 },
-        uNoiseScale:     { value: 2.0 },
-        uGrainAmount:    { value: 0.1 },
-        uGrainScale:     { value: 2.0 },
-        uGrainAnimated:  { value: 0.0 },
-        uContrast:       { value: 1.5 },
-        uGamma:          { value: 1.0 },
-        uSaturation:     { value: 1.0 },
-        uCenterOffset:   { value: new Float32Array([0, 0]) },
-        uZoom:           { value: 0.9 },
-        uColor1:         { value: new Float32Array([1, 1, 1]) },
-        uColor2:         { value: new Float32Array([1, 1, 1]) },
-        uColor3:         { value: new Float32Array([1, 1, 1]) }
-      }
-    });
-
-    const mesh = new Mesh(gl, { geometry, program });
-    ctxMap.set(container, { renderer, program, mesh });
-
-    const setSize = () => {
-      const rect = container.getBoundingClientRect();
-      const w = Math.max(1, Math.floor(rect.width));
-      const h = Math.max(1, Math.floor(rect.height));
-      renderer.setSize(w, h);
-      const res = program.uniforms.iResolution.value;
-      res[0] = gl.drawingBufferWidth;
-      res[1] = gl.drawingBufferHeight;
-      renderer.render({ scene: mesh });
-    };
-
-    const ro = new ResizeObserver(setSize);
-    ro.observe(container);
-    setSize();
-
+    let renderer;
+    let canvas;
+    let ro;
+    let io;
     let raf = 0;
+    let disposed = false;
     let isVisible = true;
     let isPageVisible = !document.hidden;
-    const t0 = performance.now();
 
-    const loop = t => {
-      program.uniforms.iTime.value = (t - t0) * 0.001;
-      renderer.render({ scene: mesh });
-      raf = requestAnimationFrame(loop);
+    const fail = error => {
+      if (disposed) return;
+      disposed = true;
+      if (raf !== 0) cancelAnimationFrame(raf);
+      if (io) io.disconnect();
+      if (ro) ro.disconnect();
+      reportError(error);
     };
 
-    const tryStart = () => {
-      if (isVisible && isPageVisible && raf === 0) raf = requestAnimationFrame(loop);
-    };
-    const tryStop = () => {
-      if (raf !== 0) { cancelAnimationFrame(raf); raf = 0; }
-    };
+    try {
+      renderer = new Renderer({
+        webgl: 2,
+        alpha: true,
+        antialias: false,
+        dpr: Math.min(window.devicePixelRatio || 1, 2)
+      });
 
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        isVisible = entry.isIntersecting;
-        if (isVisible) tryStart();
+      const gl = renderer.gl;
+      canvas = gl.canvas;
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+      canvas.style.display = 'block';
+      container.appendChild(canvas);
+
+      const geometry = new Triangle(gl);
+      const program = new Program(gl, {
+        vertex,
+        fragment,
+        uniforms: {
+          iTime:           { value: 0 },
+          iResolution:     { value: new Float32Array([1, 1]) },
+          uTimeSpeed:      { value: 0.25 },
+          uColorBalance:   { value: 0.0 },
+          uWarpStrength:   { value: 1.0 },
+          uWarpFrequency:  { value: 5.0 },
+          uWarpSpeed:      { value: 2.0 },
+          uWarpAmplitude:  { value: 50.0 },
+          uBlendAngle:     { value: 0.0 },
+          uBlendSoftness:  { value: 0.05 },
+          uRotationAmount: { value: 500.0 },
+          uNoiseScale:     { value: 2.0 },
+          uGrainAmount:    { value: 0.1 },
+          uGrainScale:     { value: 2.0 },
+          uGrainAnimated:  { value: 0.0 },
+          uContrast:       { value: 1.5 },
+          uGamma:          { value: 1.0 },
+          uSaturation:     { value: 1.0 },
+          uCenterOffset:   { value: new Float32Array([0, 0]) },
+          uZoom:           { value: 0.9 },
+          uColor1:         { value: new Float32Array([1, 1, 1]) },
+          uColor2:         { value: new Float32Array([1, 1, 1]) },
+          uColor3:         { value: new Float32Array([1, 1, 1]) }
+        }
+      });
+
+      const mesh = new Mesh(gl, { geometry, program });
+      ctxMap.set(container, { renderer, program, mesh });
+
+      const setSize = () => {
+        try {
+          const rect = container.getBoundingClientRect();
+          const w = Math.max(1, Math.floor(rect.width));
+          const h = Math.max(1, Math.floor(rect.height));
+          renderer.setSize(w, h);
+          const res = program.uniforms.iResolution.value;
+          res[0] = gl.drawingBufferWidth;
+          res[1] = gl.drawingBufferHeight;
+          renderer.render({ scene: mesh });
+        } catch (error) {
+          fail(error);
+        }
+      };
+
+      ro = new ResizeObserver(setSize);
+      ro.observe(container);
+      setSize();
+
+      const t0 = performance.now();
+      const loop = t => {
+        if (disposed) return;
+        try {
+          program.uniforms.iTime.value = (t - t0) * 0.001;
+          renderer.render({ scene: mesh });
+          raf = requestAnimationFrame(loop);
+        } catch (error) {
+          fail(error);
+        }
+      };
+
+      const tryStart = () => {
+        try {
+          if (isVisible && isPageVisible && raf === 0) raf = requestAnimationFrame(loop);
+        } catch (error) {
+          fail(error);
+        }
+      };
+      const tryStop = () => {
+        if (raf !== 0) { cancelAnimationFrame(raf); raf = 0; }
+      };
+
+      io = new IntersectionObserver(
+        ([entry]) => {
+          isVisible = entry.isIntersecting;
+          if (isVisible) tryStart();
+          else tryStop();
+        },
+        { threshold: 0 }
+      );
+      io.observe(container);
+
+      const onVisibility = () => {
+        isPageVisible = !document.hidden;
+        if (isPageVisible) tryStart();
         else tryStop();
-      },
-      { threshold: 0 }
-    );
-    io.observe(container);
+      };
+      document.addEventListener('visibilitychange', onVisibility);
 
-    const onVisibility = () => {
-      isPageVisible = !document.hidden;
-      if (isPageVisible) tryStart();
-      else tryStop();
-    };
-    document.addEventListener('visibilitychange', onVisibility);
+      tryStart();
 
-    tryStart();
+      return () => {
+        disposed = true;
+        tryStop();
+        ro.disconnect();
+        io.disconnect();
+        document.removeEventListener('visibilitychange', onVisibility);
+        ctxMap.delete(container);
+        try { container.removeChild(canvas); } catch { /* ignore */ }
+      };
+    } catch (error) {
+      fail(error);
+    }
 
     return () => {
-      tryStop();
-      ro.disconnect();
-      io.disconnect();
-      document.removeEventListener('visibilitychange', onVisibility);
+      disposed = true;
+      if (raf !== 0) cancelAnimationFrame(raf);
+      if (io) io.disconnect();
+      if (ro) ro.disconnect();
       ctxMap.delete(container);
-      try { container.removeChild(canvas); } catch { /* ignore */ }
+      if (canvas) {
+        try { container.removeChild(canvas); } catch { /* ignore */ }
+      }
     };
   }, []); // renderer created once
 

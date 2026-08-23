@@ -1,6 +1,28 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import CaseLab3Page from "../components/CaseLab3Page";
 import { caseLab3CheckoutHref } from "../lib/caseLab3";
+
+const caseLab3EventOffers = caseLab3CheckoutHref
+  ? [
+      {
+        "@type": "Offer",
+        name: "Early Bird",
+        price: "7890",
+        priceCurrency: "KZT",
+        availability: "https://schema.org/InStock",
+        url: caseLab3CheckoutHref,
+      },
+      {
+        "@type": "Offer",
+        name: "Обычный билет",
+        price: "15000",
+        priceCurrency: "KZT",
+        availability: "https://schema.org/InStock",
+        url: caseLab3CheckoutHref,
+      },
+    ]
+  : undefined;
 
 const caseLab3EventSchema = {
   "@context": "https://schema.org",
@@ -13,7 +35,7 @@ const caseLab3EventSchema = {
   duration: "PT4H",
   eventStatus: "https://schema.org/EventScheduled",
   eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-  image: ["https://caselab.kz/caselab2.webp"],
+  image: ["https://caselab.kz/case-lab-3/opengraph-image"],
   location: {
     "@type": "Place",
     name: "Narxoz Business School",
@@ -41,24 +63,7 @@ const caseLab3EventSchema = {
       jobTitle: "CMO Qara Studios",
     },
   ],
-  offers: [
-    {
-      "@type": "Offer",
-      name: "Early Bird",
-      price: "7890",
-      priceCurrency: "KZT",
-      availability: "https://schema.org/InStock",
-      ...(caseLab3CheckoutHref ? { url: caseLab3CheckoutHref } : {}),
-    },
-    {
-      "@type": "Offer",
-      name: "Обычный билет",
-      price: "15000",
-      priceCurrency: "KZT",
-      availability: "https://schema.org/InStock",
-      ...(caseLab3CheckoutHref ? { url: caseLab3CheckoutHref } : {}),
-    },
-  ],
+  ...(caseLab3EventOffers ? { offers: caseLab3EventOffers } : {}),
 };
 
 export const metadata: Metadata = {
@@ -73,15 +78,32 @@ export const metadata: Metadata = {
     description:
       "Три реальных кейса в Алматы 24 сентября 2026 года, 10:00–14:00 (UTC+5). Early Bird — 7 890 ₸.",
     url: "/case-lab-3/",
-    images: ["/caselab2.webp"],
+    images: [
+      {
+        url: "/case-lab-3/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Case Lab III — три маркетинговых кейса в Алматы",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Case Lab 3 | Кейсы, которые обычно не попадают в презентации",
+    description:
+      "Три реальных кейса в Алматы 24 сентября 2026 года, 10:00–14:00 (UTC+5). Early Bird — 7 890 ₸.",
+    images: ["/case-lab-3/opengraph-image"],
   },
 };
 
-export default function Page() {
+export default async function Page() {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <>
       <script
         type="application/ld+json"
+        nonce={nonce}
         dangerouslySetInnerHTML={{ __html: JSON.stringify(caseLab3EventSchema) }}
       />
       <CaseLab3Page />

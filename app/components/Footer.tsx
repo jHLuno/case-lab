@@ -122,7 +122,7 @@ export default function Footer({
         {/* Bottom bar */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pt-6 border-t border-black/5">
           <span
-            className="text-black/50 text-[12px] font-light"
+            className="text-black/60 text-[12px] font-light"
             style={{ fontFamily: "var(--font-body)" }}
           >
             &copy; 2026 Case Lab. Все права защищены.
@@ -130,14 +130,14 @@ export default function Footer({
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             <a
               href="/privacy/"
-              className="text-black/50 text-[12px] font-light hover:text-black/70 transition-colors duration-200"
+              className="text-black/60 text-[12px] font-light hover:text-black/80 transition-colors duration-200"
               style={{ fontFamily: "var(--font-body)" }}
             >
               Политика конфиденциальности
             </a>
             <a
               href="/offer/"
-              className="text-black/50 text-[12px] font-light hover:text-black/70 transition-colors duration-200"
+              className="text-black/60 text-[12px] font-light hover:text-black/80 transition-colors duration-200"
               style={{ fontFamily: "var(--font-body)" }}
             >
               Договор оферты
