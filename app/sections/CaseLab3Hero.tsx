@@ -7,14 +7,12 @@ import { useReducedMotion } from "framer-motion";
 import { useState } from "react";
 import styles from "../case-lab-3/case-lab-3.module.css";
 import GrainientBoundary from "../components/GrainientBoundary";
-import { caseLab3CheckoutHref } from "../lib/caseLab3";
 
 const Grainient = dynamic(() => import("../components/Grainient"), { ssr: false });
 
 export default function CaseLab3Hero() {
   const shouldReduceMotion = useReducedMotion();
   const [grainientFailed, setGrainientFailed] = useState(false);
-  const checkoutHref = caseLab3CheckoutHref;
 
   return (
     <section className={styles.hero} aria-labelledby="case-lab-3-title">
@@ -75,16 +73,10 @@ export default function CaseLab3Hero() {
               </span>
             </div>
             <div className={styles.caseRoomPurchase}>
-              {checkoutHref ? (
-                <a href={checkoutHref} className={styles.heroCta}>
-                  Купить билет
-                  <ArrowUpRight size={20} strokeWidth={2} aria-hidden="true" />
-                </a>
-              ) : (
-                <p className={styles.checkoutUnavailable} role="status">
-                  Покупка билетов временно недоступна.
-                </p>
-              )}
+              <button type="button" className={styles.heroCta} aria-disabled="true">
+                Купить билет
+                <ArrowUpRight size={20} strokeWidth={2} aria-hidden="true" />
+              </button>
               <p>Первые 20 билетов — 7 890 ₸.<br />Далее — 15 000 ₸.</p>
             </div>
           </div>

@@ -1,6 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
-import { caseLab3CheckoutHref } from "../lib/caseLab3";
 
 export default function CaseLab3Footer() {
   return (
@@ -21,24 +20,15 @@ export default function CaseLab3Footer() {
           >
             Первые 20 билетов стоят 7 890 ₸. Дальше цена будет 15 000 ₸.
           </p>
-          {caseLab3CheckoutHref ? (
-            <a
-              href={caseLab3CheckoutHref}
-              className="inline-flex items-center gap-3 rounded-full bg-[#040082] px-7 py-3.5 text-[14px] font-normal text-white transition-[gap,background-color] duration-200 hover:gap-4 hover:bg-[#0600a0] md:px-10 md:py-5 md:text-[15px]"
-              style={{ fontFamily: "var(--font-body)" }}
-            >
-              <span>Купить билет</span>
-              <ArrowUpRight size={16} strokeWidth={2} aria-hidden="true" />
-            </a>
-          ) : (
-            <span
-              className="inline-flex items-center gap-3 rounded-full bg-black/10 px-7 py-3.5 text-[14px] font-normal text-black/60 md:px-10 md:py-5 md:text-[15px]"
-              aria-disabled="true"
-              style={{ fontFamily: "var(--font-body)" }}
-            >
-              Покупка билетов временно недоступна
-            </span>
-          )}
+          <button
+            type="button"
+            aria-disabled="true"
+            className="inline-flex items-center gap-3 rounded-full bg-[#040082] px-7 py-3.5 text-[14px] font-normal text-white transition-[gap,background-color] duration-200 hover:gap-4 hover:bg-[#0600a0] md:px-10 md:py-5 md:text-[15px]"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            <span>Купить билет</span>
+            <ArrowUpRight size={16} strokeWidth={2} aria-hidden="true" />
+          </button>
         </div>
 
         <div className="mb-12 flex flex-col items-start gap-8 md:grid md:grid-cols-3 md:items-center">

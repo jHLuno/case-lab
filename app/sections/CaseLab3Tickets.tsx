@@ -1,7 +1,6 @@
 import { ArrowUpRight, Check } from "lucide-react";
 import ScrollReveal from "../components/ScrollReveal";
 import styles from "../case-lab-3/case-lab-3.module.css";
-import { caseLab3CheckoutHref } from "../lib/caseLab3";
 
 const included = [
   "три подробных разбора кейсов",
@@ -16,21 +15,14 @@ export default function CaseLab3Tickets() {
         <div className={styles.ticketGrid}>
           <ScrollReveal>
             <div>
-              <p className={styles.sectionKicker}>20 мест по ранней цене</p>
               <h2 id="case-lab-3-tickets-title">Прийти за кейсом. Уйти с решением.</h2>
               <p className={styles.ticketCopy}>
                 Early Bird действует на первые 20 билетов. После этого стоимость участия составит 15 000 ₸.
               </p>
-              {caseLab3CheckoutHref ? (
-                <a href={caseLab3CheckoutHref} className={styles.ticketCta}>
-                  Купить билет
-                  <ArrowUpRight size={17} strokeWidth={2} aria-hidden="true" />
-                </a>
-              ) : (
-                <p className={styles.checkoutUnavailable} role="status">
-                  Покупка билетов временно недоступна.
-                </p>
-              )}
+              <button type="button" className={styles.ticketCta} aria-disabled="true">
+                Купить билет
+                <ArrowUpRight size={17} strokeWidth={2} aria-hidden="true" />
+              </button>
             </div>
           </ScrollReveal>
 

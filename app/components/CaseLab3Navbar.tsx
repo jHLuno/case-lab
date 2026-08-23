@@ -1,5 +1,4 @@
 import Navbar from "./Navbar";
-import { caseLab3CheckoutHref } from "../lib/caseLab3";
 
 const caseLab3NavLinks = [
   { label: "Кейсы", href: "#cases" },
@@ -17,7 +16,7 @@ export default function CaseLab3Navbar() {
       navLinks={caseLab3NavLinks}
       basePath="/case-lab-3/"
       ctaLabel="Купить билет"
-      ctaHref={caseLab3CheckoutHref}
+      ctaHref={null}
       hideOnScroll
       menuDescription="Событие для маркетологов и команд, которым важны реальные решения."
     />

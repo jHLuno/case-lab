@@ -218,10 +218,24 @@ test("testimonial cards expose the requested visual review CTA without video", (
   assert.doesNotMatch(proofSource, /video|видео|iframe|embedUrl/i);
 });
 
-test("hero checkout is an anchor and archive cards are not false buttons", () => {
-  assert.match(heroSource, /<a[^>]+href=\{checkoutHref\}/s);
+test("ticket CTAs are no-op buttons without checkout links", () => {
+  assert.match(heroSource, /<button\s+type="button"\s+className=\{styles\.heroCta\}\s+aria-disabled="true">[\s\S]*?Купить билет/);
+  assert.match(ticketsSource, /<button\s+type="button"\s+className=\{styles\.ticketCta\}\s+aria-disabled="true">[\s\S]*?Купить билет/);
+  assert.match(navbarSource, /ctaHref === null \? \([\s\S]*?<button[\s\S]*?aria-disabled="true"[\s\S]*?\{ctaLabel\}/);
+  assert.match(caseLab3FooterSource, /<button[\s\S]*?aria-disabled="true"[\s\S]*?Купить билет/);
+  assert.doesNotMatch(heroSource, /<a[^>]+href=/);
+  assert.doesNotMatch(ticketsSource, /<a[^>]+href=/);
+  assert.doesNotMatch(caseLab3FooterSource, /<a[^>]+href=\{caseLab3CheckoutHref\}/);
   assert.doesNotMatch(heroSource, /window\.location\.assign/);
   assert.doesNotMatch(casesSource, /cursor-pointer/);
+});
+
+test("ticket section removes the early-price kicker and enlarges its CTA", () => {
+  assert.doesNotMatch(ticketsSource, /20 мест по ранней цене/);
+  assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*width:\s*min\(100%, 340px\);/s);
+  assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*font-size:\s*18px;/s);
+  assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*padding:\s*18px 34px;/s);
+  assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*justify-content:\s*center;/s);
 });
 
 test("speaker animation preserves the GSAP ScrollTrigger choreography", () => {
@@ -277,11 +291,12 @@ test("speaker semantic tree carries the mobile image and case copy", () => {
 
   assert.match(accessibleTreeSource, /<Image\s+src=\{item\.image\}\s+alt=\{item\.alt\}/);
   assert.match(accessibleTreeSource, /<strong>\{item\.company\}<\/strong>/);
-  assert.match(accessibleTreeSource, /<span>\{item\.role\}<\/span>/);
   assert.match(accessibleTreeSource, /<h3>\{item\.title\}<\/h3>/);
   assert.match(accessibleTreeSource, /<p>\{item\.description\}<\/p>/);
   assert.match(accessibleTreeSource, /styles\.speakerAccessibleVisual/);
   assert.match(accessibleTreeSource, /styles\.speakerAccessibleCopy/);
+  assert.doesNotMatch(accessibleTreeSource, /<span>\{item\.role\}<\/span>/);
+  assert.doesNotMatch(speakersSource, /styles\.speakerStageRole/);
 });
 
 test("speaker motion preserves a static fallback and cleans up lazy resources", () => {
@@ -315,6 +330,19 @@ test("speaker visual layers are decorative", () => {
   assert.ok(visualShadeTags.length > 0, "visual shading must be present");
   visualShadeTags.forEach((tag) => assert.match(tag, /\baria-hidden\s*=\s*["']true["']/));
   assert.ok(decorativeImages.length > 0, "visual-layer images must have empty alt text");
+});
+
+test("large speaker photos show each speaker role under the name", () => {
+  assert.match(
+    speakersSource,
+    /speakerStageFeature[\s\S]*?<figcaption>[\s\S]*?<span>\{item\.company\}<\/span>[\s\S]*?<small>\{item\.role\}<\/small>/,
+  );
+  assert.match(speakersSource, /role: "exCMO Invictus Go (?:• нынешний CMO|& CMO) Bayan Sulu"/);
+  assert.match(
+    caseLabStylesSource,
+    /\.speakerStageFeature \.speakerStageCard figcaption\s*\{[^}]*display:\s*flex;[^}]*flex-direction:\s*column;/s,
+  );
+  assert.match(caseLabStylesSource, /\.speakerStageFeature \.speakerStageCard figcaption small\s*\{/);
 });
 
 test("Case Lab 3 metadata declares a large-image Twitter card", () => {
@@ -393,7 +421,7 @@ test("Case Lab 3 footer is static and keeps legal text readable", () => {
   assert.match(caseLab3PageSource, /import CaseLab3Footer from ["']\.\/CaseLab3Footer["']/);
   assert.doesNotMatch(caseLab3PageSource, /import Footer from ["']\.\/Footer["']/);
   assert.doesNotMatch(caseLab3FooterSource, /^"use client"/m);
-  assert.match(caseLab3FooterSource, /caseLab3CheckoutHref/);
+  assert.match(caseLab3FooterSource, /aria-disabled="true"/);
   assert.match(footerSource, /Политика конфиденциальности[\s\S]*text-black\/60/);
 });
 
@@ -404,7 +432,7 @@ test("Organization sameAs contains only the official Case Lab profile", () => {
 
 test("Case Lab 3 hero checkout has no SpecularButton or direct OGL dependency", () => {
   assert.doesNotMatch(heroSource, /SpecularButton|from\s+["']ogl["']|import\s*\(\s*["']ogl["']\s*\)/);
-  assert.match(heroSource, /<a\s+href=\{checkoutHref\}/);
+  assert.match(heroSource, /<button\s+type="button"\s+className=\{styles\.heroCta\}\s+aria-disabled="true"/);
 });
 
 test("Case Lab 3 source stays free of media promises and direct OGL imports", () => {
@@ -419,8 +447,8 @@ test("Case Lab 3 checkout remains fail-closed without a validated URL", () => {
   assert.match(checkoutSource, /url\.protocol !== "https:"/);
   assert.match(checkoutSource, /url\.username|url\.password/);
   assert.match(checkoutSource, /url\.hostname !== host/);
-  assert.match(heroSource, /checkoutHref \? \([\s\S]*?<a\s+href=\{checkoutHref\}[\s\S]*?\) : \(/);
-  assert.match(ticketsSource, /caseLab3CheckoutHref \? \([\s\S]*?<a\s+href=\{caseLab3CheckoutHref\}[\s\S]*?\) : \(/);
+  assert.doesNotMatch(heroSource, /caseLab3CheckoutHref|checkoutHref|href=/);
+  assert.doesNotMatch(ticketsSource, /caseLab3CheckoutHref|href=/);
 });
 
 test("Case Lab 3 route tokens stay scoped and semantic", () => {

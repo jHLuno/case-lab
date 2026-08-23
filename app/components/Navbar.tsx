@@ -259,13 +259,15 @@ export default function Navbar({
               <ArrowRight size={13} strokeWidth={2.5} />
             </a>
           ) : ctaHref === null ? (
-            <span
-              className="hidden items-center whitespace-nowrap rounded-full bg-black/10 px-6 py-3 text-[14px] font-normal leading-none text-black/45 md:inline-flex"
+            <button
+              type="button"
               aria-disabled="true"
+              className={`hidden items-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-[14px] font-normal leading-none text-white transition-colors duration-200 ml-1 md:inline-flex ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a8]"}`}
               style={{ fontFamily: "var(--font-body)" }}
             >
-              {ctaLabel} временно недоступна
-            </span>
+              {ctaLabel}
+              <ArrowRight size={13} strokeWidth={2.5} />
+            </button>
           ) : (
             <button
               type="button"
@@ -394,13 +396,15 @@ export default function Navbar({
                         <ArrowRight size={14} strokeWidth={2.5} className="transition-transform duration-200 group-active:translate-x-0.5 group-focus-visible:translate-x-0.5" />
                       </a>
                     ) : ctaHref === null ? (
-                      <span
-                        className="inline-flex items-center whitespace-nowrap rounded-full bg-white/60 px-6 py-3 text-[14px] font-normal text-[#040082]/60"
+                      <button
+                        type="button"
                         aria-disabled="true"
+                        className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200"
                         style={{ fontFamily: "var(--font-body)" }}
                       >
-                        {ctaLabel} временно недоступна
-                      </span>
+                        {ctaLabel}
+                        <ArrowRight size={14} strokeWidth={2.5} className="transition-transform duration-200 group-active:translate-x-0.5 group-focus-visible:translate-x-0.5" />
+                      </button>
                     ) : (
                       <button
                         type="button"

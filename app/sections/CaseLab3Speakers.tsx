@@ -8,7 +8,7 @@ const cases = [
   {
     company: "Ануар Абдрахманов",
     captionLines: ["Ануар", "Абдрахманов"],
-    role: "exCMO Invictus Go · нынешний CMO Bayan Sulu",
+    role: "exCMO Invictus Go & CMO Bayan Sulu",
     title: "Как масштабировать точки и не потерять спрос",
     description: "О решениях, которые стояли за открытием успешных залов в Алматы и за его пределами. Какие точки роста команда проверяла первой. И что пришлось пересобрать внутри бизнеса.",
     image: "/Invictus GO.webp",
@@ -192,9 +192,9 @@ export default function CaseLab3Speakers() {
     <section id="case-lab-3-speakers" tabIndex={-1} className={styles.speakersSection} aria-labelledby="case-lab-3-speakers-title">
       <div className={styles.contentShell}>
         <div className={styles.sectionIntroWide}>
-          <h2 id="case-lab-3-speakers-title">Кейсы и спикеры, которые принимали решения.</h2>
+          <h2 id="case-lab-3-speakers-title">Спикеры, которые принимали решения</h2>
           <p>
-            Спикеры разбирают собственные кейсы и показывают, как всё происходило изнутри: с какой задачей столкнулись, что решили делать и чем всё закончилось.
+            Они разберут собственные кейсы и покажут, как всё происходило изнутри: с какими задачами сталкивались, что решили делать и чем всё закончилось.
           </p>
         </div>
 
@@ -215,6 +215,7 @@ export default function CaseLab3Speakers() {
                     <div className={styles.speakerVisualShade} aria-hidden="true" />
                     <figcaption>
                       <span>{item.company}</span>
+                      <small>{item.role}</small>
                     </figcaption>
                   </figure>
                 ))}
@@ -253,10 +254,9 @@ export default function CaseLab3Speakers() {
                     }}
                     className={styles.speakerStageCopyLayer}
                     aria-hidden={caseIndex !== 0}
-                  >
-                    <h3>{item.title}</h3>
-                    <p className={styles.speakerStageRole}>{item.role}</p>
-                    <p>{item.description}</p>
+                    >
+                      <h3>{item.title}</h3>
+                      <p>{item.description}</p>
                   </article>
                 ))}
               </div>
@@ -279,7 +279,6 @@ export default function CaseLab3Speakers() {
                     <figcaption><strong>{item.company}</strong></figcaption>
                   </figure>
                   <div className={styles.speakerAccessibleCopy}>
-                    <span>{item.role}</span>
                     <h3>{item.title}</h3>
                     <p>{item.description}</p>
                   </div>
