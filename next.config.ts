@@ -12,6 +12,9 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   trailingSlash: true,
+  images: {
+    qualities: [100, 75],
+  },
   async headers() {
     return [
       {

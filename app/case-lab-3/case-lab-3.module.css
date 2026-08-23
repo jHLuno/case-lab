@@ -757,14 +757,14 @@
 
 .testimonialMedia {
   position: relative;
-  aspect-ratio: 1;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   background: #17122f;
 }
 
 .testimonialPoster {
   object-fit: cover;
-  object-position: center 20%;
+  object-position: center 15%;
 }
 
 .testimonialCardBody {
