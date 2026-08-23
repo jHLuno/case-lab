@@ -27,8 +27,9 @@
 }
 
 .specularButton:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--sb-text-color) 60%, transparent);
+  outline: 3px solid #040082;
   outline-offset: 3px;
+  box-shadow: 0 0 0 5px #fff;
 }
 
 .specularButton:disabled {

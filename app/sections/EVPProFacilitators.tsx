@@ -120,7 +120,7 @@ export default function EVPProFacilitators() {
           />
           <h2
             id="evp-facilitators-title"
-            className="max-w-[13ch] text-[clamp(29px,4.4vw,56px)] font-bold leading-[1.06] tracking-[0.02em] uppercase text-black"
+            className="max-w-none text-[clamp(29px,4.4vw,56px)] font-bold leading-[1.06] tracking-[0.02em] uppercase text-black"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             Кто проведёт <span className="text-[#075C43]">EVP PRO</span>

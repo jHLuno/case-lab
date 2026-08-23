@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "dev:clean": "pkill -9 -f 'next' 2>/dev/null || true; rm -rf .next && next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "NODE_OPTIONS=--disable-warning=DEP0205 next dev",
+    "dev:clean": "pkill -9 -f 'next' 2>/dev/null || true; rm -rf .next && NODE_OPTIONS=--disable-warning=DEP0205 next dev",
+    "build": "NODE_OPTIONS=--disable-warning=DEP0205 next build",
+    "start": "NODE_OPTIONS=--disable-warning=DEP0205 next start",
     "lint": "eslint ."
   },
   "dependencies": {

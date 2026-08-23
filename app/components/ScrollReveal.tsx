@@ -1,7 +1,11 @@
 "use client";
 
 import { motion, useInView } from "framer-motion";
-import { useRef, ReactNode } from "react";
+import { useRef, useSyncExternalStore, type ReactNode } from "react";
+
+const subscribe = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 interface ScrollRevealProps {
   children: ReactNode;
@@ -18,6 +22,7 @@ export default function ScrollReveal({
 }: ScrollRevealProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const hydrated = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
 
   const directions = {
     up: { y: 24, x: 0 },
@@ -29,12 +34,9 @@ export default function ScrollReveal({
   return (
     <motion.div
       ref={ref}
-      initial={{
-        opacity: 0,
-        ...directions[direction],
-      }}
+      initial={false}
       animate={
-        isInView
+        !hydrated || isInView
           ? { opacity: 1, x: 0, y: 0 }
           : { opacity: 0, ...directions[direction] }
       }

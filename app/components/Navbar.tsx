@@ -11,6 +11,7 @@ import { useLeadPopup } from "../lib/LeadPopupContext";
 
 const defaultNavLinks = [
   { label: "Кейсы", href: "#cases" },
+  { label: "Case Lab 3", href: "/case-lab-3/" },
   { label: "Подход", href: "#diagnostics" },
   { label: "Процесс", href: "#process" },
   { label: "Результаты", href: "#testimonials" },
@@ -24,7 +25,8 @@ type NavbarProps = {
   navLinks?: NavLink[];
   basePath?: string;
   ctaLabel?: string;
-  ctaHref?: string;
+  ctaHref?: string | null;
+  hideOnScroll?: boolean;
 };
 
 export default function Navbar({
@@ -34,13 +36,17 @@ export default function Navbar({
   basePath = "/",
   ctaLabel = "Записаться",
   ctaHref,
+  hideOnScroll = false,
 }: NavbarProps) {
   const pathname = usePathname();
   const { openPopup } = useLeadPopup();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [navHidden, setNavHidden] = useState(false);
+  const [focusWithin, setFocusWithin] = useState(false);
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const lastScrollYRef = useRef(0);
   const closeMobileMenu = () => setMobileOpen(false);
   const closeMobileMenuAndReturnFocus = () => {
     setMobileOpen(false);
@@ -87,6 +93,30 @@ export default function Navbar({
 
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [mobileOpen]);
+
+  useEffect(() => {
+    if (!hideOnScroll) return;
+
+    lastScrollYRef.current = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollDelta = currentScrollY - lastScrollYRef.current;
+
+      if (Math.abs(scrollDelta) < 4) return;
+
+      if (mobileOpen) {
+        setNavHidden(false);
+      } else {
+        setNavHidden(currentScrollY > 100 && scrollDelta > 0);
+      }
+
+      lastScrollYRef.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hideOnScroll, mobileOpen]);
 
   useEffect(() => {
     const node = document.createElement("div");
@@ -143,10 +173,16 @@ export default function Navbar({
 
   return (
     <>
-      <motion.nav
-        className="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-30px)] md:w-auto"
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
+        <motion.nav
+          className="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-30px)] md:w-auto"
+          initial={false}
+          animate={{ y: navHidden && !focusWithin ? -120 : 0, opacity: 1 }}
+          onFocusCapture={() => setFocusWithin(true)}
+          onBlurCapture={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+              setFocusWithin(false);
+            }
+          }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <div
@@ -191,6 +227,14 @@ export default function Navbar({
               {ctaLabel}
               <ArrowRight size={13} strokeWidth={2.5} />
             </a>
+          ) : ctaHref === null ? (
+            <span
+              className="hidden items-center whitespace-nowrap rounded-full bg-black/10 px-6 py-3 text-[14px] font-normal leading-none text-black/45 md:inline-flex"
+              aria-disabled="true"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              {ctaLabel} временно недоступна
+            </span>
           ) : (
             <button
               type="button"
@@ -289,7 +333,7 @@ export default function Navbar({
                     <Link
                       href={getNavHref(link.href)}
                       onClick={closeMobileMenu}
-                      className="group py-3 text-[clamp(30px,8vw,38px)] font-normal leading-[1.02] tracking-[-0.03em] text-white/92 transition-[color,transform] duration-200 active:translate-x-1 active:text-white focus-visible:outline-none focus-visible:text-white"
+                       className="group py-3 text-[clamp(30px,8vw,38px)] font-normal leading-[1.02] tracking-[-0.03em] text-white/92 transition-[color,transform] duration-200 active:translate-x-1 active:text-white focus-visible:text-white"
                       style={{ fontFamily: "var(--font-heading)" }}
                     >
                       <span className="inline-block border-b border-transparent pb-1 group-active:border-white/50 group-focus-visible:border-white/60">
@@ -312,17 +356,25 @@ export default function Navbar({
                       <a
                         href={getNavHref(ctaHref)}
                         onClick={closeMobileMenu}
-                        className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200 focus-visible:outline-none"
+                         className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200"
                         style={{ fontFamily: "var(--font-body)" }}
                       >
                         {ctaLabel}
                         <ArrowRight size={14} strokeWidth={2.5} className="transition-transform duration-200 group-active:translate-x-0.5 group-focus-visible:translate-x-0.5" />
                       </a>
+                    ) : ctaHref === null ? (
+                      <span
+                        className="inline-flex items-center whitespace-nowrap rounded-full bg-white/60 px-6 py-3 text-[14px] font-normal text-[#040082]/60"
+                        aria-disabled="true"
+                        style={{ fontFamily: "var(--font-body)" }}
+                      >
+                        {ctaLabel} временно недоступна
+                      </span>
                     ) : (
                       <button
                         type="button"
                         onClick={() => { closeMobileMenu(); openPopup(); }}
-                        className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200 focus-visible:outline-none"
+                         className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200"
                         style={{ fontFamily: "var(--font-body)" }}
                       >
                         {ctaLabel}

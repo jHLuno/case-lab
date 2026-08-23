@@ -1,64 +1,79 @@
-"use client";
-
 import Image from "next/image";
-import { Play } from "lucide-react";
-import ScrollReveal from "../components/ScrollReveal";
 import styles from "../case-lab-3/case-lab-3.module.css";
 
-const proofItems = [
+const testimonials = [
   {
-    image: "/CASElab.webp",
-    label: "Поток 01",
-    title: "Что забрали с собой после прошлого Case Lab",
-    alt: "Материалы и участники прошлого мероприятия Case Lab",
+    id: "testimonial-01",
+    name: "Екатерина Щипачёва",
+    role: "CMO Intertop & Pandora",
+    quote:
+      "После Case Lab я пересобрала подход к работе с кейсами: меньше теории, больше вопросов к тому, почему команда вообще приняла именно такое решение.",
+    photo: "/testimonial-ekaterina.webp",
   },
   {
-    image: "/caselab2.webp",
-    label: "Поток 02",
-    title: "Когда кейс разбирают не со стороны, а изнутри",
-    alt: "Участник выступает перед аудиторией на Case Lab",
+    id: "testimonial-02",
+    name: "Елена Афонина",
+    role: "Управляющий директор Centras Group",
+    quote:
+      "Увидела, как другие команды находят выход из похожих ситуаций. Забрала несколько идей, которые уже внедрили в следующем спринте.",
+    photo: "/testimonial-elena.webp",
   },
-];
+  {
+    id: "testimonial-03",
+    name: "Аида Нурсултанова",
+    role: "Директор по маркетингу дистрибуции Li Auto",
+    quote:
+      "Разбор кейсов без прикрас — это то, чего часто не хватает в индустрии. После Case Lab появилось больше смелости принимать решения и тестировать.",
+    photo: "/testimonial-aida.webp",
+  },
+] as const;
 
 export default function CaseLab3Proof() {
   return (
-    <section id="case-lab-3-proof" className={styles.proofSection} aria-labelledby="case-lab-3-proof-title">
+    <section
+      id="case-lab-3-proof"
+      className={styles.proofSection}
+      aria-labelledby="case-lab-3-proof-title"
+    >
       <div className={styles.contentShell}>
-        <ScrollReveal>
-          <div className={styles.sectionIntro}>
-            <p className={styles.sectionKicker}>До этого уже было</p>
-            <h2 id="case-lab-3-proof-title">Не обещаем инсайты. Показываем, как это выглядит.</h2>
-            <p>
-              На прошлых потоках маркетологи приходили за насмотренностью, а уходили с решениями, которые можно обсуждать с командой уже на следующий день.
+        <div className={styles.proofIntro}>
+          <div>
+            <h2 id="case-lab-3-proof-title">ЧТО ГОВОРЯТ УЧАСТНИКИ</h2>
+            <p className={styles.proofIntroDescription}>
+              Участники прошлых Case Lab рассказывают,
+              <br />
+              что поменяли в работе после разбора реальных кейсов.
             </p>
           </div>
-        </ScrollReveal>
-
-        <div className={styles.proofGrid}>
-          {proofItems.map((item, index) => (
-            <ScrollReveal key={item.label} delay={index * 0.1}>
-              <article className={styles.proofCard}>
-                <div className={styles.proofMedia}>
-                  <Image
-                    src={item.image}
-                    alt={item.alt}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 767px) 100vw, 50vw"
-                  />
-                  <div className={styles.proofMediaShade} aria-hidden="true" />
-                  <span className={styles.proofPlay} aria-hidden="true">
-                    <Play size={17} fill="currentColor" strokeWidth={1.5} />
-                  </span>
-                  <span className={styles.proofLabel}>{item.label} · видеоотзыв</span>
-                </div>
-                <h3>{item.title}</h3>
-              </article>
-            </ScrollReveal>
-          ))}
         </div>
 
-        <p className={styles.proofNote}>Видеоотзывы с прошлых потоков подключаются в эти два слота.</p>
+        <div className={styles.testimonialGallery}>
+          {testimonials.map((testimonial) => {
+            return (
+              <article key={testimonial.id} className={styles.testimonialCard}>
+                <div className={styles.testimonialMedia}>
+                  <Image
+                    src={testimonial.photo}
+                    alt=""
+                    fill
+                    sizes="(min-width: 1200px) 33vw, (min-width: 768px) 50vw, 100vw"
+                    className={styles.testimonialPoster}
+                  />
+                </div>
+
+                <div className={styles.testimonialCardBody}>
+                  <h3>{testimonial.name}</h3>
+                  <p className={styles.testimonialRole}>{testimonial.role}</p>
+                  <span className={styles.testimonialRule} aria-hidden="true" />
+                  <blockquote>
+                    &laquo;{testimonial.quote}&raquo;
+                  </blockquote>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
       </div>
     </section>
   );

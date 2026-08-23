@@ -8,7 +8,6 @@ import { caseLab3CheckoutHref } from "../lib/caseLab3";
 const included = [
   "три подробных разбора кейсов",
   "живой разговор с CMO после выступлений",
-  "видеозаписи отзывов прошлых потоков",
   "знакомства с людьми из маркетинга и креатива",
 ];
 
@@ -24,10 +23,16 @@ export default function CaseLab3Tickets() {
               <p className={styles.ticketCopy}>
                 Early Bird действует на первые 20 билетов. После этого стоимость участия составит 15 000 ₸.
               </p>
-              <a href={caseLab3CheckoutHref} className={styles.ticketCta}>
-                Купить билет
-                <ArrowUpRight size={17} strokeWidth={2} aria-hidden="true" />
-              </a>
+              {caseLab3CheckoutHref ? (
+                <a href={caseLab3CheckoutHref} className={styles.ticketCta}>
+                  Купить билет
+                  <ArrowUpRight size={17} strokeWidth={2} aria-hidden="true" />
+                </a>
+              ) : (
+                <p className={styles.checkoutUnavailable} role="status">
+                  Покупка билетов временно недоступна.
+                </p>
+              )}
             </div>
           </ScrollReveal>
 

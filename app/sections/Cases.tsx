@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState, type FocusEvent } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import ScrollReveal from "../components/ScrollReveal";
 
@@ -59,16 +60,60 @@ const industries = [
 const AUTO_SCROLL_SPEED = 1.5;
 const RESUME_DELAY = 3000;
 
-export default function Cases() {
+type CasesProps = {
+  alignToCaseLab?: boolean;
+};
+
+export default function Cases({ alignToCaseLab = false }: CasesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const isAutoScrollingRef = useRef(true);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastScrollLeftRef = useRef(0);
   const halfWidthRef = useRef(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [interactionPaused, setInteractionPaused] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+  const [pageHidden, setPageHidden] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(true);
+  const shouldAutoAnimate = !isPaused && !interactionPaused && isInView && !pageHidden && !prefersReducedMotion;
 
   useEffect(() => {
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    if (!isMobile || !containerRef.current) return;
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateMedia = () => {
+      setIsMobile(mediaQuery.matches);
+      setPrefersReducedMotion(reducedMotionQuery.matches);
+    };
+    updateMedia();
+    mediaQuery.addEventListener("change", updateMedia);
+    reducedMotionQuery.addEventListener("change", updateMedia);
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateMedia);
+      reducedMotionQuery.removeEventListener("change", updateMedia);
+    };
+  }, []);
+
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInView(entry.isIntersecting),
+      { rootMargin: "200px 0px" },
+    );
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => setPageHidden(document.hidden);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile || !shouldAutoAnimate || !containerRef.current) return;
 
     let animId: number;
     const el = containerRef.current;
@@ -80,36 +125,10 @@ export default function Cases() {
     window.addEventListener("resize", updateHalfWidth);
 
     const tick = () => {
-      if (!el) {
-        animId = requestAnimationFrame(tick);
-        return;
-      }
-
-      if (!isAutoScrollingRef.current) {
-        lastScrollLeftRef.current = el.scrollLeft;
-        animId = requestAnimationFrame(tick);
-        return;
-      }
-
-      const expected = lastScrollLeftRef.current + AUTO_SCROLL_SPEED;
-      const diff = Math.abs(el.scrollLeft - expected);
-      if (diff > AUTO_SCROLL_SPEED * 5) {
-        isAutoScrollingRef.current = false;
-        lastScrollLeftRef.current = el.scrollLeft;
-        if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-        resumeTimerRef.current = setTimeout(() => {
-          isAutoScrollingRef.current = true;
-        }, RESUME_DELAY);
-        animId = requestAnimationFrame(tick);
-        return;
-      }
-
       el.scrollLeft += AUTO_SCROLL_SPEED;
-      lastScrollLeftRef.current = el.scrollLeft;
 
-      if (el.scrollLeft >= halfWidthRef.current) {
+      if (halfWidthRef.current > 0 && el.scrollLeft >= halfWidthRef.current) {
         el.scrollLeft -= halfWidthRef.current;
-        lastScrollLeftRef.current = el.scrollLeft;
       }
 
       animId = requestAnimationFrame(tick);
@@ -122,25 +141,35 @@ export default function Cases() {
       window.removeEventListener("resize", updateHalfWidth);
       if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
     };
-  }, []);
+  }, [isMobile, shouldAutoAnimate]);
 
   const handleTouchStart = () => {
-    isAutoScrollingRef.current = false;
+    setInteractionPaused(true);
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
   };
 
   const handleTouchEnd = () => {
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
     resumeTimerRef.current = setTimeout(() => {
-      isAutoScrollingRef.current = true;
+      setInteractionPaused(false);
     }, RESUME_DELAY);
+  };
+
+  const handlePauseToggle = () => {
+    setIsPaused((current) => !current);
+  };
+
+  const handleRegionBlur = (event: FocusEvent<HTMLDivElement>) => {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+      setInteractionPaused(false);
+    }
   };
 
   return (
     <section id="cases" aria-label="Кейсы" className="relative bg-white py-16 md:py-40 px-6 md:px-10 overflow-clip z-[3]">
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
-      <div className="max-w-[1078px] mx-auto">
+      <div className={`max-w-[1078px] ${alignToCaseLab ? "ml-4 md:ml-10" : "mx-auto"}`}>
         <ScrollReveal>
           <h2
             className="text-black text-[clamp(16px,4vw,54px)] font-bold leading-[1.15] mb-12 md:mb-16 uppercase tracking-[0.02em]"
@@ -153,14 +182,35 @@ export default function Cases() {
 
       {/* Marquee cards */}
       <div
-        ref={containerRef}
-        className="overflow-x-auto md:overflow-hidden py-3 scrollbar-hide"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
+        className="relative"
+        onMouseEnter={() => setInteractionPaused(true)}
+        onMouseLeave={() => setInteractionPaused(false)}
+        onFocusCapture={() => setInteractionPaused(true)}
+        onBlurCapture={handleRegionBlur}
       >
-        <div className="marquee-track flex">
+        <div className="mx-auto mb-2 flex max-w-[1078px] justify-end px-6 md:px-10">
+          <button
+            type="button"
+            className="rounded-full border border-[#040082]/25 px-4 py-2 text-[12px] text-[#040082] transition-colors hover:bg-[#040082] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+            aria-pressed={isPaused}
+            disabled={prefersReducedMotion}
+            onClick={handlePauseToggle}
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            {prefersReducedMotion ? "Автодвижение отключено" : isPaused ? "Продолжить карусель" : "Поставить карусель на паузу"}
+          </button>
+        </div>
+        <div
+          ref={containerRef}
+          className="overflow-x-auto py-3 scrollbar-hide md:overflow-hidden"
+          aria-label="Лента кейсов"
+          tabIndex={0}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+        <div className={`marquee-track flex ${shouldAutoAnimate ? "" : "marqueePaused"}`}>
           {[0, 1].map((set) => (
-            <div key={set} className="flex gap-4 md:gap-6 flex-shrink-0 pr-4 md:pr-6">
+            <div key={set} className="flex flex-shrink-0 gap-4 pr-4 md:gap-6 md:pr-6" aria-hidden={set === 1}>
               {industries.map((industry) => (
                 <div
                   key={`${industry.id}-${set}`}
@@ -171,12 +221,12 @@ export default function Cases() {
                   <div className="aspect-[4/3] relative overflow-hidden">
                     <Image
                       src={industry.photo}
-                      alt={industry.speaker}
+                      alt={set === 0 ? industry.speaker : ""}
                       fill
                       className="object-cover"
                       style={{ objectPosition: industry.objectPos }}
                       sizes="(max-width: 768px) 280px, 400px"
-                      loading={set === 0 ? "eager" : "lazy"}
+                      loading="lazy"
                     />
                     {/* Blue gradient overlay */}
                     <div
@@ -208,12 +258,13 @@ export default function Cases() {
             </div>
           ))}
         </div>
+        </div>
       </div>
 
       <div className="max-w-[1078px] mx-auto mt-8">
         <ScrollReveal delay={0.2}>
-          <a
-            href="#news"
+          <Link
+            href="/#news"
             className="inline-flex items-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-200 group"
             style={{ fontFamily: "var(--font-body)" }}
           >
@@ -223,7 +274,7 @@ export default function Cases() {
               strokeWidth={2}
               className="group-hover:translate-x-1 transition-transform"
             />
-          </a>
+          </Link>
         </ScrollReveal>
       </div>
     </section>

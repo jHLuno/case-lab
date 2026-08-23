@@ -1,4 +1,12 @@
+:global(html:has(#case-lab-3-speakers)),
+:global(body:has(#case-lab-3-speakers)) {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
 .hero {
+  --case-lab-hero-frame-left: 8px;
+  --case-lab-heading-left: 80px;
   overflow: hidden;
   background: #fff;
   color: #fff;
@@ -10,10 +18,13 @@
 }
 
 .contentShell {
+  --case-lab-heading-left: 80px;
+  --case-lab-section-left: 24px;
+  --case-lab-heading-shift: calc(var(--case-lab-heading-left) - var(--case-lab-section-left));
   position: relative;
   z-index: 1;
-  width: min(100%, 1320px);
-  margin: 0 auto;
+  width: calc(100% - max(0px, var(--case-lab-heading-shift)) - max(0px, var(--case-lab-heading-shift)));
+  margin: 0 0 0 var(--case-lab-heading-shift);
 }
 
 .heroGrid {
@@ -62,11 +73,7 @@
 .heroFact span,
 .heroPrice span,
 .heroBottomLine,
-.sectionKicker,
-.proofLabel,
-.caseRole,
-.caseIndex,
-.archiveCardBody span {
+.sectionKicker {
   font-family: var(--font-body);
   font-size: 11px;
   letter-spacing: .12em;
@@ -83,13 +90,19 @@
 .heroTitle {
   position: relative;
   z-index: 1;
-  max-width: 9ch;
+  max-width: none;
   margin: 22px 0 0;
   font-family: var(--font-heading);
   font-size: clamp(42px, 6vw, 88px);
   line-height: .94;
   letter-spacing: -.035em;
   text-wrap: balance;
+}
+
+.caseLabHeroHeading {
+  position: relative;
+  left: var(--case-lab-heading-shift);
+  width: calc(100% - max(0px, var(--case-lab-heading-shift)));
 }
 
 .heroCopy {
@@ -140,6 +153,13 @@
   transform: translateY(-2px);
 }
 
+.heroCta:focus-visible,
+.ticketCta:focus-visible {
+  outline: 3px solid #040082;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px #fff;
+}
+
 .heroPrice {
   display: flex;
   flex-direction: column;
@@ -157,6 +177,13 @@
   color: rgba(255, 255, 255, .55);
   letter-spacing: .04em;
   text-transform: none;
+}
+
+.checkoutUnavailable {
+  margin: 24px 0 0;
+  color: rgba(255, 255, 255, .72);
+  font-size: 14px;
+  line-height: 1.4;
 }
 
 .heroImage {
@@ -178,10 +205,7 @@
   pointer-events: none;
 }
 
-.heroImageOverlay,
-.proofMediaShade,
-.speakerVisualShade,
-.archiveImageShade {
+.speakerVisualShade {
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg, rgba(9, 6, 27, .03) 35%, rgba(9, 6, 27, .86) 100%);
@@ -343,9 +367,11 @@
 }
 
 .caseRoomShape {
+  --case-room-x-padding: clamp(20px, 3vw, 42px);
+  --case-lab-heading-shift: calc(var(--case-lab-heading-left) - var(--case-lab-hero-frame-left) - var(--case-room-x-padding));
   position: relative;
   display: flex;
-  min-height: min(74svh, 900px);
+  min-height: max(min(70svh, 700px), 400px);
   flex-direction: column;
   justify-content: space-between;
   overflow: hidden;
@@ -353,8 +379,8 @@
   border: 0;
   outline: 0;
   box-shadow: none;
-  background: transparent;
-  padding: clamp(28px, 5vw, 64px);
+  background: #040082;
+  padding: var(--case-room-x-padding);
 }
 
 .caseRoomShapeStatic {
@@ -374,7 +400,7 @@
 }
 
 .caseRoomShapeContent {
-  padding-top: clamp(28px, 4vw, 56px);
+  padding-top: calc(clamp(20px, 2.5vw, 34px) + 20px);
 }
 
 .caseRoomShapeFooter {
@@ -382,13 +408,15 @@
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 24px;
-  margin-top: 48px;
+  margin-top: 36px;
 }
 
 .caseRoomDetails {
+  position: relative;
   display: flex;
   align-items: flex-end;
   gap: 10px;
+  left: var(--case-lab-heading-shift);
 }
 
 .caseRoomDetails strong {
@@ -434,12 +462,12 @@
 .caseRoomCase {
   position: relative;
   display: flex;
-  min-height: 128px;
+  min-height: clamp(148px, 12vw, 180px);
   flex-direction: column;
   justify-content: space-between;
   gap: 16px;
   overflow: hidden;
-  padding: 16px;
+  padding: 20px;
   border-radius: 18px;
   border: 0;
   outline: 0;
@@ -463,6 +491,7 @@
   height: 100%;
   max-width: none;
   object-fit: cover;
+  object-position: 60% 50%;
 }
 
 .caseRoomCase strong,
@@ -501,7 +530,7 @@
   z-index: 3;
   right: 16px;
   bottom: 14px;
-  display: grid;
+  display: none;
   width: 50px;
   height: 50px;
   place-items: center;
@@ -513,25 +542,143 @@
   box-shadow: none;
 }
 
+.howItWorksSection {
+  margin-top: var(--case-lab-content-next-headline-gap);
+  padding: clamp(52px, 8vw, 112px) 24px clamp(52px, 8vw, 112px) 80px;
+  background: #040082;
+  color: #fff;
+}
+
+.howItWorksLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: clamp(24px, 5vw, 80px);
+  width: min(100%, 1320px);
+  margin: 0;
+}
+
+.howItWorksIntro {
+  position: sticky;
+  top: 120px;
+  align-self: start;
+}
+
+.howItWorksIntro h2 {
+  max-width: 12ch;
+  margin: 0;
+  font-size: clamp(28px, 3.5vw, 48px);
+  line-height: 1;
+  letter-spacing: -.035em;
+}
+
+.howItWorksIntro h2 span {
+  display: block;
+  white-space: nowrap;
+}
+
+.howItWorksOutcome {
+  max-width: 30ch;
+  margin: 28px 0 0;
+  color: rgba(255, 255, 255, .72);
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.howItWorksScoreboard {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  margin-top: clamp(42px, 8vw, 100px);
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, .28);
+}
+
+.howItWorksScoreboard strong {
+  font-family: var(--font-heading);
+  font-size: clamp(32px, 4vw, 58px);
+  font-weight: 400;
+  line-height: .8;
+  letter-spacing: -.05em;
+}
+
+.howItWorksScoreboard span {
+  max-width: none;
+  color: rgba(255, 255, 255, .68);
+  font-size: 12px;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.howItWorksSteps {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0 0 0 clamp(16px, 2vw, 32px);
+  list-style: none;
+}
+
+.howItWorksStep {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 18px;
+  padding: 24px 0;
+  border-top: 1px solid rgba(255, 255, 255, .24);
+}
+
+.howItWorksStep:last-child {
+  border-bottom: 1px solid rgba(255, 255, 255, .24);
+}
+
+.howItWorksStepNumber {
+  color: #afa8ff;
+  font-family: var(--font-heading);
+  font-size: 18px;
+}
+
+.howItWorksStep h3 {
+  margin: 0;
+  font-size: clamp(19px, 2vw, 28px);
+  line-height: 1;
+  letter-spacing: -.025em;
+}
+
+@media (min-width: 1024px) {
+  .howItWorksStep h3 {
+    white-space: nowrap;
+  }
+}
+
+.howItWorksStep p {
+  max-width: 52ch;
+  margin: 12px 0 0;
+  color: rgba(255, 255, 255, .7);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
 .proofSection,
 .speakersSection,
-.archiveSection {
+.howItWorksSection,
+.ticketSection,
+.faqSection {
+  --case-lab-headline-content-gap: 48px;
+  --case-lab-content-next-headline-gap: calc(var(--case-lab-headline-content-gap) * 1.5);
+}
+
+.proofSection,
+.speakersSection {
   background: #fff;
   color: #0a0a16;
-  padding: clamp(84px, 12vw, 180px) 24px;
+  padding: var(--case-lab-content-next-headline-gap) 24px 0;
 }
 
-.sectionIntro {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(240px, .9fr);
-  column-gap: clamp(30px, 8vw, 140px);
-  align-items: end;
+.proofSection {
+  padding-bottom: var(--case-lab-headline-content-gap);
 }
 
-.sectionIntro h2,
 .sectionIntroWide h2,
-.archiveIntro h2,
-.ticketGrid h2 {
+.ticketGrid h2,
+.faqIntro h2 {
   margin: 0;
   font-family: var(--font-heading);
   font-size: clamp(32px, 5vw, 68px);
@@ -540,19 +687,13 @@
   text-wrap: balance;
 }
 
-.sectionIntro h2 {
-  grid-row: span 2;
-  max-width: 9ch;
-}
-
-.sectionIntro > p:last-child,
-.archiveIntro > p:last-child,
 .sectionIntroWide > p:last-child {
-  max-width: 48ch;
+  max-width: 72ch;
   margin: 0;
   color: #4f4e5b;
   font-size: 17px;
   line-height: 1.5;
+  text-wrap: balance;
 }
 
 .sectionKicker {
@@ -561,227 +702,305 @@
   letter-spacing: .1em;
 }
 
-.proofGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 64px;
+.proofIntro {
+  display: block;
 }
 
-.proofCard {
+.proofIntro h2 {
+  max-width: none;
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(34px, 5vw, 68px);
+  line-height: .97;
+  letter-spacing: -.035em;
+  white-space: nowrap;
+}
+
+.proofIntroDescription {
+  max-width: 72ch;
+  margin: 24px 0 0;
+  color: #4f4e5b;
+  font-size: var(--text-body);
+  line-height: 1.5;
+}
+
+.testimonialGallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: var(--case-lab-headline-content-gap);
+  align-items: stretch;
+}
+
+.testimonialCard {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
   overflow: hidden;
-  border-radius: 26px;
+  border: 1px solid rgba(10, 10, 22, .1);
+  border-radius: 22px;
   background: #fff;
 }
 
-.proofMedia {
+.testimonialMedia {
   position: relative;
-  min-height: clamp(260px, 35vw, 460px);
+  aspect-ratio: 1;
   overflow: hidden;
-  border-radius: 26px 26px 0 0;
   background: #17122f;
 }
 
-.proofPlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  display: grid;
-  width: 58px;
-  height: 58px;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, .65);
-  border-radius: 999px;
-  color: #fff;
-  transform: translate(-50%, -50%);
+.testimonialPoster {
+  object-fit: cover;
+  object-position: center 20%;
 }
 
-.proofLabel {
-  position: absolute;
-  bottom: 18px;
-  left: 20px;
-  color: rgba(255, 255, 255, .82);
+.testimonialCardBody {
+  display: flex;
+  min-height: 280px;
+  flex: 1;
+  flex-direction: column;
+  padding: 24px;
 }
 
-.proofCard h3 {
-  min-height: 76px;
+.testimonialCardBody h3 {
   margin: 0;
-  padding: 20px;
-  font-family: var(--font-heading);
-  font-size: clamp(20px, 2vw, 30px);
-  line-height: 1;
-  letter-spacing: -.025em;
+  color: #0a0a16;
+  font-family: var(--font-body);
+  font-size: var(--text-subheading);
+  font-weight: 500;
+  line-height: 1.22;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
-.proofNote {
-  margin: 18px 0 0;
-  color: #676672;
-  font-size: 13px;
+.testimonialRole {
+  margin: 10px 0 0;
+  color: #777684;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.25;
+}
+
+.testimonialRule {
+  display: block;
+  width: 56px;
+  height: 2px;
+  margin: 24px 0 20px;
+  background: #040082;
+}
+
+.testimonialCardBody blockquote {
+  margin: 0;
+  color: #0a0a16;
+  font-family: var(--font-body);
+  font-size: clamp(14px, 1.3vw, 18px);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+@media (max-width: 1100px) and (min-width: 768px) {
+  .testimonialGallery {
+    gap: 12px;
+  }
+
+  .testimonialCardBody {
+    padding: 20px;
+  }
+
 }
 
 .speakersSection {
-  padding-top: 0;
+  padding-top: var(--case-lab-content-next-headline-gap);
+  padding-bottom: 0;
 }
 
 .sectionIntroWide {
-  max-width: 820px;
+  max-width: none;
 }
 
 .sectionIntroWide h2 {
-  max-width: 10ch;
+  max-width: none;
 }
 
-.speakerVisualGrid {
-  display: grid;
-  grid-template-columns: 1.3fr .85fr .85fr;
-  gap: 12px;
-  margin-top: 68px;
-}
-
-.speakerVisualFeature {
-  grid-row: span 2;
-}
-
-.speakerVisual {
+.speakerScene {
   position: relative;
-  min-height: 250px;
+  min-height: 300svh;
+  margin-top: 0;
+}
+
+.speakerStage {
+  position: sticky;
+  top: 0;
+  display: flex;
+  min-height: 100svh;
+  align-items: center;
+  padding-top: 0;
+}
+
+.speakerStageGrid {
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, .95fr);
+  grid-template-rows: minmax(0, 1.05fr) minmax(0, .71fr);
+  gap: 12px;
+  min-height: calc(100svh - (var(--case-lab-headline-content-gap) * 2));
+  transform: none;
+}
+
+.speakerStageRail {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.speakerStageSlot,
+.speakerStageCopy {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
   overflow: hidden;
   border-radius: 26px;
-  background: #161433;
 }
 
-.speakerVisualFeature .speakerVisual {
-  min-height: 540px;
+.speakerStageFeature {
+  grid-row: 1 / span 2;
 }
 
-.speakerVisual figcaption {
+.speakerStageFeature .speakerStageCard figcaption {
+  right: 30px;
+  bottom: 30px;
+  left: 30px;
+}
+
+.speakerStageCard,
+.speakerStageCopyLayer {
   position: absolute;
+  inset: 0;
+  margin: 0;
+}
+
+.speakerStageCard {
+  overflow: hidden;
+  border-radius: inherit;
+  background: #161433;
+  opacity: 0;
+  transform: scale(.985);
+}
+
+.speakerStageCard:first-child,
+.speakerStageCopyLayer:first-child {
+  opacity: 1;
+}
+
+.speakerStageCard figcaption {
+  position: absolute;
+  z-index: 2;
   right: 16px;
   bottom: 16px;
-  color: rgba(255, 255, 255, .82);
-  font-family: var(--font-body);
-  font-size: 11px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-}
-
-.caseList {
-  margin-top: 14px;
-}
-
-.caseRow {
-  display: grid;
-  grid-template-columns: 58px minmax(190px, .85fr) minmax(0, 1.4fr);
-  gap: 20px;
-  align-items: start;
-  margin-top: 10px;
-  padding: 24px;
-  border: 1px solid rgba(10, 10, 22, .12);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, .5);
-}
-
-.caseRow:last-child {
-  border-bottom: 1px solid rgba(10, 10, 22, .12);
-}
-
-.caseIndex {
-  color: #040082;
-  letter-spacing: .08em;
-}
-
-.caseRow h3,
-.caseTitle {
-  margin: 0;
+  left: 16px;
+  color: #fff;
   font-family: var(--font-heading);
-  font-size: clamp(20px, 2.4vw, 30px);
+  font-size: clamp(16px, 1.5vw, 22px);
   line-height: 1;
-  letter-spacing: -.025em;
 }
 
-.caseRole,
-.caseDescription {
-  margin: 8px 0 0;
-  color: #676672;
-  font-size: 14px;
-  line-height: 1.35;
+.speakerStageRail .speakerStageCard figcaption {
+  max-width: 16ch;
+  min-height: 1.9em;
+  font-size: clamp(14px, 1.2vw, 18px);
+  line-height: .95;
+  text-wrap: balance;
 }
 
-.caseRole {
-  font-size: 10px;
-  letter-spacing: .04em;
-  text-transform: none;
+.speakerStageRail .speakerStageCard figcaption span {
+  display: block;
 }
 
-.archiveSection {
-  padding-top: clamp(84px, 10vw, 140px);
-  padding-right: 0;
-  padding-bottom: clamp(84px, 10vw, 140px);
+.speakerStageCopy {
+  grid-column: 2;
+  padding: clamp(24px, 2.5vw, 30px) clamp(18px, 2vw, 24px) clamp(18px, 2vw, 24px);
+  border: 1px solid rgba(10, 10, 22, .1);
+  background: linear-gradient(145deg, #fff 0%, #f5f6fb 58%, #e8eaf2 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9);
 }
 
-.archiveIntro {
-  width: min(100% - 24px, 1320px);
-  margin: 0 auto 56px;
-}
-
-.archiveIntro h2 {
-  max-width: 9ch;
-}
-
-.archiveIntro > p:last-child {
-  margin-top: 18px;
-}
-
-.archiveViewport {
-  overflow: hidden;
-}
-
-.archiveTrack {
-  display: flex;
-  width: max-content;
-  gap: 14px;
-  animation: case-lab-3-marquee 36s linear infinite;
-}
-
-.archiveCard {
-  width: clamp(280px, 32vw, 390px);
-  overflow: hidden;
-  border-radius: 20px;
-  background: #fff;
-}
-
-.archiveImage {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: #1a1638;
-}
-
-.archiveCardBody {
+.speakerStageCopyLayer {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 18px;
+  justify-content: flex-start;
+  padding: inherit;
+  background: transparent;
+  opacity: 0;
 }
 
-.archiveCardBody strong {
+.speakerStageCopyLayer h3 {
+  max-width: none;
+  margin: 0;
   font-family: var(--font-heading);
-  font-size: 22px;
+  font-size: clamp(16px, calc(2vw - 6px), 26px);
   font-weight: 400;
-  line-height: 1;
+  line-height: .98;
+  letter-spacing: -.03em;
+  color: #0a0a16;
 }
 
-.archiveCardBody span {
-  color: #73717d;
-  font-size: 10px;
-  letter-spacing: .04em;
-  text-transform: none;
+.speakerStageCopyLayer > p:last-child {
+  max-width: 40ch;
+  margin: 12px 0 0;
+  color: rgba(10, 10, 22, .62);
+  font-size: clamp(15px, 1.2vw, 17px);
+  line-height: 1.5;
+}
+
+.speakerStageRole {
+  margin: 8px 0 0;
+  color: #4f4e5b;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.speakerSceneSteps,
+.speakerMobileCases {
+  display: none;
+}
+
+.speakerMobileVisual {
+  position: relative;
+}
+
+.speakerMobileCopy {
+  min-width: 0;
+  padding: 24px 18px 18px;
+  border: 1px solid rgba(10, 10, 22, .1);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #fff 0%, #f5f6fb 58%, #e8eaf2 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9);
+}
+
+.speakerMobileCase h3 {
+  color: #0a0a16;
+}
+
+.speakerMobileCase p:last-child {
+  color: #4f4e5b;
+}
+
+.speakerAccessibleCases {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .ticketSection {
   background: #0b0920;
   color: #fff;
-  padding: clamp(84px, 12vw, 170px) 24px;
+  padding: var(--case-lab-content-next-headline-gap) 24px clamp(84px, 12vw, 170px);
 }
 
 .ticketGrid {
@@ -792,7 +1011,7 @@
 }
 
 .ticketGrid h2 {
-  max-width: 8ch;
+  max-width: none;
 }
 
 .ticketCopy {
@@ -874,9 +1093,112 @@
   color: #afa8ff;
 }
 
-@keyframes case-lab-3-marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(calc(-50% - 7px)); }
+.faqSection {
+  background: #fff;
+  color: #0a0a16;
+  padding: var(--case-lab-content-next-headline-gap) 24px var(--case-lab-headline-content-gap);
+}
+
+.faqShell {
+  width: min(100%, 900px);
+  margin: 0 auto;
+}
+
+.faqIntro {
+  max-width: none;
+}
+
+.faqIntro h2 {
+  max-width: none;
+  font-size: clamp(24px, calc(5vw - 8px), 60px);
+  text-align: center;
+}
+
+.faqList {
+  width: 100%;
+  margin-top: var(--case-lab-headline-content-gap);
+  border-top: 1px solid rgba(10, 10, 22, .14);
+}
+
+.faqItem {
+  border-bottom: 1px solid rgba(10, 10, 22, .14);
+}
+
+.faqButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  padding: 24px 0;
+  border: 0;
+  background: transparent;
+  color: #0a0a16;
+  text-align: left;
+  cursor: pointer;
+}
+
+.faqButton:focus-visible {
+  outline: 3px solid #040082;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px #fff;
+}
+
+.faqQuestion {
+  font-family: var(--font-body);
+  font-size: clamp(18px, 2vw, 25px);
+  font-weight: 500;
+  line-height: 1.2;
+  transition: color .25s ease;
+}
+
+.faqQuestionOpen {
+  color: #040082;
+}
+
+.faqIcon {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(10, 10, 22, .18);
+  border-radius: 50%;
+  color: #040082;
+  transition: transform .3s ease, border-color .3s ease, background-color .3s ease;
+}
+
+.faqIconOpen {
+  border-color: #040082;
+  background: #040082;
+  color: #fff;
+  transform: rotate(45deg);
+}
+
+.faqPanel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows .3s ease, opacity .3s ease;
+}
+
+.faqPanelOpen {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.faqPanelInner {
+  overflow: hidden;
+}
+
+.faqAnswer {
+  max-width: 62ch;
+  margin: 0;
+  padding: 0 62px 24px 0;
+  color: #4f4e5b;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 @media (max-width: 900px) {
@@ -887,59 +1209,210 @@
   .heroImage { grid-column: span 4; }
   .heroRail { grid-column: span 4; grid-template-columns: 1fr; }
   .heroSignal { grid-column: span 1; }
-  .sectionIntro { grid-template-columns: 1fr; gap: 20px; }
-  .sectionIntro h2 { grid-row: auto; }
-  .speakerVisualGrid { grid-template-columns: 1fr 1fr; }
-  .speakerVisualFeature { grid-row: auto; grid-column: span 2; }
-  .speakerVisualFeature .speakerVisual { min-height: 370px; }
+  .speakerStageGrid {
+    grid-template-columns: minmax(0, 1.08fr) minmax(250px, .92fr);
+    grid-template-rows: minmax(0, 1.05fr) minmax(0, .71fr);
+    min-height: calc(100svh - (var(--case-lab-headline-content-gap) * 2));
+  }
+  .speakerStageFeature {
+    margin: 0;
+  }
+  .speakerStageFeature .speakerStageCard figcaption {
+    right: 24px;
+    bottom: 24px;
+    left: 24px;
+  }
+  .speakerStageCopy { padding: clamp(16px, 2vw, 24px); }
+  .speakerStageCopyLayer h3 { font-size: clamp(16px, calc(2.3vw - 6px), 24px); }
   .ticketGrid { grid-template-columns: 1fr 1fr; gap: 34px; }
 }
 
+@media (max-width: 1023px) {
+  .contentShell { --case-lab-heading-left: 40px; }
+}
+
+@media (max-width: 1100px) {
+  .ticketGrid { grid-template-columns: 1fr; gap: 48px; }
+}
+
+@media (max-width: 767px), (min-width: 768px) and (max-height: 700px) {
+  .howItWorksSection {
+    margin-top: var(--case-lab-content-next-headline-gap);
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .howItWorksLayout {
+    display: block;
+  }
+
+  .howItWorksIntro {
+    position: static;
+  }
+
+  .howItWorksIntro h2 {
+    max-width: 12ch;
+    font-size: 28px;
+  }
+
+  .howItWorksScoreboard {
+    margin-top: 42px;
+    margin-bottom: 34px;
+  }
+
+  .howItWorksStep {
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 12px;
+    padding: 20px 0;
+  }
+
+  .howItWorksSteps {
+    padding-left: 0;
+  }
+
+  .proofIntro h2 {
+    max-width: 11ch;
+    font-size: 32px;
+    white-space: normal;
+  }
+
+  .testimonialGallery {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .testimonialCardBody {
+    min-height: 0;
+    padding: 20px;
+  }
+
+  .testimonialRole {
+    font-size: var(--text-body);
+  }
+
+  .speakerScene { display: none; }
+  .speakerMobileCases {
+    display: grid;
+    gap: 12px;
+    margin-top: var(--case-lab-headline-content-gap);
+  }
+  .speakerMobileCase {
+    display: grid;
+    gap: 18px;
+    padding: 16px;
+    border: 1px solid rgba(10, 10, 22, .12);
+    border-radius: 22px;
+    background: #f7f7fb;
+  }
+  .speakerMobileVisual {
+    min-height: 280px;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #161433;
+  }
+  .speakerMobileVisual figcaption {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+    color: #fff;
+    font-family: var(--font-heading);
+    font-size: 20px;
+    line-height: 1;
+  }
+  .speakerMobileCopy { min-width: 0; }
+  .speakerMobileCase h3 {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: clamp(20px, calc(7vw - 6px), 26px);
+    font-weight: 400;
+    line-height: 1;
+    overflow-wrap: anywhere;
+  }
+  .speakerMobileCase .speakerMobileRole {
+    margin: 10px 0 0;
+    color: #4f4e5b;
+    font-size: 13px;
+    line-height: 1.3;
+  }
+  .speakerMobileCase p:last-child {
+    margin: 12px 0 0;
+    color: #4f4e5b;
+    font-size: 14px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+}
+
 @media (max-width: 640px) {
+  .hero { --case-lab-heading-left: 40px; }
+  .contentShell {
+    --case-lab-heading-left: 0px;
+    --case-lab-section-left: 0px;
+    width: 100%;
+    margin-left: 0;
+  }
   .caseRoomTitle { font-size: clamp(20px, 5.6vw, 30px); }
   .caseRoomTitle span { white-space: normal; }
   .caseRoomCopy { font-size: 17px; }
-  .caseRoomShape { min-height: min(76svh, 680px); border-radius: 28px; padding: 24px 12px; }
+  .caseRoomShape {
+    --case-room-x-padding: 12px;
+    min-height: min(65svh, 600px);
+    border-radius: 28px;
+    padding: max(42px, calc(env(safe-area-inset-top) + 26px)) 12px 18px;
+    padding-left: var(--case-room-x-padding);
+  }
   .caseRoomCases { grid-template-columns: 1fr; }
   .caseRoomCases { margin-top: 10px; padding: 0; }
-  .caseRoomCase { min-height: 84px; }
+  .caseRoomCase { min-height: 110px; }
   .caseRoomPurchase { align-items: flex-start; flex-direction: column; }
   .caseRoomPurchase p { text-align: left; }
   .heroGrid { display: flex; flex-direction: column; }
   .heroLead { min-height: 520px; padding: 28px 22px; }
+  .heroCta { max-width: 100%; padding-right: 20px; padding-left: 20px; }
   .heroTitle { font-size: clamp(42px, 14vw, 64px); }
+  .sectionIntroWide h2 { font-size: 24px; }
   .heroImage { min-height: 300px; }
   .heroRail { display: grid; grid-template-columns: 1fr 1fr; }
   .heroSignal { grid-column: span 2; min-height: 124px; }
   .heroBottomLine { justify-content: flex-start; overflow-x: auto; padding-bottom: 5px; }
   .proofSection,
   .speakersSection,
-  .archiveSection,
-  .ticketSection { padding-right: 16px; padding-left: 16px; }
-  .proofGrid { grid-template-columns: 1fr; margin-top: 42px; }
-  .proofCard h3 { min-height: 0; }
-  .speakerVisualGrid { grid-template-columns: 1fr; margin-top: 42px; }
-  .speakerVisualFeature { grid-column: auto; }
-  .speakerVisualFeature .speakerVisual,
-  .speakerVisual { min-height: 320px; }
-  .caseRow { grid-template-columns: 34px 1fr; gap: 11px; }
-  .caseRow > div:last-child { grid-column: 2; }
-  .archiveSection { padding-right: 0; }
-  .archiveIntro { width: calc(100% - 16px); margin-left: 0; }
+  .ticketSection,
+  .faqSection { padding-right: 16px; padding-left: 16px; }
   .ticketGrid { grid-template-columns: 1fr; gap: 48px; }
+  .faqIntro h2 { font-size: 24px; }
+  .faqList { margin-top: 48px; }
+  .faqButton { gap: 16px; padding: 20px 0; }
+  .faqAnswer { padding-right: 50px; }
+}
+
+@media (min-width: 901px) and (max-height: 650px) {
+  .caseRoomCase { min-height: 132px; }
 }
 
 @media (min-width: 768px) {
+  .speakerScene {
+    margin-top: 0;
+  }
+  .speakersSection {
+    padding-bottom: 0;
+  }
   .caseRoomShape { border-radius: 36px; }
 }
 
 @media (min-width: 1024px) {
+  .hero { --case-lab-hero-frame-left: 12px; }
   .hero { padding: 12px; }
   .caseRoomShape { border-radius: 40px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .archiveTrack { animation-play-state: paused; }
   .heroCta,
-  .ticketCta { transition: none; }
+  .ticketCta,
+  .speakerStageCard,
+  .speakerStageCopyLayer,
+  .faqQuestion,
+  .faqIcon,
+  .faqPanel { transition: none; }
 }

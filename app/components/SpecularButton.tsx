@@ -188,10 +188,12 @@ export default function SpecularButton({
     effect.appendChild(gl.canvas);
 
     const sizeRef = { w: 1, h: 1 };
+    const pointerRectRef = { current: null as DOMRect | null };
     const lineColor = new Color();
     const baseColor = new Color();
     const resize = () => {
       const rect = button.getBoundingClientRect();
+      pointerRectRef.current = rect;
       const width = rect.width;
       const height = rect.height;
       sizeRef.w = width;
@@ -215,9 +217,13 @@ export default function SpecularButton({
     let pointerAngle: number | null = null;
     let proximityT = 0;
     let animationFrame = 0;
+    let isVisible = true;
+    let isDocumentHidden = document.hidden;
+    let isRunning = false;
 
     const onPointerMove = (event: PointerEvent) => {
-      const rect = button.getBoundingClientRect();
+      const rect = pointerRectRef.current ?? button.getBoundingClientRect();
+      pointerRectRef.current = rect;
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
       const dx = Math.max(rect.left - event.clientX, 0, event.clientX - rect.right);
@@ -236,49 +242,86 @@ export default function SpecularButton({
       proximityT = t * t * (3 - 2 * t);
     };
 
-    if (!reducedMotion) {
-      window.addEventListener("pointermove", onPointerMove);
+    let angle = 2.4;
+    let idleAngle = 2.4;
+    let bright = 0;
+    let last = performance.now();
 
-      let angle = 2.4;
-      let idleAngle = 2.4;
-      let bright = 0;
-      let last = performance.now();
+    const canAnimate = () => !reducedMotion && isVisible && !isDocumentHidden;
+    const stopAnimation = () => {
+      isRunning = false;
+      cancelAnimationFrame(animationFrame);
+    };
 
-      const update = (now: number) => {
-        animationFrame = requestAnimationFrame(update);
-        const delta = Math.min((now - last) / 1000, 0.05);
-        last = now;
-        const currentProps = propsRef.current;
-
-        idleAngle += currentProps.speed * delta;
-        const steer = currentProps.followMouse && pointerAngle !== null && (!currentProps.autoAnimate || proximityT > 0);
-        const target = steer && pointerAngle !== null ? pointerAngle : idleAngle;
-        const difference = ((target - angle + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
-        angle += difference * (1 - Math.exp(-delta * 7));
-
-        const brightTarget = currentProps.autoAnimate ? 1 : proximityT;
-        bright += (brightTarget - bright) * (1 - Math.exp(-delta * 8));
-
-        lineColor.set(currentProps.lineColor);
-        baseColor.set(currentProps.baseColor);
-        program.uniforms.uAngle.value = angle;
-        program.uniforms.uRadius.value = Math.min(currentProps.radius, Math.min(sizeRef.w, sizeRef.h) / 2) * dpr;
-        program.uniforms.uLineColor.value = [lineColor.r, lineColor.g, lineColor.b];
-        program.uniforms.uBaseColor.value = [baseColor.r, baseColor.g, baseColor.b];
-        program.uniforms.uIntensity.value = currentProps.intensity * bright;
-        program.uniforms.uShineSize.value = (currentProps.shineSize * Math.PI) / 180;
-        program.uniforms.uShineFade.value = (currentProps.shineFade * Math.PI) / 180;
-        program.uniforms.uThickness.value = currentProps.thickness * dpr;
-        renderer.render({ scene: mesh });
-      };
+    const update = (now: number) => {
+      if (!isRunning) return;
+      if (!canAnimate()) {
+        stopAnimation();
+        return;
+      }
 
       animationFrame = requestAnimationFrame(update);
-    }
+      const delta = Math.min((now - last) / 1000, 0.05);
+      last = now;
+      const currentProps = propsRef.current;
+
+      idleAngle += currentProps.speed * delta;
+      const steer = currentProps.followMouse && pointerAngle !== null && (!currentProps.autoAnimate || proximityT > 0);
+      const target = steer && pointerAngle !== null ? pointerAngle : idleAngle;
+      const difference = ((target - angle + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+      angle += difference * (1 - Math.exp(-delta * 7));
+
+      const brightTarget = currentProps.autoAnimate ? 1 : proximityT;
+      bright += (brightTarget - bright) * (1 - Math.exp(-delta * 8));
+
+      lineColor.set(currentProps.lineColor);
+      baseColor.set(currentProps.baseColor);
+      program.uniforms.uAngle.value = angle;
+      program.uniforms.uRadius.value = Math.min(currentProps.radius, Math.min(sizeRef.w, sizeRef.h) / 2) * dpr;
+      program.uniforms.uLineColor.value = [lineColor.r, lineColor.g, lineColor.b];
+      program.uniforms.uBaseColor.value = [baseColor.r, baseColor.g, baseColor.b];
+      program.uniforms.uIntensity.value = currentProps.intensity * bright;
+      program.uniforms.uShineSize.value = (currentProps.shineSize * Math.PI) / 180;
+      program.uniforms.uShineFade.value = (currentProps.shineFade * Math.PI) / 180;
+      program.uniforms.uThickness.value = currentProps.thickness * dpr;
+      renderer.render({ scene: mesh });
+    };
+
+    const startAnimation = () => {
+      if (isRunning || !canAnimate()) return;
+      isRunning = true;
+      last = performance.now();
+      animationFrame = requestAnimationFrame(update);
+    };
+
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting;
+      if (isVisible) startAnimation();
+      else stopAnimation();
+    }, { rootMargin: "120px" });
+    observer.observe(button);
+
+    const handleVisibilityChange = () => {
+      isDocumentHidden = document.hidden;
+      if (isDocumentHidden) stopAnimation();
+      else startAnimation();
+    };
+    const invalidatePointerRect = () => {
+      pointerRectRef.current = null;
+    };
+
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("scroll", invalidatePointerRect, { passive: true });
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    startAnimation();
 
     return () => {
       cancelAnimationFrame(animationFrame);
+      observer.disconnect();
       resizeObserver.disconnect();
       window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("scroll", invalidatePointerRect);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       if (gl.canvas.parentNode === effect) effect.removeChild(gl.canvas);
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };

@@ -9,7 +9,7 @@ type FooterProps = {
   ctaHeading?: string;
   ctaDescription?: string;
   ctaLabel?: string;
-  ctaHref?: string;
+  ctaHref?: string | null;
 };
 
 export default function Footer({
@@ -20,14 +20,15 @@ export default function Footer({
   ctaHref,
 }: FooterProps) {
   const { openPopup } = useLeadPopup();
+
   return (
-    <footer className="relative bg-white pt-20 md:pt-32 pb-8 px-6 md:px-10 z-[2]">
+    <footer className="relative z-[2] bg-white px-6 pb-8 pt-20 md:px-10 md:pt-32">
       {/* Top divider */}
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
-      <div className="max-w-[1078px] mx-auto">
+      <div className="mx-auto max-w-[1078px]">
         {/* CTA Section */}
-        <div className="text-center mb-20 md:mb-28">
+        <div className="mb-20 text-center md:mb-28">
           <h2
             className="text-black text-[clamp(24px,4vw,48px)] font-bold leading-[1.05] uppercase tracking-[0.02em] mb-6 md:mb-6 md:max-w-none"
             style={{ fontFamily: "var(--font-heading)" }}
@@ -35,7 +36,7 @@ export default function Footer({
             <span className="md:whitespace-nowrap">{ctaHeading}</span>
           </h2>
           <p
-            className="text-black/60 text-[15px] md:text-[18px] leading-[1.4] mb-10 md:mb-10 max-w-md mx-auto font-light"
+            className="mb-10 max-w-md mx-auto text-[15px] font-light leading-[1.4] text-black/60 md:mb-10 md:text-[18px]"
             style={{ fontFamily: "var(--font-body)" }}
           >
             {ctaDescription}
@@ -49,6 +50,14 @@ export default function Footer({
               <span>{ctaLabel}</span>
               <ArrowUpRight size={16} strokeWidth={2} />
             </a>
+          ) : ctaHref === null ? (
+            <span
+              className="inline-flex items-center gap-3 rounded-full bg-black/10 px-7 py-3.5 text-[14px] font-normal text-black/45 md:px-10 md:py-5 md:text-[15px]"
+              aria-disabled="true"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              Покупка билетов временно недоступна
+            </span>
           ) : (
             <button
               type="button"

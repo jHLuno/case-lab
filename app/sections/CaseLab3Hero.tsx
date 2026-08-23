@@ -12,6 +12,7 @@ const Grainient = dynamic(() => import("../components/Grainient"), { ssr: false 
 
 export default function CaseLab3Hero() {
   const shouldReduceMotion = useReducedMotion();
+  const checkoutHref = caseLab3CheckoutHref;
 
   return (
     <section className={styles.hero} aria-labelledby="case-lab-3-title">
@@ -45,7 +46,7 @@ export default function CaseLab3Hero() {
               />
             )}
           </div>
-          <div className={styles.caseRoomShapeContent}>
+          <div className={`${styles.caseRoomShapeContent} ${styles.caseLabHeroHeading}`}>
             <p className={styles.caseRoomKicker}>
               <span className={styles.caseRoomBrand}>
                 Case Lab <span className={styles.caseRoomRoman}>III</span>
@@ -62,56 +63,67 @@ export default function CaseLab3Hero() {
           <div className={styles.caseRoomShapeFooter}>
             <div className={styles.caseRoomDetails}>
               <strong>24</strong>
-              <span>СЕНТЯБРЯ<br />NARXOZ BUSINESS SCHOOL</span>
+              <span>
+                СЕНТЯБРЯ 2026<br />
+                10:00–14:00 (UTC+5), 4 ЧАСА<br />
+                NARXOZ BUSINESS SCHOOL<br />
+                УЛ. ЖАНДОСОВА 55/10, АЛМАТЫ
+              </span>
             </div>
             <div className={styles.caseRoomPurchase}>
-              <SpecularButton
-                size="lg"
-                radius={999}
-                tint="#ffffff"
-                tintOpacity={1}
-                textColor="#160f43"
-                lineColor="#040082"
-                baseColor="#afa8ff"
-                intensity={1}
-                shineSize={10}
-                shineFade={40}
-                thickness={3}
-                speed={0.35}
-                followMouse
-                proximity={250}
-                autoAnimate={false}
-                className={styles.heroCta}
-                style={{ padding: "14px 76px", fontSize: "16px" }}
-                onClick={() => window.location.assign(caseLab3CheckoutHref)}
-              >
-                Купить билет
-                <ArrowUpRight size={20} strokeWidth={2} aria-hidden="true" />
-              </SpecularButton>
+              {checkoutHref ? (
+                <SpecularButton
+                  size="lg"
+                  radius={999}
+                  tint="#ffffff"
+                  tintOpacity={1}
+                  textColor="#160f43"
+                  lineColor="#040082"
+                  baseColor="#afa8ff"
+                  intensity={1}
+                  shineSize={10}
+                  shineFade={40}
+                  thickness={3}
+                  speed={0.35}
+                  followMouse
+                  proximity={250}
+                  autoAnimate={false}
+                  className={styles.heroCta}
+                  style={{ fontSize: "16px" }}
+                  onClick={() => window.location.assign(checkoutHref)}
+                >
+                  Купить билет
+                  <ArrowUpRight size={20} strokeWidth={2} aria-hidden="true" />
+                </SpecularButton>
+              ) : (
+                <p className={styles.checkoutUnavailable} role="status">
+                  Покупка билетов временно недоступна.
+                </p>
+              )}
               <p>Первые 20 билетов — 7 890 ₸.<br />Далее — 15 000 ₸.</p>
             </div>
           </div>
         </div>
 
         <div className={styles.caseRoomCases}>
-          <div className={styles.caseRoomCase}>
-            <Image src="/Invictus GO.webp" alt="" fill sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
+          <div className={styles.caseRoomCase} style={{ position: "relative" }}>
+            <Image src="/Invictus GO.webp" alt="" fill loading="eager" sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
             <strong>Invictus GO</strong>
             <span className={styles.caseRoomCaseFeaturedDescription}>Масштабирование сети фитнес-клубов</span>
             <span className={styles.caseRoomCaseArrow} aria-hidden="true">
               <ArrowUpRight size={22} strokeWidth={2} />
             </span>
           </div>
-          <div className={styles.caseRoomCase}>
-            <Image src="/OYU Fest 2026.webp" alt="" fill sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
+          <div className={styles.caseRoomCase} style={{ position: "relative" }}>
+            <Image src="/OYU Fest 2026.webp" alt="" fill loading="lazy" sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
             <strong>Qara Studios</strong>
             <span className={styles.caseRoomCaseFeaturedDescription}>Что сработало в продвижении OYU Fest?</span>
             <span className={styles.caseRoomCaseArrow} aria-hidden="true">
               <ArrowUpRight size={22} strokeWidth={2} />
             </span>
           </div>
-          <div className={styles.caseRoomCase}>
-            <Image src="/ForteXGForce.webp" alt="" fill sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
+          <div className={styles.caseRoomCase} style={{ position: "relative" }}>
+            <Image src="/ForteXGForce.webp" alt="" fill loading="lazy" sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
             <strong>Forte Bank × GForce Grey</strong>
             <span className={styles.caseRoomCaseFeaturedDescription}>Как история<br />стала арт-объектом?</span>
             <span className={styles.caseRoomCaseArrow} aria-hidden="true">

@@ -102,6 +102,7 @@
     font-weight: 700;
     letter-spacing: 0.02em;
     text-transform: uppercase;
+    text-wrap: balance;
   }
 
   p {
@@ -163,9 +164,9 @@
     scroll-behavior: auto !important;
   }
 
-  /* Keep marquee and functional transitions working */
+  /* Continuous motion is not required to understand the case archive. */
   .marquee-track {
-    animation-duration: 25s !important;
+    animation: none !important;
   }
 }
 
@@ -177,6 +178,10 @@
 
 .marquee-track {
   display: inline-flex;
+}
+
+.marquee-track.marqueePaused {
+  animation-play-state: paused;
 }
 
 @media (min-width: 768px) {
@@ -207,8 +212,9 @@
 
 /* Focus-visible ring for keyboard navigation */
 :focus-visible {
-  outline: 2px solid #040082;
-  outline-offset: 2px;
+  outline: 3px solid #040082;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px #ffffff;
 }
 
 /* Remove default outline for mouse users */
@@ -225,6 +231,10 @@
 @media (scripting: none) {
   .gsap-hidden {
     opacity: 1 !important;
+  }
+
+  .marquee-track {
+    animation: none !important;
   }
 }
 
