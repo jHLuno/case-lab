@@ -69,6 +69,16 @@ test("hero left text uses the same inset as the main heading", () => {
   assert.match(caseLabStyles, /\.caseRoomDetails\s*\{[^}]*left:\s*var\(--case-lab-heading-shift\)/s);
 });
 
+test("hero event details keep the date number and use the compact copy", () => {
+  assert.match(heroSource, /<strong>24<\/strong>/);
+  assert.match(heroSource, /СЕНТЯБРЯ<br \/>/);
+  assert.match(heroSource, /10:00–14:00<br \/>/);
+  assert.match(heroSource, /NARXOZ BUSINESS SCHOOL/);
+  assert.doesNotMatch(heroSource, /СЕНТЯБРЯ 2026|UTC\+5|4 ЧАСА|ЖАНДОСОВА/);
+  assert.match(caseLabStyles, /\.caseRoomDetails span\s*\{[^}]*font-size:\s*12px;/s);
+  assert.match(caseLabStyles, /\.caseRoomDetails strong\s*\{[^}]*font-size:\s*clamp\(32px, 3\.5vw, 52px\);/s);
+});
+
 test("hero case cards give their text a 20px inset", () => {
   assert.match(caseLabStyles, /\.caseRoomCase\s*\{[^}]*padding:\s*20px;/s);
 });

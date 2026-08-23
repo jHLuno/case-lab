@@ -82,7 +82,7 @@ test("event metadata is route-specific and does not expose the service offer", (
   assert.match(heroSource, /24\.09\.2026|2026/);
   assert.match(heroSource, /10:00/);
   assert.match(heroSource, /14:00/);
-  assert.match(heroSource, /Жандосова 55\/10/i);
+  assert.doesNotMatch(heroSource, /Жандосова 55\/10/i);
   assert.doesNotMatch(jsonLdSource, /usePathname|case-lab-3/);
   assert.match(jsonLdSource, /@type\":\s*\"Organization\"/);
 });

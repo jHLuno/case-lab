@@ -69,10 +69,9 @@ export default function CaseLab3Hero() {
             <div className={styles.caseRoomDetails}>
               <strong>24</strong>
               <span>
-                СЕНТЯБРЯ 2026<br />
-                10:00–14:00 (UTC+5), 4 ЧАСА<br />
-                NARXOZ BUSINESS SCHOOL<br />
-                УЛ. ЖАНДОСОВА 55/10, АЛМАТЫ
+                СЕНТЯБРЯ<br />
+                10:00–14:00<br />
+                NARXOZ BUSINESS SCHOOL
               </span>
             </div>
             <div className={styles.caseRoomPurchase}>
