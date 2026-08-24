@@ -227,7 +227,10 @@ test("testimonial cards expose the requested visual review CTA without video", (
 
 test("ticket CTAs are no-op buttons without checkout links", () => {
   assert.match(heroSource, /<button\s+type="button"\s+className=\{styles\.heroCta\}\s+aria-disabled="true">[\s\S]*?Купить билет/);
-  assert.match(ticketsSource, /<button\s+type="button"\s+className=\{styles\.ticketCta\}\s+aria-disabled="true">[\s\S]*?Купить билет/);
+  assert.match(
+    ticketsSource,
+    /<button\s+(?=[^>]*\btype="button")(?=[^>]*\bclassName=\{styles\.ticketCta\})(?=[^>]*\sdisabled(?:\s|=|>))(?=[^>]*\baria-disabled="true")[^>]*>[\s\S]*?Купить билет/,
+  );
   assert.match(navbarSource, /ctaHref === null \? \([\s\S]*?<button[\s\S]*?aria-disabled="true"[\s\S]*?\{ctaLabel\}/);
   assert.match(caseLab3FooterSource, /<button[\s\S]*?aria-disabled="true"[\s\S]*?Купить билет/);
   assert.doesNotMatch(heroSource, /<a[^>]+href=/);
@@ -237,11 +240,11 @@ test("ticket CTAs are no-op buttons without checkout links", () => {
   assert.doesNotMatch(casesSource, /cursor-pointer/);
 });
 
-test("ticket section removes the early-price kicker and enlarges its CTA", () => {
+test("ticket section uses the approved editorial CTA treatment", () => {
   assert.doesNotMatch(ticketsSource, /20 мест по ранней цене/);
   assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*width:\s*min\(100%, 340px\);/s);
-  assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*font-size:\s*18px;/s);
-  assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*padding:\s*18px 34px;/s);
+  assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*font-size:\s*17px;/s);
+  assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*min-height:\s*54px;/s);
   assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*justify-content:\s*center;/s);
 });
 
