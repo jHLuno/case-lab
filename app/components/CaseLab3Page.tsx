@@ -17,9 +17,9 @@ export default function CaseLab3Page() {
         <CaseLab3Hero />
         <CaseLab3Speakers />
         <CaseLab3HowItWorks />
+        <CaseLab3Tickets />
         <CaseLab3Proof />
         <Cases alignToCaseLab />
-        <CaseLab3Tickets />
         <CaseLab3FAQ />
       </main>
       <CaseLab3Footer />
