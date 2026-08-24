@@ -4,10 +4,11 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-const [layoutSource, globalsSource, navbarSource, casesSource, scrollRevealSource, proofSource, ticketsSource, faqSource, checkoutSource, pageSource, jsonLdSource, sitemapSource, caseLabStyles, heroSource, speakersSource] = await Promise.all([
+const [layoutSource, globalsSource, navbarSource, caseLab3NavbarSource, casesSource, scrollRevealSource, proofSource, ticketsSource, faqSource, checkoutSource, pageSource, jsonLdSource, sitemapSource, caseLabStyles, heroSource, speakersSource] = await Promise.all([
   read("app/layout.tsx"),
   read("app/globals.css"),
   read("app/components/Navbar.tsx"),
+  read("app/components/CaseLab3Navbar.tsx"),
   read("app/sections/Cases.tsx"),
   read("app/components/ScrollReveal.tsx"),
   read("app/sections/CaseLab3Proof.tsx"),
@@ -71,7 +72,8 @@ test("checkout configuration fails closed and only accepts secure URLs", () => {
 
 test("all cases points to the homepage archive and the event is internally linked", () => {
   assert.match(casesSource, /href="\/#news"/);
-  assert.match(navbarSource, /case-lab-3/);
+  assert.doesNotMatch(navbarSource, /label:\s*["']Case Lab 3["']/);
+  assert.match(caseLab3NavbarSource, /basePath="\/case-lab-3\/"/);
   assert.match(sitemapSource, /https:\/\/caselab\.kz\/case-lab-3\//);
 });
 

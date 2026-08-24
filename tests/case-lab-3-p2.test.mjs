@@ -347,7 +347,7 @@ test("large speaker photos show each speaker role under the name", () => {
     speakersSource,
     /speakerStageFeature[\s\S]*?<figcaption>[\s\S]*?<span>\{item\.company\}<\/span>[\s\S]*?<small>\{item\.role\}<\/small>/,
   );
-  assert.match(speakersSource, /role: "exCMO Invictus Go (?:• нынешний CMO|& CMO) Bayan Sulu"/);
+  assert.match(speakersSource, /role: "exCMO Invictus Go & CCO Bayan Sulu"/);
   assert.match(
     caseLabStylesSource,
     /\.speakerStageFeature \.speakerStageCard figcaption\s*\{[^}]*display:\s*flex;[^}]*flex-direction:\s*column;/s,
