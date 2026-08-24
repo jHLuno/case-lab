@@ -39,7 +39,7 @@ export default function CaseLab3Tickets() {
                 <div className={styles.ticketFact}>
                   <CalendarDays size={23} strokeWidth={1.5} aria-hidden="true" />
                   <span>
-                    <strong>24 сентября 2026</strong>
+                    <strong>24 сентября 2026 года</strong>
                     <small>10:00–14:00</small>
                   </span>
                 </div>

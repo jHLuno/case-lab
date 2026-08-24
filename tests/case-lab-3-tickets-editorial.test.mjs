@@ -26,7 +26,8 @@ test("ticket section uses the generated background and disabled CTA", () => {
   assert.match(ticketSource, /10:00–14:00/);
   assert.match(ticketSource, /Narxoz Business School/);
   assert.match(ticketSource, /100 мест/);
-  assert.match(ticketSource, /7 890 ₸/);
+  assert.match(ticketSource, /<strong>7 890<\/strong>/);
+  assert.match(ticketSource, /<span>₸<\/span>/);
   assert.match(ticketSource, /15 000 ₸/);
   assert.match(ticketSource, /Первые 20 билетов/);
 });
