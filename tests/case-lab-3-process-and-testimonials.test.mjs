@@ -23,10 +23,15 @@ test("Case Lab 3 places the process block before testimonials", () => {
 test("testimonial proof is static and makes no video promise", () => {
   assert.doesNotMatch(proofSource, /До этого уже было/);
   assert.doesNotMatch(proofSource, /video|видео|embedUrl|iframe/i);
-  assert.equal((proofSource.match(/Посмотреть отзыв/g) ?? []).length, 1);
+  assert.equal((proofSource.match(/Посмотреть отзыв/g) ?? []).length, 2);
   assert.equal((proofSource.match(/id: "testimonial-/g) ?? []).length, 3);
-  assert.equal((proofSource.match(/testimonialReviewLabel/g) ?? []).length, 1);
+  assert.equal((proofSource.match(/testimonialReviewLabel/g) ?? []).length, 2);
   assert.match(proofSource, /<span className=\{styles\.testimonialReviewLabel\} aria-hidden="true">/);
+  assert.match(proofSource, /reviewHref:\s*"https:\/\/www\.instagram\.com\/p\/DcYwmZZsQq1\/"/);
+  assert.match(proofSource, /reviewHref:\s*"https:\/\/www\.instagram\.com\/p\/DcbLF_MsX5Q\/"/);
+  assert.match(proofSource, /href=\{testimonial\.reviewHref\}/);
+  assert.match(proofSource, /target="_blank"/);
+  assert.match(proofSource, /rel="noopener noreferrer"/);
   assert.match(proofSource, /ArrowUpRight/);
   assert.doesNotMatch(proofSource, /useState|useRef/);
   assert.doesNotMatch(caseLabStyles, /testimonialVideoLink|testimonialPlayerClose|testimonialMedia > iframe/);

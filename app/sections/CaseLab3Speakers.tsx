@@ -8,7 +8,7 @@ const cases = [
   {
     company: "Ануар Абдрахманов",
     captionLines: ["Ануар", "Абдрахманов"],
-    role: "exCMO Invictus Go & CMO Bayan Sulu",
+    role: "exCMO Invictus Go & CCO Bayan Sulu",
     title: "Как масштабировать точки и не потерять спрос",
     description: "О решениях, которые стояли за открытием успешных залов в Алматы и за его пределами. Какие точки роста команда проверяла первой. И что пришлось пересобрать внутри бизнеса.",
     image: "/Invictus GO.webp",

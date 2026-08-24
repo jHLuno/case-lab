@@ -11,7 +11,6 @@ import { useLeadPopup } from "../lib/LeadPopupContext";
 
 const defaultNavLinks = [
   { label: "Кейсы", href: "#cases" },
-  { label: "Case Lab 3", href: "/case-lab-3/" },
   { label: "Подход", href: "#diagnostics" },
   { label: "Процесс", href: "#process" },
   { label: "Результаты", href: "#testimonials" },

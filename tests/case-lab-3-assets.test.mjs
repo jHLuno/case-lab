@@ -87,6 +87,6 @@ test("Case Lab 3 cases headline uses the shared left inset", () => {
   assert.match(pageSource, /<Cases alignToCaseLab \/>/);
   assert.match(casesSource, /alignToCaseLab\s*=\s*false/);
   assert.match(casesSource, /const caseLabShell = `max-w-\[1078px\] \$\{alignToCaseLab \? "ml-4 md:ml-10" : "mx-auto"\}`/);
-  assert.equal((casesSource.match(/caseLabShell/g) ?? []).length, 4);
+  assert.equal((casesSource.match(/caseLabShell/g) ?? []).length, 3);
   assert.match(casesSource, /text-\[clamp\(24px,4vw,54px\)\]/);
 });

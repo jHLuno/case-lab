@@ -214,7 +214,14 @@ test("testimonial cards expose the requested visual review CTA without video", (
 
   assert.equal(visualReviewLabels.length, 1);
   assert.equal((proofSource.match(/id: "testimonial-/g) ?? []).length, 3);
-  assert.doesNotMatch(proofSource, /testimonialReviewLabel[\s\S]*?(?:href=|<button)/i);
+  const linkedReviewLabels = proofSource.match(
+    /<a\s+href=\{testimonial\.reviewHref\}[\s\S]*?Посмотреть отзыв[\s\S]*?<\/a>/g,
+  ) ?? [];
+
+  assert.equal(linkedReviewLabels.length, 1);
+  assert.match(proofSource, /https:\/\/www\.instagram\.com\/p\/DcYwmZZsQq1\//);
+  assert.match(proofSource, /https:\/\/www\.instagram\.com\/p\/DcbLF_MsX5Q\//);
+  assert.match(proofSource, /<a\s+href=\{testimonial\.reviewHref\}[\s\S]*?target="_blank"[\s\S]*?rel="noopener noreferrer"/);
   assert.doesNotMatch(proofSource, /video|видео|iframe|embedUrl/i);
 });
 

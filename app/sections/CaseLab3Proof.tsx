@@ -10,6 +10,7 @@ const testimonials = [
     quote:
       "После Case Lab я пересобрала подход к работе с кейсами: меньше теории, больше вопросов к тому, почему команда вообще приняла именно такое решение.",
     photo: "/testimonial-ekaterina.webp",
+    reviewHref: "https://www.instagram.com/p/DcYwmZZsQq1/",
   },
   {
     id: "testimonial-02",
@@ -18,6 +19,7 @@ const testimonials = [
     quote:
       "Увидела, как другие команды находят выход из похожих ситуаций. Забрала несколько идей, которые уже внедрили в следующем спринте.",
     photo: "/testimonial-elena.webp",
+    reviewHref: "https://www.instagram.com/p/DcbLF_MsX5Q/",
   },
   {
     id: "testimonial-03",
@@ -26,6 +28,7 @@ const testimonials = [
     quote:
       "Разбор кейсов без прикрас — это то, чего часто не хватает в индустрии. После Case Lab появилось больше смелости принимать решения и тестировать.",
     photo: "/testimonial-aida.webp",
+    reviewHref: undefined,
   },
 ] as const;
 
@@ -72,10 +75,22 @@ export default function CaseLab3Proof() {
                   <blockquote>
                     &laquo;{testimonial.quote}&raquo;
                   </blockquote>
-                  <span className={styles.testimonialReviewLabel} aria-hidden="true">
-                    Посмотреть отзыв
-                    <ArrowUpRight size={16} strokeWidth={2} />
-                  </span>
+                  {testimonial.reviewHref ? (
+                    <a
+                      href={testimonial.reviewHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.testimonialReviewLabel}
+                    >
+                      Посмотреть отзыв
+                      <ArrowUpRight size={16} strokeWidth={2} />
+                    </a>
+                  ) : (
+                    <span className={styles.testimonialReviewLabel} aria-hidden="true">
+                      Посмотреть отзыв
+                      <ArrowUpRight size={16} strokeWidth={2} />
+                    </span>
+                  )}
                 </div>
               </article>
             );

@@ -28,17 +28,21 @@ test("Case Lab 3 has no video-related promise or player implementation", () => {
   }
 });
 
-test("mobile speaker copy stays readable and short viewports use the semantic mobile layout", () => {
+test("mobile speaker copy stays readable without switching short desktop viewports to mobile", () => {
   assert.match(globalsSource, /--color-blue/);
   assert.match(caseLabStyles, /\.speakerAccessibleCase p:last-child\s*\{[^}]*color:\s*#4f4e5b/s);
-  assert.match(caseLabStyles, /@media \(max-width: 767px\), \(min-width: 768px\) and \(max-height: 700px\)[\s\S]*?\.speakerAccessibleCases\s*\{[\s\S]*?position:\s*static/s);
-  assert.match(caseLabStyles, /@media \(max-width: 767px\), \(min-width: 768px\) and \(max-height: 700px\)[\s\S]*?\.speakerAccessibleVisual\s*\{[\s\S]*?min-height:\s*280px/s);
+  assert.doesNotMatch(caseLabStyles, /@media \(max-width: 767px\), \(min-width: 768px\) and \(max-height: 700px\)/);
+  assert.match(
+    caseLabStyles,
+    /@media \(max-width: 767px\)[\s\S]*?\.howItWorksLayout\s*\{\s*display:\s*block;[\s\S]*?\.proofIntro h2[\s\S]*?\.testimonialGallery[\s\S]*?\.speakerScene\s*\{\s*display:\s*none;\s*\}[\s\S]*?\.speakerAccessibleCases\s*\{[\s\S]*?position:\s*static/s,
+  );
+  assert.match(caseLabStyles, /\.speakerAccessibleVisual\s*\{[\s\S]*?min-height:\s*280px/s);
   assert.match(speakersSource, /<ul>[\s\S]*?cases\.map\([\s\S]*?<li\b[\s\S]*?<article\b[^>]*className=\{styles\.speakerAccessibleCase\}/);
 });
 
-test("marquee exposes a pause control and stops for reduced motion", () => {
-  assert.match(casesSource, /aria-pressed=/);
-  assert.match(casesSource, /Поставить карусель на паузу|Продолжить карусель/);
+test("marquee has no visible pause control and stops for reduced motion", () => {
+  assert.doesNotMatch(casesSource, /<button[\s\S]*?aria-pressed=/);
+  assert.doesNotMatch(casesSource, /Поставить карусель на паузу|Продолжить карусель/);
   assert.match(casesSource, /IntersectionObserver/);
   assert.match(globalsSource, /\.marquee-track\s*\{\s*animation:\s*none\s*!important;/s);
 });

@@ -12,7 +12,7 @@ export default function CaseLab3Footer() {
             className="mb-6 text-[clamp(24px,4vw,48px)] font-bold uppercase leading-[1.05] tracking-[0.02em] text-black md:mb-6 md:max-w-none"
             style={{ fontFamily: "var(--font-heading)" }}
           >
-            <span className="md:whitespace-nowrap">Увидимся на Case Lab 3</span>
+            <span className="md:whitespace-nowrap">Увидимся на Case Lab III</span>
           </h2>
           <p
             className="mx-auto mb-10 max-w-md text-[15px] font-light leading-[1.4] text-black/60 md:mb-10 md:text-[18px]"

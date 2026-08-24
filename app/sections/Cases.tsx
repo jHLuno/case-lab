@@ -69,12 +69,11 @@ export default function Cases({ alignToCaseLab = false }: CasesProps) {
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const halfWidthRef = useRef(0);
   const [isMobile, setIsMobile] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const [interactionPaused, setInteractionPaused] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [pageHidden, setPageHidden] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(true);
-  const shouldAutoAnimate = !isPaused && !interactionPaused && isInView && !pageHidden && !prefersReducedMotion;
+  const shouldAutoAnimate = !interactionPaused && isInView && !pageHidden && !prefersReducedMotion;
   const caseLabShell = `max-w-[1078px] ${alignToCaseLab ? "ml-4 md:ml-10" : "mx-auto"}`;
 
   useEffect(() => {
@@ -156,10 +155,6 @@ export default function Cases({ alignToCaseLab = false }: CasesProps) {
     }, RESUME_DELAY);
   };
 
-  const handlePauseToggle = () => {
-    setIsPaused((current) => !current);
-  };
-
   const handleRegionBlur = (event: FocusEvent<HTMLDivElement>) => {
     if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
       setInteractionPaused(false);
@@ -189,18 +184,6 @@ export default function Cases({ alignToCaseLab = false }: CasesProps) {
         onFocusCapture={() => setInteractionPaused(true)}
         onBlurCapture={handleRegionBlur}
       >
-        <div className={`${caseLabShell} mb-2 flex justify-end`}>
-          <button
-            type="button"
-            className="rounded-full border border-[#040082]/25 px-4 py-2 text-[12px] text-[#040082] transition-colors hover:bg-[#040082] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-            aria-pressed={isPaused}
-            disabled={prefersReducedMotion}
-            onClick={handlePauseToggle}
-            style={{ fontFamily: "var(--font-body)" }}
-          >
-            {prefersReducedMotion ? "Автодвижение отключено" : isPaused ? "Продолжить карусель" : "Поставить карусель на паузу"}
-          </button>
-        </div>
         <div
           ref={containerRef}
           className="overflow-x-auto py-3 scrollbar-hide md:overflow-hidden"

@@ -1278,7 +1278,7 @@
   .ticketGrid { grid-template-columns: 1fr; gap: 48px; }
 }
 
-@media (max-width: 767px), (min-width: 768px) and (max-height: 700px) {
+@media (max-width: 767px) {
   .howItWorksSection {
     margin-top: var(--case-lab-content-next-headline-gap);
     padding-right: 16px;
