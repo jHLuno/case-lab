@@ -1069,6 +1069,7 @@
 }
 
 .ticketGrid {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(360px, .8fr);
   gap: clamp(36px, 8vw, 132px);
@@ -1091,6 +1092,8 @@
 
 .ticketGrid h2 {
   max-width: 10ch;
+  font-size: clamp(40px, 5.8vw, 82px);
+  line-height: .94;
 }
 
 .ticketCopy {
