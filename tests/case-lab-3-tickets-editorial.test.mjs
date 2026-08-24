@@ -20,7 +20,7 @@ test("ticket section uses the generated background and disabled CTA", () => {
   assert.match(ticketSource, /id="tickets"/);
   assert.match(ticketSource, /case-lab-3-tickets-bg\.png/);
   assert.match(ticketSource, /alt=""/);
-  assert.match(ticketSource, /disabled/);
+  assert.match(ticketSource, /<button\b[^>]*\sdisabled(?:\s|\/?>)/);
   assert.match(ticketSource, /aria-disabled="true"/);
   assert.match(ticketSource, /24 сентября 2026/);
   assert.match(ticketSource, /10:00–14:00/);
