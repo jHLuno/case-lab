@@ -1380,7 +1380,7 @@
 }
 
 .faqAnswer {
-  max-width: 62ch;
+  max-width: 90ch;
   margin: 0;
   padding: 0 62px 24px 0;
   color: var(--cl-muted);

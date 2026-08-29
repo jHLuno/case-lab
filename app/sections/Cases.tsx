@@ -187,11 +187,12 @@ export default function Cases({ alignToCaseLab = false, forceMotion = false }: C
       >
         <div
           ref={containerRef}
-          className="overflow-x-auto py-3 scrollbar-hide md:overflow-hidden"
+          className="overflow-x-auto py-3 scrollbar-hide lg:overflow-hidden"
           aria-label="Лента кейсов"
           tabIndex={0}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
         >
         <div className={`marquee-track flex ${shouldAutoAnimate ? "" : "marqueePaused"}`}>
           {[0, 1].map((set) => (

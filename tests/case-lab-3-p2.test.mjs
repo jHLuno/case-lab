@@ -636,6 +636,14 @@ test("Case Lab 3 keeps speaker motion independent from reduced-motion changes", 
   assert.match(speakersSource, /setupRun !== motionRun/);
 });
 
+test("case cards allow horizontal touch scrolling through tablet widths", () => {
+  assert.match(casesSource, /className="overflow-x-auto py-3 scrollbar-hide lg:overflow-hidden"/);
+  assert.doesNotMatch(casesSource, /md:overflow-hidden/);
+  assert.match(casesSource, /onTouchStart=\{handleTouchStart\}/);
+  assert.match(casesSource, /onTouchEnd=\{handleTouchEnd\}/);
+  assert.match(casesSource, /onTouchCancel=\{handleTouchEnd\}/);
+});
+
 test("site routes own the single main landmark outside global navigation and footer", () => {
   assert.doesNotMatch(layoutSource, /<main\b/);
   assert.match(layoutSource, /<div\s+tabIndex=\{-1\}>\s*\{children\}/s);
