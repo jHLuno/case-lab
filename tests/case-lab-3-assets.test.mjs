@@ -8,6 +8,7 @@ const pageSource = await readFile(new URL("../app/components/CaseLab3Page.tsx", 
 const navbarSource = await readFile(new URL("../app/components/CaseLab3Navbar.tsx", import.meta.url), "utf8");
 const heroSource = await readFile(new URL("../app/sections/CaseLab3Hero.tsx", import.meta.url), "utf8");
 const speakersSource = await readFile(new URL("../app/sections/CaseLab3Speakers.tsx", import.meta.url), "utf8");
+const ticketsSource = await readFile(new URL("../app/sections/CaseLab3Tickets.tsx", import.meta.url), "utf8");
 const caseLabStyles = await readFile(new URL("../app/case-lab-3/case-lab-3.module.css", import.meta.url), "utf8");
 
 test("Case Lab 3 mounts the main Case Lab cases section", () => {
@@ -110,6 +111,15 @@ test("Qara hero topic uses the extra-wide text measure", () => {
   assert.match(
     caseLabStyles,
     /\.caseRoomCase \.caseRoomCaseFeaturedDescriptionWide\s*\{[^}]*max-width:\s*22ch;/s,
+  );
+});
+
+test("ticket cards use explicit source dimensions and quality 100", () => {
+  assert.match(ticketsSource, /width: 1600,\s*height: 801/);
+  assert.match(ticketsSource, /width: 2098,\s*height: 1050/);
+  assert.match(
+    ticketsSource,
+    /src=\{ticket\.src\}[\s\S]*?width=\{ticket\.width\}[\s\S]*?height=\{ticket\.height\}[\s\S]*?quality=\{100\}/,
   );
 });
 

@@ -13,10 +13,14 @@ const tickets = [
   {
     src: "/case-lab-3-ticket-early-bird-v4.webp",
     alt: "Early Bird: 7 890 ₸, первые 20 билетов",
+    width: 1600,
+    height: 801,
   },
   {
     src: "/case-lab-3-ticket-standard-v5.webp",
     alt: "Стандарт: 15 000 ₸ после первых 20 билетов",
+    width: 2098,
+    height: 1050,
   },
 ] as const;
 
@@ -99,8 +103,9 @@ export default function CaseLab3Tickets() {
                   key={ticket.src}
                   src={ticket.src}
                   alt={ticket.alt}
-                  width={2098}
-                  height={1050}
+                  width={ticket.width}
+                  height={ticket.height}
+                  quality={100}
                   sizes="(max-width: 900px) 100vw, 40vw"
                   className={styles.ticketImage}
                 />
