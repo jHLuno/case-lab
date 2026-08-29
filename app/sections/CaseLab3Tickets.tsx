@@ -11,16 +11,16 @@ const included = [
 
 const tickets = [
   {
-    src: "/case-lab-3-ticket-early-bird-v4.webp",
+    src: "/case-lab-3-ticket-early-bird.webp",
     alt: "Early Bird: 7 890 ₸, первые 20 билетов",
-    width: 1600,
-    height: 801,
+    width: 2400,
+    height: 1200,
   },
   {
-    src: "/case-lab-3-ticket-standard-v5.webp",
+    src: "/case-lab-3-ticket-standard.webp",
     alt: "Стандарт: 15 000 ₸ после первых 20 билетов",
-    width: 2098,
-    height: 1050,
+    width: 2400,
+    height: 1200,
   },
 ] as const;
 

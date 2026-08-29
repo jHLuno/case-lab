@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
+import sharp from "sharp";
 
 const casesSource = await readFile(new URL("../app/sections/Cases.tsx", import.meta.url), "utf8");
 const caseImagePaths = [...casesSource.matchAll(/photo: "([^"]+)"/g)].map((match) => match[1]);
@@ -10,6 +12,13 @@ const heroSource = await readFile(new URL("../app/sections/CaseLab3Hero.tsx", im
 const speakersSource = await readFile(new URL("../app/sections/CaseLab3Speakers.tsx", import.meta.url), "utf8");
 const ticketsSource = await readFile(new URL("../app/sections/CaseLab3Tickets.tsx", import.meta.url), "utf8");
 const caseLabStyles = await readFile(new URL("../app/case-lab-3/case-lab-3.module.css", import.meta.url), "utf8");
+const ticketAssetPairs = [
+  ["case-lab-3-ticket-early-bird.webp", "early bird.png"],
+  ["case-lab-3-ticket-standard.webp", "standard.png"],
+].map(([optimized, source]) => ({
+  optimized: fileURLToPath(new URL(`../public/${optimized}`, import.meta.url)),
+  source: fileURLToPath(new URL(`../public/${source}`, import.meta.url)),
+}));
 
 test("Case Lab 3 mounts the main Case Lab cases section", () => {
   assert.match(pageSource, /import Cases from "\.\.\/sections\/Cases"/);
@@ -119,12 +128,25 @@ test("Qara hero topic uses the extra-wide text measure", () => {
 });
 
 test("ticket cards use explicit source dimensions and quality 100", () => {
-  assert.match(ticketsSource, /width: 1600,\s*height: 801/);
-  assert.match(ticketsSource, /width: 2098,\s*height: 1050/);
+  assert.equal((ticketsSource.match(/width: 2400,\s*height: 1200/g) ?? []).length, 2);
   assert.match(
     ticketsSource,
     /src=\{ticket\.src\}[\s\S]*?width=\{ticket\.width\}[\s\S]*?height=\{ticket\.height\}[\s\S]*?quality=\{100\}/,
   );
+});
+
+test("ticket WebP assets keep 2400x1200 dimensions and reduce file size", async () => {
+  for (const { optimized } of ticketAssetPairs) {
+    const [metadata, optimizedStats] = await Promise.all([
+      sharp(optimized).metadata(),
+      stat(optimized),
+    ]);
+
+    assert.equal(metadata.format, "webp");
+    assert.equal(metadata.width, 2400);
+    assert.equal(metadata.height, 1200);
+    assert.ok(optimizedStats.size < 1_000_000);
+  }
 });
 
 test("Case Lab 3 cases headline uses the shared left inset", () => {
