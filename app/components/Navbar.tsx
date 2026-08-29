@@ -27,6 +27,7 @@ type NavbarProps = {
   ctaHref?: string | null;
   hideOnScroll?: boolean;
   menuDescription?: string;
+  forceMotion?: boolean;
 };
 
 export default function Navbar({
@@ -38,10 +39,12 @@ export default function Navbar({
   ctaHref,
   hideOnScroll = false,
   menuDescription = "Диагностика маркетинга для команд, которым нужен ясный следующий шаг.",
+  forceMotion = false,
 }: NavbarProps) {
   const pathname = usePathname();
   const { openPopup } = useLeadPopup();
-  const shouldReduceMotion = useReducedMotion() ?? false;
+  const prefersReducedMotion = useReducedMotion() ?? false;
+  const shouldReduceMotion = forceMotion ? false : prefersReducedMotion;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [navHidden, setNavHidden] = useState(false);
   const [focusWithin, setFocusWithin] = useState(false);
@@ -310,7 +313,7 @@ export default function Navbar({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3 }}
-            className="fixed inset-0 z-[60] flex flex-col overflow-hidden bg-[#040082] text-white"
+            className={`fixed inset-0 z-[60] flex flex-col overflow-hidden bg-[#040082] text-white ${forceMotion ? "caseLabForceMotion" : ""}`}
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_32%),radial-gradient(circle_at_75%_30%,rgba(120,150,255,0.22),transparent_28%),linear-gradient(180deg,#0a0f9f_0%,#040082_45%,#03045e_100%)]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_28%)]" />

@@ -62,9 +62,10 @@ const RESUME_DELAY = 3000;
 
 type CasesProps = {
   alignToCaseLab?: boolean;
+  forceMotion?: boolean;
 };
 
-export default function Cases({ alignToCaseLab = false }: CasesProps) {
+export default function Cases({ alignToCaseLab = false, forceMotion = false }: CasesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const halfWidthRef = useRef(0);
@@ -72,26 +73,26 @@ export default function Cases({ alignToCaseLab = false }: CasesProps) {
   const [interactionPaused, setInteractionPaused] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [pageHidden, setPageHidden] = useState(false);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(true);
-  const shouldAutoAnimate = !interactionPaused && isInView && !pageHidden && !prefersReducedMotion;
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(!forceMotion);
+  const shouldAutoAnimate = !interactionPaused && isInView && !pageHidden && (forceMotion || !prefersReducedMotion);
   const caseLabShell = `max-w-[1078px] ${alignToCaseLab ? "ml-4 md:ml-10" : "mx-auto"}`;
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
-    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const reducedMotionQuery = forceMotion ? null : window.matchMedia("(prefers-reduced-motion: reduce)");
     const updateMedia = () => {
       setIsMobile(mediaQuery.matches);
-      setPrefersReducedMotion(reducedMotionQuery.matches);
+      if (reducedMotionQuery) setPrefersReducedMotion(reducedMotionQuery.matches);
     };
     updateMedia();
     mediaQuery.addEventListener("change", updateMedia);
-    reducedMotionQuery.addEventListener("change", updateMedia);
+    reducedMotionQuery?.addEventListener("change", updateMedia);
 
     return () => {
       mediaQuery.removeEventListener("change", updateMedia);
-      reducedMotionQuery.removeEventListener("change", updateMedia);
+      reducedMotionQuery?.removeEventListener("change", updateMedia);
     };
-  }, []);
+  }, [forceMotion]);
 
   useEffect(() => {
     const element = containerRef.current;
@@ -166,7 +167,7 @@ export default function Cases({ alignToCaseLab = false }: CasesProps) {
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
       <div className={caseLabShell}>
-        <ScrollReveal>
+          <ScrollReveal forceMotion={forceMotion}>
           <h2
             className="text-black text-[clamp(24px,4vw,54px)] font-bold leading-[1.15] mb-12 md:mb-16 uppercase tracking-[0.02em]"
             style={{ fontFamily: "var(--font-heading)" }}
@@ -246,7 +247,7 @@ export default function Cases({ alignToCaseLab = false }: CasesProps) {
       </div>
 
       <div className={`${caseLabShell} mt-8`}>
-        <ScrollReveal delay={0.2}>
+        <ScrollReveal delay={0.2} forceMotion={forceMotion}>
           <Link
             href="/#news"
             className="inline-flex items-center gap-2 bg-[#040082] text-white px-7 py-3.5 text-[14px] md:px-10 md:py-5 md:text-[15px] rounded-full font-normal hover:bg-[#0600a8] transition-colors duration-200 group"

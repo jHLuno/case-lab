@@ -61,7 +61,6 @@ export default function CaseLab3Speakers() {
 
     if (!scene || typeof IntersectionObserver === "undefined") return;
 
-    const prefersReducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     let disposed = false;
     let motionRun = 0;
     let observer: IntersectionObserver | undefined;
@@ -83,11 +82,11 @@ export default function CaseLab3Speakers() {
 
     const setupMotion = async () => {
       const setupRun = ++motionRun;
-      if (disposed || prefersReducedMotionQuery.matches) return;
+      if (disposed) return;
 
       try {
         const { gsap, ScrollTrigger } = await loadSpeakerMotion();
-        if (disposed || setupRun !== motionRun || prefersReducedMotionQuery.matches) return;
+        if (disposed || setupRun !== motionRun) return;
 
         context = gsap.context(() => {
           const media = gsap.matchMedia();
@@ -185,7 +184,7 @@ export default function CaseLab3Speakers() {
     };
 
     const observeScene = () => {
-      if (disposed || prefersReducedMotionQuery.matches) return;
+      if (disposed) return;
 
       observer = new IntersectionObserver((entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
@@ -196,17 +195,10 @@ export default function CaseLab3Speakers() {
       observer.observe(scene);
     };
 
-    const handlePreferenceChange = () => {
-      cleanupMotion();
-      observeScene();
-    };
-
-    prefersReducedMotionQuery.addEventListener("change", handlePreferenceChange);
     observeScene();
 
     return () => {
       disposed = true;
-      prefersReducedMotionQuery.removeEventListener("change", handlePreferenceChange);
       cleanupMotion();
     };
   }, []);

@@ -12,7 +12,7 @@ import styles from "../case-lab-3/case-lab-3.module.css";
 
 export default function CaseLab3Page() {
   return (
-    <div className={`${styles.caseLabPage} relative overflow-x-clip bg-white`}>
+    <div className={`${styles.caseLabPage} caseLabForceMotion relative overflow-x-clip bg-white`}>
       <CaseLab3Navbar />
       <main id="main" tabIndex={-1}>
         <CaseLab3Hero />
@@ -20,11 +20,11 @@ export default function CaseLab3Page() {
         <CaseLab3HowItWorks />
         <CaseLab3Tickets />
         <CaseLab3Proof />
-        <Cases alignToCaseLab />
+        <Cases alignToCaseLab forceMotion />
         <CaseLab3FAQ />
       </main>
       <CaseLab3Footer />
-      <BackToTop />
+      <BackToTop forceMotion />
     </div>
   );
 }

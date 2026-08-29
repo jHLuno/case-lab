@@ -1,5 +1,5 @@
-:global(html:has(#case-lab-3-speakers)),
-:global(body:has(#case-lab-3-speakers)) {
+:global(html.caseLabPage),
+:global(body.caseLabPage) {
   overflow-x: clip;
   overflow-y: visible;
 }
@@ -1613,88 +1613,4 @@
   .hero { --case-lab-hero-frame-left: 12px; }
   .hero { padding: 12px; }
   .caseRoomShape { border-radius: 40px; }
-}
-
-@media (prefers-reduced-motion: reduce) and (min-width: 768px) {
-  .speakerScene {
-    display: none;
-  }
-
-  .speakerAccessibleCases {
-    position: static;
-    width: min(100%, 720px);
-    height: auto;
-    margin: var(--case-lab-headline-content-gap) 0 0;
-    overflow: visible;
-    clip: auto;
-    white-space: normal;
-  }
-
-  .speakerAccessibleCases ul {
-    display: grid;
-    gap: 12px;
-  }
-
-  .speakerAccessibleCase {
-    display: grid;
-    gap: 18px;
-    padding: 16px;
-    border: 1px solid rgba(10, 10, 22, .12);
-    border-radius: 22px;
-    background: #f7f7fb;
-  }
-
-  .speakerAccessibleVisual {
-    min-height: 280px;
-    overflow: hidden;
-    border-radius: 16px;
-    background: #161433;
-  }
-
-  .speakerAccessibleVisual figcaption {
-    position: absolute;
-    right: 16px;
-    bottom: 16px;
-    left: 16px;
-    color: #fff;
-    font-family: var(--font-heading);
-    font-size: 20px;
-    line-height: 1;
-  }
-
-  .speakerAccessibleCopy {
-    min-width: 0;
-    padding: 24px 18px 18px;
-    border: 1px solid rgba(10, 10, 22, .1);
-    border-radius: 18px;
-    background: linear-gradient(145deg, #fff 0%, #f5f6fb 58%, #e8eaf2 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9);
-  }
-
-  .speakerAccessibleCase h3 {
-    margin: 0;
-    font-family: var(--font-heading);
-    font-size: clamp(20px, 2.2vw, 28px);
-    font-weight: 400;
-    line-height: 1;
-    overflow-wrap: anywhere;
-  }
-
-  .speakerAccessibleCase p:last-child {
-    margin: 12px 0 0;
-    color: var(--cl-muted);
-    font-size: 16px;
-    line-height: 1.4;
-    overflow-wrap: anywhere;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .heroCta,
-  .ticketCta,
-  .speakerStageCard,
-  .speakerStageCopyLayer,
-  .faqQuestion,
-  .faqIcon,
-  .faqPanel { transition: none; }
 }

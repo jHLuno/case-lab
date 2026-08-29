@@ -37,7 +37,7 @@ export default function CaseLab3Tickets() {
 
       <div className={styles.contentShell}>
         <div className={styles.ticketGrid}>
-          <ScrollReveal>
+          <ScrollReveal forceMotion>
             <div className={styles.ticketLead}>
               <h2 id="case-lab-3-tickets-title">Стоимость участия на Case Lab III</h2>
               <p className={styles.ticketCopy}>
@@ -92,7 +92,7 @@ export default function CaseLab3Tickets() {
             </div>
           </ScrollReveal>
 
-          <ScrollReveal delay={0.12}>
+          <ScrollReveal delay={0.12} forceMotion>
             <div className={styles.ticketArtwork}>
               {tickets.map((ticket) => (
                 <Image

@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 
-export default function BackToTop() {
+export default function BackToTop({ forceMotion = false }: { forceMotion?: boolean }) {
   const [visible, setVisible] = useState(false);
-  const shouldReduceMotion = useReducedMotion() ?? false;
+  const prefersReducedMotion = useReducedMotion() ?? false;
+  const shouldReduceMotion = forceMotion ? false : prefersReducedMotion;
 
   useEffect(() => {
     const toggleVisible = () => {

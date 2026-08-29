@@ -184,6 +184,7 @@ const [proofSource, heroSource, grainientBoundarySource, grainientSource, casesS
   readOptional("app/case-lab-3/opengraph-image.tsx"),
   read("app/lib/caseLab3.ts"),
 ]);
+const caseLab3NavbarSource = await read("app/components/CaseLab3Navbar.tsx");
 
 const caseLabRouteSources = [
   pageSource,
@@ -312,7 +313,7 @@ test("speaker semantic tree carries the mobile image and case copy", () => {
 
 test("speaker motion preserves a static fallback and cleans up lazy resources", () => {
   assert.match(speakersSource, /useEffect/);
-  assert.match(speakersSource, /prefers-reduced-motion/);
+  assert.doesNotMatch(speakersSource, /prefersReducedMotionQuery/);
   assert.match(speakersSource, /observer\?\.disconnect\(\)/);
   assert.match(speakersSource, /context\?\.revert\(\)/);
   assert.match(speakersSource, /triggers\.forEach/);
@@ -572,23 +573,29 @@ test("shared reduced-motion CSS removes control motion without hiding content", 
   assert.doesNotMatch(reducedMotionSource, /opacity:\s*0/);
 });
 
-test("Case Lab 3 keeps responsive headings and a visible reduced-motion fallback", () => {
+test("Case Lab 3 opts into motion despite reduced-motion preferences", () => {
+  assert.match(caseLab3PageSource, /caseLabForceMotion/);
+  assert.match(caseLab3PageSource, /<Cases alignToCaseLab forceMotion \/>/);
+  assert.match(caseLab3PageSource, /<BackToTop forceMotion \/>/);
+  assert.match(caseLab3NavbarSource, /document\.body\.classList\.add\("caseLabForceMotion"\)/);
+  assert.match(caseLab3NavbarSource, /document\.body\.classList\.remove\("caseLabForceMotion"\)/);
+  assert.match(caseLab3NavbarSource, /document\.body\.classList\.add\("caseLabPage"\)/);
+  assert.match(caseLab3NavbarSource, /document\.body\.classList\.remove\("caseLabPage"\)/);
+  assert.match(caseLab3NavbarSource, /document\.documentElement\.classList\.add\("caseLabPage"\)/);
+  assert.match(caseLab3NavbarSource, /document\.documentElement\.classList\.remove\("caseLabPage"\)/);
+  assert.match(caseLabStylesSource, /@media \(max-width: 767px\)[\s\S]*?\.speakerScene\s*\{\s*display: none;/);
   assert.doesNotMatch(
-    caseLabStylesSource,
-    /@media \(min-width: 1024px\) \{\s*\.howItWorksStep h3\s*\{[\s\S]*?white-space:\s*nowrap;/,
-  );
-  assert.doesNotMatch(
-    caseLabStylesSource,
-    /\.howItWorksIntro h2 span\s*\{[^}]*white-space:\s*nowrap;/,
-  );
-  assert.match(
     caseLabStylesSource,
     /@media \(prefers-reduced-motion: reduce\)\s+and\s+\(min-width: 768px\)[\s\S]*?\.speakerScene\s*\{\s*display:\s*none;/,
   );
-  assert.match(
-    caseLabStylesSource,
-    /@media \(prefers-reduced-motion: reduce\)\s+and\s+\(min-width: 768px\)[\s\S]*?\.speakerAccessibleCases\s*\{[\s\S]*?position:\s*static;/,
-  );
+  assert.match(heroSource, /const shouldReduceMotion = false/);
+  assert.doesNotMatch(speakersSource, /prefersReducedMotionQuery/);
+  assert.match(casesSource, /forceMotion\?/);
+  assert.match(casesSource, /forceMotion \|\| !prefersReducedMotion/);
+  assert.match(scrollRevealSource, /forceMotion\?/);
+  assert.match(ticketsSource, /<ScrollReveal\s+forceMotion/);
+  assert.match(faqSource, /<ScrollReveal\s+forceMotion/);
+  assert.match(globalStylesSource, /caseLabForceMotion/);
 });
 
 test("Case Lab 3 uses one heading-description gap at every breakpoint", () => {
@@ -622,9 +629,8 @@ test("Case Lab 3 defers below-fold proof images and avoids mobile WebGL", () => 
   assert.match(heroSource, /grainientAllowed/);
 });
 
-test("speaker motion responds when the reduced-motion preference changes", () => {
-  assert.match(speakersSource, /prefersReducedMotionQuery\.addEventListener\("change"/);
-  assert.match(speakersSource, /prefersReducedMotionQuery\.removeEventListener\("change"/);
+test("Case Lab 3 keeps speaker motion independent from reduced-motion changes", () => {
+  assert.doesNotMatch(speakersSource, /prefersReducedMotionQuery/);
   assert.match(speakersSource, /let motionRun = 0/);
   assert.match(speakersSource, /const setupRun = \+\+motionRun/);
   assert.match(speakersSource, /setupRun !== motionRun/);

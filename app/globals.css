@@ -162,18 +162,18 @@
 
 /* Reduced motion support — disable only decorative animations */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  body:not(.caseLabForceMotion) *,
+  body:not(.caseLabForceMotion) *::before,
+  body:not(.caseLabForceMotion) *::after {
     scroll-behavior: auto !important;
   }
 
   /* Continuous motion is not required to understand the case archive. */
-  .marquee-track {
+  body:not(.caseLabForceMotion) .marquee-track {
     animation: none !important;
   }
 
-  :where(
+  body:not(.caseLabForceMotion) :where(
     .motion-control,
     .motion-control *,
     .motion-control::before,
@@ -195,7 +195,7 @@
     transition: none !important;
   }
 
-  :where(
+  body:not(.caseLabForceMotion) :where(
     .motion-control *,
     button,
     button *,

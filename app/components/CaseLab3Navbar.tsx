@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect } from "react";
 import Navbar from "./Navbar";
 
 const caseLab3NavLinks = [
@@ -9,6 +12,18 @@ const caseLab3NavLinks = [
 ];
 
 export default function CaseLab3Navbar() {
+  useEffect(() => {
+    document.documentElement.classList.add("caseLabPage");
+    document.body.classList.add("caseLabForceMotion");
+    document.body.classList.add("caseLabPage");
+
+    return () => {
+      document.documentElement.classList.remove("caseLabPage");
+      document.body.classList.remove("caseLabForceMotion");
+      document.body.classList.remove("caseLabPage");
+    };
+  }, []);
+
   return (
     <Navbar
       accent="blue"
@@ -18,6 +33,7 @@ export default function CaseLab3Navbar() {
       ctaLabel="Купить билет"
       ctaHref={null}
       hideOnScroll
+      forceMotion
       menuDescription="Событие для маркетологов и команд, которым важны реальные решения."
     />
   );

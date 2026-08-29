@@ -3,7 +3,6 @@
 import { ArrowUpRight } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 import styles from "../case-lab-3/case-lab-3.module.css";
 import GrainientBoundary from "../components/GrainientBoundary";
@@ -11,7 +10,7 @@ import GrainientBoundary from "../components/GrainientBoundary";
 const Grainient = dynamic(() => import("../components/Grainient"), { ssr: false });
 
 export default function CaseLab3Hero() {
-  const shouldReduceMotion = useReducedMotion();
+  const shouldReduceMotion = false;
   const [grainientFailed, setGrainientFailed] = useState(false);
   const [grainientAllowed, setGrainientAllowed] = useState(false);
 

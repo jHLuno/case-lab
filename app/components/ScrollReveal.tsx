@@ -12,6 +12,7 @@ interface ScrollRevealProps {
   delay?: number;
   className?: string;
   direction?: "up" | "down" | "left" | "right";
+  forceMotion?: boolean;
 }
 
 export default function ScrollReveal({
@@ -19,11 +20,13 @@ export default function ScrollReveal({
   delay = 0,
   className = "",
   direction = "up",
+  forceMotion = false,
 }: ScrollRevealProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
   const hydrated = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
-  const shouldReduceMotion = useReducedMotion() ?? false;
+  const prefersReducedMotion = useReducedMotion() ?? false;
+  const shouldReduceMotion = forceMotion ? false : prefersReducedMotion;
 
   const directions = {
     up: { y: 24, x: 0 },
