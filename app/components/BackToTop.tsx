@@ -35,7 +35,7 @@ export default function BackToTop() {
           animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
           exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
           transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3, ease: "easeOut" }}
-           className="motion-control fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 w-10 h-10 md:w-14 md:h-14 rounded-full
+            className="motion-control fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 h-11 w-11 md:w-14 md:h-14 rounded-full
                      bg-white/80 backdrop-blur-2xl
                      border border-black/15
                      shadow-[0_8px_32px_-8px_rgba(4,0,130,0.2)]

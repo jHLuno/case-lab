@@ -7,7 +7,18 @@ const included = [
   "три подробных разбора кейсов",
   "живой разговор с CMO после выступлений",
   "знакомства с людьми из маркетинга и креатива",
-];
+] as const;
+
+const tickets = [
+  {
+    src: "/case-lab-3-ticket-early-bird-v4.webp",
+    alt: "Early Bird: 7 890 ₸, первые 20 билетов",
+  },
+  {
+    src: "/case-lab-3-ticket-standard-v5.webp",
+    alt: "Стандарт: 15 000 ₸ после первых 20 билетов",
+  },
+] as const;
 
 export default function CaseLab3Tickets() {
   return (
@@ -28,8 +39,7 @@ export default function CaseLab3Tickets() {
         <div className={styles.ticketGrid}>
           <ScrollReveal>
             <div className={styles.ticketLead}>
-              <p className={styles.ticketKicker}>Билет</p>
-              <h2 id="case-lab-3-tickets-title">Прийти за кейсом. Уйти с решением.</h2>
+              <h2 id="case-lab-3-tickets-title">Стоимость участия на Case Lab III</h2>
               <p className={styles.ticketCopy}>
                 Case Lab III — это три реальных кейса от CMO ведущих компаний Казахстана,
                 живой разбор с залом и ответы на вопросы, которые обычно остаются за кадром.
@@ -59,31 +69,9 @@ export default function CaseLab3Tickets() {
                 </div>
               </div>
 
-              <button type="button" className={styles.ticketCta} disabled aria-disabled="true">
-                Купить билет
-                <ArrowUpRight size={18} strokeWidth={2} aria-hidden="true" />
-              </button>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.12}>
-            <div className={styles.ticketPanel} aria-label="Стоимость и содержание билета">
-              <div className={styles.ticketPanelHeader}>
-                <span className={styles.ticketBadge}>Early Bird</span>
-                <span>Первые 20 билетов</span>
-              </div>
-
-              <div className={styles.ticketPrice}>
-                <strong>7 890</strong>
-                <span>₸</span>
-              </div>
-
-              <div className={styles.ticketPriceNote}>Специальная цена на первые 20 билетов</div>
-
-              <div className={styles.ticketLaterPrice}>
-                <span>Затем</span>
-                <strong>15 000 ₸</strong>
-              </div>
+              <p className={styles.ticketPriceSummary}>
+                Early Bird — <strong>7 890 ₸</strong> для первых 20 билетов. Далее — <strong>15 000 ₸</strong>.
+              </p>
 
               <div className={styles.ticketIncluded}>
                 <p>В билет входит:</p>
@@ -96,6 +84,27 @@ export default function CaseLab3Tickets() {
                   ))}
                 </ul>
               </div>
+
+              <button type="button" className={styles.ticketCta} disabled aria-disabled="true">
+                Купить билет
+                <ArrowUpRight size={18} strokeWidth={2} aria-hidden="true" />
+              </button>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.12}>
+            <div className={styles.ticketArtwork}>
+              {tickets.map((ticket) => (
+                <Image
+                  key={ticket.src}
+                  src={ticket.src}
+                  alt={ticket.alt}
+                  width={2098}
+                  height={1050}
+                  sizes="(max-width: 900px) 100vw, 40vw"
+                  className={styles.ticketImage}
+                />
+              ))}
             </div>
           </ScrollReveal>
         </div>

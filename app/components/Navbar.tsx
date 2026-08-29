@@ -239,7 +239,7 @@ export default function Navbar({
               <Link
                 key={link.label}
                 href={getNavHref(link.href)}
-                className="px-4 py-2 text-[14px] font-normal leading-none rounded-full text-black/60 hover:text-black hover:bg-black/5 transition-colors duration-200"
+                className="inline-flex min-h-11 items-center rounded-full px-4 py-2 text-[14px] font-normal leading-none text-black/60 transition-colors duration-200 hover:bg-black/5 hover:text-black"
                 style={{ fontFamily: "var(--font-body)" }}
               >
                 {link.label}
@@ -251,7 +251,7 @@ export default function Navbar({
           {ctaHref ? (
             <a
               href={getNavHref(ctaHref)}
-              className={`hidden md:inline-flex items-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-[14px] font-normal leading-none text-white transition-colors duration-200 ml-1 ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a8]"}`}
+              className={`hidden min-h-11 md:inline-flex items-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-[14px] font-normal leading-none text-white transition-colors duration-200 ml-1 ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a8]"}`}
               style={{ fontFamily: "var(--font-body)" }}
             >
               {ctaLabel}
@@ -260,8 +260,9 @@ export default function Navbar({
           ) : ctaHref === null ? (
             <button
               type="button"
+              disabled
               aria-disabled="true"
-              className={`hidden items-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-[14px] font-normal leading-none text-white transition-colors duration-200 ml-1 md:inline-flex ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a8]"}`}
+              className={`hidden min-h-11 items-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-[14px] font-normal leading-none text-white transition-colors duration-200 ml-1 md:inline-flex ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a8]"}`}
               style={{ fontFamily: "var(--font-body)" }}
             >
               {ctaLabel}
@@ -271,7 +272,7 @@ export default function Navbar({
             <button
               type="button"
               onClick={openPopup}
-              className={`hidden md:inline-flex items-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-[14px] font-normal leading-none text-white transition-colors duration-200 ml-1 ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a8]"}`}
+              className={`hidden min-h-11 md:inline-flex items-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-[14px] font-normal leading-none text-white transition-colors duration-200 ml-1 ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a8]"}`}
               style={{ fontFamily: "var(--font-body)" }}
             >
               {ctaLabel}
@@ -284,7 +285,7 @@ export default function Navbar({
             ref={toggleRef}
             type="button"
             onClick={() => setMobileOpen(true)}
-            className="md:hidden flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 text-black/60 hover:bg-black/5 transition-colors duration-200"
+            className="md:hidden flex items-center justify-center h-11 w-11 rounded-full flex-shrink-0 text-black/60 hover:bg-black/5 transition-colors duration-200"
             aria-label="Открыть меню"
             aria-expanded={mobileOpen}
             aria-controls="mobile-menu"
@@ -388,7 +389,7 @@ export default function Navbar({
                       <a
                         href={getNavHref(ctaHref)}
                          onClick={() => handleMobileLinkClick(ctaHref)}
-                         className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200"
+                         className="group inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200"
                         style={{ fontFamily: "var(--font-body)" }}
                       >
                         {ctaLabel}
@@ -397,8 +398,9 @@ export default function Navbar({
                     ) : ctaHref === null ? (
                       <button
                         type="button"
+                        disabled
                         aria-disabled="true"
-                        className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200"
+                        className="group inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200"
                         style={{ fontFamily: "var(--font-body)" }}
                       >
                         {ctaLabel}
@@ -408,7 +410,7 @@ export default function Navbar({
                       <button
                         type="button"
                          onClick={() => { closeMobileMenu(); openPopup(); }}
-                         className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200"
+                         className="group inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200"
                         style={{ fontFamily: "var(--font-body)" }}
                       >
                         {ctaLabel}

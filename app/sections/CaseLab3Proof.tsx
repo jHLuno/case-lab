@@ -61,8 +61,7 @@ export default function CaseLab3Proof() {
                     src={testimonial.photo}
                     alt=""
                     fill
-                    loading="eager"
-                    quality={100}
+                    loading="lazy"
                     sizes="(min-width: 1200px) 33vw, (min-width: 768px) 50vw, 100vw"
                     className={styles.testimonialPoster}
                   />

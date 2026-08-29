@@ -4,7 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useReducedMotion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "../case-lab-3/case-lab-3.module.css";
 import GrainientBoundary from "../components/GrainientBoundary";
 
@@ -13,13 +13,24 @@ const Grainient = dynamic(() => import("../components/Grainient"), { ssr: false 
 export default function CaseLab3Hero() {
   const shouldReduceMotion = useReducedMotion();
   const [grainientFailed, setGrainientFailed] = useState(false);
+  const [grainientAllowed, setGrainientAllowed] = useState(false);
+
+  useEffect(() => {
+    const deviceQuery = window.matchMedia("(max-width: 767px)");
+    const updateDeviceBudget = () => setGrainientAllowed(!deviceQuery.matches);
+
+    updateDeviceBudget();
+    deviceQuery.addEventListener("change", updateDeviceBudget);
+
+    return () => deviceQuery.removeEventListener("change", updateDeviceBudget);
+  }, []);
 
   return (
     <section className={styles.hero} aria-labelledby="case-lab-3-title">
       <div className={styles.heroShell}>
         <div className={`${styles.caseRoomShape} ${shouldReduceMotion ? styles.caseRoomShapeStatic : ""}`}>
           <div className={styles.caseRoomGradient} aria-hidden="true">
-            {!shouldReduceMotion && !grainientFailed && (
+            {grainientAllowed && !shouldReduceMotion && !grainientFailed && (
               <GrainientBoundary>
                 <Grainient
                   onError={() => setGrainientFailed(true)}
@@ -73,7 +84,7 @@ export default function CaseLab3Hero() {
               </span>
             </div>
             <div className={styles.caseRoomPurchase}>
-              <button type="button" className={styles.heroCta} aria-disabled="true">
+              <button type="button" className={styles.heroCta} disabled aria-disabled="true">
                 Купить билет
                 <ArrowUpRight size={20} strokeWidth={2} aria-hidden="true" />
               </button>
@@ -84,9 +95,9 @@ export default function CaseLab3Hero() {
 
         <div className={styles.caseRoomCases}>
           <div className={styles.caseRoomCase} style={{ position: "relative" }}>
-            <Image src="/Invictus GO.webp" alt="" fill loading="eager" sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
+            <Image src="/Invictus GO.webp" alt="" fill loading="lazy" sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
             <strong>Invictus GO</strong>
-            <span className={styles.caseRoomCaseFeaturedDescription}>Масштабирование сети фитнес-клубов</span>
+            <span className={styles.caseRoomCaseFeaturedDescription}>Как построить маркетинг, который масштабируется вместе с бизнесом?</span>
             <span className={styles.caseRoomCaseArrow} aria-hidden="true">
               <ArrowUpRight size={22} strokeWidth={2} />
             </span>
@@ -94,7 +105,7 @@ export default function CaseLab3Hero() {
           <div className={styles.caseRoomCase} style={{ position: "relative" }}>
             <Image src="/OYU Fest 2026.webp" alt="" fill loading="lazy" sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
             <strong>Qara Studios</strong>
-            <span className={styles.caseRoomCaseFeaturedDescription}>Что сработало в продвижении OYU Fest?</span>
+            <span className={`${styles.caseRoomCaseFeaturedDescription} ${styles.caseRoomCaseFeaturedDescriptionWide}`}>Как коллаборации и маркетинг масштабировали OYU Fest?</span>
             <span className={styles.caseRoomCaseArrow} aria-hidden="true">
               <ArrowUpRight size={22} strokeWidth={2} />
             </span>

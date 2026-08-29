@@ -225,14 +225,15 @@ test("testimonial cards expose the requested visual review CTA without video", (
   assert.doesNotMatch(proofSource, /video|видео|iframe|embedUrl/i);
 });
 
-test("ticket CTAs are no-op buttons without checkout links", () => {
-  assert.match(heroSource, /<button\s+type="button"\s+className=\{styles\.heroCta\}\s+aria-disabled="true">[\s\S]*?Купить билет/);
+test("ticket CTAs remain fail-closed without checkout links", () => {
+  assert.match(heroSource, /<button\s+type="button"\s+className=\{styles\.heroCta\}\s+disabled\s+aria-disabled="true">[\s\S]*?Купить билет/);
   assert.match(
     ticketsSource,
     /<button\s+(?=[^>]*\btype="button")(?=[^>]*\bclassName=\{styles\.ticketCta\})(?=[^>]*\sdisabled(?:\s|=|>))(?=[^>]*\baria-disabled="true")[^>]*>[\s\S]*?Купить билет/,
   );
-  assert.match(navbarSource, /ctaHref === null \? \([\s\S]*?<button[\s\S]*?aria-disabled="true"[\s\S]*?\{ctaLabel\}/);
-  assert.match(caseLab3FooterSource, /<button[\s\S]*?aria-disabled="true"[\s\S]*?Купить билет/);
+  assert.match(navbarSource, /ctaHref === null \? \([\s\S]*?<button[\s\S]*?disabled[\s\S]*?aria-disabled="true"[\s\S]*?\{ctaLabel\}/);
+  assert.match(caseLab3FooterSource, /<button[\s\S]*?disabled[\s\S]*?aria-disabled="true"[\s\S]*?>[\s\S]*?Купить билет/);
+  assert.match(caseLabStylesSource, /\.heroCta:disabled\s*\{[^}]*cursor:\s*not-allowed;[^}]*transform:\s*none;/s);
   assert.doesNotMatch(heroSource, /<a[^>]+href=/);
   assert.doesNotMatch(ticketsSource, /<a[^>]+href=/);
   assert.doesNotMatch(caseLab3FooterSource, /<a[^>]+href=\{caseLab3CheckoutHref\}/);
@@ -431,7 +432,6 @@ test("Case Lab 3 footer is static and keeps legal text readable", () => {
   assert.match(caseLab3PageSource, /import CaseLab3Footer from ["']\.\/CaseLab3Footer["']/);
   assert.doesNotMatch(caseLab3PageSource, /import Footer from ["']\.\/Footer["']/);
   assert.doesNotMatch(caseLab3FooterSource, /^"use client"/m);
-  assert.match(caseLab3FooterSource, /aria-disabled="true"/);
   assert.match(footerSource, /Политика конфиденциальности[\s\S]*text-black\/60/);
 });
 
@@ -442,7 +442,7 @@ test("Organization sameAs contains only the official Case Lab profile", () => {
 
 test("Case Lab 3 hero checkout has no SpecularButton or direct OGL dependency", () => {
   assert.doesNotMatch(heroSource, /SpecularButton|from\s+["']ogl["']|import\s*\(\s*["']ogl["']\s*\)/);
-  assert.match(heroSource, /<button\s+type="button"\s+className=\{styles\.heroCta\}\s+aria-disabled="true"/);
+  assert.match(heroSource, /<button\s+type="button"\s+className=\{styles\.heroCta\}\s+disabled\s+aria-disabled="true">/);
 });
 
 test("Case Lab 3 source stays free of media promises and direct OGL imports", () => {
@@ -570,6 +570,64 @@ test("shared reduced-motion CSS removes control motion without hiding content", 
   assert.match(navbarSource, /className="[^"]*motion-control/);
   assert.match(backToTopSource, /className="[^"]*motion-control/);
   assert.doesNotMatch(reducedMotionSource, /opacity:\s*0/);
+});
+
+test("Case Lab 3 keeps responsive headings and a visible reduced-motion fallback", () => {
+  assert.doesNotMatch(
+    caseLabStylesSource,
+    /@media \(min-width: 1024px\) \{\s*\.howItWorksStep h3\s*\{[\s\S]*?white-space:\s*nowrap;/,
+  );
+  assert.doesNotMatch(
+    caseLabStylesSource,
+    /\.howItWorksIntro h2 span\s*\{[^}]*white-space:\s*nowrap;/,
+  );
+  assert.match(
+    caseLabStylesSource,
+    /@media \(prefers-reduced-motion: reduce\)\s+and\s+\(min-width: 768px\)[\s\S]*?\.speakerScene\s*\{\s*display:\s*none;/,
+  );
+  assert.match(
+    caseLabStylesSource,
+    /@media \(prefers-reduced-motion: reduce\)\s+and\s+\(min-width: 768px\)[\s\S]*?\.speakerAccessibleCases\s*\{[\s\S]*?position:\s*static;/,
+  );
+});
+
+test("Case Lab 3 uses one heading-description gap at every breakpoint", () => {
+  assert.match(caseLab3PageSource, /className=\{`\$\{styles\.caseLabPage\}/);
+  assert.match(caseLabStylesSource, /\.caseLabPage\s*\{[\s\S]*?--case-lab-heading-description-gap:\s*20px;/);
+  assert.match(caseLabStylesSource, /@media \(min-width: 768px\)[\s\S]*?\.caseLabPage\s*\{[\s\S]*?--case-lab-heading-description-gap:\s*24px;/);
+  assert.match(caseLabStylesSource, /@media \(min-width: 1024px\)[\s\S]*?\.caseLabPage\s*\{[\s\S]*?--case-lab-heading-description-gap:\s*28px;/);
+  assert.match(caseLabStylesSource, /\.caseRoomCopy\s*\{[\s\S]*?margin:\s*var\(--case-lab-heading-description-gap\)\s+0\s+0;/);
+  assert.match(caseLabStylesSource, /\.sectionIntroWide > p:last-child\s*\{[\s\S]*?margin:\s*var\(--case-lab-heading-description-gap\)\s+0\s+0;/);
+  assert.match(caseLabStylesSource, /\.howItWorksOutcome\s*\{[\s\S]*?margin:\s*var\(--case-lab-heading-description-gap\)\s+0\s+0;/);
+  assert.match(caseLabStylesSource, /\.ticketCopy\s*\{[\s\S]*?margin:\s*var\(--case-lab-heading-description-gap\)\s+0\s+0;/);
+  assert.match(caseLabStylesSource, /\.proofIntroDescription\s*\{[\s\S]*?margin:\s*var\(--case-lab-heading-description-gap\)\s+0\s+0;/);
+  assert.match(caseLabStylesSource, /\.caseLabPage footer h2\s*\{[\s\S]*?margin-bottom:\s*var\(--case-lab-heading-description-gap\);/);
+});
+
+test("Case Lab 3 controls and review links meet the mobile target size", () => {
+  assert.match(navbarSource, /h-11\s+w-11/);
+  assert.match(backToTopSource, /h-11\s+w-11/);
+  assert.match(caseLab3FooterSource, /inline-flex\s+min-h-11\s+items-center/);
+  assert.match(caseLabStylesSource, /\.testimonialReviewLabel\s*\{[\s\S]*?min-height:\s*44px;/);
+});
+
+test("Case Lab 3 defers below-fold proof images and avoids mobile WebGL", () => {
+  assert.match(proofSource, /loading="lazy"/);
+  assert.doesNotMatch(proofSource, /quality=\{100\}/);
+  assert.equal((heroSource.match(/loading="eager"/g) ?? []).length, 0);
+  assert.equal((heroSource.match(/loading="lazy"/g) ?? []).length, 3);
+  assert.match(heroSource, /matchMedia\("\(max-width:\s*767px\)"\)/);
+  assert.doesNotMatch(heroSource, /pointer:\s*coarse/);
+  caseLabRouteSources.forEach((source) => assert.doesNotMatch(source, /pointer:\s*coarse/));
+  assert.match(heroSource, /grainientAllowed/);
+});
+
+test("speaker motion responds when the reduced-motion preference changes", () => {
+  assert.match(speakersSource, /prefersReducedMotionQuery\.addEventListener\("change"/);
+  assert.match(speakersSource, /prefersReducedMotionQuery\.removeEventListener\("change"/);
+  assert.match(speakersSource, /let motionRun = 0/);
+  assert.match(speakersSource, /const setupRun = \+\+motionRun/);
+  assert.match(speakersSource, /setupRun !== motionRun/);
 });
 
 test("site routes own the single main landmark outside global navigation and footer", () => {

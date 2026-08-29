@@ -9,28 +9,28 @@ const cases = [
     company: "Ануар Абдрахманов",
     captionLines: ["Ануар", "Абдрахманов"],
     role: "exCMO Invictus Go & CCO Bayan Sulu",
-    title: "Как масштабировать точки и не потерять спрос",
+    title: "Как построить маркетинг, который масштабируется вместе с бизнесом?",
     description: "О решениях, которые стояли за открытием успешных залов в Алматы и за его пределами. Какие точки роста команда проверяла первой. И что пришлось пересобрать внутри бизнеса.",
-    image: "/Invictus GO.webp",
+    image: "/Anuar.webp",
     alt: "Визуальные материалы кейса Invictus Go",
   },
   {
     company: "Перизат Сейфульмаликова",
     captionLines: ["Перизат", "Сейфульмаликова"],
     role: "CMO Qara Studios",
-    title: "Что осталось после OYU Fest 2026",
+    title: "Как коллаборации и маркетинг масштабировали OYU Fest?",
     description: "Результаты прошедшего фестиваля и разбор решений, которые к ним привели. Что осталось после события, кроме красивой картинки. И какие идеи продолжают работать дальше.",
-    image: "/OYU Fest 2026.webp",
+    image: "/Perizat-v2.webp",
     alt: "Визуальные материалы кейса OYU Fest 2026",
   },
   {
-    company: "Forte Bank × GForce Grey",
-    captionLines: ["Forte Bank ×", "GForce Grey"],
-    role: "Спикер уточняется",
+    company: "Малика Каражанова",
+    captionLines: ["Малика", "Каражанова"],
+    role: "Forte Bank × GForce Grey",
     title: "Когда инсталляция становится метрикой",
     description: "Кейс «Спасение собаки» и то, как идея повлияла на показатели бренда. Как инсталляция стала частью разговора с аудиторией. И почему это вышло за пределы обычной кампании.",
-    image: "/ForteXGForce.webp",
-    alt: "Визуальные материалы кейса Forte Bank и GForce Grey",
+    image: "/Malika.webp",
+    alt: "Малика Каражанова — спикер кейса Forte Bank и GForce Grey",
   },
 ];
 
@@ -59,23 +59,35 @@ export default function CaseLab3Speakers() {
   useEffect(() => {
     const scene = sceneRef.current;
 
-    if (
-      !scene ||
-      typeof IntersectionObserver === "undefined" ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) return;
+    if (!scene || typeof IntersectionObserver === "undefined") return;
 
-    let cancelled = false;
+    const prefersReducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let disposed = false;
+    let motionRun = 0;
+    let observer: IntersectionObserver | undefined;
     let revertMedia: (() => void) | undefined;
     let context: { revert: () => void } | undefined;
     const triggers: Array<{ kill: () => void }> = [];
 
+    const cleanupMotion = () => {
+      motionRun += 1;
+      observer?.disconnect();
+      observer = undefined;
+      triggers.forEach((trigger) => trigger.kill());
+      triggers.length = 0;
+      revertMedia?.();
+      revertMedia = undefined;
+      context?.revert();
+      context = undefined;
+    };
+
     const setupMotion = async () => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const setupRun = ++motionRun;
+      if (disposed || prefersReducedMotionQuery.matches) return;
 
       try {
         const { gsap, ScrollTrigger } = await loadSpeakerMotion();
-        if (cancelled || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        if (disposed || setupRun !== motionRun || prefersReducedMotionQuery.matches) return;
 
         context = gsap.context(() => {
           const media = gsap.matchMedia();
@@ -172,19 +184,30 @@ export default function CaseLab3Speakers() {
       }
     };
 
-    const observer = new IntersectionObserver((entries) => {
-      if (!entries.some((entry) => entry.isIntersecting)) return;
-      observer?.disconnect();
-      void setupMotion();
-    }, { rootMargin: "200px 0px" });
-    observer.observe(scene);
+    const observeScene = () => {
+      if (disposed || prefersReducedMotionQuery.matches) return;
+
+      observer = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer?.disconnect();
+        observer = undefined;
+        void setupMotion();
+      }, { rootMargin: "200px 0px" });
+      observer.observe(scene);
+    };
+
+    const handlePreferenceChange = () => {
+      cleanupMotion();
+      observeScene();
+    };
+
+    prefersReducedMotionQuery.addEventListener("change", handlePreferenceChange);
+    observeScene();
 
     return () => {
-      cancelled = true;
-      observer?.disconnect();
-      triggers.forEach((trigger) => trigger.kill());
-      revertMedia?.();
-      context?.revert();
+      disposed = true;
+      prefersReducedMotionQuery.removeEventListener("change", handlePreferenceChange);
+      cleanupMotion();
     };
   }, []);
 
@@ -211,7 +234,13 @@ export default function CaseLab3Speakers() {
                     className={styles.speakerStageCard}
                     aria-hidden="true"
                   >
-                    <Image src={item.image} alt="" fill sizes="(max-width: 1100px) 55vw, 58vw" className="object-cover" />
+                    <Image
+                      src={item.image}
+                      alt=""
+                      fill
+                      sizes="(max-width: 1100px) 55vw, 58vw"
+                      className={item.company === "Ануар Абдрахманов" ? `object-cover ${styles.speakerStageFeatureAnuar}` : item.company === "Перизат Сейфульмаликова" ? `object-cover ${styles.speakerStageFeaturePerizat}` : item.company === "Малика Каражанова" ? `object-cover ${styles.speakerStageFeatureMalika}` : "object-cover"}
+                    />
                     <div className={styles.speakerVisualShade} aria-hidden="true" />
                     <figcaption>
                       <span>{item.company}</span>

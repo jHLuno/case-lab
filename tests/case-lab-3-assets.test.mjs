@@ -26,7 +26,7 @@ test("main Case Lab cases keep the complete archive catalog", () => {
   }
 });
 
-test("hero fill images have positioned parents and defer secondary loading", () => {
+test("hero fill images have positioned parents and defer loading", () => {
   const heroCards = [...heroSource.matchAll(/<div className=\{styles\.caseRoomCase\}[^>]*>[\s\S]*?<Image[^>]+>/g)].map(
     (match) => match[0],
   );
@@ -35,9 +35,9 @@ test("hero fill images have positioned parents and defer secondary loading", () 
   for (const heroCard of heroCards) {
     assert.match(heroCard, /style=\{\{ position: "relative" \}\}/);
   }
-  assert.match(heroCards[0], /loading="eager"/);
-  assert.match(heroCards[1], /loading="lazy"/);
-  assert.match(heroCards[2], /loading="lazy"/);
+  for (const heroCard of heroCards) {
+    assert.match(heroCard, /loading="lazy"/);
+  }
 });
 
 test("semantic speaker image parents stay positioned outside the mobile media query", () => {
@@ -53,8 +53,8 @@ test("semantic speaker tree supplies the responsive fill-image figures", () => {
   );
 });
 
-test("speaker motion uses a const observer and aligned crossfade durations", () => {
-  assert.match(speakersSource, /const observer = new IntersectionObserver\(/);
+test("speaker motion uses a replaceable observer and aligned crossfade durations", () => {
+  assert.match(speakersSource, /observer = new IntersectionObserver\(/);
   assert.match(speakersSource, /outgoingCopy[\s\S]*duration: visualTransitionDuration/);
   assert.match(speakersSource, /incomingCopy[\s\S]*duration: visualTransitionDuration/);
 });
@@ -79,8 +79,38 @@ test("hero event details keep the date number and use the compact copy", () => {
   assert.match(caseLabStyles, /\.caseRoomDetails strong\s*\{[^}]*font-size:\s*clamp\(32px, 3\.5vw, 52px\);/s);
 });
 
+test("Case Lab 3 topics are synchronized across Hero and speakers", () => {
+  const invictusTopic = "Как построить маркетинг, который масштабируется вместе с бизнесом?";
+  const qaraTopic = "Как коллаборации и маркетинг масштабировали OYU Fest?";
+
+  assert.equal(heroSource.split(invictusTopic).length - 1, 1);
+  assert.equal(speakersSource.split(invictusTopic).length - 1, 1);
+  assert.equal(heroSource.split(qaraTopic).length - 1, 1);
+  assert.equal(speakersSource.split(qaraTopic).length - 1, 1);
+  assert.doesNotMatch(heroSource, /Масштабирование сети фитнес-клубов|Что сработало в продвижении OYU Fest\?/);
+  assert.doesNotMatch(speakersSource, /Как масштабировать точки и не потерять спрос|Что осталось после OYU Fest 2026/);
+});
+
 test("hero case cards give their text a 20px inset", () => {
   assert.match(caseLabStyles, /\.caseRoomCase\s*\{[^}]*padding:\s*20px;/s);
+});
+
+test("hero case topics use a wider text measure", () => {
+  assert.match(
+    caseLabStyles,
+    /\.caseRoomCase \.caseRoomCaseFeaturedDescription\s*\{[^}]*max-width:\s*20ch;/s,
+  );
+});
+
+test("Qara hero topic uses the extra-wide text measure", () => {
+  assert.match(
+    heroSource,
+    /className=\{`\$\{styles\.caseRoomCaseFeaturedDescription\} \$\{styles\.caseRoomCaseFeaturedDescriptionWide\}`\}/,
+  );
+  assert.match(
+    caseLabStyles,
+    /\.caseRoomCase \.caseRoomCaseFeaturedDescriptionWide\s*\{[^}]*max-width:\s*22ch;/s,
+  );
 });
 
 test("Case Lab 3 cases headline uses the shared left inset", () => {
