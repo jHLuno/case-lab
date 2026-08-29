@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Обновить утвержденные темы кейсов Qara Studios и Invictus GO во всех местах, где они отображаются на `/case-lab-3`.
+**Goal:** Обновить утвержденные темы трех кейсов во всех местах, где они отображаются на `/case-lab-3`.
 
 **Architecture:** Сохранить текущую структуру данных и компонентов. Полные формулировки будут синхронно заменены в Hero-подписях и полях `title` массива `cases`; accessible-версия блока спикеров уже использует `item.title` и обновится автоматически.
 
@@ -12,7 +12,8 @@
 
 - Для `Qara Studios` использовать: `Как коллаборации и маркетинг масштабировали OYU Fest?`
 - Для `Invictus GO` использовать: `Как построить маркетинг, который масштабируется вместе с бизнесом?`
-- Оставить тему `Forte Bank × GForce Grey`, описания кейсов, порядок, стили и metadata без изменений.
+- Для `Forte Bank × GForce Grey` использовать: `Как арт-инсталляция ForteBank разошлась по всему миру?`
+- Описания кейсов, порядок, стили и metadata оставить без изменений.
 - Не добавлять зависимости, environment variables или новые публичные API.
 - Не менять незатронутые пользователем файлы и существующие изменения в рабочем дереве.
 
@@ -36,13 +37,17 @@ Add this test after the existing hero event details test:
 test("Case Lab 3 topics are synchronized across Hero and speakers", () => {
   const invictusTopic = "Как построить маркетинг, который масштабируется вместе с бизнесом?";
   const qaraTopic = "Как коллаборации и маркетинг масштабировали OYU Fest?";
+  const forteTopic = "Как арт-инсталляция ForteBank разошлась по всему миру?";
 
   assert.equal(heroSource.split(invictusTopic).length - 1, 1);
   assert.equal(speakersSource.split(invictusTopic).length - 1, 1);
   assert.equal(heroSource.split(qaraTopic).length - 1, 1);
   assert.equal(speakersSource.split(qaraTopic).length - 1, 1);
+  assert.equal(heroSource.split(forteTopic).length - 1, 1);
+  assert.equal(speakersSource.split(forteTopic).length - 1, 1);
   assert.doesNotMatch(heroSource, /Масштабирование сети фитнес-клубов|Что сработало в продвижении OYU Fest\?/);
-  assert.doesNotMatch(speakersSource, /Как масштабировать точки и не потерять спрос|Что осталось после OYU Fest 2026/);
+  assert.doesNotMatch(heroSource, /Как история<br \/>стала арт-объектом\?/);
+  assert.doesNotMatch(speakersSource, /Как масштабировать точки и не потерять спрос|Что осталось после OYU Fest 2026|Когда инсталляция становится метрикой/);
 });
 ```
 
@@ -60,9 +65,9 @@ Expected: FAIL in `Case Lab 3 topics are synchronized across Hero and speakers`,
 
 **Interfaces:**
 - Consumes: the existing `cases` order, Hero card markup, and `item.title` rendering in the accessible speaker tree.
-- Produces: identical approved topic strings for Invictus GO and Qara Studios in both visual locations.
+- Produces: identical approved topic strings for Invictus GO, Qara Studios, and Forte Bank × GForce Grey in both visual locations.
 
-- [x] **Step 1: Replace the two Hero card descriptions**
+- [x] **Step 1: Replace the three Hero card descriptions**
 
 In `app/sections/CaseLab3Hero.tsx`, replace only the two `caseRoomCaseFeaturedDescription` contents:
 
@@ -76,9 +81,13 @@ and:
 <span className={styles.caseRoomCaseFeaturedDescription}>Как коллаборации и маркетинг масштабировали OYU Fest?</span>
 ```
 
-Leave the Forte Bank × GForce Grey card unchanged.
+and:
 
-- [x] **Step 2: Replace the two speaker case titles**
+```tsx
+<span className={styles.caseRoomCaseFeaturedDescription}>Как арт-инсталляция ForteBank разошлась по всему миру?</span>
+```
+
+- [x] **Step 2: Replace the three speaker case titles**
 
 In the `cases` array in `app/sections/CaseLab3Speakers.tsx`, replace only these fields:
 
@@ -92,7 +101,13 @@ and:
 title: "Как коллаборации и маркетинг масштабировали OYU Fest?",
 ```
 
-Leave each `description`, the third case, and the case order unchanged. The existing `{item.title}` binding updates both the desktop copy layer and accessible/mobile case copy.
+and:
+
+```ts
+title: "Как арт-инсталляция ForteBank разошлась по всему миру?",
+```
+
+Leave each `description`, the case order, and all non-topic case data unchanged. The existing `{item.title}` binding updates both the desktop copy layer and accessible/mobile case copy.
 
 - [x] **Step 3: Run the focused source-contract test**
 

@@ -112,7 +112,7 @@ export default function CaseLab3Hero() {
           <div className={styles.caseRoomCase} style={{ position: "relative" }}>
             <Image src="/ForteXGForce.webp" alt="" fill loading="lazy" sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
             <strong>Forte Bank × GForce Grey</strong>
-            <span className={styles.caseRoomCaseFeaturedDescription}>Как история<br />стала арт-объектом?</span>
+            <span className={styles.caseRoomCaseFeaturedDescription}>Как арт-инсталляция ForteBank разошлась по всему миру?</span>
             <span className={styles.caseRoomCaseArrow} aria-hidden="true">
               <ArrowUpRight size={22} strokeWidth={2} />
             </span>

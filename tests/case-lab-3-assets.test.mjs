@@ -83,13 +83,17 @@ test("hero event details keep the date number and use the compact copy", () => {
 test("Case Lab 3 topics are synchronized across Hero and speakers", () => {
   const invictusTopic = "Как построить маркетинг, который масштабируется вместе с бизнесом?";
   const qaraTopic = "Как коллаборации и маркетинг масштабировали OYU Fest?";
+  const forteTopic = "Как арт-инсталляция ForteBank разошлась по всему миру?";
 
   assert.equal(heroSource.split(invictusTopic).length - 1, 1);
   assert.equal(speakersSource.split(invictusTopic).length - 1, 1);
   assert.equal(heroSource.split(qaraTopic).length - 1, 1);
   assert.equal(speakersSource.split(qaraTopic).length - 1, 1);
+  assert.equal(heroSource.split(forteTopic).length - 1, 1);
+  assert.equal(speakersSource.split(forteTopic).length - 1, 1);
   assert.doesNotMatch(heroSource, /Масштабирование сети фитнес-клубов|Что сработало в продвижении OYU Fest\?/);
-  assert.doesNotMatch(speakersSource, /Как масштабировать точки и не потерять спрос|Что осталось после OYU Fest 2026/);
+  assert.doesNotMatch(heroSource, /Как история<br \/>стала арт-объектом\?/);
+  assert.doesNotMatch(speakersSource, /Как масштабировать точки и не потерять спрос|Что осталось после OYU Fest 2026|Когда инсталляция становится метрикой/);
 });
 
 test("hero case cards give their text a 20px inset", () => {
