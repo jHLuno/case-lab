@@ -55,6 +55,11 @@ test("SSR content is visible before client motion initializes", () => {
   assert.match(caseLabStyles, /\.caseRoomShape\s*\{[^}]*background:\s*#040082/s);
 });
 
+test("hero headline uses the approved event framing", () => {
+  assert.match(heroSource, /<span>Основано на<\/span>[\s\S]*?<span>реальных событиях<\/span>/);
+  assert.doesNotMatch(heroSource, /Как это было|сделано на самом деле/);
+});
+
 test("keyboard users can bypass the fixed navigation and keep it visible on focus", () => {
   assert.match(layoutSource, /Перейти к содержимому/);
   assert.match(layoutSource, /href="#main"/);

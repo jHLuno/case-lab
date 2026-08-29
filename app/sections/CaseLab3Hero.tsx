@@ -66,8 +66,8 @@ export default function CaseLab3Hero() {
               </span>
             </p>
             <h1 id="case-lab-3-title" className={styles.caseRoomTitle}>
-              <span>Как это было</span>
-              <span>сделано на самом деле</span>
+              <span>Основано на</span>
+              <span>реальных событиях</span>
             </h1>
             <p className={styles.caseRoomCopy}>
               Внутренняя кухня трёх казахстанских маркетинговых кейсов. Что происходило внутри, какие решения принимали и к чему они привели.
