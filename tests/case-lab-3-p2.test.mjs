@@ -639,11 +639,18 @@ test("Case Lab 3 responsive fixes keep the event details and mobile layout align
 test("Case Lab 3 mobile speaker cards keep titles compact and reveal photo tops", () => {
   assert.match(
     caseLabStylesSource,
-    /@media \(max-width: 767px\)[\s\S]*?\.speakerAccessibleCase h3\s*\{[\s\S]*?font-size:\s*clamp\(18px,\s*5vw,\s*22px\);[\s\S]*?line-height:\s*1\.02;/,
+    /@media \(max-width: 767px\)[\s\S]*?\.speakerAccessibleCase h3\s*\{[\s\S]*?font-size:\s*clamp\(14px,\s*5vw,\s*18px\);[\s\S]*?line-height:\s*1\.02;/,
   );
   assert.match(
     caseLabStylesSource,
     /@media \(max-width: 767px\)[\s\S]*?\.speakerAccessibleVisual > img\s*\{[\s\S]*?object-position:\s*center top;/,
+  );
+});
+
+test("Case Lab 3 hides the scoreboard on phone widths only", () => {
+  assert.match(
+    caseLabStylesSource,
+    /@media \(max-width: 767px\)[\s\S]*?\.howItWorksScoreboard\s*\{[^}]*display:\s*none;/,
   );
 });
 
