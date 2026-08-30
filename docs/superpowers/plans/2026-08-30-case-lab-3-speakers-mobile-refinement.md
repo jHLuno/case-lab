@@ -96,7 +96,7 @@ rtk npm run build
 rtk git diff --check
 ```
 
-Expected: `75/75` tests pass, TypeScript reports no errors, ESLint reports no issues, the production build completes successfully, and `git diff --check` is clean.
+Expected: `76/76` tests pass, TypeScript reports no errors, ESLint reports no issues, the production build completes successfully, and `git diff --check` is clean.
 
 - [ ] **Step 6: Review and commit the implementation**
 
