@@ -654,6 +654,14 @@ test("Case Lab 3 hides the scoreboard on phone widths only", () => {
   );
 });
 
+test("Case Lab 3 matches the mobile process spacing rhythm", () => {
+  assert.match(
+    caseLabStylesSource,
+    /@media \(max-width: 767px\)[\s\S]*?\.howItWorksSteps\s*\{[^}]*margin-top:\s*20px;/,
+  );
+  assert.match(caseLabStylesSource, /\.howItWorksStep\s*\{[\s\S]*?padding:\s*20px 0;/);
+});
+
 test("Case Lab 3 defers below-fold proof images and avoids mobile WebGL", () => {
   assert.match(proofSource, /loading="lazy"/);
   assert.doesNotMatch(proofSource, /quality=\{100\}/);
