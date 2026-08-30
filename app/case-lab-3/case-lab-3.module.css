@@ -1675,7 +1675,8 @@
   .caseRoomCases { margin-top: 10px; padding: 0; }
   .caseRoomCase { min-height: 110px; }
   .caseRoomPurchase { align-items: flex-start; flex-direction: column; }
-  .caseRoomPurchase p { text-align: left; }
+  .caseRoomPurchase p { text-align: left; white-space: nowrap; }
+  .caseRoomPurchase p br { display: none; }
   .heroGrid { display: flex; flex-direction: column; }
   .heroLead { min-height: 520px; padding: 28px 22px; }
   .heroCta { max-width: 100%; padding-right: 20px; padding-left: 20px; }

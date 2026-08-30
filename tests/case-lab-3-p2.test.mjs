@@ -636,6 +636,18 @@ test("Case Lab 3 responsive fixes keep the event details and mobile layout align
   assert.match(ticketsSource, /подарк|приз/i);
 });
 
+test("Case Lab 3 keeps the mobile hero pricing on one line", () => {
+  assert.match(heroSource, /Первые 20 билетов — 7 890 ₸\.<br \/>\s*Далее — 15 000 ₸\./);
+  assert.match(
+    caseLabStylesSource,
+    /@media \(max-width: 767px\)[\s\S]*?\.caseRoomPurchase p\s*\{[^}]*white-space:\s*nowrap;/,
+  );
+  assert.match(
+    caseLabStylesSource,
+    /@media \(max-width: 767px\)[\s\S]*?\.caseRoomPurchase p br\s*\{[^}]*display:\s*none;/,
+  );
+});
+
 test("Case Lab 3 mobile speaker cards keep titles compact and reveal photo tops", () => {
   assert.match(
     caseLabStylesSource,
