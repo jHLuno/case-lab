@@ -623,6 +623,8 @@ test("Case Lab 3 responsive fixes keep the event details and mobile layout align
   assert.match(caseLabStylesSource, /\.caseRoomDate\s*\{[\s\S]*?display:\s*flex;/);
   assert.match(caseLabStylesSource, /justify-content:\s*space-between/);
   assert.match(caseLabStylesSource, /\.caseRoomPurchase\s*\{[\s\S]*?align-items:\s*center;/);
+  assert.match(caseLabStylesSource, /@media \(max-width: 767px\)[\s\S]*?\.hero\s*\{[\s\S]*?--case-lab-heading-left:\s*40px;/);
+  assert.match(caseLabStylesSource, /@media \(max-width: 767px\)[\s\S]*?\.caseRoomPurchase\s*\{[\s\S]*?left:\s*var\(--case-lab-heading-shift\);/);
   assert.match(caseLabStylesSource, /@media \(min-width: 1080px\)[\s\S]*?\.caseRoomCaseFeaturedDescription/);
   assert.match(caseLabStylesSource, /\.speakerStageCopyLayer > p:last-child\s*\{[\s\S]*?max-width:\s*none;/);
   assert.match(caseLabStylesSource, /\.howItWorksScoreboard\s*\{[\s\S]*?align-items:\s*flex-end;/);

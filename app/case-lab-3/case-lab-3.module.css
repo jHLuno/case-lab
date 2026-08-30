@@ -1414,7 +1414,7 @@
 
 @media (max-width: 767px) {
   .caseRoomShapeFooter { display: flex; align-items: flex-start; flex-direction: column; }
-  .caseRoomPurchase { display: flex; align-items: flex-start; gap: 18px; }
+  .caseRoomPurchase { position: relative; left: var(--case-lab-heading-shift); display: flex; align-items: flex-start; gap: 18px; }
   .caseRoomPurchase { flex-wrap: wrap; }
   .heroLead { grid-column: span 8; }
   .heroImage { grid-column: span 4; }
