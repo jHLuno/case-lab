@@ -81,12 +81,11 @@ test("hero left text uses the same inset as the main heading", () => {
 
 test("hero event details keep the date number and use the compact copy", () => {
   assert.match(heroSource, /<strong>24<\/strong>/);
-  assert.match(heroSource, /СЕНТЯБРЯ<br \/>/);
-  assert.match(heroSource, /10:00–14:00<br \/>/);
+  assert.match(heroSource, /<span className=\{styles\.caseRoomDate\}>[\s\S]*?<span>СЕНТЯБРЯ<\/span>[\s\S]*?<span>10:00–14:00<\/span>/);
   assert.match(heroSource, /NARXOZ BUSINESS SCHOOL/);
   assert.doesNotMatch(heroSource, /СЕНТЯБРЯ 2026|UTC\+5|4 ЧАСА|ЖАНДОСОВА/);
-  assert.match(caseLabStyles, /\.caseRoomDetails span\s*\{[^}]*font-size:\s*12px;/s);
-  assert.match(caseLabStyles, /\.caseRoomDetails strong\s*\{[^}]*font-size:\s*clamp\(32px, 3\.5vw, 52px\);/s);
+  assert.match(caseLabStyles, /\.caseRoomDate\s*\{[^}]*font-size:\s*clamp\(11px, \.8vw, 13px\);/s);
+  assert.match(caseLabStyles, /\.caseRoomDetails strong\s*\{[^}]*font-size:\s*clamp\(46px, 3\.8vw, 64px\);/s);
 });
 
 test("Case Lab 3 topics are synchronized across Hero and speakers", () => {

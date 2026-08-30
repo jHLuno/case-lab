@@ -20,7 +20,19 @@ test("Case Lab 3 places the process block before testimonials", () => {
   assert.ok(proofIndex > processIndex);
 });
 
-test("testimonial proof is static and makes no video promise", () => {
+test("testimonial proof keeps its content and exposes a mobile carousel", () => {
+  assert.match(proofSource, /^"use client"/m);
+  assert.match(proofSource, /useState/);
+  assert.match(proofSource, /useRef/);
+  assert.match(proofSource, /setInterval/);
+  assert.match(proofSource, /3000/);
+  assert.match(proofSource, /IntersectionObserver/);
+  assert.match(proofSource, /visibilitychange/);
+  assert.match(proofSource, /onTouchStart/);
+  assert.match(proofSource, /onTouchEnd/);
+  assert.match(proofSource, /aria-live="polite"/);
+  assert.match(proofSource, /Предыдущий отзыв/);
+  assert.match(proofSource, /Следующий отзыв/);
   assert.doesNotMatch(proofSource, /До этого уже было/);
   assert.doesNotMatch(proofSource, /video|видео|embedUrl|iframe/i);
   assert.equal((proofSource.match(/Посмотреть отзыв/g) ?? []).length, 2);
@@ -33,7 +45,6 @@ test("testimonial proof is static and makes no video promise", () => {
   assert.match(proofSource, /target="_blank"/);
   assert.match(proofSource, /rel="noopener noreferrer"/);
   assert.match(proofSource, /ArrowUpRight/);
-  assert.doesNotMatch(proofSource, /useState|useRef/);
   assert.doesNotMatch(caseLabStyles, /testimonialVideoLink|testimonialPlayerClose|testimonialMedia > iframe/);
 });
 

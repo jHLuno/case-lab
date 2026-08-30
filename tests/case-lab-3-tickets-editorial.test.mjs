@@ -67,8 +67,8 @@ test("ticket artwork fills the compact column and angles the upper ticket left",
   assert.match(ticketStylesBlock, /\.ticketImage\s*\{[\s\S]*?transform:\s*scale\(1\.3\);/);
   assert.match(ticketStylesBlock, /\.ticketImage:first-child\s*\{[\s\S]*?transform:\s*rotate\(-10deg\)\s+scale\(1\.3\);/);
   assert.match(ticketStylesBlock, /\.ticketImage\s*\+\s*\.ticketImage\s*\{[\s\S]*?margin-top:\s*5%;/);
-  assert.match(ticketStyles, /@media \(max-width: 900px\) \{[\s\S]*?\.ticketGrid\s*\{[\s\S]*?grid-template-columns:\s*1fr;/);
-  assert.match(ticketStyles, /@media \(max-width: 900px\) \{[\s\S]*?\.ticketImage\s*\{[\s\S]*?transform:\s*scale\(1\);/);
+  assert.match(ticketStyles, /@media \(max-width: 767px\) \{[\s\S]*?\.ticketGrid\s*\{[\s\S]*?grid-template-columns:\s*1fr;/);
+  assert.match(ticketStyles, /@media \(max-width: 767px\) \{[\s\S]*?\.ticketImage\s*\{[\s\S]*?transform:\s*scale\(1\);/);
   assert.match(ticketStyles, /@media \(max-width: 640px\) \{[\s\S]*?\.ticketImage\s*\{[\s\S]*?transform:\s*scale\(\.92\);/);
   assert.match(ticketStyles, /@media \(max-width: 640px\) \{[\s\S]*?\.ticketImage\s*\+\s*\.ticketImage\s*\{[\s\S]*?margin-top:\s*-6%;/);
   assert.match(ticketStyles, /@media \(min-width: 901px\) and \(max-width: 1100px\) \{[\s\S]*?\.ticketGrid\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 65fr\)\s+minmax\(0, 35fr\);/);

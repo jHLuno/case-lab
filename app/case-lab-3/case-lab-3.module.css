@@ -423,7 +423,7 @@
 }
 
 .caseRoomShapeContent {
-  padding-top: calc(clamp(20px, 2.5vw, 34px) + 20px);
+  padding-top: calc(clamp(20px, 2.5vw, 34px) + 32px);
 }
 
 .caseRoomShapeFooter {
@@ -437,27 +437,33 @@
 .caseRoomDetails {
   position: relative;
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   gap: 10px;
   left: var(--case-lab-heading-shift);
 }
 
 .caseRoomDetails strong {
+  display: block;
   color: #fff;
   font-family: var(--font-heading);
-  font-size: clamp(32px, 3.5vw, 52px);
+  font-size: clamp(46px, 3.8vw, 64px);
   font-weight: 400;
-  line-height: .8;
+  line-height: .82;
   letter-spacing: -.05em;
 }
 
-.caseRoomDetails span {
+.caseRoomDate {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
   color: rgba(255, 255, 255, .7);
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: clamp(11px, .8vw, 13px);
   letter-spacing: .11em;
-  line-height: 1.25;
+  line-height: 1.12;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .caseRoomPurchase {
@@ -613,7 +619,7 @@
 
 .howItWorksScoreboard {
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   gap: 12px;
   margin-top: clamp(42px, 8vw, 100px);
   padding-top: 18px;
@@ -751,6 +757,11 @@
   gap: 14px;
   margin-top: var(--case-lab-headline-content-gap);
   align-items: stretch;
+}
+
+.testimonialCarouselControls,
+.testimonialCarouselStatus {
+  display: none;
 }
 
 .testimonialCard {
@@ -1010,10 +1021,10 @@
 }
 
 .speakerStageCopyLayer > p:last-child {
-  max-width: 40ch;
+  max-width: none;
   margin: 12px 0 0;
   color: rgba(10, 10, 22, .62);
-  font-size: clamp(15px, 1.2vw, 17px);
+  font-size: clamp(16px, 1.35vw, 20px);
   line-height: 1.5;
 }
 
@@ -1161,13 +1172,15 @@
 }
 
 .ticketFact strong {
-  font-size: 14px;
+  color: #fff;
+  font-size: clamp(15px, 1.1vw, 18px);
   font-weight: 500;
+  letter-spacing: -.01em;
 }
 
 .ticketFact small {
   color: rgba(255, 255, 255, .62);
-  font-size: 13px;
+  font-size: clamp(13px, .9vw, 15px);
 }
 
 .ticketPriceSummary {
@@ -1295,6 +1308,10 @@
   margin-bottom: var(--case-lab-heading-description-gap);
 }
 
+.caseLabFooterDetails {
+  width: 100%;
+}
+
 .faqIntro h2 {
   max-width: none;
   font-size: clamp(24px, calc(5vw - 8px), 60px);
@@ -1395,9 +1412,9 @@
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 767px) {
   .caseRoomShapeFooter { display: flex; align-items: flex-start; flex-direction: column; }
-  .caseRoomPurchase { display: flex; align-items: flex-end; gap: 18px; }
+  .caseRoomPurchase { display: flex; align-items: flex-start; gap: 18px; }
   .caseRoomPurchase { flex-wrap: wrap; }
   .heroLead { grid-column: span 8; }
   .heroImage { grid-column: span 4; }
@@ -1437,6 +1454,28 @@
 
 @media (max-width: 1023px) {
   .contentShell { --case-lab-heading-left: 40px; }
+  .caseRoomShape { padding-top: max(76px, calc(env(safe-area-inset-top) + 56px)); }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .ticketGrid {
+    grid-template-columns: minmax(0, 1.12fr) minmax(220px, .88fr);
+    gap: clamp(24px, 4vw, 42px);
+    align-items: start;
+  }
+
+  .ticketLead { max-width: none; }
+
+  .ticketArtwork {
+    width: min(100%, 380px);
+    justify-self: end;
+    align-self: center;
+    overflow: visible;
+  }
+
+  .ticketImage { transform: scale(1.02); }
+  .ticketImage:first-child { transform: rotate(-6deg) scale(1.02); }
+  .ticketImage + .ticketImage { margin-top: -2%; }
 }
 
 @media (max-width: 767px) {
@@ -1481,9 +1520,62 @@
   }
 
   .testimonialGallery {
-    grid-template-columns: 1fr;
-    gap: 24px;
+    display: flex;
+    grid-template-columns: none;
+    gap: 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
   }
+
+  .testimonialGallery::-webkit-scrollbar { display: none; }
+
+  .testimonialCard {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+  }
+
+  .testimonialCarousel { overflow: hidden; }
+
+  .testimonialCarouselControls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .testimonialCarouselButton {
+    display: inline-grid;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    place-items: center;
+    border: 1px solid rgba(10, 10, 22, .18);
+    border-radius: 50%;
+    background: #fff;
+    color: var(--cl-accent);
+    font-family: var(--font-body);
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .testimonialCarouselButton:focus-visible {
+    outline: 3px solid var(--cl-focus);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 5px var(--cl-focus-contrast);
+  }
+
+  .testimonialCarouselStatus {
+    display: block;
+    color: var(--cl-muted);
+    font-family: var(--font-body);
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  .ticketFacts { grid-template-columns: 1fr; gap: 16px; }
 
   .testimonialCardBody {
     min-height: 0;
@@ -1566,14 +1658,14 @@
     width: 100%;
     margin-left: 0;
   }
-  .caseRoomTitle { font-size: clamp(20px, 5.6vw, 30px); }
+  .caseRoomTitle { font-size: clamp(34px, 10.5vw, 56px); }
   .caseRoomTitle span { white-space: normal; }
-  .caseRoomCopy { font-size: 17px; }
+  .caseRoomCopy { max-width: 42ch; font-size: clamp(16px, 4.6vw, 18px); line-height: 1.4; }
   .caseRoomShape {
     --case-room-x-padding: 12px;
-    min-height: min(65svh, 600px);
+    min-height: max(620px, min(80svh, 760px));
     border-radius: 28px;
-    padding: max(42px, calc(env(safe-area-inset-top) + 26px)) 12px 18px;
+    padding: max(58px, calc(env(safe-area-inset-top) + 36px)) 12px 18px;
     padding-left: var(--case-room-x-padding);
   }
   .caseRoomCases { grid-template-columns: 1fr; }
@@ -1629,4 +1721,26 @@
   .hero { --case-lab-hero-frame-left: 12px; }
   .hero { padding: 12px; }
   .caseRoomShape { border-radius: 40px; }
+}
+
+@media (min-width: 768px) {
+  .ticketGrid h2 {
+    max-width: 18ch;
+    font-size: clamp(36px, 5.4vw, 72px);
+  }
+}
+
+@media (min-width: 1080px) {
+  .caseRoomCase .caseRoomCaseFeaturedDescription {
+    max-width: 24ch;
+    font-size: clamp(17px, 1.6vw, 22px);
+  }
+
+  .caseRoomCase .caseRoomCaseFeaturedDescriptionWide {
+    max-width: 26ch;
+  }
+
+  .speakerStageCopyLayer > p:last-child {
+    font-size: clamp(17px, 1.4vw, 20px);
+  }
 }

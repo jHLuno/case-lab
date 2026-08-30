@@ -76,10 +76,10 @@ export default function CaseLab3Hero() {
           <div className={styles.caseRoomShapeFooter}>
             <div className={styles.caseRoomDetails}>
               <strong>24</strong>
-              <span>
-                СЕНТЯБРЯ<br />
-                10:00–14:00<br />
-                NARXOZ BUSINESS SCHOOL
+              <span className={styles.caseRoomDate}>
+                <span>СЕНТЯБРЯ</span>
+                <span>10:00–14:00</span>
+                <span>NARXOZ BUSINESS SCHOOL</span>
               </span>
             </div>
             <div className={styles.caseRoomPurchase}>

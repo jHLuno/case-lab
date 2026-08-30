@@ -618,6 +618,22 @@ test("Case Lab 3 controls and review links meet the mobile target size", () => {
   assert.match(caseLabStylesSource, /\.testimonialReviewLabel\s*\{[\s\S]*?min-height:\s*44px;/);
 });
 
+test("Case Lab 3 responsive fixes keep the event details and mobile layout aligned", () => {
+  assert.match(caseLabStylesSource, /\.caseRoomDetails\s*\{[\s\S]*?align-items:\s*stretch;/);
+  assert.match(caseLabStylesSource, /\.caseRoomDate\s*\{[\s\S]*?display:\s*flex;/);
+  assert.match(caseLabStylesSource, /justify-content:\s*space-between/);
+  assert.match(caseLabStylesSource, /\.caseRoomPurchase\s*\{[\s\S]*?align-items:\s*center;/);
+  assert.match(caseLabStylesSource, /@media \(min-width: 1080px\)[\s\S]*?\.caseRoomCaseFeaturedDescription/);
+  assert.match(caseLabStylesSource, /\.speakerStageCopyLayer > p:last-child\s*\{[\s\S]*?max-width:\s*none;/);
+  assert.match(caseLabStylesSource, /\.howItWorksScoreboard\s*\{[\s\S]*?align-items:\s*flex-end;/);
+  assert.match(caseLabStylesSource, /@media \(min-width: 768px\)[\s\S]*?\.ticketGrid h2\s*\{[\s\S]*?max-width:\s*18ch/);
+  assert.match(caseLabStylesSource, /@media \(min-width: 768px\) and \(max-width: 1023px\)[\s\S]*?\.ticketArtwork/);
+  assert.match(caseLabStylesSource, /\.caseLabFooterDetails/);
+  assert.match(caseLab3FooterSource, /caseLabFooterDetails/);
+  assert.match(ticketsSource, /кейтеринг/);
+  assert.match(ticketsSource, /подарк|приз/i);
+});
+
 test("Case Lab 3 defers below-fold proof images and avoids mobile WebGL", () => {
   assert.match(proofSource, /loading="lazy"/);
   assert.doesNotMatch(proofSource, /quality=\{100\}/);

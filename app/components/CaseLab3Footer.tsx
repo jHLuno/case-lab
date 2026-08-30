@@ -1,5 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
+import styles from "../case-lab-3/case-lab-3.module.css";
 
 export default function CaseLab3Footer() {
   return (
@@ -32,7 +33,7 @@ export default function CaseLab3Footer() {
           </button>
         </div>
 
-        <div className="mb-12 flex flex-col items-start gap-8 md:grid md:grid-cols-3 md:items-center">
+        <div className={`${styles.caseLabFooterDetails} mb-12 flex flex-col items-start gap-8 md:grid md:grid-cols-3 md:items-center`}>
           <div className="relative h-7 w-[130px] md:justify-self-start">
             <Image
               src="/Logo.png"
@@ -44,7 +45,7 @@ export default function CaseLab3Footer() {
             />
           </div>
 
-          <div className="w-full text-center">
+          <div className="w-full text-left md:text-center">
             <a
               href="mailto:hello@caselab.kz"
               className="inline-flex min-h-11 items-center text-[15px] font-light text-black/60 transition-colors duration-200 hover:text-black"
@@ -54,7 +55,7 @@ export default function CaseLab3Footer() {
             </a>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 md:justify-self-end md:gap-6">
+          <div className="flex flex-wrap items-center justify-start gap-4 md:justify-self-end md:gap-6">
             <a
               href="https://instagram.com/caselabkz"
               target="_blank"
