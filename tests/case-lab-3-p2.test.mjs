@@ -636,6 +636,17 @@ test("Case Lab 3 responsive fixes keep the event details and mobile layout align
   assert.match(ticketsSource, /подарк|приз/i);
 });
 
+test("Case Lab 3 mobile speaker cards keep titles compact and reveal photo tops", () => {
+  assert.match(
+    caseLabStylesSource,
+    /@media \(max-width: 767px\)[\s\S]*?\.speakerAccessibleCase h3\s*\{[\s\S]*?font-size:\s*clamp\(18px,\s*5vw,\s*22px\);[\s\S]*?line-height:\s*1\.02;/,
+  );
+  assert.match(
+    caseLabStylesSource,
+    /@media \(max-width: 767px\)[\s\S]*?\.speakerAccessibleVisual > img\s*\{[\s\S]*?object-position:\s*center top;/,
+  );
+});
+
 test("Case Lab 3 defers below-fold proof images and avoids mobile WebGL", () => {
   assert.match(proofSource, /loading="lazy"/);
   assert.doesNotMatch(proofSource, /quality=\{100\}/);
