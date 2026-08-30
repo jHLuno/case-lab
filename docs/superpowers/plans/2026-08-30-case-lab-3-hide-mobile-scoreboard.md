@@ -45,7 +45,7 @@ Add this test after the existing responsive alignment test in `tests/case-lab-3-
 test("Case Lab 3 hides the scoreboard on phone widths only", () => {
   assert.match(
     caseLabStylesSource,
-    /@media \(max-width: 767px\)[\s\S]*?\.howItWorksScoreboard\s*\{[\s\S]*?display:\s*none;/,
+    /@media \(max-width: 767px\)[\s\S]*?\.howItWorksScoreboard\s*\{[^}]*display:\s*none;/,
   );
 });
 ```
