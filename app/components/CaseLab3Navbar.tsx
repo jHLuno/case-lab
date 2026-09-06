@@ -32,6 +32,7 @@ export default function CaseLab3Navbar() {
       basePath="/case-lab-3/"
       ctaLabel="Купить билет"
       ctaHref={null}
+      ctaDisabled={false}
       hideOnScroll
       forceMotion
       menuDescription="Событие для маркетологов и команд, которым важны реальные решения."

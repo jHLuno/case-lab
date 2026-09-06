@@ -42,6 +42,9 @@ export default function CaseLab3Proof() {
   const carouselRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const programmaticScrollRef = useRef(false);
+  const programmaticScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isNativeTouchingRef = useRef(false);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -99,20 +102,50 @@ export default function CaseLab3Proof() {
   }, [isDocumentVisible, isInteractionPaused, isMobile, isVisible]);
 
   useEffect(() => {
-    if (!isMobile) return;
+    if (!isMobile || isNativeTouchingRef.current) return;
 
     const track = trackRef.current;
     const nextSlide = track?.children[activeTestimonial] as HTMLElement | undefined;
     if (!track || !nextSlide) return;
 
+    if (Math.abs(track.scrollLeft - nextSlide.offsetLeft) < 1) {
+      programmaticScrollRef.current = false;
+      return;
+    }
+
+    programmaticScrollRef.current = true;
+    if (programmaticScrollTimerRef.current) clearTimeout(programmaticScrollTimerRef.current);
+
     track.scrollTo({
       left: nextSlide.offsetLeft,
       behavior: prefersReducedMotion ? "auto" : "smooth",
     });
+
+    programmaticScrollTimerRef.current = setTimeout(() => {
+      programmaticScrollRef.current = false;
+      programmaticScrollTimerRef.current = null;
+    }, 700);
   }, [activeTestimonial, isMobile, prefersReducedMotion]);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const handleScrollEnd = () => {
+      programmaticScrollRef.current = false;
+      if (programmaticScrollTimerRef.current) {
+        clearTimeout(programmaticScrollTimerRef.current);
+        programmaticScrollTimerRef.current = null;
+      }
+    };
+
+    track.addEventListener("scrollend", handleScrollEnd);
+    return () => track.removeEventListener("scrollend", handleScrollEnd);
+  }, [isMobile]);
 
   useEffect(() => () => {
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    if (programmaticScrollTimerRef.current) clearTimeout(programmaticScrollTimerRef.current);
   }, []);
 
   const clearResumeTimer = () => {
@@ -123,6 +156,11 @@ export default function CaseLab3Proof() {
 
   const pauseForInteraction = () => {
     clearResumeTimer();
+    programmaticScrollRef.current = false;
+    if (programmaticScrollTimerRef.current) {
+      clearTimeout(programmaticScrollTimerRef.current);
+      programmaticScrollTimerRef.current = null;
+    }
     setIsTouching(true);
   };
 
@@ -132,6 +170,16 @@ export default function CaseLab3Proof() {
       setIsTouching(false);
       resumeTimerRef.current = null;
     }, AUTOPLAY_INTERVAL);
+  };
+
+  const handleTouchStart = () => {
+    isNativeTouchingRef.current = true;
+    pauseForInteraction();
+  };
+
+  const handleTouchEnd = () => {
+    isNativeTouchingRef.current = false;
+    resumeAfterTouch();
   };
 
   const handleCarouselFocus = () => {
@@ -146,13 +194,15 @@ export default function CaseLab3Proof() {
   };
 
   const handleTrackScroll = () => {
-    if (!isMobile || !trackRef.current || trackRef.current.clientWidth === 0) return;
+    if (programmaticScrollRef.current || !isMobile || !trackRef.current || trackRef.current.clientWidth === 0) return;
 
     const nextIndex = Math.round(trackRef.current.scrollLeft / trackRef.current.clientWidth);
     setActiveTestimonial(Math.max(0, Math.min(nextIndex, testimonials.length - 1)));
   };
 
   const moveToTestimonial = (direction: -1 | 1) => {
+    pauseForInteraction();
+    resumeAfterTouch();
     setActiveTestimonial((current) => (current + direction + testimonials.length) % testimonials.length);
   };
 
@@ -183,9 +233,9 @@ export default function CaseLab3Proof() {
           aria-label="Отзывы участников"
           onFocusCapture={handleCarouselFocus}
           onBlurCapture={handleCarouselBlur}
-          onTouchStart={pauseForInteraction}
-          onTouchEnd={resumeAfterTouch}
-          onTouchCancel={resumeAfterTouch}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
         >
           <div ref={trackRef} className={styles.testimonialGallery} onScroll={handleTrackScroll}>
             {testimonials.map((testimonial, testimonialIndex) => {

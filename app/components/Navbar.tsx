@@ -25,6 +25,7 @@ type NavbarProps = {
   basePath?: string;
   ctaLabel?: string;
   ctaHref?: string | null;
+  ctaDisabled?: boolean;
   hideOnScroll?: boolean;
   menuDescription?: string;
   forceMotion?: boolean;
@@ -37,6 +38,7 @@ export default function Navbar({
   basePath = "/",
   ctaLabel = "Записаться",
   ctaHref,
+  ctaDisabled,
   hideOnScroll = false,
   menuDescription = "Диагностика маркетинга для команд, которым нужен ясный следующий шаг.",
   forceMotion = false,
@@ -45,6 +47,7 @@ export default function Navbar({
   const { openPopup } = useLeadPopup();
   const prefersReducedMotion = useReducedMotion() ?? false;
   const shouldReduceMotion = forceMotion ? false : prefersReducedMotion;
+  const shouldDisableCta = ctaDisabled ?? ctaHref === null;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [navHidden, setNavHidden] = useState(false);
   const [focusWithin, setFocusWithin] = useState(false);
@@ -260,7 +263,7 @@ export default function Navbar({
               {ctaLabel}
               <ArrowRight size={13} strokeWidth={2.5} />
             </a>
-          ) : ctaHref === null ? (
+          ) : ctaHref === null && shouldDisableCta ? (
             <button
               type="button"
               disabled
@@ -274,7 +277,7 @@ export default function Navbar({
           ) : (
             <button
               type="button"
-              onClick={openPopup}
+              onClick={ctaHref === null ? undefined : openPopup}
               className={`hidden min-h-11 md:inline-flex items-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-[14px] font-normal leading-none text-white transition-colors duration-200 ml-1 ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a8]"}`}
               style={{ fontFamily: "var(--font-body)" }}
             >
@@ -398,7 +401,7 @@ export default function Navbar({
                         {ctaLabel}
                         <ArrowRight size={14} strokeWidth={2.5} className="transition-transform duration-200 group-active:translate-x-0.5 group-focus-visible:translate-x-0.5" />
                       </a>
-                    ) : ctaHref === null ? (
+                    ) : ctaHref === null && shouldDisableCta ? (
                       <button
                         type="button"
                         disabled
@@ -412,7 +415,7 @@ export default function Navbar({
                     ) : (
                       <button
                         type="button"
-                         onClick={() => { closeMobileMenu(); openPopup(); }}
+                        onClick={ctaHref === null ? undefined : () => { closeMobileMenu(); openPopup(); }}
                          className="group inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200"
                         style={{ fontFamily: "var(--font-body)" }}
                       >

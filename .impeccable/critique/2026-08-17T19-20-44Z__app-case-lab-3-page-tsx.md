@@ -35,7 +35,7 @@ The first impression is distinctive on desktop, but the conversion argument brea
 #### What's Working
 
 - The C-style blue stage is a clear visual signature and maps to the event format.
-- The named Invictus Go, Qara Studios, and Forte Bank × GForce Grey cases make the event specific and locally relevant.
+- The named Invictus Go, Qara Studios, and Forte Bank cases make the event specific and locally relevant.
 - Shared navigation has accessible mobile dialog behavior, focus trapping, Escape handling, and background inertness.
 
 #### Priority Issues

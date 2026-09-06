@@ -83,7 +83,7 @@ export default function CaseLab3Hero() {
               </span>
             </div>
             <div className={styles.caseRoomPurchase}>
-              <button type="button" className={styles.heroCta} disabled aria-disabled="true">
+              <button type="button" className={styles.heroCta}>
                 Купить билет
                 <ArrowUpRight size={20} strokeWidth={2} aria-hidden="true" />
               </button>
@@ -94,7 +94,7 @@ export default function CaseLab3Hero() {
 
         <div className={styles.caseRoomCases}>
           <div className={styles.caseRoomCase} style={{ position: "relative" }}>
-            <Image src="/Invictus GO.webp" alt="" fill loading="lazy" sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
+            <Image src="/Invictus GO.webp" alt="" fill loading="eager" sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
             <strong>Invictus GO</strong>
             <span className={styles.caseRoomCaseFeaturedDescription}>Как построить маркетинг, который масштабируется вместе с бизнесом?</span>
             <span className={styles.caseRoomCaseArrow} aria-hidden="true">
@@ -102,7 +102,7 @@ export default function CaseLab3Hero() {
             </span>
           </div>
           <div className={styles.caseRoomCase} style={{ position: "relative" }}>
-            <Image src="/OYU Fest 2026.webp" alt="" fill loading="lazy" sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
+            <Image src="/OYU Fest 2026.webp" alt="" fill loading="eager" sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
             <strong>Qara Studios</strong>
             <span className={`${styles.caseRoomCaseFeaturedDescription} ${styles.caseRoomCaseFeaturedDescriptionWide}`}>Как коллаборации и маркетинг масштабировали OYU Fest?</span>
             <span className={styles.caseRoomCaseArrow} aria-hidden="true">
@@ -110,8 +110,8 @@ export default function CaseLab3Hero() {
             </span>
           </div>
           <div className={styles.caseRoomCase} style={{ position: "relative" }}>
-            <Image src="/ForteXGForce.webp" alt="" fill loading="lazy" sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
-            <strong>Forte Bank × GForce Grey</strong>
+            <Image src="/ForteXGForce.webp" alt="" fill loading="eager" sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
+            <strong>Forte Bank</strong>
             <span className={styles.caseRoomCaseFeaturedDescription}>Как арт-инсталляция ForteBank разошлась по всему миру?</span>
             <span className={styles.caseRoomCaseArrow} aria-hidden="true">
               <ArrowUpRight size={22} strokeWidth={2} />

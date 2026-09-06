@@ -23,9 +23,7 @@ export default function CaseLab3Footer() {
           </p>
           <button
             type="button"
-            disabled
-            aria-disabled="true"
-            className="inline-flex items-center gap-3 rounded-full bg-[#040082] px-7 py-3.5 text-[14px] font-normal text-white transition-[gap,background-color] duration-200 hover:gap-4 hover:bg-[#0600a0] md:px-10 md:py-5 md:text-[15px]"
+            className="inline-flex items-center gap-3 rounded-[24px] bg-[#040082] px-7 py-3.5 text-[14px] font-normal text-white transition-[gap,background-color] duration-200 hover:gap-4 hover:bg-[#0600a0] md:px-10 md:py-5 md:text-[15px]"
             style={{ fontFamily: "var(--font-body)" }}
           >
             <span>Купить билет</span>

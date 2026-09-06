@@ -20,56 +20,118 @@ test("tickets appear after process and before proof", () => {
   assert.ok(proofIndex > ticketIndex);
 });
 
-test("ticket section uses the generated background and fail-closed CTA", () => {
+test("ticket section matches the dark reference and keeps CTA button-only", () => {
   assert.match(ticketSource, /id="tickets"/);
-  assert.doesNotMatch(ticketSource, /ticketKicker|<p[^>]*>Билет<\/p>/);
   assert.match(ticketSource, /case-lab-3-ticket-early-bird\.webp/);
   assert.match(ticketSource, /case-lab-3-ticket-standard\.webp/);
   assert.doesNotMatch(ticketSource, /case-lab-3-ticket-(early-bird-v4|standard-v5)\.webp/);
-  assert.match(ticketSource, /alt=""/);
   assert.match(ticketSource, /alt: "Early Bird: 7 890 ₸, первые 20 билетов"/);
   assert.match(ticketSource, /alt: "Стандарт: 15 000 ₸ после первых 20 билетов"/);
-  assert.match(ticketSource, /<button\b[^>]*className=\{styles\.ticketCta\}[^>]*\bdisabled\b[^>]*\baria-disabled="true"[^>]*>/);
+  assert.match(ticketSource, /<button\s+type="button"\s+className=\{styles\.ticketCta\}>/);
   assert.match(ticketSource, /24 сентября 2026/);
   assert.match(ticketSource, /10:00–14:00/);
   assert.match(ticketSource, /Narxoz Business School/);
-  assert.match(ticketSource, /100 мест/);
-  assert.match(ticketSource, /ticketPriceSummary/);
-  assert.match(ticketSource, /<strong>7 890 ₸<\/strong>/);
-  assert.match(ticketSource, /<strong>15 000 ₸<\/strong>/);
+  assert.doesNotMatch(ticketSource, /100 мест/);
   assert.match(ticketSource, /ticketIncluded/);
-  assert.match(ticketSource, /три подробных разбора кейсов/);
-  assert.match(ticketSource, /живой разговор с CMO после выступлений/);
-  assert.match(ticketSource, /знакомства с людьми из маркетинга и креатива/);
+  assert.match(ticketSource, /Разборы Invictus, OYU Fest и ForteBank/);
+  assert.match(ticketSource, /Обсуждение решений и вопросы спикерам/);
+  assert.match(ticketSource, /Знакомства с коллегами и кейтеринг/);
+  assert.match(ticketSource, /Участие в рейтинге и призы для топ-3/);
+  assert.match(ticketSource, /БИЛЕТЫ НА CASE LAB III/);
+  assert.match(ticketSource, /Купить билет за 7 890 ₸/);
+  assert.match(ticketSource, /Один билет — вся программа Case Lab III/);
+  assert.match(ticketSource, /className=\{styles\.ticketPurchaseArea\}/);
+  assert.match(ticketSource, /className=\{styles\.ticketPurchaseMeta\}/);
+  assert.match(ticketSource, /className=\{styles\.ticketPurchaseNote\}/);
+  assert.match(ticketStylesBlock, /background:\s*#080811/);
+  assert.doesNotMatch(ticketSource, /ticketBackground|ticketOverlay/);
 });
 
-test("ticket section exposes the editorial layout classes", () => {
-  assert.match(ticketStyles, /\.ticketArtwork\s*\{/);
-  assert.match(ticketStyles, /\.ticketImage\s*\{/);
-  assert.match(ticketStylesBlock, /\.ticketArtwork\s*\{[\s\S]*?display:\s*grid;/);
-  assert.match(ticketStylesBlock, /\.ticketArtwork\s*\{[\s\S]*?gap:/);
-  assert.doesNotMatch(ticketStylesBlock, /\.ticketArtwork\s*\{[\s\S]*?border-radius:/);
-  assert.match(ticketStyles, /\.ticketFacts\s*\{/);
+test("ticket section exposes the reference composition", () => {
+  const standardTicketIndex = ticketSource.indexOf('src: "/case-lab-3-ticket-standard.webp"');
+  const earlyBirdTicketIndex = ticketSource.indexOf('src: "/case-lab-3-ticket-early-bird.webp"');
+
+  assert.ok(standardTicketIndex >= 0);
+  assert.ok(earlyBirdTicketIndex > standardTicketIndex);
+  assert.match(ticketStylesBlock, /grid-template-columns:\s*minmax\(0, 52fr\)\s+minmax\(0, 48fr\)/);
+  assert.match(ticketStylesBlock, /\.ticketArtwork\s*\{[\s\S]*?position:\s*relative;/);
+  assert.match(ticketStylesBlock, /\.ticketImage:first-child\s*\{[\s\S]*?z-index:\s*1;/);
+  assert.match(ticketStylesBlock, /\.ticketImage\s*\+\s*\.ticketImage\s*\{[\s\S]*?z-index:\s*2;[\s\S]*?margin-top:\s*-\d+(?:\.\d+)?%;/);
+  assert.match(ticketStylesBlock, /\.ticketPurchaseArea\s*\{[\s\S]*?background:\s*transparent;/);
+  assert.match(ticketStylesBlock, /\.ticketCta\s*\{[\s\S]*?background:\s*#f5f4fb;/);
 });
 
-test("ticket section uses the blue Case Lab accent instead of purple tokens", () => {
-  assert.match(ticketStylesBlock, /background:\s*var\(--cl-accent\)/);
-  assert.doesNotMatch(ticketStylesBlock, /#9b54ff|#c3a3ff|#bd8dff|#b687ff|#d0b6ff|#bf8dff/i);
+test("primary Case Lab CTAs use the shared 24px radius", () => {
+  assert.match(
+    ticketStyles,
+    /\.heroCta,\s*\.ticketCta\s*\{[\s\S]*?border-radius:\s*24px;/,
+  );
+  assert.doesNotMatch(ticketStylesBlock, /\.ticketCta\s*\{[^}]*border-radius:\s*6px;/);
 });
 
-test("ticket artwork fills the compact column and angles the upper ticket left", () => {
-  assert.match(ticketStylesBlock, /\.ticketArtwork\s*\{[\s\S]*?gap:\s*0;/);
-  assert.match(ticketStylesBlock, /grid-template-columns:\s*minmax\(0,\s*65fr\)\s+minmax\(0,\s*35fr\);/);
-  assert.match(ticketStylesBlock, /\.ticketLead\s*\{[\s\S]*?max-width:\s*760px;/);
-  assert.match(ticketStylesBlock, /\.ticketGrid h2\s*\{[\s\S]*?max-width:\s*12ch[\s\S]*?font-size:\s*clamp\(34px,\s*5\.2vw,\s*68px\);/);
-  assert.match(ticketStylesBlock, /\.ticketCopy\s*\{[\s\S]*?max-width:\s*56ch;/);
-  assert.match(ticketStylesBlock, /@media \(min-width: 1101px\) \{[\s\S]*?\.ticketArtwork\s*\{[\s\S]*?width:\s*100%;/);
-  assert.match(ticketStylesBlock, /\.ticketImage\s*\{[\s\S]*?transform:\s*scale\(1\.3\);/);
-  assert.match(ticketStylesBlock, /\.ticketImage:first-child\s*\{[\s\S]*?transform:\s*rotate\(-10deg\)\s+scale\(1\.3\);/);
-  assert.match(ticketStylesBlock, /\.ticketImage\s*\+\s*\.ticketImage\s*\{[\s\S]*?margin-top:\s*5%;/);
-  assert.match(ticketStyles, /@media \(max-width: 767px\) \{[\s\S]*?\.ticketGrid\s*\{[\s\S]*?grid-template-columns:\s*1fr;/);
-  assert.match(ticketStyles, /@media \(max-width: 767px\) \{[\s\S]*?\.ticketImage\s*\{[\s\S]*?transform:\s*scale\(1\);/);
-  assert.match(ticketStyles, /@media \(max-width: 640px\) \{[\s\S]*?\.ticketImage\s*\{[\s\S]*?transform:\s*scale\(\.92\);/);
-  assert.match(ticketStyles, /@media \(max-width: 640px\) \{[\s\S]*?\.ticketImage\s*\+\s*\.ticketImage\s*\{[\s\S]*?margin-top:\s*-6%;/);
-  assert.match(ticketStyles, /@media \(min-width: 901px\) and \(max-width: 1100px\) \{[\s\S]*?\.ticketGrid\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 65fr\)\s+minmax\(0, 35fr\);/);
+test("ticket heading uses the reduced reference scale", () => {
+  assert.match(ticketStylesBlock, /\.ticketGrid h2\s*\{[\s\S]*?font-size:\s*clamp\(42px,\s*5\.8vw,\s*70px\);/);
+  assert.match(
+    ticketStyles,
+    /@media \(min-width: 901px\) and \(max-width: 1100px\)[\s\S]*?\.ticketGrid h2\s*\{[^}]*font-size:\s*clamp\(38px,\s*5\.2vw,\s*52px\);/,
+  );
+  assert.match(
+    ticketStyles,
+    /@media \(min-width: 768px\) and \(max-width: 1023px\)[\s\S]*?\.ticketGrid h2\s*\{[^}]*font-size:\s*clamp\(38px,\s*5vw,\s*46px\);/,
+  );
+  assert.match(
+    ticketStyles,
+    /@media \(max-width: 767px\)[\s\S]*?\.ticketGrid h2\s*\{[^}]*font-size:\s*clamp\(40px,\s*11vw,\s*54px\);/,
+  );
+});
+
+test("ticket benefits follow the artwork on mobile and artwork scales up", () => {
+  const purchaseIndex = ticketSource.indexOf("ticketPurchaseArea");
+  const includedIndex = ticketSource.indexOf("ticketIncluded");
+
+  assert.ok(includedIndex > purchaseIndex);
+  assert.match(
+    ticketStyles,
+    /@media \(max-width: 767px\)[\s\S]*?\.ticketIncludedGridItem\s*\{[\s\S]*?grid-column:\s*1;[\s\S]*?grid-row:\s*auto;/,
+  );
+  assert.match(
+    ticketStyles,
+    /@media \(max-width: 767px\)[\s\S]*?\.ticketImage:first-child\s*\{[^}]*transform:\s*rotate\(4deg\)\s+scale\(1\.04\);/,
+  );
+  assert.match(
+    ticketStyles,
+    /@media \(max-width: 767px\)[\s\S]*?\.ticketImage\s*\+\s*\.ticketImage\s*\{[^}]*transform:\s*rotate\(-6deg\)\s+scale\(1\.12\);/,
+  );
+});
+
+test("ticket mobile details use a lighter rhythm", () => {
+  const mobileTicketFacts = ticketStyles.match(
+    /@media \(max-width: 767px\) \{[\s\S]*?\.ticketFacts\s*\{([^}]*)\}/,
+  )?.[1] ?? "";
+  const mobileTicketFactDivider = ticketStyles.match(
+    /@media \(max-width: 767px\) \{[\s\S]*?\.ticketFact\s*\+\s*\.ticketFact\s*\{([^}]*)\}/,
+  )?.[1] ?? "";
+  const mobileTicketPurchaseMeta = ticketStyles.match(
+    /@media \(max-width: 767px\) \{[\s\S]*?\.ticketPurchaseMeta\s*\{([^}]*)\}/,
+  )?.[1] ?? "";
+  const mobileTicketIncluded = ticketStyles.match(
+    /\.ticketIncludedGridItem\s*\{\s*margin-top:\s*-16px;/,
+  )?.[0] ?? "";
+
+  assert.match(
+    mobileTicketFacts,
+    /border-top:\s*0;[\s\S]*border-bottom:\s*0;/,
+  );
+  assert.match(
+    mobileTicketFactDivider,
+    /border-top:\s*0;[\s\S]*border-left:\s*0;/,
+  );
+  assert.match(
+    mobileTicketPurchaseMeta,
+    /flex-direction:\s*row;[\s\S]*justify-content:\s*space-between;/,
+  );
+  assert.match(
+    mobileTicketIncluded,
+    /margin-top:\s*-16px;/,
+  );
 });

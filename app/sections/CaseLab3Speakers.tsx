@@ -26,11 +26,11 @@ const cases = [
   {
     company: "Малика Каражанова",
     captionLines: ["Малика", "Каражанова"],
-    role: "Forte Bank × GForce Grey",
+    role: "PR Director Forte Bank",
     title: "Как арт-инсталляция ForteBank разошлась по всему миру?",
-    description: "Кейс «Спасение собаки» и то, как идея повлияла на показатели бренда. Как инсталляция стала частью разговора с аудиторией. И почему это вышло за пределы обычной кампании.",
+    description: "ForteBank превратил локальную историю в арт-инсталляцию, которая получила международный резонанс. Разберем, как сильная идея и культурный контекст помогли проекту выйти за пределы Казахстана и стать глобальным инфоповодом.",
     image: "/Malika.webp",
-    alt: "Малика Каражанова — спикер кейса Forte Bank и GForce Grey",
+    alt: "Малика Каражанова — спикер кейса Forte Bank",
   },
 ];
 
@@ -297,7 +297,12 @@ export default function CaseLab3Speakers() {
                   <figure className={styles.speakerAccessibleVisual}>
                     <Image src={item.image} alt={item.alt} fill sizes="100vw" className="object-cover" />
                     <div className={styles.speakerVisualShade} aria-hidden="true" />
-                    <figcaption><strong>{item.company}</strong></figcaption>
+                    <figcaption>
+                      <strong>
+                        {item.captionLines.map((line) => <span key={line}>{line}</span>)}
+                      </strong>
+                      <small>{item.role}</small>
+                    </figcaption>
                   </figure>
                   <div className={styles.speakerAccessibleCopy}>
                     <h3>{item.title}</h3>

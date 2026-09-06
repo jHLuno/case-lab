@@ -12,7 +12,7 @@
 
 - Для `Qara Studios` использовать: `Как коллаборации и маркетинг масштабировали OYU Fest?`
 - Для `Invictus GO` использовать: `Как построить маркетинг, который масштабируется вместе с бизнесом?`
-- Для `Forte Bank × GForce Grey` использовать: `Как арт-инсталляция ForteBank разошлась по всему миру?`
+- Для `Forte Bank` использовать: `Как арт-инсталляция ForteBank разошлась по всему миру?`
 - Описания кейсов, порядок, стили и metadata оставить без изменений.
 - Не добавлять зависимости, environment variables или новые публичные API.
 - Не менять незатронутые пользователем файлы и существующие изменения в рабочем дереве.
@@ -65,7 +65,7 @@ Expected: FAIL in `Case Lab 3 topics are synchronized across Hero and speakers`,
 
 **Interfaces:**
 - Consumes: the existing `cases` order, Hero card markup, and `item.title` rendering in the accessible speaker tree.
-- Produces: identical approved topic strings for Invictus GO, Qara Studios, and Forte Bank × GForce Grey in both visual locations.
+- Produces: identical approved topic strings for Invictus GO, Qara Studios, and Forte Bank in both visual locations.
 
 - [x] **Step 1: Replace the three Hero card descriptions**
 

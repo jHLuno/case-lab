@@ -19,6 +19,7 @@ const ticketAssetPairs = [
   optimized: fileURLToPath(new URL(`../public/${optimized}`, import.meta.url)),
   source: fileURLToPath(new URL(`../public/${source}`, import.meta.url)),
 }));
+const ticketBackgroundAsset = fileURLToPath(new URL("../public/case-lab-3-tickets-bg.png", import.meta.url));
 
 test("Case Lab 3 mounts the main Case Lab cases section", () => {
   assert.match(pageSource, /import Cases from "\.\.\/sections\/Cases"/);
@@ -36,7 +37,7 @@ test("main Case Lab cases keep the complete archive catalog", () => {
   }
 });
 
-test("hero fill images have positioned parents and defer loading", () => {
+test("hero fill images have positioned parents and load eagerly", () => {
   const heroCards = [...heroSource.matchAll(/<div className=\{styles\.caseRoomCase\}[^>]*>[\s\S]*?<Image[^>]+>/g)].map(
     (match) => match[0],
   );
@@ -46,8 +47,18 @@ test("hero fill images have positioned parents and defer loading", () => {
     assert.match(heroCard, /style=\{\{ position: "relative" \}\}/);
   }
   for (const heroCard of heroCards) {
-    assert.match(heroCard, /loading="lazy"/);
+    assert.match(heroCard, /loading="eager"/);
   }
+});
+
+test("ticket section background asset exists", async () => {
+  const [backgroundStats, backgroundMetadata] = await Promise.all([
+    stat(ticketBackgroundAsset),
+    sharp(ticketBackgroundAsset).metadata(),
+  ]);
+
+  assert.ok(backgroundStats.size > 0);
+  assert.equal(backgroundMetadata.format, "png");
 });
 
 test("semantic speaker image parents stay positioned outside the mobile media query", () => {

@@ -226,14 +226,17 @@ test("testimonial cards expose the requested visual review CTA without video", (
   assert.doesNotMatch(proofSource, /video|видео|iframe|embedUrl/i);
 });
 
-test("ticket CTAs remain fail-closed without checkout links", () => {
-  assert.match(heroSource, /<button\s+type="button"\s+className=\{styles\.heroCta\}\s+disabled\s+aria-disabled="true">[\s\S]*?Купить билет/);
+test("Case Lab 3 purchase CTAs stay button-only until checkout is configured", () => {
+  assert.match(heroSource, /<button\s+type="button"\s+className=\{styles\.heroCta\}>[\s\S]*?Купить билет/);
   assert.match(
     ticketsSource,
-    /<button\s+(?=[^>]*\btype="button")(?=[^>]*\bclassName=\{styles\.ticketCta\})(?=[^>]*\sdisabled(?:\s|=|>))(?=[^>]*\baria-disabled="true")[^>]*>[\s\S]*?Купить билет/,
+    /<button\s+type="button"\s+className=\{styles\.ticketCta\}>[\s\S]*?Купить билет/,
   );
-  assert.match(navbarSource, /ctaHref === null \? \([\s\S]*?<button[\s\S]*?disabled[\s\S]*?aria-disabled="true"[\s\S]*?\{ctaLabel\}/);
-  assert.match(caseLab3FooterSource, /<button[\s\S]*?disabled[\s\S]*?aria-disabled="true"[\s\S]*?>[\s\S]*?Купить билет/);
+  assert.match(caseLab3FooterSource, /<button[\s\S]*?>[\s\S]*?Купить билет/);
+  assert.match(caseLab3NavbarSource, /ctaDisabled=\{false\}/);
+  assert.doesNotMatch(heroSource, /className=\{styles\.heroCta\}[^>]*\bdisabled\b/);
+  assert.doesNotMatch(ticketsSource, /className=\{styles\.ticketCta\}[^>]*\bdisabled\b/);
+  assert.doesNotMatch(caseLab3FooterSource, /\bdisabled\b|aria-disabled/);
   assert.match(caseLabStylesSource, /\.heroCta:disabled\s*\{[^}]*cursor:\s*not-allowed;[^}]*transform:\s*none;/s);
   assert.doesNotMatch(heroSource, /<a[^>]+href=/);
   assert.doesNotMatch(ticketsSource, /<a[^>]+href=/);
@@ -242,12 +245,20 @@ test("ticket CTAs remain fail-closed without checkout links", () => {
   assert.doesNotMatch(casesSource, /cursor-pointer/);
 });
 
+test("mobile testimonial navigation ignores its own smooth-scroll events", () => {
+  assert.match(proofSource, /programmaticScrollRef/);
+  assert.match(proofSource, /isNativeTouchingRef/);
+  assert.match(proofSource, /scrollend/);
+  assert.match(proofSource, /pauseForInteraction\(\);\s*resumeAfterTouch\(\);\s*setActiveTestimonial/);
+  assert.match(caseLabStylesSource, /\.testimonialCard\s*\{[\s\S]*?scroll-snap-stop:\s*always;/);
+});
+
 test("ticket section uses the approved editorial CTA treatment", () => {
   assert.doesNotMatch(ticketsSource, /20 мест по ранней цене/);
-  assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*width:\s*min\(100%, 340px\);/s);
-  assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*font-size:\s*17px;/s);
-  assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*min-height:\s*54px;/s);
-  assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*justify-content:\s*center;/s);
+  assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*width:\s*100%;/s);
+  assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*font-size:\s*16px;/s);
+  assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*min-height:\s*70px;/s);
+  assert.match(caseLabStylesSource, /\.ticketCta\s*\{[^}]*justify-content:\s*space-between;/s);
 });
 
 test("speaker animation preserves the GSAP ScrollTrigger choreography", () => {
@@ -302,12 +313,15 @@ test("speaker semantic tree carries the mobile image and case copy", () => {
   const accessibleTreeSource = speakersSource.slice(accessibleTreeStart);
 
   assert.match(accessibleTreeSource, /<Image\s+src=\{item\.image\}\s+alt=\{item\.alt\}/);
-  assert.match(accessibleTreeSource, /<strong>\{item\.company\}<\/strong>/);
+  assert.match(
+    accessibleTreeSource,
+    /<strong>\s*\{item\.captionLines\.map\(\(line\) => <span key=\{line\}>\{line\}<\/span>\)\}\s*<\/strong>/,
+  );
   assert.match(accessibleTreeSource, /<h3>\{item\.title\}<\/h3>/);
   assert.match(accessibleTreeSource, /<p>\{item\.description\}<\/p>/);
   assert.match(accessibleTreeSource, /styles\.speakerAccessibleVisual/);
   assert.match(accessibleTreeSource, /styles\.speakerAccessibleCopy/);
-  assert.doesNotMatch(accessibleTreeSource, /<span>\{item\.role\}<\/span>/);
+  assert.match(accessibleTreeSource, /<small>\{item\.role\}<\/small>/);
   assert.doesNotMatch(speakersSource, /styles\.speakerStageRole/);
 });
 
@@ -355,6 +369,28 @@ test("large speaker photos show each speaker role under the name", () => {
     /\.speakerStageFeature \.speakerStageCard figcaption\s*\{[^}]*display:\s*flex;[^}]*flex-direction:\s*column;/s,
   );
   assert.match(caseLabStylesSource, /\.speakerStageFeature \.speakerStageCard figcaption small\s*\{/);
+});
+
+test("mobile speaker cards keep roles under names with edge spacing", () => {
+  assert.match(
+    caseLabStylesSource,
+    /@media \(max-width: 767px\)[\s\S]*?\.speakerAccessibleVisual figcaption\s*\{[^}]*right:\s*16px;[^}]*bottom:\s*16px;[^}]*left:\s*16px;[^}]*display:\s*flex;[^}]*flex-direction:\s*column;[^}]*gap:\s*8px;/,
+  );
+  assert.match(
+    caseLabStylesSource,
+    /@media \(max-width: 767px\)[\s\S]*?\.speakerAccessibleVisual figcaption small\s*\{[^}]*display:\s*block;[^}]*font-family:\s*var\(--font-body\);/,
+  );
+});
+
+test("mobile speaker names stay on two lines", () => {
+  assert.match(
+    speakersSource,
+    /speakerAccessibleVisual[\s\S]*?<strong>\s*\{item\.captionLines\.map\(\(line\) => <span key=\{line\}>\{line\}<\/span>\)\}\s*<\/strong>/,
+  );
+  assert.match(
+    caseLabStylesSource,
+    /@media \(max-width: 767px\)[\s\S]*?\.speakerAccessibleVisual figcaption strong span\s*\{[^}]*display:\s*block;/,
+  );
 });
 
 test("Case Lab 3 metadata declares a large-image Twitter card", () => {
@@ -443,7 +479,7 @@ test("Organization sameAs contains only the official Case Lab profile", () => {
 
 test("Case Lab 3 hero checkout has no SpecularButton or direct OGL dependency", () => {
   assert.doesNotMatch(heroSource, /SpecularButton|from\s+["']ogl["']|import\s*\(\s*["']ogl["']\s*\)/);
-  assert.match(heroSource, /<button\s+type="button"\s+className=\{styles\.heroCta\}\s+disabled\s+aria-disabled="true">/);
+  assert.match(heroSource, /<button\s+type="button"\s+className=\{styles\.heroCta\}>/);
 });
 
 test("Case Lab 3 source stays free of media promises and direct OGL imports", () => {
@@ -606,9 +642,17 @@ test("Case Lab 3 uses one heading-description gap at every breakpoint", () => {
   assert.match(caseLabStylesSource, /\.caseRoomCopy\s*\{[\s\S]*?margin:\s*var\(--case-lab-heading-description-gap\)\s+0\s+0;/);
   assert.match(caseLabStylesSource, /\.sectionIntroWide > p:last-child\s*\{[\s\S]*?margin:\s*var\(--case-lab-heading-description-gap\)\s+0\s+0;/);
   assert.match(caseLabStylesSource, /\.howItWorksOutcome\s*\{[\s\S]*?margin:\s*var\(--case-lab-heading-description-gap\)\s+0\s+0;/);
-  assert.match(caseLabStylesSource, /\.ticketCopy\s*\{[\s\S]*?margin:\s*var\(--case-lab-heading-description-gap\)\s+0\s+0;/);
+  assert.match(caseLabStylesSource, /\.ticketCopy\s*\{[\s\S]*?margin:\s*30px\s+0\s+0;/);
   assert.match(caseLabStylesSource, /\.proofIntroDescription\s*\{[\s\S]*?margin:\s*var\(--case-lab-heading-description-gap\)\s+0\s+0;/);
   assert.match(caseLabStylesSource, /\.caseLabPage footer h2\s*\{[\s\S]*?margin-bottom:\s*var\(--case-lab-heading-description-gap\);/);
+});
+
+test("Case Lab 3 gives the speakers intro copy a wider mobile measure", () => {
+  assert.match(caseLabStylesSource, /\.sectionIntroWide > p:last-child\s*\{[\s\S]*?max-width:\s*72ch;/);
+  assert.match(
+    caseLabStylesSource,
+    /@media \(max-width: 767px\)[\s\S]*?\.sectionIntroWide > p:last-child\s*\{[^}]*max-width:\s*78ch;/,
+  );
 });
 
 test("Case Lab 3 controls and review links meet the mobile target size", () => {
@@ -628,12 +672,30 @@ test("Case Lab 3 responsive fixes keep the event details and mobile layout align
   assert.match(caseLabStylesSource, /@media \(min-width: 1080px\)[\s\S]*?\.caseRoomCaseFeaturedDescription/);
   assert.match(caseLabStylesSource, /\.speakerStageCopyLayer > p:last-child\s*\{[\s\S]*?max-width:\s*none;/);
   assert.match(caseLabStylesSource, /\.howItWorksScoreboard\s*\{[\s\S]*?align-items:\s*flex-end;/);
-  assert.match(caseLabStylesSource, /@media \(min-width: 768px\)[\s\S]*?\.ticketGrid h2\s*\{[\s\S]*?max-width:\s*18ch/);
-  assert.match(caseLabStylesSource, /@media \(min-width: 768px\) and \(max-width: 1023px\)[\s\S]*?\.ticketArtwork/);
+  assert.match(caseLabStylesSource, /\.ticketGrid h2\s*\{[\s\S]*?max-width:\s*10ch/);
+  assert.match(
+    caseLabStylesSource,
+    /@media \(min-width: 768px\) and \(max-width: 1023px\)[\s\S]*?\.ticketGrid h2\s*\{[\s\S]*?font-size:\s*clamp\(38px,\s*5vw,\s*46px\);/,
+  );
   assert.match(caseLabStylesSource, /\.caseLabFooterDetails/);
   assert.match(caseLab3FooterSource, /caseLabFooterDetails/);
   assert.match(ticketsSource, /кейтеринг/);
   assert.match(ticketsSource, /подарк|приз/i);
+});
+
+test("Case Lab 3 removes the former partner name from visible case labels", () => {
+  assert.doesNotMatch(heroSource, /GForce\s+Grey/);
+  assert.doesNotMatch(speakersSource, /GForce\s+Grey/);
+  assert.match(heroSource, /<strong>Forte Bank<\/strong>/);
+  assert.match(speakersSource, /role: "PR Director Forte Bank"/);
+  assert.match(speakersSource, /alt: "Малика Каражанова — спикер кейса Forte Bank"/);
+});
+
+test("Case Lab 3 uses the approved Forte speaker description", () => {
+  assert.match(
+    speakersSource,
+    /description: "ForteBank превратил локальную историю в арт-инсталляцию, которая получила международный резонанс\. Разберем, как сильная идея и культурный контекст помогли проекту выйти за пределы Казахстана и стать глобальным инфоповодом\."/,
+  );
 });
 
 test("Case Lab 3 keeps the mobile hero pricing on one line", () => {
@@ -674,11 +736,11 @@ test("Case Lab 3 matches the mobile process spacing rhythm", () => {
   assert.match(caseLabStylesSource, /\.howItWorksStep\s*\{[\s\S]*?padding:\s*20px 0;/);
 });
 
-test("Case Lab 3 defers below-fold proof images and avoids mobile WebGL", () => {
+test("Case Lab 3 prioritizes hero images, defers proof images, and avoids mobile WebGL", () => {
   assert.match(proofSource, /loading="lazy"/);
   assert.doesNotMatch(proofSource, /quality=\{100\}/);
-  assert.equal((heroSource.match(/loading="eager"/g) ?? []).length, 0);
-  assert.equal((heroSource.match(/loading="lazy"/g) ?? []).length, 3);
+  assert.equal((heroSource.match(/loading="eager"/g) ?? []).length, 3);
+  assert.equal((heroSource.match(/loading="lazy"/g) ?? []).length, 0);
   assert.match(heroSource, /matchMedia\("\(max-width:\s*767px\)"\)/);
   assert.doesNotMatch(heroSource, /pointer:\s*coarse/);
   caseLabRouteSources.forEach((source) => assert.doesNotMatch(source, /pointer:\s*coarse/));

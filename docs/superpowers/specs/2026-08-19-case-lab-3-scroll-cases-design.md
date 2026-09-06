@@ -12,9 +12,9 @@ The `CaseLab3Speakers` section currently renders three case images in a large-le
 
 The section keeps its introductory heading. The case showcase below it becomes a three-step scroll scene:
 
-1. Featured: Invictus GO. Supporting images: Qara Studios, then Forte Bank x GForce Grey.
-2. Featured: Qara Studios. Supporting images: Forte Bank x GForce Grey, then Invictus GO.
-3. Featured: Forte Bank x GForce Grey. Supporting images: Invictus GO, then Qara Studios.
+1. Featured: Invictus GO. Supporting images: Qara Studios, then Forte Bank.
+2. Featured: Qara Studios. Supporting images: Forte Bank, then Invictus GO.
+3. Featured: Forte Bank. Supporting images: Invictus GO, then Qara Studios.
 
 The large image remains on the left. The two supporting images remain in the upper-right rail. The active case copy moves into the open area below the supporting images. The copy includes the case title and description, but does not repeat the numeric index or company name from the current lower rows. Image captions may continue to identify the company so the visual assets remain understandable.
 
