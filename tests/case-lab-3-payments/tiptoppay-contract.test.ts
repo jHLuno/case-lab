@@ -98,6 +98,32 @@ test("form parsing applies HTML form decoding but rejects duplicates and malform
   assert.throws(() => parseFormPayload("InvoiceId=%ZZ"), /invalid tiptop webhook payload/i);
 });
 
+test("Check accepts repeated SubscriptionId values without retaining the non-recurring field", async () => {
+  const route = await import("../../app/api/tiptoppay/[environment]/check/route");
+  const baseBody = await fixture("check-percent-encoded.form");
+  const body = `${baseBody}&SubscriptionId=sub-001&SubscriptionId=sub-001`;
+  let seenPayload: TipTopCheck | undefined;
+  const response = await route.handlePost(
+    signedRequestWithSecret("/api/tiptoppay/test/check", body),
+    { params: Promise.resolve({ environment: "test" }) },
+    {
+      getSecret: () => SECRET,
+      applyCheck: async (_environment: "test" | "live", payload: TipTopCheck) => {
+        seenPayload = payload;
+        return { kind: "accepted", code: 0 };
+      },
+    },
+  );
+
+  assert.equal(await responseCode(response), 0);
+  assert.equal("SubscriptionId" in (seenPayload as unknown as Record<string, unknown>), false);
+  assert.equal(parseFormPayload(`${baseBody}&SubscriptionId=&SubscriptionId=`).SubscriptionId, undefined);
+  assert.throws(
+    () => parseFormPayload(`${baseBody}&SubscriptionId=sub-001&SubscriptionId=`),
+    /invalid tiptop webhook payload/i,
+  );
+});
+
 test("typed parsers keep only strict, provider-documented transition data", async () => {
   const check = parseCheck(parseFormPayload(await fixture("check-plus-space.form")));
   assert.deepEqual(check, {
@@ -310,6 +336,33 @@ test("Check callback diagnostics identify safe rejection stages and RPC metadata
     stage: "invalid_payload",
     receivedFields: ["TransactionId", "Amount", "Currency", "Status", "OperationType"],
     rejectedField: "DateTime",
+  });
+
+  const duplicateCriticalField = await run(
+    signedRequestWithSecret("/api/tiptoppay/test/check", `${body}&Amount=7890.00`),
+    async () => ({ kind: "accepted", code: 0 }),
+  );
+  assert.deepEqual(duplicateCriticalField.warnings[0]?.[1], {
+    environment: "test",
+    eventType: "Check",
+    stage: "invalid_payload",
+    receivedFields: [
+      "TransactionId",
+      "Amount",
+      "Currency",
+      "PaymentAmount",
+      "PaymentCurrency",
+      "InvoiceId",
+      "AccountId",
+      "Name",
+      "TestMode",
+      "Status",
+      "OperationType",
+      "DateTime",
+    ],
+    rejectedField: "Amount",
+    duplicateField: "Amount",
+    occurrenceCount: 2,
   });
 
   const modeMismatchBody = body.replace("TestMode=true", "TestMode=false");

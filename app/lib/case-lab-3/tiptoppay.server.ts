@@ -71,12 +71,21 @@ const DOCUMENTED_FIELDS = new Set([
 export class TipTopPayloadError extends Error {
   readonly receivedFields: readonly string[];
   readonly rejectedField?: string;
+  readonly duplicateField?: string;
+  readonly occurrenceCount?: number;
 
-  constructor(details: { receivedFields?: readonly string[]; rejectedField?: string } = {}) {
+  constructor(details: {
+    receivedFields?: readonly string[];
+    rejectedField?: string;
+    duplicateField?: string;
+    occurrenceCount?: number;
+  } = {}) {
     super("Invalid TipTop webhook payload");
     this.name = "TipTopPayloadError";
     this.receivedFields = [...new Set(details.receivedFields ?? [])].slice(0, 64);
     this.rejectedField = details.rejectedField;
+    this.duplicateField = details.duplicateField;
+    this.occurrenceCount = details.occurrenceCount;
   }
 }
 
@@ -143,8 +152,17 @@ export type TipTopTransitionResult =
   | { kind: "rejected"; code: (typeof CHECK_CODES)[number]; result?: string }
   | { kind: "review_required"; result?: string };
 
-function invalid(rejectedField?: string, receivedFields?: readonly string[]): never {
-  throw new TipTopPayloadError({ rejectedField, receivedFields });
+function invalid(
+  rejectedField?: string,
+  receivedFields?: readonly string[],
+  duplicate?: { field: string; occurrenceCount: number },
+): never {
+  throw new TipTopPayloadError({
+    rejectedField,
+    receivedFields,
+    duplicateField: duplicate?.field,
+    occurrenceCount: duplicate?.occurrenceCount,
+  });
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -300,6 +318,8 @@ export function parseFormPayload(rawBody: Uint8Array | string): TipTopFormFields
 
   if (body.length === 0) invalid("body");
   const fields: Record<string, string> = {};
+  const subscriptionIds: string[] = [];
+  const occurrenceCounts = new Map<string, number>();
   for (const pair of body.split("&")) {
     const separator = pair.indexOf("=");
     if (separator <= 0) invalid("malformed_field", Object.keys(fields));
@@ -309,7 +329,9 @@ export function parseFormPayload(rawBody: Uint8Array | string): TipTopFormFields
     } catch {
       invalid("malformed_field_name", Object.keys(fields));
     }
-    if (!DOCUMENTED_FIELDS.has(key) || fields[key] !== undefined) invalid(key, [...Object.keys(fields), key]);
+    if (!DOCUMENTED_FIELDS.has(key)) invalid(key, [...Object.keys(fields), key]);
+    const occurrenceCount = (occurrenceCounts.get(key) ?? 0) + 1;
+    occurrenceCounts.set(key, occurrenceCount);
     let value: string;
     try {
       value = decodeFormComponent(pair.slice(separator + 1));
@@ -317,10 +339,25 @@ export function parseFormPayload(rawBody: Uint8Array | string): TipTopFormFields
       invalid(key, [...Object.keys(fields), key]);
     }
     try {
-      fields[key] = boundedText(value);
+      if (!(key === "SubscriptionId" && value === "")) {
+        value = boundedText(value);
+      }
     } catch {
       invalid(key, [...Object.keys(fields), key]);
     }
+    if (key === "SubscriptionId") {
+      subscriptionIds.push(value);
+      const allEmpty = subscriptionIds.every((subscriptionId) => subscriptionId === "");
+      const allEqual = subscriptionIds.every((subscriptionId) => subscriptionId === subscriptionIds[0]);
+      if (!allEmpty && !allEqual) {
+        invalid(key, [...Object.keys(fields), key], { field: key, occurrenceCount });
+      }
+      continue;
+    }
+    if (fields[key] !== undefined) {
+      invalid(key, [...Object.keys(fields), key], { field: key, occurrenceCount });
+    }
+    fields[key] = value;
   }
   return fields;
 }
@@ -623,6 +660,8 @@ export async function handleSignedTipTopWebhook<T>(
         logWebhookRejection(environmentValue, dependencies.eventType, "invalid_payload", undefined, {
           receivedFields: error.receivedFields,
           rejectedField: error.rejectedField,
+          ...(error.duplicateField === undefined ? {} : { duplicateField: error.duplicateField }),
+          ...(error.occurrenceCount === undefined ? {} : { occurrenceCount: error.occurrenceCount }),
         });
         return Response.json({ code: 20 });
       }
