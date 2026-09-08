@@ -1307,6 +1307,12 @@
   min-width: 0;
 }
 
+@media (min-width: 768px) {
+  .ticketIncluded {
+    margin-top: 0;
+  }
+}
+
 .faqSection {
   background: #fff;
   color: #0a0a16;

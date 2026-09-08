@@ -1,28 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import CaseLab3Page from "../components/CaseLab3Page";
-import { caseLab3CheckoutHref } from "../lib/caseLab3";
-
-const caseLab3EventOffers = caseLab3CheckoutHref
-  ? [
-      {
-        "@type": "Offer",
-        name: "Early Bird",
-        price: "7890",
-        priceCurrency: "KZT",
-        availability: "https://schema.org/InStock",
-        url: caseLab3CheckoutHref,
-      },
-      {
-        "@type": "Offer",
-        name: "Обычный билет",
-        price: "15000",
-        priceCurrency: "KZT",
-        availability: "https://schema.org/InStock",
-        url: caseLab3CheckoutHref,
-      },
-    ]
-  : undefined;
 
 const caseLab3EventSchema = {
   "@context": "https://schema.org",
@@ -63,7 +41,6 @@ const caseLab3EventSchema = {
       jobTitle: "CMO Qara Studios",
     },
   ],
-  ...(caseLab3EventOffers ? { offers: caseLab3EventOffers } : {}),
 };
 
 export const metadata: Metadata = {
@@ -107,7 +84,7 @@ export default async function Page() {
         suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(caseLab3EventSchema) }}
       />
-      <CaseLab3Page />
+      <CaseLab3Page nonce={nonce} />
     </>
   );
 }

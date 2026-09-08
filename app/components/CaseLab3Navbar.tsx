@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Navbar from "./Navbar";
+import { useCaseLab3Checkout } from "./case-lab-3/checkout/CaseLab3CheckoutProvider";
 
 const caseLab3NavLinks = [
   { label: "Кейсы", href: "#cases" },
@@ -12,14 +13,14 @@ const caseLab3NavLinks = [
 ];
 
 export default function CaseLab3Navbar() {
+  const { openCheckout } = useCaseLab3Checkout();
+
   useEffect(() => {
     document.documentElement.classList.add("caseLabPage");
-    document.body.classList.add("caseLabForceMotion");
     document.body.classList.add("caseLabPage");
 
     return () => {
       document.documentElement.classList.remove("caseLabPage");
-      document.body.classList.remove("caseLabForceMotion");
       document.body.classList.remove("caseLabPage");
     };
   }, []);
@@ -33,8 +34,8 @@ export default function CaseLab3Navbar() {
       ctaLabel="Купить билет"
       ctaHref={null}
       ctaDisabled={false}
+      onCtaClick={() => openCheckout("navbar")}
       hideOnScroll
-      forceMotion
       menuDescription="Событие для маркетологов и команд, которым важны реальные решения."
     />
   );

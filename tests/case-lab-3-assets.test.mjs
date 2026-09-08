@@ -23,7 +23,7 @@ const ticketBackgroundAsset = fileURLToPath(new URL("../public/case-lab-3-ticket
 
 test("Case Lab 3 mounts the main Case Lab cases section", () => {
   assert.match(pageSource, /import Cases from "\.\.\/sections\/Cases"/);
-  assert.match(pageSource, /<Cases alignToCaseLab forceMotion \/>/);
+  assert.match(pageSource, /<Cases alignToCaseLab \/>/);
   assert.doesNotMatch(pageSource, /CaseLab3Archive|archiveSection/);
   assert.match(navbarSource, /href: "#cases"/);
   assert.doesNotMatch(navbarSource, /case-lab-3-cases/);
@@ -160,7 +160,7 @@ test("ticket WebP assets keep 2400x1200 dimensions and reduce file size", async 
 });
 
 test("Case Lab 3 cases headline uses the shared left inset", () => {
-  assert.match(pageSource, /<Cases alignToCaseLab forceMotion \/>/);
+  assert.match(pageSource, /<Cases alignToCaseLab \/>/);
   assert.match(casesSource, /alignToCaseLab\s*=\s*false/);
   assert.match(casesSource, /const caseLabShell = `max-w-\[1078px\] \$\{alignToCaseLab \? "ml-4 md:ml-10" : "mx-auto"\}`/);
   assert.equal((casesSource.match(/caseLabShell/g) ?? []).length, 3);

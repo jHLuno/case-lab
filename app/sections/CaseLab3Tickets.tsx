@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { ArrowUpRight, CalendarDays, Check, MapPin } from "lucide-react";
 import ScrollReveal from "../components/ScrollReveal";
+import CaseLab3CheckoutButton from "../components/case-lab-3/checkout/CaseLab3CheckoutButton";
 import styles from "../case-lab-3/case-lab-3.module.css";
 
 const included = [
@@ -30,7 +31,7 @@ export default function CaseLab3Tickets() {
     <section id="tickets" tabIndex={-1} className={styles.ticketSection} aria-labelledby="case-lab-3-tickets-title">
       <div className={styles.contentShell}>
         <div className={styles.ticketGrid}>
-          <ScrollReveal forceMotion className={styles.ticketLeadGridItem}>
+          <ScrollReveal className={styles.ticketLeadGridItem}>
             <div className={styles.ticketLead}>
               <p className={styles.ticketMeta}>24 сентября · Алматы</p>
               <h2 id="case-lab-3-tickets-title">БИЛЕТЫ НА CASE LAB III</h2>
@@ -58,7 +59,7 @@ export default function CaseLab3Tickets() {
             </div>
           </ScrollReveal>
 
-          <ScrollReveal forceMotion className={styles.ticketPurchaseGridItem} delay={0.12}>
+          <ScrollReveal className={styles.ticketPurchaseGridItem} delay={0.12}>
             <div className={styles.ticketPurchaseArea}>
               <div className={styles.ticketArtwork}>
                 {tickets.map((ticket) => (
@@ -78,15 +79,15 @@ export default function CaseLab3Tickets() {
                 <span>Первые 20 билетов</span>
                 <span>Затем — <strong>15 000 ₸</strong></span>
               </div>
-              <button type="button" className={styles.ticketCta}>
+              <CaseLab3CheckoutButton source="tickets" className={styles.ticketCta}>
                 <span>Купить билет за 7 890 ₸</span>
                 <ArrowUpRight size={23} strokeWidth={1.5} aria-hidden="true" />
-              </button>
+              </CaseLab3CheckoutButton>
               <p className={styles.ticketPurchaseNote}>Один билет — вся программа Case Lab III</p>
             </div>
           </ScrollReveal>
 
-          <ScrollReveal forceMotion className={styles.ticketIncludedGridItem} delay={0.24}>
+          <ScrollReveal className={styles.ticketIncludedGridItem} delay={0.24}>
             <div className={styles.ticketIncluded}>
               <p>В билет входит</p>
               <ul>

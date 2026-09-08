@@ -8,23 +8,26 @@ import CaseLab3Tickets from "../sections/CaseLab3Tickets";
 import Cases from "../sections/Cases";
 import CaseLab3Navbar from "./CaseLab3Navbar";
 import CaseLab3Footer from "./CaseLab3Footer";
+import CaseLab3CheckoutProvider from "./case-lab-3/checkout/CaseLab3CheckoutProvider";
 import styles from "../case-lab-3/case-lab-3.module.css";
 
-export default function CaseLab3Page() {
+export default function CaseLab3Page({ nonce }: { nonce?: string }) {
   return (
-    <div className={`${styles.caseLabPage} caseLabForceMotion relative overflow-x-clip bg-white`}>
-      <CaseLab3Navbar />
-      <main id="main" tabIndex={-1}>
-        <CaseLab3Hero />
-        <CaseLab3Speakers />
-        <CaseLab3HowItWorks />
-        <CaseLab3Tickets />
-        <CaseLab3Proof />
-        <Cases alignToCaseLab forceMotion />
-        <CaseLab3FAQ />
-      </main>
-      <CaseLab3Footer />
-      <BackToTop forceMotion />
-    </div>
+    <CaseLab3CheckoutProvider nonce={nonce}>
+      <div className={`${styles.caseLabPage} relative overflow-x-clip bg-white`}>
+        <CaseLab3Navbar />
+        <main id="main" tabIndex={-1}>
+          <CaseLab3Hero />
+          <CaseLab3Speakers />
+          <CaseLab3HowItWorks />
+          <CaseLab3Tickets />
+          <CaseLab3Proof />
+          <Cases alignToCaseLab />
+          <CaseLab3FAQ />
+        </main>
+        <CaseLab3Footer />
+        <BackToTop />
+      </div>
+    </CaseLab3CheckoutProvider>
   );
 }

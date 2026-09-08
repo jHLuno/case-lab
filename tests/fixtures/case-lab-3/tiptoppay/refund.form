@@ -1,0 +1,1 @@
+TransactionId=77777&PaymentTransactionId=12345&Amount=15000.00&DateTime=2026-09-08T00%3A00%3A00Z&OperationType=Refund&InvoiceId=order-001&Data=%7B%22operationKey%22%3A%22refund-op-001%22%7D

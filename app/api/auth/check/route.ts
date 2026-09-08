@@ -1,20 +1,18 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { verifyToken } from "../../../lib/jwt";
+import { issueCrmCsrfToken, requireCrmAdmin } from "../../../lib/crm-auth.server";
+import { noStoreJson } from "../../../lib/case-lab-3/http.server";
 
 export async function GET() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("crm_auth")?.value;
+  try {
+    const session = await requireCrmAdmin();
+    if (!session) {
+      return noStoreJson({ authenticated: false }, { status: 401 });
+    }
 
-  if (!token) {
-    return NextResponse.json({ authenticated: false }, { status: 401 });
+    const csrfToken = issueCrmCsrfToken(session);
+    return noStoreJson(
+      { authenticated: true, csrfToken },
+    );
+  } catch {
+    return noStoreJson({ error: "Service unavailable" }, { status: 503 });
   }
-
-  const isValid = await verifyToken(token);
-
-  if (!isValid) {
-    return NextResponse.json({ authenticated: false }, { status: 401 });
-  }
-
-  return NextResponse.json({ authenticated: true });
 }

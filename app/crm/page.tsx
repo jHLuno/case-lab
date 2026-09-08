@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ArrowLeft, RefreshCw, Search, Filter, Trash2, Save, X, Pencil } from "lucide-react";
 import Link from "next/link";
+import CrmSectionNav from "./components/CrmSectionNav";
 
 type Lead = {
   id: number;
@@ -26,6 +27,7 @@ export default function CRMPage() {
   const [source, setSource] = useState<Source>("main");
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [csrfToken, setCsrfToken] = useState<string | null>(null);
   const [checking, setChecking] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -46,6 +48,7 @@ export default function CRMPage() {
       if (!res.ok) {
         if (res.status === 401) {
           setIsAuthenticated(false);
+          setCsrfToken(null);
           setError("Сессия истекла. Войдите снова.");
         } else {
           setError("Ошибка сервера");
@@ -68,7 +71,9 @@ export default function CRMPage() {
     const checkAuth = async () => {
       try {
         const res = await fetch("/api/auth/check");
-        if (res.ok) {
+        const data = await res.json();
+        if (res.ok && typeof data.csrfToken === "string") {
+          setCsrfToken(data.csrfToken);
           setIsAuthenticated(true);
           await fetchLeads();
         }
@@ -84,6 +89,7 @@ export default function CRMPage() {
     const handlePageShow = (e: PageTransitionEvent) => {
       if (e.persisted) {
         setIsAuthenticated(false);
+        setCsrfToken(null);
         setLeads([]);
         setPassword("");
         setError("");
@@ -127,6 +133,13 @@ export default function CRMPage() {
         return;
       }
 
+      const authCheck = await fetch("/api/auth/check");
+      const authData = await authCheck.json();
+      if (!authCheck.ok || typeof authData.csrfToken !== "string") {
+        throw new Error("Failed to establish session");
+      }
+
+      setCsrfToken(authData.csrfToken);
       setIsAuthenticated(true);
       await fetchLeads();
     } catch {
@@ -143,6 +156,7 @@ export default function CRMPage() {
       // Ignore
     }
     setIsAuthenticated(false);
+    setCsrfToken(null);
     setPassword("");
     setLeads([]);
     setError("");
@@ -162,15 +176,24 @@ export default function CRMPage() {
   };
 
   const saveLead = async (id: number) => {
+    if (!csrfToken) {
+      setError("Сессия истекла. Войдите снова.");
+      return;
+    }
+
     setSaving(true);
     try {
       const res = await fetch("/api/crm/update", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken },
         body: JSON.stringify({ id, source, status: editStatus, notes: editNotes || null }),
       });
 
       if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          setIsAuthenticated(false);
+          setCsrfToken(null);
+        }
         throw new Error("Failed to update");
       }
 
@@ -189,15 +212,23 @@ export default function CRMPage() {
 
   const deleteLead = async (id: number) => {
     if (!confirm("Удалить заявку? Это действие нельзя отменить.")) return;
+    if (!csrfToken) {
+      setError("Сессия истекла. Войдите снова.");
+      return;
+    }
 
     try {
       const res = await fetch("/api/crm/delete", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken },
         body: JSON.stringify({ id, source }),
       });
 
       if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          setIsAuthenticated(false);
+          setCsrfToken(null);
+        }
         throw new Error("Failed to delete");
       }
 
@@ -292,7 +323,7 @@ export default function CRMPage() {
         ) : (
           <div className="min-h-screen bg-[#fafafa] px-6 md:px-10 py-8 md:py-12 w-full">
             <div className="max-w-[1400px] mx-auto">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
                   <h1
                     className="text-black text-[24px] md:text-[32px] font-bold leading-[1.15] uppercase tracking-[0.02em]"
@@ -321,9 +352,13 @@ export default function CRMPage() {
                     <ArrowLeft size={14} /> Выйти
                   </button>
                 </div>
-              </div>
+               </div>
 
-              <div className="flex items-center gap-2 mb-6">
+               <div className="mb-6">
+                 <CrmSectionNav active="leads" />
+               </div>
+
+               <div className="flex items-center gap-2 mb-6">
                 {sourceTabs.map((tab) => (
                   <button
                     key={tab.value}

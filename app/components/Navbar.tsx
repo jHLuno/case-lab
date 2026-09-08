@@ -29,6 +29,7 @@ type NavbarProps = {
   hideOnScroll?: boolean;
   menuDescription?: string;
   forceMotion?: boolean;
+  onCtaClick?: () => void;
 };
 
 export default function Navbar({
@@ -42,12 +43,13 @@ export default function Navbar({
   hideOnScroll = false,
   menuDescription = "Диагностика маркетинга для команд, которым нужен ясный следующий шаг.",
   forceMotion = false,
+  onCtaClick,
 }: NavbarProps) {
   const pathname = usePathname();
   const { openPopup } = useLeadPopup();
   const prefersReducedMotion = useReducedMotion() ?? false;
   const shouldReduceMotion = forceMotion ? false : prefersReducedMotion;
-  const shouldDisableCta = ctaDisabled ?? ctaHref === null;
+  const shouldDisableCta = ctaDisabled ?? (ctaHref === null && !onCtaClick);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [navHidden, setNavHidden] = useState(false);
   const [focusWithin, setFocusWithin] = useState(false);
@@ -55,8 +57,13 @@ export default function Navbar({
   const toggleRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const lastScrollYRef = useRef(0);
-  const closeMobileMenu = () => setMobileOpen(false);
+  const pendingMobileCta = useRef(false);
+  const closeMobileMenu = () => {
+    pendingMobileCta.current = false;
+    setMobileOpen(false);
+  };
   const closeMobileMenuAndReturnFocus = () => {
+    pendingMobileCta.current = false;
     setMobileOpen(false);
     requestAnimationFrame(() => {
       toggleRef.current?.focus();
@@ -91,6 +98,18 @@ export default function Navbar({
   const handleMobileLinkClick = (href: string) => {
     closeMobileMenu();
     focusHashTarget(getNavHref(href));
+  };
+  const handleMobileCtaClick = () => {
+    pendingMobileCta.current = true;
+    setMobileOpen(false);
+  };
+  const handleMobileMenuExitComplete = () => {
+    if (!pendingMobileCta.current) return;
+    pendingMobileCta.current = false;
+    requestAnimationFrame(() => {
+      toggleRef.current?.focus();
+      (onCtaClick ?? openPopup)();
+    });
   };
 
   // Focus trap + Escape for mobile menu
@@ -185,6 +204,7 @@ export default function Navbar({
 
   useEffect(() => {
     // Navigation should always close an open mobile menu.
+    pendingMobileCta.current = false;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileOpen(false);
   }, [pathname]);
@@ -193,6 +213,11 @@ export default function Navbar({
     if (!mobileOpen || !portalNode) return;
 
     const siblings = Array.from(document.body.children).filter((node) => node !== portalNode);
+    const previousAttributes = siblings.map((node) => ({
+      node,
+      ariaHidden: node.getAttribute("aria-hidden"),
+      inert: node.hasAttribute("inert"),
+    }));
 
     siblings.forEach((node) => {
       node.setAttribute("aria-hidden", "true");
@@ -200,9 +225,11 @@ export default function Navbar({
     });
 
     return () => {
-      siblings.forEach((node) => {
-        node.removeAttribute("aria-hidden");
-        node.removeAttribute("inert");
+      previousAttributes.forEach(({ node, ariaHidden, inert }) => {
+        if (ariaHidden === null) node.removeAttribute("aria-hidden");
+        else node.setAttribute("aria-hidden", ariaHidden);
+        if (!inert) node.removeAttribute("inert");
+        else node.setAttribute("inert", "");
       });
     };
   }, [mobileOpen, portalNode]);
@@ -277,7 +304,7 @@ export default function Navbar({
           ) : (
             <button
               type="button"
-              onClick={ctaHref === null ? undefined : openPopup}
+              onClick={onCtaClick ?? openPopup}
               className={`hidden min-h-11 md:inline-flex items-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-[14px] font-normal leading-none text-white transition-colors duration-200 ml-1 ${accent === "emerald" ? "bg-[#075C43] hover:bg-[#064B36]" : "bg-[#040082] hover:bg-[#0600a8]"}`}
               style={{ fontFamily: "var(--font-body)" }}
             >
@@ -304,7 +331,7 @@ export default function Navbar({
 
       {/* Mobile Menu Overlay */}
       {portalNode && createPortal(
-        <AnimatePresence>
+        <AnimatePresence onExitComplete={handleMobileMenuExitComplete}>
           {mobileOpen && (
           <motion.div
             ref={menuRef}
@@ -415,7 +442,7 @@ export default function Navbar({
                     ) : (
                       <button
                         type="button"
-                        onClick={ctaHref === null ? undefined : () => { closeMobileMenu(); openPopup(); }}
+                        onClick={handleMobileCtaClick}
                          className="group inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 text-[14px] font-normal text-[#040082] transition-transform duration-200"
                         style={{ fontFamily: "var(--font-body)" }}
                       >

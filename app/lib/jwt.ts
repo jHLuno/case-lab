@@ -1,3 +1,5 @@
+import "server-only";
+
 import { SignJWT, jwtVerify } from "jose";
 
 function getSecret(): Uint8Array {
@@ -11,6 +13,8 @@ function getSecret(): Uint8Array {
 export async function createToken(): Promise<string> {
   return new SignJWT({ role: "crm_admin" })
     .setProtectedHeader({ alg: "HS256" })
+    .setIssuer("caselab.kz")
+    .setAudience("caselab-crm")
     .setIssuedAt()
     .setExpirationTime("1h")
     .sign(getSecret());
@@ -18,8 +22,13 @@ export async function createToken(): Promise<string> {
 
 export async function verifyToken(token: string): Promise<boolean> {
   try {
-    await jwtVerify(token, getSecret(), { clockTolerance: 60 });
-    return true;
+    const { payload } = await jwtVerify(token, getSecret(), {
+      algorithms: ["HS256"],
+      issuer: "caselab.kz",
+      audience: "caselab-crm",
+      clockTolerance: 60,
+    });
+    return payload.role === "crm_admin";
   } catch {
     return false;
   }

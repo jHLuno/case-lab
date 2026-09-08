@@ -4,13 +4,15 @@ import { ArrowUpRight } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 import styles from "../case-lab-3/case-lab-3.module.css";
 import GrainientBoundary from "../components/GrainientBoundary";
+import CaseLab3CheckoutButton from "../components/case-lab-3/checkout/CaseLab3CheckoutButton";
 
 const Grainient = dynamic(() => import("../components/Grainient"), { ssr: false });
 
 export default function CaseLab3Hero() {
-  const shouldReduceMotion = false;
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const [grainientFailed, setGrainientFailed] = useState(false);
   const [grainientAllowed, setGrainientAllowed] = useState(false);
 
@@ -83,10 +85,10 @@ export default function CaseLab3Hero() {
               </span>
             </div>
             <div className={styles.caseRoomPurchase}>
-              <button type="button" className={styles.heroCta}>
+              <CaseLab3CheckoutButton source="hero" className={styles.heroCta}>
                 Купить билет
                 <ArrowUpRight size={20} strokeWidth={2} aria-hidden="true" />
-              </button>
+              </CaseLab3CheckoutButton>
               <p>Первые 20 билетов — 7 890 ₸.<br /> Далее — 15 000 ₸.</p>
             </div>
           </div>

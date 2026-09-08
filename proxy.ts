@@ -11,23 +11,42 @@ function getSupabaseOrigin() {
   }
 }
 
+function isCaseLab3Path(pathname: string): boolean {
+  return pathname === "/case-lab-3" || pathname.startsWith("/case-lab-3/");
+}
+
+function createNonce(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
+}
+
 export function proxy(request: NextRequest) {
-  const nonce = crypto.randomUUID();
+  const nonce = createNonce();
   const isDev = process.env.NODE_ENV === "development";
   const supabaseOrigin = getSupabaseOrigin();
+  const caseLab3WidgetOrigin = isCaseLab3Path(request.nextUrl.pathname)
+    ? " https://widget.tiptoppay.kz"
+    : "";
+  const caseLab3FrameDirective = isCaseLab3Path(request.nextUrl.pathname)
+    ? `frame-src 'self'${caseLab3WidgetOrigin}`
+    : null;
   const cspHeader = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}${caseLab3WidgetOrigin}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' blob: data:",
     "font-src 'self'",
+    caseLab3FrameDirective,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
     `connect-src 'self'${supabaseOrigin ? ` ${supabaseOrigin}` : ""}`,
     "upgrade-insecure-requests",
-  ].join("; ");
+  ].filter((directive): directive is string => directive !== null).join("; ");
 
   const requestHeaders = new Headers();
   const forwardableHeaders = ["accept", "accept-language", "cookie", "host", "user-agent"];
@@ -46,6 +65,7 @@ export function proxy(request: NextRequest) {
     },
   });
   response.headers.set("Content-Security-Policy", cspHeader);
+  response.headers.set("x-nonce", nonce);
 
   return response;
 }

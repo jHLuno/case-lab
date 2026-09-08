@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
-import { verifyToken } from "../../../lib/jwt";
+import { noStoreJson } from "../../../lib/case-lab-3/http.server";
 import { resolveCrmTable } from "../../../lib/crm-tables";
+import { requireCrmAdmin, verifyCrmMutation } from "../../../lib/crm-auth.server";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -22,24 +22,28 @@ export async function POST(request: Request) {
     const token = cookieStore.get("crm_auth")?.value;
 
     if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return noStoreJson({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const isValid = await verifyToken(token);
-    if (!isValid) {
-      return NextResponse.json({ error: "Session expired" }, { status: 401 });
+    const session = await requireCrmAdmin(token);
+    if (!session) {
+      return noStoreJson({ error: "Session expired" }, { status: 401 });
+    }
+
+    if (!verifyCrmMutation(request, session)) {
+      return noStoreJson({ error: "Forbidden" }, { status: 403 });
     }
 
     const body = await request.json();
     const { id, source } = body;
 
     if (!id) {
-      return NextResponse.json({ error: "ID required" }, { status: 400 });
+      return noStoreJson({ error: "ID required" }, { status: 400 });
     }
 
     const table = resolveCrmTable(source);
     if (!table) {
-      return NextResponse.json({ error: "Invalid source" }, { status: 400 });
+      return noStoreJson({ error: "Invalid source" }, { status: 400 });
     }
 
     const supabase = getServiceSupabase();
@@ -47,12 +51,12 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error("Supabase delete error:", error);
-      return NextResponse.json({ error: "Database error" }, { status: 500 });
+      return noStoreJson({ error: "Database error" }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true });
+    return noStoreJson({ success: true });
   } catch (err) {
     console.error("CRM delete error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return noStoreJson({ error: "Server error" }, { status: 500 });
   }
 }

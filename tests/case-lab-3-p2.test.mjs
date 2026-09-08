@@ -148,9 +148,7 @@ const extractEnclosingBraceBlock = (source, marker) => {
   return "";
 };
 
-const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-const [proofSource, heroSource, grainientBoundarySource, grainientSource, casesSource, speakersSource, pageSource, nextConfigSource, proxySource, layoutSource, globalStylesSource, caseLabStylesSource, navbarSource, scrollRevealSource, backToTopSource, caseLab3PageSource, caseLab3FooterSource, footerSource, homePageSource, evpProComponentSource, comingSoonSource, faqSource, ticketsSource, evpSessionSource, evpFacilitatorsSource, evpPricingSource, evpFaqSource, jsonLdSource, serviceJsonLdSource, homeRouteSource, openGraphImageSource, checkoutSource] = await Promise.all([
+const [proofSource, heroSource, grainientBoundarySource, grainientSource, casesSource, speakersSource, pageSource, nextConfigSource, proxySource, layoutSource, globalStylesSource, caseLabStylesSource, navbarSource, scrollRevealSource, backToTopSource, caseLab3PageSource, caseLab3FooterSource, footerSource, homePageSource, evpProComponentSource, comingSoonSource, faqSource, ticketsSource, evpSessionSource, evpFacilitatorsSource, evpPricingSource, evpFaqSource, jsonLdSource, serviceJsonLdSource, homeRouteSource, openGraphImageSource, checkoutProviderSource, checkoutWidgetSource, checkoutDialogSource, checkoutDialogStylesSource, privacySource] = await Promise.all([
   read("app/sections/CaseLab3Proof.tsx"),
   read("app/sections/CaseLab3Hero.tsx"),
   readOptional("app/components/GrainientBoundary.tsx"),
@@ -182,7 +180,11 @@ const [proofSource, heroSource, grainientBoundarySource, grainientSource, casesS
   readOptional("app/components/ServiceJsonLd.tsx"),
   read("app/page.tsx"),
   readOptional("app/case-lab-3/opengraph-image.tsx"),
-  read("app/lib/caseLab3.ts"),
+  read("app/components/case-lab-3/checkout/CaseLab3CheckoutProvider.tsx"),
+  read("app/components/case-lab-3/checkout/tiptoppay-widget.client.ts"),
+  read("app/components/case-lab-3/checkout/CaseLab3CheckoutDialog.tsx"),
+  read("app/components/case-lab-3/checkout/CaseLab3CheckoutDialog.module.css"),
+  read("app/privacy/page.tsx"),
 ]);
 const caseLab3NavbarSource = await read("app/components/CaseLab3Navbar.tsx");
 
@@ -227,12 +229,12 @@ test("testimonial cards expose the requested visual review CTA without video", (
 });
 
 test("Case Lab 3 purchase CTAs stay button-only until checkout is configured", () => {
-  assert.match(heroSource, /<button\s+type="button"\s+className=\{styles\.heroCta\}>[\s\S]*?Купить билет/);
+  assert.match(heroSource, /<CaseLab3CheckoutButton\s+source="hero"\s+className=\{styles\.heroCta\}>[\s\S]*?Купить билет/);
   assert.match(
     ticketsSource,
-    /<button\s+type="button"\s+className=\{styles\.ticketCta\}>[\s\S]*?Купить билет/,
+    /<CaseLab3CheckoutButton\s+source="tickets"\s+className=\{styles\.ticketCta\}>[\s\S]*?Купить билет/,
   );
-  assert.match(caseLab3FooterSource, /<button[\s\S]*?>[\s\S]*?Купить билет/);
+  assert.match(caseLab3FooterSource, /<CaseLab3CheckoutButton\s+source="footer"[\s\S]*?>[\s\S]*?Купить билет/);
   assert.match(caseLab3NavbarSource, /ctaDisabled=\{false\}/);
   assert.doesNotMatch(heroSource, /className=\{styles\.heroCta\}[^>]*\bdisabled\b/);
   assert.doesNotMatch(ticketsSource, /className=\{styles\.ticketCta\}[^>]*\bdisabled\b/);
@@ -243,6 +245,45 @@ test("Case Lab 3 purchase CTAs stay button-only until checkout is configured", (
   assert.doesNotMatch(caseLab3FooterSource, /<a[^>]+href=\{caseLab3CheckoutHref\}/);
   assert.doesNotMatch(heroSource, /window\.location\.assign/);
   assert.doesNotMatch(casesSource, /cursor-pointer/);
+});
+
+test("checkout inerting includes the global skip link outside the provider children", () => {
+  assert.match(layoutSource, /data-case-lab-global-skip-link/);
+  assert.match(checkoutProviderSource, /data-case-lab-global-skip-link/);
+  assert.match(checkoutProviderSource, /aria-hidden/);
+  assert.match(checkoutProviderSource, /inert/);
+});
+
+test("availability and failure outcomes announce through live regions", () => {
+  for (const phase of ["temporarily_reserved", "sold_out", "closed", "failed", "script_error"]) {
+    const phaseStart = checkoutDialogSource.indexOf(`case "${phase}"`);
+    const nextCase = checkoutDialogSource.indexOf("case \"", phaseStart + 6);
+    const phaseSource = checkoutDialogSource.slice(phaseStart, nextCase < 0 ? checkoutDialogSource.length : nextCase);
+    assert.ok(phaseStart >= 0, `missing ${phase} state`);
+    assert.match(phaseSource, /aria-live=/, `${phase} state must be announced`);
+  }
+  assert.match(checkoutDialogSource, /disabled=\{isBusy\(state\.phase\)\}/);
+});
+
+test("async checkout effects carry generations and provider-side phase guards", () => {
+  assert.match(checkoutProviderSource, /operationRef/);
+  assert.match(checkoutProviderSource, /isCurrentOperation/);
+  assert.match(checkoutProviderSource, /const generation = state\.generation/);
+  assert.match(checkoutProviderSource, /\[state\.generation, state\.phase\]/);
+  assert.match(checkoutProviderSource, /\[state\.generation, state\.orderId, state\.phase\]/);
+  assert.match(checkoutProviderSource, /generation, requestPhase/);
+});
+
+test("widget CTA waits for mobile menu exit before opening checkout", () => {
+  assert.match(navbarSource, /pendingMobileCta/);
+  assert.match(navbarSource, /handleMobileMenuExitComplete/);
+  assert.match(navbarSource, /<AnimatePresence\s+onExitComplete=\{handleMobileMenuExitComplete\}>/);
+});
+
+test("widget operation cleanup is not tied to the loading-to-open phase transition", () => {
+  assert.doesNotMatch(checkoutProviderSource, /\[nonce, state\.generation, state\.phase, state\.widget\]/);
+  assert.match(checkoutProviderSource, /widgetOpen/);
+  assert.match(checkoutProviderSource, /controller\.abort\(\)/);
 });
 
 test("mobile testimonial navigation ignores its own smooth-scroll events", () => {
@@ -403,10 +444,10 @@ test("Case Lab 3 metadata declares a large-image Twitter card", () => {
   assert.match(twitterMetadata, /images:\s*\[[^\]]+\]/s);
 });
 
-test("Case Lab 3 event metadata stays truthful when checkout is unavailable", () => {
+test("Case Lab 3 event metadata no longer depends on a public checkout URL", () => {
   assert.match(pageSource, /image:\s*\["https:\/\/caselab\.kz\/case-lab-3\/opengraph-image"\]/);
-  assert.match(pageSource, /const caseLab3EventOffers = caseLab3CheckoutHref/);
-  assert.match(pageSource, /\.\.\.\(caseLab3EventOffers \? \{ offers: caseLab3EventOffers \} : \{\}\)/);
+  assert.doesNotMatch(pageSource, /caseLab3CheckoutHref/);
+  assert.doesNotMatch(checkoutProviderSource, /localStorage|orderRegistry/);
 });
 
 test("JSON-LD is server-side and the Service schema is homepage-only", () => {
@@ -421,7 +462,8 @@ test("JSON-LD is server-side and the Service schema is homepage-only", () => {
 });
 
 test("strict nonce CSP is owned by proxy and excludes non-page requests", () => {
-  assert.match(proxySource, /crypto\.randomUUID\(\)/);
+  assert.match(proxySource, /crypto\.getRandomValues\(/);
+  assert.match(proxySource, /btoa\(/);
   assert.match(proxySource, /requestHeaders\.set\(\s*["']x-nonce["']/);
   assert.match(proxySource, /response\.headers\.set\(\s*["']Content-Security-Policy["']/);
   assert.match(proxySource, /source:\s*["']\/\(\(\?!api\|_next\/static\|_next\/image\|favicon\.ico\)/);
@@ -479,7 +521,7 @@ test("Organization sameAs contains only the official Case Lab profile", () => {
 
 test("Case Lab 3 hero checkout has no SpecularButton or direct OGL dependency", () => {
   assert.doesNotMatch(heroSource, /SpecularButton|from\s+["']ogl["']|import\s*\(\s*["']ogl["']\s*\)/);
-  assert.match(heroSource, /<button\s+type="button"\s+className=\{styles\.heroCta\}>/);
+  assert.match(heroSource, /<CaseLab3CheckoutButton\s+source="hero"\s+className=\{styles\.heroCta\}>/);
 });
 
 test("Case Lab 3 source stays free of media promises and direct OGL imports", () => {
@@ -489,13 +531,78 @@ test("Case Lab 3 source stays free of media promises and direct OGL imports", ()
   }
 });
 
-test("Case Lab 3 checkout remains fail-closed without a validated URL", () => {
-  assert.match(checkoutSource, /if \(!value\) return null/);
-  assert.match(checkoutSource, /url\.protocol !== "https:"/);
-  assert.match(checkoutSource, /url\.username|url\.password/);
-  assert.match(checkoutSource, /url\.hostname !== host/);
+test("privacy policy matches the Case Lab III checkout data and processor disclosures", () => {
+  for (const marker of [
+    /фамил/i,
+    /email/i,
+    /телефон/i,
+    /компан/i,
+    /должност/i,
+    /покупател/i,
+    /участник/i,
+    /заказ/i,
+    /платеж/i,
+    /возврат/i,
+    /чек/i,
+    /билет/i,
+    /ревиз/i,
+    /check-?in/i,
+    /email-?delivery/i,
+    /TipTop\s+Pay/i,
+    /Kassir/i,
+    /Mail\.ru/i,
+    /Supabase/i,
+    /Vercel/i,
+    /GA4/i,
+    /цели\s+обработки/i,
+    /срок\s+хранения/i,
+  ]) {
+    assert.match(privacySource, marker);
+  }
+
+  assert.match(privacySource, /реквизиты[^.]*банковской карты[^.]*вводятся[^.]*TipTop\s+Pay/i);
+  assert.match(privacySource, /Case Lab[^.]*не получает[^.]*не хранит[^.]*карты/i);
+  assert.match(privacySource, /согласие[^.]*маркетинг[^.]*отдельн[^.]*необязат/i);
+  assert.match(privacySource, /<main\s+className=/);
+  assert.match(privacySource, /<article\s+className=/);
+  assert.match(privacySource, /href="\/"/);
+  assert.match(privacySource, /19 августа 2026 года|7 сентября 2026 года/);
+});
+
+test("privacy policy keeps seller identifiers outside the public page contract", () => {
+  assert.match(privacySource, /официальн[а-яё\s-]*канал[а-яё\s-]*Case Lab/i);
+  assert.doesNotMatch(privacySource, /(?:ИИН|БИН|IIN|BIN)\s*:/i);
+  assert.doesNotMatch(privacySource, /860927350183|Таугуль|Мамыр|702\s*111\s*4747/iu);
+});
+
+test("Case Lab 3 checkout uses the server offer and rejects browser-authoritative payment state", () => {
+  assert.match(checkoutProviderSource, /\/api\/case-lab-3\/availability/);
+  assert.match(checkoutProviderSource, /\/api\/case-lab-3\/orders/);
+  assert.match(checkoutProviderSource, /\/payment-attempts/);
+  assert.match(checkoutProviderSource, /\/status/);
+  assert.match(checkoutProviderSource, /Idempotency-Key/);
+  assert.doesNotMatch(checkoutProviderSource, /localStorage|sessionStorage|window\.location\.(assign|replace|href)/);
+  assert.match(checkoutWidgetSource, /receipt|recurrent|tokenization/i);
+  assert.match(checkoutWidgetSource, /FORBIDDEN_PARAM_KEYS|hasForbiddenParams/);
+  assert.doesNotMatch(checkoutWidgetSource, /params\.(receipt|recurrent|tokenization)\b/i);
+  assert.match(checkoutWidgetSource, /oncomplete|callback/i);
   assert.doesNotMatch(heroSource, /caseLab3CheckoutHref|checkoutHref|href=/);
   assert.doesNotMatch(ticketsSource, /caseLab3CheckoutHref|href=/);
+});
+
+test("Tickets and Footer remain Server Components with a client CTA leaf", () => {
+  assert.doesNotMatch(ticketsSource, /^"use client"/m);
+  assert.doesNotMatch(caseLab3FooterSource, /^"use client"/m);
+  assert.match(ticketsSource, /CaseLab3CheckoutButton/);
+  assert.match(caseLab3FooterSource, /CaseLab3CheckoutButton/);
+});
+
+test("Case Lab 3 CSP adds the TipTop script and frame origin only on the event path", () => {
+  assert.match(proxySource, /case-lab-3/);
+  assert.match(proxySource, /widget\.tiptoppay\.kz/);
+  assert.match(proxySource, /frame-src/);
+  assert.match(proxySource, /strict-dynamic/);
+  assert.match(proxySource, /pathname/);
 });
 
 test("Case Lab 3 route tokens stay scoped and semantic", () => {
@@ -540,16 +647,12 @@ test("CSP prevents framing by other origins", () => {
 });
 
 test("request proxy emits a CSP nonce", () => {
-  const nonceDeclaration = nonceHeaderSource.match(
-    /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*crypto\.randomUUID\s*\(\s*\)/,
-  );
-
-  assert.ok(nonceDeclaration, "the request header path must generate a nonce");
-  const nonceName = nonceDeclaration[1];
-  assert.match(
-    nonceHeaderSource,
-    new RegExp(`["']x-nonce["']\\s*,\\s*${escapeRegExp(nonceName)}\\b`),
-  );
+  assert.match(proxySource, /crypto\.getRandomValues\(/);
+  assert.match(proxySource, /new Uint8Array\(16\)/);
+  assert.match(proxySource, /btoa\(/);
+  assert.match(proxySource, /const nonce = createNonce\(\)/);
+  assert.match(nonceHeaderSource, /["']x-nonce["']\s*,\s*nonce\b/);
+  assert.match(proxySource, /response\.headers\.set\(\s*["']x-nonce["']\s*,\s*nonce\s*\)/);
   assert.match(nonceHeaderSource, /Content-Security-Policy/);
 });
 
@@ -609,12 +712,11 @@ test("shared reduced-motion CSS removes control motion without hiding content", 
   assert.doesNotMatch(reducedMotionSource, /opacity:\s*0/);
 });
 
-test("Case Lab 3 opts into motion despite reduced-motion preferences", () => {
-  assert.match(caseLab3PageSource, /caseLabForceMotion/);
-  assert.match(caseLab3PageSource, /<Cases alignToCaseLab forceMotion \/>/);
-  assert.match(caseLab3PageSource, /<BackToTop forceMotion \/>/);
-  assert.match(caseLab3NavbarSource, /document\.body\.classList\.add\("caseLabForceMotion"\)/);
-  assert.match(caseLab3NavbarSource, /document\.body\.classList\.remove\("caseLabForceMotion"\)/);
+test("Case Lab 3 preserves reduced-motion preferences without global forcing", () => {
+  assert.doesNotMatch(caseLab3PageSource, /caseLabForceMotion/);
+  assert.match(caseLab3PageSource, /<Cases alignToCaseLab \/>/);
+  assert.match(caseLab3PageSource, /<BackToTop \/>/);
+  assert.doesNotMatch(caseLab3NavbarSource, /caseLabForceMotion|forceMotion/);
   assert.match(caseLab3NavbarSource, /document\.body\.classList\.add\("caseLabPage"\)/);
   assert.match(caseLab3NavbarSource, /document\.body\.classList\.remove\("caseLabPage"\)/);
   assert.match(caseLab3NavbarSource, /document\.documentElement\.classList\.add\("caseLabPage"\)/);
@@ -624,14 +726,19 @@ test("Case Lab 3 opts into motion despite reduced-motion preferences", () => {
     caseLabStylesSource,
     /@media \(prefers-reduced-motion: reduce\)\s+and\s+\(min-width: 768px\)[\s\S]*?\.speakerScene\s*\{\s*display:\s*none;/,
   );
-  assert.match(heroSource, /const shouldReduceMotion = false/);
-  assert.doesNotMatch(speakersSource, /prefersReducedMotionQuery/);
-  assert.match(casesSource, /forceMotion\?/);
-  assert.match(casesSource, /forceMotion \|\| !prefersReducedMotion/);
-  assert.match(scrollRevealSource, /forceMotion\?/);
-  assert.match(ticketsSource, /<ScrollReveal\s+forceMotion/);
-  assert.match(faqSource, /<ScrollReveal\s+forceMotion/);
-  assert.match(globalStylesSource, /caseLabForceMotion/);
+  assert.match(heroSource, /useReducedMotion/);
+  assert.match(heroSource, /const shouldReduceMotion = useReducedMotion\(\) \?\? false/);
+  assert.doesNotMatch(ticketsSource, /<ScrollReveal\s+forceMotion/);
+  assert.doesNotMatch(faqSource, /<ScrollReveal\s+forceMotion/);
+  assert.doesNotMatch(globalStylesSource, /body:not\(\.caseLabForceMotion\)/);
+  assert.doesNotMatch(globalStylesSource, /caseLabForceMotion/);
+});
+
+test("checkout secondary text uses an AA-safe solid muted color", () => {
+  for (const selector of [".description", ".offerRow", ".status", ".result p", ".fields label", ".fields label span", ".fields small", ".checkboxLabel"]) {
+    const block = checkoutDialogStylesSource.match(new RegExp(`${selector.replace(".", "\\.")}\\s*\\{[^}]*\\}`))?.[0] ?? "";
+    assert.match(block, /color:\s*#4f4e5b;/, `${selector} must use the AA-safe muted text color`);
+  }
 });
 
 test("Case Lab 3 uses one heading-description gap at every breakpoint", () => {
@@ -780,20 +887,18 @@ test("hash targets and archive clones are non-interactive and screen-reader safe
   assert.match(casesSource, /alt=""/);
 });
 
-test("legal files are not part of the P2 change surface", async () => {
-  const legalPaths = [
-    ...new Set([
-      ...(await readGitPaths("app/offer")),
-      ...(await readGitPaths("app/privacy")),
-    ]),
-  ];
-  const { stdout: changedLegalFiles } = await execFileAsync("git", ["status", "--short", "--", "app/offer", "app/privacy"], {
+test("the legal URL surface stays stable while Task 6A changes privacy copy only", async () => {
+  const offerPaths = await readGitPaths("app/offer");
+  const { stdout: changedOfferFiles } = await execFileAsync("git", ["status", "--short", "--", "app/offer"], {
     cwd: repoRoot,
     encoding: "utf8",
   });
 
-  assert.equal(changedLegalFiles.trim(), "");
-  for (const path of legalPaths) {
+  assert.equal(changedOfferFiles.trim(), "");
+  for (const path of offerPaths) {
     assert.equal(await read(path), await readGitHead(path), `Legal file changed: ${path}`);
   }
+  assert.match(privacySource, /export default function PrivacyPage/);
+  assert.match(privacySource, /href="\/"/);
+  assert.match(privacySource, /Политика конфиденциальности/);
 });

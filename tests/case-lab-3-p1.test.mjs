@@ -4,7 +4,7 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-const [layoutSource, globalsSource, navbarSource, caseLab3NavbarSource, casesSource, scrollRevealSource, proofSource, ticketsSource, faqSource, checkoutSource, pageSource, jsonLdSource, sitemapSource, caseLabStyles, heroSource, speakersSource] = await Promise.all([
+const [layoutSource, globalsSource, navbarSource, caseLab3NavbarSource, casesSource, scrollRevealSource, proofSource, ticketsSource, faqSource, pageSource, jsonLdSource, sitemapSource, caseLabStyles, heroSource, speakersSource, checkoutProviderSource, checkoutDialogSource, checkoutButtonSource] = await Promise.all([
   read("app/layout.tsx"),
   read("app/globals.css"),
   read("app/components/Navbar.tsx"),
@@ -14,13 +14,15 @@ const [layoutSource, globalsSource, navbarSource, caseLab3NavbarSource, casesSou
   read("app/sections/CaseLab3Proof.tsx"),
   read("app/sections/CaseLab3Tickets.tsx"),
   read("app/sections/CaseLab3FAQ.tsx"),
-  read("app/lib/caseLab3.ts"),
   read("app/case-lab-3/page.tsx"),
   read("app/components/JsonLd.tsx"),
   read("public/sitemap.xml"),
   read("app/case-lab-3/case-lab-3.module.css"),
   read("app/sections/CaseLab3Hero.tsx"),
   read("app/sections/CaseLab3Speakers.tsx"),
+  read("app/components/case-lab-3/checkout/CaseLab3CheckoutProvider.tsx"),
+  read("app/components/case-lab-3/checkout/CaseLab3CheckoutDialog.tsx"),
+  read("app/components/case-lab-3/checkout/CaseLab3CheckoutButton.tsx"),
 ]);
 
 test("Case Lab 3 has no video-related promise or player implementation", () => {
@@ -67,12 +69,28 @@ test("keyboard users can bypass the fixed navigation and keep it visible on focu
   assert.match(navbarSource, /onFocusCapture/);
 });
 
-test("checkout configuration fails closed and only accepts secure URLs", () => {
-  assert.match(checkoutSource, /new URL/);
-  assert.match(checkoutSource, /https:/);
-  assert.match(checkoutSource, /username|password/);
-  assert.match(checkoutSource, /!host/);
-  assert.match(checkoutSource, /null/);
+test("Case Lab 3 owns one checkout provider and one dialog", () => {
+  assert.match(pageSource, /<CaseLab3Page\s+nonce=\{nonce\}\s*\/>/);
+  assert.match(checkoutProviderSource, /CaseLab3CheckoutDialog/);
+  assert.equal((checkoutProviderSource.match(/<CaseLab3CheckoutDialog\b/g) ?? []).length, 1);
+  assert.match(checkoutProviderSource, /useCaseLab3Checkout/);
+  assert.match(checkoutProviderSource, /openCheckout/);
+  assert.match(checkoutDialogSource, /role="dialog"/);
+  assert.match(checkoutDialogSource, /aria-modal="true"/);
+  assert.match(checkoutDialogSource, /aria-labelledby=/);
+  assert.match(checkoutProviderSource, /aria-hidden|inert/);
+});
+
+test("Case Lab 3 exposes all four purchase CTA sources through the client leaf", () => {
+  assert.match(caseLab3NavbarSource, /onCtaClick=\{\(\) => openCheckout\("navbar"\)\}/);
+  assert.match(heroSource, /CaseLab3CheckoutButton\s+source="hero"/);
+  assert.match(ticketsSource, /CaseLab3CheckoutButton\s+source="tickets"/);
+  assert.match(checkoutButtonSource, /source/);
+  assert.match(checkoutProviderSource, /CheckoutSource/);
+  assert.match(checkoutProviderSource, /dispatch\(\{ type: "OPEN", source \}\)/);
+  assert.doesNotMatch(pageSource + checkoutProviderSource + checkoutDialogSource, /caseLab3CheckoutHref/);
+  assert.match(checkoutDialogSource, /amountMinor/);
+  assert.match(checkoutDialogSource, /formatKzt/);
 });
 
 test("all cases points to the homepage archive and the event is internally linked", () => {
@@ -88,7 +106,7 @@ test("event metadata is route-specific and does not expose the service offer", (
   assert.match(pageSource, /2026-09-24T10:00:00\+05:00/);
   assert.match(pageSource, /2026-09-24T14:00:00\+05:00/);
   assert.match(pageSource, /Жандосова 55\/10/);
-  assert.match(pageSource, /"@type": "Offer"/);
+  assert.doesNotMatch(pageSource, /"@type": "Offer"/);
   assert.doesNotMatch(pageSource, /Маркетинговая диагностика/);
   assert.match(heroSource, /24\.09\.2026|2026/);
   assert.match(heroSource, /10:00/);

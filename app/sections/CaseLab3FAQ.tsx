@@ -31,13 +31,13 @@ export default function CaseLab3FAQ() {
   return (
     <section id="faq" tabIndex={-1} className={styles.faqSection} aria-labelledby="case-lab-3-faq-title">
       <div className={styles.faqShell}>
-        <ScrollReveal forceMotion>
+        <ScrollReveal>
           <div className={styles.faqIntro}>
             <h2 id="case-lab-3-faq-title">Вопросы, которые могут возникнуть</h2>
           </div>
         </ScrollReveal>
 
-        <ScrollReveal delay={0.1} forceMotion>
+        <ScrollReveal delay={0.1}>
           <div className={styles.faqList}>
             {faqItems.map((item, index) => {
               const isOpen = index === openItem;

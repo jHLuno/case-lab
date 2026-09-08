@@ -1,5 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
+import CaseLab3CheckoutButton from "./case-lab-3/checkout/CaseLab3CheckoutButton";
 import styles from "../case-lab-3/case-lab-3.module.css";
 
 export default function CaseLab3Footer() {
@@ -21,14 +22,14 @@ export default function CaseLab3Footer() {
           >
             Первые 20 билетов стоят 7 890 ₸. Дальше цена будет 15 000 ₸.
           </p>
-          <button
-            type="button"
+          <CaseLab3CheckoutButton
+            source="footer"
             className="inline-flex items-center gap-3 rounded-[24px] bg-[#040082] px-7 py-3.5 text-[14px] font-normal text-white transition-[gap,background-color] duration-200 hover:gap-4 hover:bg-[#0600a0] md:px-10 md:py-5 md:text-[15px]"
             style={{ fontFamily: "var(--font-body)" }}
           >
             <span>Купить билет</span>
             <ArrowUpRight size={16} strokeWidth={2} aria-hidden="true" />
-          </button>
+          </CaseLab3CheckoutButton>
         </div>
 
         <div className={`${styles.caseLabFooterDetails} mb-12 flex flex-col items-start gap-8 md:grid md:grid-cols-3 md:items-center`}>

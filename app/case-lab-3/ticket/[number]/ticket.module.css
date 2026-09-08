@@ -1,0 +1,50 @@
+.page {
+  min-height: 100svh;
+  background: #f5f4fb;
+  color: #0a0a16;
+  padding: 28px 18px 80px;
+}
+
+.shell {
+  width: min(100%, 900px);
+  margin: 0 auto;
+}
+
+.backLink {
+  display: inline-flex;
+  color: #040082;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.kicker {
+  margin: 52px 0 16px;
+  color: #040082;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.shell h1 {
+  margin: 0;
+  color: #040082;
+  font-size: clamp(44px, 9vw, 84px);
+  line-height: .88;
+  letter-spacing: -.05em;
+}
+
+.intro {
+  max-width: 54ch;
+  margin: 18px 0 42px;
+  color: rgba(10, 10, 22, .62);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+@media (max-width: 560px) {
+  .page {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+}

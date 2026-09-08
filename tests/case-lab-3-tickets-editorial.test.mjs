@@ -27,7 +27,7 @@ test("ticket section matches the dark reference and keeps CTA button-only", () =
   assert.doesNotMatch(ticketSource, /case-lab-3-ticket-(early-bird-v4|standard-v5)\.webp/);
   assert.match(ticketSource, /alt: "Early Bird: 7 890 ₸, первые 20 билетов"/);
   assert.match(ticketSource, /alt: "Стандарт: 15 000 ₸ после первых 20 билетов"/);
-  assert.match(ticketSource, /<button\s+type="button"\s+className=\{styles\.ticketCta\}>/);
+  assert.match(ticketSource, /<CaseLab3CheckoutButton\s+source="tickets"\s+className=\{styles\.ticketCta\}>/);
   assert.match(ticketSource, /24 сентября 2026/);
   assert.match(ticketSource, /10:00–14:00/);
   assert.match(ticketSource, /Narxoz Business School/);
@@ -133,5 +133,12 @@ test("ticket mobile details use a lighter rhythm", () => {
   assert.match(
     mobileTicketIncluded,
     /margin-top:\s*-16px;/,
+  );
+});
+
+test("desktop ticket benefits sit closer to the ticket content", () => {
+  assert.match(
+    ticketStylesBlock,
+    /@media \(min-width: 768px\)[\s\S]*?\.ticketIncluded\s*\{[^}]*margin-top:\s*0;/,
   );
 });
