@@ -86,6 +86,20 @@ test("remote runner stops after the first failed suite", async () => {
   assert.equal(report.failedSuite, "inventory");
 });
 
+test("remote runner treats pgTAP finish failure summaries as failed suites", async () => {
+  const report = await runSuites({
+    write: () => {},
+    executeSuite: async () => ({
+      exitCode: 0,
+      result: { rows: [{ finish: "# Looks like you failed 2 tests of 76" }] },
+    }),
+  });
+
+  assert.equal(report.status, "failed");
+  assert.equal(report.failedSuite, "schema");
+  assert.equal(report.suites[0].failure, "pgtap_assertion_failed");
+});
+
 test("package script selects remote runner and preserves an explicit local fallback", async () => {
   const packageJson = JSON.parse(await readFile("package.json", "utf8"));
 

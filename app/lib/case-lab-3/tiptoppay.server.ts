@@ -22,6 +22,8 @@ const OPAQUE_PROVIDER_FIELDS = new Set(["Data", "CustomFields"]);
 const STRICT_CONTROL_BYTES = /[\u0000-\u001f\u007f]/u;
 const DANGEROUS_JSON_CONTROL_BYTES = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/u;
 const JSON_WHITESPACE = /[ \t\r\n]/u;
+const SAFE_IGNORED_FIELD_NAME = /^[A-Za-z0-9_.-]{1,128}$/u;
+const IGNORED_FIELDS = Symbol("tiptopIgnoredFields");
 const DOCUMENTED_FIELDS = new Set([
   "TransactionId",
   "PaymentTransactionId",
@@ -116,7 +118,9 @@ export class TipTopReconciliationRequiredError extends Error {
   }
 }
 
-export type TipTopFormFields = Readonly<Record<string, string>>;
+export type TipTopFormFields = Readonly<Record<string, string>> & {
+  readonly [IGNORED_FIELDS]?: readonly string[];
+};
 
 type CommonTipTopFields = {
   transactionId: string;
@@ -185,6 +189,10 @@ function invalid(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function ignoredProviderFields(fields: TipTopFormFields): readonly string[] {
+  return fields[IGNORED_FIELDS] ?? [];
 }
 
 function decodeFormComponent(value: string): string {
@@ -372,6 +380,7 @@ export function parseFormPayload(rawBody: Uint8Array | string): TipTopFormFields
   if (body.length === 0) invalid("body");
   const fields: Record<string, string> = {};
   const subscriptionIds: string[] = [];
+  const ignoredFields = new Set<string>();
   const occurrenceCounts = new Map<string, number>();
   for (const pair of body.split("&")) {
     const separator = pair.indexOf("=");
@@ -382,7 +391,10 @@ export function parseFormPayload(rawBody: Uint8Array | string): TipTopFormFields
     } catch {
       invalid("malformed_field_name", Object.keys(fields));
     }
-    if (!DOCUMENTED_FIELDS.has(key)) invalid(key, [...Object.keys(fields), key]);
+    if (!DOCUMENTED_FIELDS.has(key)) {
+      if (SAFE_IGNORED_FIELD_NAME.test(key)) ignoredFields.add(key);
+      continue;
+    }
     const occurrenceCount = (occurrenceCounts.get(key) ?? 0) + 1;
     occurrenceCounts.set(key, occurrenceCount);
     let value: string;
@@ -411,6 +423,10 @@ export function parseFormPayload(rawBody: Uint8Array | string): TipTopFormFields
     }
     fields[key] = value;
   }
+  Object.defineProperty(fields, IGNORED_FIELDS, {
+    value: [...ignoredFields].slice(0, 64),
+    enumerable: false,
+  });
   return fields;
 }
 
@@ -680,6 +696,13 @@ function responseCode(result: TipTopTransitionResult): number {
   return result.kind === "accepted" ? 0 : result.kind === "rejected" ? result.code : 20;
 }
 
+function ignoredFieldDetails(fields: TipTopFormFields | undefined): {
+  ignoredFields?: readonly string[];
+} {
+  const ignoredFields = fields === undefined ? [] : ignoredProviderFields(fields);
+  return ignoredFields.length === 0 ? {} : { ignoredFields };
+}
+
 export async function handleSignedTipTopWebhook<T>(
   request: Request,
   environmentValue: string,
@@ -705,7 +728,7 @@ export async function handleSignedTipTopWebhook<T>(
       return Response.json({ code: 20 });
     }
     stage = "parse";
-    let fields: TipTopFormFields;
+    let fields: TipTopFormFields | undefined;
     let payload: T;
     try {
       fields = parseFormPayload(rawBody);
@@ -717,24 +740,29 @@ export async function handleSignedTipTopWebhook<T>(
           rejectedField: error.rejectedField,
           ...(error.duplicateField === undefined ? {} : { duplicateField: error.duplicateField }),
           ...(error.occurrenceCount === undefined ? {} : { occurrenceCount: error.occurrenceCount }),
-          ...(error.valueTooLong === undefined ? {} : { valueTooLong: error.valueTooLong }),
-          ...(error.valueLength === undefined ? {} : { valueLength: error.valueLength }),
-          ...(error.hasJsonWhitespace === undefined ? {} : { hasJsonWhitespace: error.hasJsonWhitespace }),
-        });
+           ...(error.valueTooLong === undefined ? {} : { valueTooLong: error.valueTooLong }),
+           ...(error.valueLength === undefined ? {} : { valueLength: error.valueLength }),
+           ...(error.hasJsonWhitespace === undefined ? {} : { hasJsonWhitespace: error.hasJsonWhitespace }),
+           ...ignoredFieldDetails(fields),
+         });
         return Response.json({ code: 20 });
       }
       throw error;
     }
     const testMode = (payload as T & { testMode?: unknown }).testMode;
     if (typeof testMode === "boolean" && testMode !== (environmentValue === "test")) {
-      logWebhookRejection(environmentValue, dependencies.eventType, "mode_mismatch", undefined, { field: "TestMode" });
+      logWebhookRejection(environmentValue, dependencies.eventType, "mode_mismatch", undefined, {
+        field: "TestMode",
+        ...ignoredFieldDetails(fields),
+      });
       return Response.json({ code: 20 });
     }
     const transactionId = (payload as T & { transactionId?: unknown }).transactionId;
     if (typeof transactionId !== "string") {
       logWebhookRejection(environmentValue, dependencies.eventType, "invalid_payload", undefined, {
-        receivedFields: Object.keys(fields),
+        receivedFields: Object.keys(fields ?? {}),
         rejectedField: "TransactionId",
+        ...ignoredFieldDetails(fields),
       });
       return Response.json({ code: 20 });
     }
@@ -758,6 +786,7 @@ export async function handleSignedTipTopWebhook<T>(
         {
           ...(transition.kind === "rejected" ? { rpcCode: transition.code } : {}),
           ...(rpcReason === undefined ? {} : { rpcReason }),
+          ...ignoredFieldDetails(fields),
         },
       );
     }

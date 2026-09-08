@@ -255,6 +255,171 @@ test("Pay accepts binary TestMode and documented optional fields but rejects amo
   assert.equal(withoutTestMode.testMode, undefined);
 });
 
+test("Pay accepts the full provider payload when it adds InstallmentTerm", async () => {
+  const route = await import("../../app/api/tiptoppay/[environment]/pay/route");
+  const body = [
+    "TransactionId=12345",
+    "Amount=15000.00",
+    "Currency=KZT",
+    "PaymentAmount=15000.00",
+    "PaymentCurrency=KZT",
+    "OperationType=Payment",
+    "InvoiceId=cl3-attempt-001",
+    "AccountId=order-001",
+    "Name=",
+    "Email=buyer%40example.test",
+    "DateTime=2026-09-08T00%3A00%3A00Z",
+    "IpAddress=127.0.0.1",
+    "IpCountry=KZ",
+    "IpCity=Almaty",
+    "IpRegion=Almaty",
+    "IpDistrict=Almaly",
+    "IpLatitude=43.2389",
+    "IpLongitude=76.8897",
+    "CardId=card-001",
+    "CardFirstSix=411111",
+    "CardLastFour=1111",
+    "CardType=Visa",
+    "CardExpDate=12%2F30",
+    "Issuer=TestBank",
+    "IssuerBankCountry=KZ",
+    "Description=Case%20Lab%20III",
+    "AuthCode=auth-001",
+    "TestMode=true",
+    "Status=Completed",
+    "GatewayName=TestGateway",
+    "Data=%7B%22source%22%3A%22tiptop%22%7D",
+    "TotalFee=0.00",
+    "CardProduct=Visa%20Classic",
+    "PaymentMethod=Card",
+    "InstallmentTerm=0",
+  ].join("&");
+  let seenPayload: TipTopPay | undefined;
+  const response = await route.handlePost(
+    signedRequestWithSecret("/api/tiptoppay/test/pay", body),
+    { params: Promise.resolve({ environment: "test" }) },
+    {
+      getSecret: () => SECRET,
+      applyPay: async (_environment: "test" | "live", payload: TipTopPay) => {
+        seenPayload = payload;
+        return { kind: "accepted", code: 0 };
+      },
+    },
+  );
+
+  assert.equal(await responseCode(response), 0);
+  assert.equal(seenPayload?.status, "Completed");
+  assert.equal("InstallmentTerm" in (seenPayload as unknown as Record<string, unknown>), false);
+  assert.equal("Data" in (seenPayload as unknown as Record<string, unknown>), false);
+});
+
+test("Pay and Check ignore unknown provider fields without retaining their values", async () => {
+  const payRoute = await import("../../app/api/tiptoppay/[environment]/pay/route");
+  const checkRoute = await import("../../app/api/tiptoppay/[environment]/check/route");
+  const payBody = `${await fixture("pay-completed.form")}&InstallmentTerm=0&FutureProviderField=private-value`;
+  const checkBody = `${await fixture("check-percent-encoded.form")}&FutureProviderField=private-value`;
+  let payPayload: TipTopPay | undefined;
+  let checkPayload: TipTopCheck | undefined;
+
+  const payResponse = await payRoute.handlePost(
+    signedRequestWithSecret("/api/tiptoppay/test/pay", payBody),
+    { params: Promise.resolve({ environment: "test" }) },
+    {
+      getSecret: () => SECRET,
+      applyPay: async (_environment: "test" | "live", payload: TipTopPay) => {
+        payPayload = payload;
+        return { kind: "accepted", code: 0 };
+      },
+    },
+  );
+  const checkResponse = await checkRoute.handlePost(
+    signedRequestWithSecret("/api/tiptoppay/test/check", checkBody),
+    { params: Promise.resolve({ environment: "test" }) },
+    {
+      getSecret: () => SECRET,
+      applyCheck: async (_environment: "test" | "live", payload: TipTopCheck) => {
+        checkPayload = payload;
+        return { kind: "accepted", code: 0 };
+      },
+    },
+  );
+
+  assert.equal(await responseCode(payResponse), 0);
+  assert.equal(await responseCode(checkResponse), 0);
+  assert.equal("InstallmentTerm" in (payPayload as unknown as Record<string, unknown>), false);
+  assert.equal("FutureProviderField" in (payPayload as unknown as Record<string, unknown>), false);
+  assert.equal("FutureProviderField" in (checkPayload as unknown as Record<string, unknown>), false);
+});
+
+test("unknown provider fields are reported by name only in safe diagnostics", async () => {
+  const route = await import("../../app/api/tiptoppay/[environment]/pay/route");
+  const body = `${(await fixture("pay-completed.form")).replace("Amount=15000.00", "Amount=not-money")}&InstallmentTerm=0&FutureProviderField=private-value`;
+  const result = await captureWarnings(() => route.handlePost(
+    signedRequestWithSecret("/api/tiptoppay/test/pay", body),
+    { params: Promise.resolve({ environment: "test" }) },
+    { getSecret: () => SECRET, applyPay: async () => ({ kind: "accepted", code: 0 }) },
+  ));
+
+  assert.equal(await responseCode(result.result), 20);
+  assert.deepEqual(result.warnings[0]?.[1], {
+    environment: "test",
+    eventType: "Pay",
+    stage: "invalid_payload",
+    receivedFields: [],
+    rejectedField: "Amount",
+    ignoredFields: ["InstallmentTerm", "FutureProviderField"],
+  });
+  assert.doesNotMatch(JSON.stringify(result.warnings[0]), /private-value|Content-HMAC|fixture-secret-2026/i);
+});
+
+test("Pay rejects an invalid HMAC and a payload changed after signing", async () => {
+  const route = await import("../../app/api/tiptoppay/[environment]/pay/route");
+  const body = await fixture("pay-completed.form");
+  let calls = 0;
+  const dependencies = {
+    getSecret: () => SECRET,
+    applyPay: async () => {
+      calls += 1;
+      return { kind: "accepted" as const, code: 0 as const };
+    },
+  };
+
+  const invalidHmac = await route.handlePost(
+    signedRequest("/api/tiptoppay/test/pay", body, "invalid"),
+    { params: Promise.resolve({ environment: "test" }) },
+    dependencies,
+  );
+  const changedPayload = await route.handlePost(
+    signedRequest("/api/tiptoppay/test/pay", `${body}&InstallmentTerm=0`, SIGNATURES["pay-completed.form"]),
+    { params: Promise.resolve({ environment: "test" }) },
+    dependencies,
+  );
+
+  assert.equal(await responseCode(invalidHmac), 20);
+  assert.equal(await responseCode(changedPayload), 20);
+  assert.equal(calls, 0);
+});
+
+test("critical Pay fields remain duplicate-safe", async () => {
+  const body = await fixture("pay-completed.form");
+  const duplicateFields = {
+    Amount: "15000.00",
+    InvoiceId: "cl3-attempt-001",
+    AccountId: "order-001",
+    TransactionId: "12345",
+    TestMode: "true",
+    Currency: "KZT",
+  };
+
+  for (const [field, value] of Object.entries(duplicateFields)) {
+    assert.throws(
+      () => parseFormPayload(`${body}&${field}=${encodeURIComponent(value)}`),
+      /invalid tiptop webhook payload/i,
+      field,
+    );
+  }
+});
+
 test("Refund keeps the original InvoiceId separate from the durable operation key carried in Data", () => {
   const refund = parseRefund(parseFormPayload(
     "TransactionId=77777&PaymentTransactionId=12345&Amount=15000.00&DateTime=2026-09-08T00%3A00%3A00Z&OperationType=Refund&InvoiceId=order-001&Data=%7B%22operationKey%22%3A%22refund-op-001%22%7D",

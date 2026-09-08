@@ -111,7 +111,8 @@ export function hasPgTapFailure(result) {
       || row.ok === 0
       || row.ok === "0"
       || row.status === "not ok"
-      || row.result === "not ok";
+      || row.result === "not ok"
+      || (typeof row.finish === "string" && /# looks like you failed \d+ tests?/iu.test(row.finish));
   });
 }
 
