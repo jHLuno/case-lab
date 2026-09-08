@@ -69,9 +69,14 @@ const DOCUMENTED_FIELDS = new Set([
 ]);
 
 export class TipTopPayloadError extends Error {
-  constructor() {
+  readonly receivedFields: readonly string[];
+  readonly rejectedField?: string;
+
+  constructor(details: { receivedFields?: readonly string[]; rejectedField?: string } = {}) {
     super("Invalid TipTop webhook payload");
     this.name = "TipTopPayloadError";
+    this.receivedFields = [...new Set(details.receivedFields ?? [])].slice(0, 64);
+    this.rejectedField = details.rejectedField;
   }
 }
 
@@ -135,11 +140,11 @@ export type TipTopWebhookContext = {
 
 export type TipTopTransitionResult =
   | { kind: "accepted"; code?: 0; duplicate?: boolean; result?: string }
-  | { kind: "rejected"; code: (typeof CHECK_CODES)[number] }
+  | { kind: "rejected"; code: (typeof CHECK_CODES)[number]; result?: string }
   | { kind: "review_required"; result?: string };
 
-function invalid(): never {
-  throw new TipTopPayloadError();
+function invalid(rejectedField?: string, receivedFields?: readonly string[]): never {
+  throw new TipTopPayloadError({ rejectedField, receivedFields });
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -168,13 +173,17 @@ function boundedText(value: string, maxLength = TEXT_MAX_LENGTH): string {
 
 function requiredField(fields: TipTopFormFields, name: string): string {
   const value = fields[name];
-  if (value === undefined) invalid();
-  return boundedText(value, IDENTIFIER_MAX_LENGTH);
+  if (value === undefined) invalid(name, Object.keys(fields));
+  try {
+    return boundedText(value, IDENTIFIER_MAX_LENGTH);
+  } catch {
+    invalid(name, Object.keys(fields));
+  }
 }
 
 function identifier(fields: TipTopFormFields, name: string): string {
   const value = requiredField(fields, name);
-  if (value.trim() !== value || /\s/u.test(value)) invalid();
+  if (value.trim() !== value || /\s/u.test(value)) invalid(name, Object.keys(fields));
   return value;
 }
 
@@ -186,22 +195,22 @@ function optionalText(fields: TipTopFormFields, name: string): string | undefine
 function assertDocumentedFields(fields: TipTopFormFields): void {
   if (!isRecord(fields)) invalid();
   for (const [name, value] of Object.entries(fields)) {
-    if (!DOCUMENTED_FIELDS.has(name) || typeof value !== "string") invalid();
+    if (!DOCUMENTED_FIELDS.has(name) || typeof value !== "string") invalid(name, Object.keys(fields));
   }
 }
 
-function parseTransactionId(value: string): string {
-  if (!/^\d+$/u.test(value)) invalid();
+function parseTransactionId(value: string, field = "TransactionId"): string {
+  if (!/^\d+$/u.test(value)) invalid(field);
   const numberValue = Number(value);
-  if (!Number.isSafeInteger(numberValue) || numberValue < 1) invalid();
+  if (!Number.isSafeInteger(numberValue) || numberValue < 1) invalid(field);
   return value;
 }
 
-function parseAmount(value: string): number {
-  if (!/^\d+(?:\.\d{1,2})?$/u.test(value)) invalid();
+function parseAmount(value: string, field = "Amount"): number {
+  if (!/^\d+(?:\.\d{1,2})?$/u.test(value)) invalid(field);
   const [whole, fraction = ""] = value.split(".");
   const amountMinor = Number(whole) * 100 + Number(fraction.padEnd(2, "0"));
-  if (!Number.isSafeInteger(amountMinor) || amountMinor < 0) invalid();
+  if (!Number.isSafeInteger(amountMinor) || amountMinor < 0) invalid(field);
   return amountMinor;
 }
 
@@ -213,7 +222,7 @@ function parseCurrency(fields: TipTopFormFields): "KZT" {
 function parseTestMode(value: string): boolean {
   if (value === "true" || value === "1") return true;
   if (value === "false" || value === "0") return false;
-  invalid();
+  invalid("TestMode");
 }
 
 function validateOptionalPaymentAmountAndCurrency(
@@ -225,19 +234,19 @@ function validateOptionalPaymentAmountAndCurrency(
   const paymentCurrency = fields.PaymentCurrency;
   if (paymentAmount === undefined && paymentCurrency === undefined) return;
   if (paymentAmount === undefined || paymentCurrency === undefined) invalid();
-  if (parseAmount(paymentAmount) !== amountMinor || paymentCurrency !== currency) invalid();
+  if (parseAmount(paymentAmount, "PaymentAmount") !== amountMinor || paymentCurrency !== currency) invalid("PaymentAmount");
 }
 
 function parseReasonCode(value: string): number {
-  if (!/^\d+$/u.test(value)) invalid();
+  if (!/^\d+$/u.test(value)) invalid("ReasonCode");
   const reasonCode = Number(value);
-  if (!Number.isSafeInteger(reasonCode) || reasonCode < 0) invalid();
+  if (!Number.isSafeInteger(reasonCode) || reasonCode < 0) invalid("ReasonCode");
   return reasonCode;
 }
 
 function commonFields(fields: TipTopFormFields, requireStatus: boolean): CommonTipTopFields {
   const operationType = requiredField(fields, "OperationType");
-  if (operationType !== "Payment") invalid();
+  if (operationType !== "Payment") invalid("OperationType", Object.keys(fields));
   const transactionId = parseTransactionId(requiredField(fields, "TransactionId"));
   const amountMinor = parseAmount(requiredField(fields, "Amount"));
   const currency = parseCurrency(fields);
@@ -247,7 +256,7 @@ function commonFields(fields: TipTopFormFields, requireStatus: boolean): CommonT
     : identifier(fields, "InvoiceId");
   const accountId = fields.AccountId === undefined ? undefined : identifier(fields, "AccountId");
   const status = fields.Status;
-  if (requireStatus && status === undefined) invalid();
+  if (requireStatus && status === undefined) invalid("Status", Object.keys(fields));
   return {
     transactionId,
     amountMinor,
@@ -289,15 +298,29 @@ export function parseFormPayload(rawBody: Uint8Array | string): TipTopFormFields
     invalid();
   }
 
-  if (body.length === 0) invalid();
+  if (body.length === 0) invalid("body");
   const fields: Record<string, string> = {};
   for (const pair of body.split("&")) {
     const separator = pair.indexOf("=");
-    if (separator <= 0) invalid();
-    const key = decodeFormComponent(pair.slice(0, separator));
-    if (!DOCUMENTED_FIELDS.has(key) || fields[key] !== undefined) invalid();
-    const value = decodeFormComponent(pair.slice(separator + 1));
-    fields[key] = boundedText(value);
+    if (separator <= 0) invalid("malformed_field", Object.keys(fields));
+    let key: string;
+    try {
+      key = decodeFormComponent(pair.slice(0, separator));
+    } catch {
+      invalid("malformed_field_name", Object.keys(fields));
+    }
+    if (!DOCUMENTED_FIELDS.has(key) || fields[key] !== undefined) invalid(key, [...Object.keys(fields), key]);
+    let value: string;
+    try {
+      value = decodeFormComponent(pair.slice(separator + 1));
+    } catch {
+      invalid(key, [...Object.keys(fields), key]);
+    }
+    try {
+      fields[key] = boundedText(value);
+    } catch {
+      invalid(key, [...Object.keys(fields), key]);
+    }
   }
   return fields;
 }
@@ -423,22 +446,29 @@ function rpcClient(): RpcClient {
 
 function transitionResult(value: unknown): TipTopTransitionResult {
   if (!isRecord(value) || typeof value.kind !== "string") throw new TipTopApiError();
+  const result = typeof value.result === "string" && /^[a-z][a-z0-9_]{0,127}$/u.test(value.result)
+    ? value.result
+    : undefined;
   if (value.kind === "accepted") {
     if (value.code !== undefined && value.code !== 0) throw new TipTopApiError();
     return {
       kind: "accepted",
       ...(value.code === undefined ? {} : { code: 0 }),
       ...(typeof value.duplicate === "boolean" ? { duplicate: value.duplicate } : {}),
-      ...(typeof value.result === "string" ? { result: value.result } : {}),
+      ...(result === undefined ? {} : { result }),
     };
   }
   if (value.kind === "rejected" && CHECK_CODES.includes(value.code as (typeof CHECK_CODES)[number])) {
-    return { kind: "rejected", code: value.code as (typeof CHECK_CODES)[number] };
+    return {
+      kind: "rejected",
+      code: value.code as (typeof CHECK_CODES)[number],
+      ...(result === undefined ? {} : { result }),
+    };
   }
   if (value.kind === "review_required") {
     return {
       kind: "review_required",
-      ...(typeof value.result === "string" ? { result: value.result } : {}),
+      ...(result === undefined ? {} : { result }),
     };
   }
   throw new TipTopApiError();
@@ -538,6 +568,22 @@ export type TipTopWebhookDependencies<T> = {
   eventType?: TipTopEventType;
 };
 
+function logWebhookRejection(
+  environment: string,
+  eventType: TipTopEventType | undefined,
+  stage: string,
+  error?: unknown,
+  details?: Readonly<Record<string, boolean | number | string | readonly string[] | undefined>>,
+): void {
+  console.warn("Case Lab III TipTop webhook rejected", {
+    environment,
+    eventType: eventType ?? "unknown",
+    stage,
+    ...(error === undefined ? {} : { errorType: error instanceof Error ? error.name : "unknown_error" }),
+    ...details,
+  });
+}
+
 function responseCode(result: TipTopTransitionResult): number {
   return result.kind === "accepted" ? 0 : result.kind === "rejected" ? result.code : 20;
 }
@@ -547,24 +593,55 @@ export async function handleSignedTipTopWebhook<T>(
   environmentValue: string,
   dependencies: TipTopWebhookDependencies<T>,
 ): Promise<Response> {
+  let stage = "environment";
   try {
     if (environmentValue !== "test" && environmentValue !== "live") {
+      logWebhookRejection(environmentValue, dependencies.eventType, "unexpected_error", new Error("invalid_environment"));
       return Response.json({ code: 20 });
     }
+    stage = "content_type";
     requireForm(request);
+    stage = "body";
     const rawBody = await readBoundedBody(request, TIPTOP_BODY_MAX_BYTES);
+    stage = "hmac";
     const secret = dependencies.getSecret(environmentValue);
     if (!verifyProviderHmac(rawBody, request.headers, secret, "raw-body")) {
+      logWebhookRejection(environmentValue, dependencies.eventType, "invalid_hmac", undefined, {
+        contentHmacPresent: request.headers.has("content-hmac"),
+        xContentHmacPresent: request.headers.has("x-content-hmac"),
+      });
       return Response.json({ code: 20 });
     }
-    const fields = parseFormPayload(rawBody);
-    const payload = dependencies.parse(fields);
+    stage = "parse";
+    let fields: TipTopFormFields;
+    let payload: T;
+    try {
+      fields = parseFormPayload(rawBody);
+      payload = dependencies.parse(fields);
+    } catch (error) {
+      if (error instanceof TipTopPayloadError) {
+        logWebhookRejection(environmentValue, dependencies.eventType, "invalid_payload", undefined, {
+          receivedFields: error.receivedFields,
+          rejectedField: error.rejectedField,
+        });
+        return Response.json({ code: 20 });
+      }
+      throw error;
+    }
     const testMode = (payload as T & { testMode?: unknown }).testMode;
     if (typeof testMode === "boolean" && testMode !== (environmentValue === "test")) {
+      logWebhookRejection(environmentValue, dependencies.eventType, "mode_mismatch", undefined, { field: "TestMode" });
       return Response.json({ code: 20 });
     }
     const transactionId = (payload as T & { transactionId?: unknown }).transactionId;
-    if (typeof transactionId !== "string") return Response.json({ code: 20 });
+    if (typeof transactionId !== "string") {
+      logWebhookRejection(environmentValue, dependencies.eventType, "invalid_payload", undefined, {
+        receivedFields: Object.keys(fields),
+        rejectedField: "TransactionId",
+      });
+      return Response.json({ code: 20 });
+    }
+    stage = "transition";
     const context: TipTopWebhookContext = {
       environment: environmentValue,
       bodyHash: hashTipTopBody(rawBody),
@@ -573,8 +650,23 @@ export async function handleSignedTipTopWebhook<T>(
         transactionId,
       ),
     };
-    return Response.json({ code: responseCode(await dependencies.apply(payload, context)) });
-  } catch {
+    const transition = await dependencies.apply(payload, context);
+    if (transition.kind === "rejected" || transition.kind === "review_required") {
+      const rpcReason = transition.result;
+      logWebhookRejection(
+        environmentValue,
+        dependencies.eventType,
+        rpcReason === "rejected_provider_metadata" ? "metadata_mismatch" : "rpc_rejection",
+        undefined,
+        {
+          ...(transition.kind === "rejected" ? { rpcCode: transition.code } : {}),
+          ...(rpcReason === undefined ? {} : { rpcReason }),
+        },
+      );
+    }
+    return Response.json({ code: responseCode(transition) });
+  } catch (error) {
+    logWebhookRejection(environmentValue, dependencies.eventType, "unexpected_error", error, { failedStage: stage });
     return Response.json({ code: 20 });
   }
 }

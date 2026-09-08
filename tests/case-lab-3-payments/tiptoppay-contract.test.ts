@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHmac } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
@@ -20,6 +21,8 @@ import {
   type TipTopJsonObject,
   type TipTopPay,
   type TipTopRefund,
+  type TipTopTransitionResult,
+  type TipTopWebhookContext,
 } from "../../app/lib/case-lab-3/tiptoppay.server";
 
 const SECRET = "fixture-secret-2026";
@@ -48,6 +51,21 @@ function signedRequest(path: string, body: string, signature: string): Request {
     },
     body,
   });
+}
+
+function signedRequestWithSecret(path: string, body: string, secret = SECRET): Request {
+  return signedRequest(path, body, createHmac("sha256", secret).update(body).digest("base64"));
+}
+
+async function captureWarnings<T>(action: () => Promise<T>): Promise<{ result: T; warnings: unknown[][] }> {
+  const warnings: unknown[][] = [];
+  const originalWarn = console.warn;
+  console.warn = (...args) => warnings.push(args);
+  try {
+    return { result: await action(), warnings };
+  } finally {
+    console.warn = originalWarn;
+  }
 }
 
 async function responseCode(response: Response): Promise<number> {
@@ -263,6 +281,79 @@ test("Check maps durable provider rejection codes without retrying the RPC", asy
     assert.equal(await responseCode(response), code);
     assert.equal(calls, 1);
   }
+});
+
+test("Check callback diagnostics identify safe rejection stages and RPC metadata reasons", async () => {
+  const route = await import("../../app/api/tiptoppay/[environment]/check/route");
+  const body = await fixture("check-percent-encoded.form");
+  type ApplyCheck = (environment: "test" | "live", payload: TipTopCheck, context: TipTopWebhookContext) => Promise<TipTopTransitionResult>;
+  const run = (request: Request, applyCheck: ApplyCheck) => captureWarnings(() => route.handlePost(
+    request,
+    { params: Promise.resolve({ environment: "test" }) },
+    { getSecret: () => SECRET, applyCheck },
+  ));
+
+  const invalidHmac = await run(
+    signedRequest("/api/tiptoppay/test/check", body, "invalid"),
+    async () => ({ kind: "accepted", code: 0 }),
+  );
+  assert.equal((invalidHmac.warnings[0]?.[1] as { stage?: string }).stage, "invalid_hmac");
+
+  const invalidPayloadBody = "TransactionId=12345&Amount=7890.00&Currency=KZT&Status=Authorized&OperationType=Payment";
+  const invalidPayload = await run(
+    signedRequestWithSecret("/api/tiptoppay/test/check", invalidPayloadBody),
+    async () => ({ kind: "accepted", code: 0 }),
+  );
+  assert.deepEqual(invalidPayload.warnings[0]?.[1], {
+    environment: "test",
+    eventType: "Check",
+    stage: "invalid_payload",
+    receivedFields: ["TransactionId", "Amount", "Currency", "Status", "OperationType"],
+    rejectedField: "DateTime",
+  });
+
+  const modeMismatchBody = body.replace("TestMode=true", "TestMode=false");
+  const modeMismatch = await run(
+    signedRequestWithSecret("/api/tiptoppay/test/check", modeMismatchBody),
+    async () => ({ kind: "accepted", code: 0 }),
+  );
+  assert.equal((modeMismatch.warnings[0]?.[1] as { stage?: string }).stage, "mode_mismatch");
+
+  const metadataMismatch = await run(
+    signedRequestWithSecret("/api/tiptoppay/test/check", body),
+    async () => ({ kind: "rejected", code: 20, result: "rejected_provider_metadata" }),
+  );
+  assert.deepEqual(metadataMismatch.warnings[0]?.[1], {
+    environment: "test",
+    eventType: "Check",
+    stage: "metadata_mismatch",
+    rpcCode: 20,
+    rpcReason: "rejected_provider_metadata",
+  });
+
+  const rpcRejection = await run(
+    signedRequestWithSecret("/api/tiptoppay/test/check", body),
+    async () => ({ kind: "rejected", code: 11 }),
+  );
+  assert.deepEqual(rpcRejection.warnings[0]?.[1], {
+    environment: "test",
+    eventType: "Check",
+    stage: "rpc_rejection",
+    rpcCode: 11,
+  });
+
+  const unexpectedError = await run(
+    signedRequestWithSecret("/api/tiptoppay/test/check", body),
+    async () => { throw new Error("private database details"); },
+  );
+  assert.deepEqual(unexpectedError.warnings[0]?.[1], {
+    environment: "test",
+    eventType: "Check",
+    stage: "unexpected_error",
+    errorType: "Error",
+    failedStage: "transition",
+  });
+  assert.doesNotMatch(JSON.stringify(unexpectedError.warnings[0]), /private database details|Content-HMAC|fixture-secret-2026/i);
 });
 
 test("wrong TestMode is rejected before Check persistence and an invalid environment is generic", async () => {
