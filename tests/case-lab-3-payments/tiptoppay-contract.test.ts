@@ -145,6 +145,37 @@ test("Check accepts empty documented optional fields after HMAC verification", a
   assert.equal(seenPayload?.name, undefined);
 });
 
+test("Check treats Data and CustomFields as opaque body-bounded provider fields", async () => {
+  const route = await import("../../app/api/tiptoppay/[environment]/check/route");
+  const baseBody = await fixture("check-percent-encoded.form");
+  const longData = JSON.stringify({ providerMetadata: "x".repeat(3000) });
+  const cases = [
+    longData,
+    '{\n\t"provider": "tiptop"\r\n}',
+    "",
+  ];
+
+  for (const data of cases) {
+    const body = `${baseBody}&Data=${encodeURIComponent(data)}&CustomFields=${encodeURIComponent(longData)}`;
+    let calls = 0;
+    const response = await route.handlePost(
+      signedRequestWithSecret("/api/tiptoppay/test/check", body),
+      { params: Promise.resolve({ environment: "test" }) },
+      {
+        getSecret: () => SECRET,
+        applyCheck: async () => {
+          calls += 1;
+          return { kind: "accepted", code: 0 };
+        },
+      },
+    );
+
+    assert.ok(longData.length > 2048);
+    assert.equal(await responseCode(response), 0);
+    assert.equal(calls, 1);
+  }
+});
+
 test("Check keeps required values strict when their form values are empty", async () => {
   const baseBody = await fixture("check-percent-encoded.form");
   for (const field of [
@@ -242,6 +273,17 @@ test("Refund keeps the original InvoiceId separate from the durable operation ke
   assert.throws(() => parseRefund(parseFormPayload(
     "TransactionId=77778&PaymentTransactionId=12345&Amount=15000.00&DateTime=2026-09-08T00%3A00%3A00Z&TestMode=1&OperationType=Refund",
   )), /invalid/i);
+});
+
+test("Refund parses only a strict Data operation key and accepts an empty Data field", () => {
+  const common = "TransactionId=77778&PaymentTransactionId=12345&Amount=15000.00&DateTime=2026-09-08T00%3A00%3A00Z&OperationType=Refund";
+  const whitespace = parseRefund(parseFormPayload(
+    `${common}&Data=${encodeURIComponent('{\n\t"requestId": "refund-op-002"\r\n}')}`,
+  ));
+  assert.equal(whitespace.operationKey, "refund-op-002");
+  assert.equal(parseRefund(parseFormPayload(`${common}&Data=`)).operationKey, undefined);
+  assert.throws(() => parseRefund(parseFormPayload(`${common}&Data=not-json`)), /invalid/i);
+  assert.throws(() => parseRefund(parseFormPayload(`${common}&Data=%5B%5D`)), /invalid/i);
 });
 
 test("Fail rejects the undocumented Status field", () => {
@@ -448,6 +490,67 @@ test("Check callback diagnostics identify safe rejection stages and RPC metadata
     failedStage: "transition",
   });
   assert.doesNotMatch(JSON.stringify(unexpectedError.warnings[0]), /private database details|Content-HMAC|fixture-secret-2026/i);
+});
+
+test("payload diagnostics expose safe value metadata without logging the value", async () => {
+  const route = await import("../../app/api/tiptoppay/[environment]/check/route");
+  const baseBody = await fixture("check-percent-encoded.form");
+  const run = (body: string) => captureWarnings(() => route.handlePost(
+    signedRequestWithSecret("/api/tiptoppay/test/check", body),
+    { params: Promise.resolve({ environment: "test" }) },
+    { getSecret: () => SECRET, applyCheck: async () => ({ kind: "accepted", code: 0 }) },
+  ));
+
+  const longName = "n".repeat(2049);
+  const longNameResult = await run(baseBody.replace("Name=%D0%90%D0%B9%D0%B4%D0%B0%D0%BD", `Name=${longName}`));
+  assert.deepEqual(longNameResult.warnings[0]?.[1], {
+    environment: "test",
+    eventType: "Check",
+    stage: "invalid_payload",
+    receivedFields: [
+      "TransactionId",
+      "Amount",
+      "Currency",
+      "PaymentAmount",
+      "PaymentCurrency",
+      "InvoiceId",
+      "AccountId",
+      "Name",
+    ],
+    rejectedField: "Name",
+    valueTooLong: true,
+    valueLength: longName.length,
+  });
+  assert.doesNotMatch(JSON.stringify(longNameResult.warnings[0]), /n{100}/u);
+
+  const data = '{\n\t"provider": "tiptop",\u0000\r\n}';
+  const dataResult = await run(`${baseBody}&Data=${encodeURIComponent(data)}`);
+  assert.deepEqual(dataResult.warnings[0]?.[1], {
+    environment: "test",
+    eventType: "Check",
+    stage: "invalid_payload",
+    receivedFields: [
+      "TransactionId",
+      "Amount",
+      "Currency",
+      "PaymentAmount",
+      "PaymentCurrency",
+      "InvoiceId",
+      "AccountId",
+      "Name",
+      "TestMode",
+      "Status",
+      "OperationType",
+      "DateTime",
+      "Data",
+    ],
+    rejectedField: "Data",
+    valueLength: data.length,
+    hasJsonWhitespace: true,
+  });
+  const serializedDataWarning = JSON.stringify(dataResult.warnings[0]);
+  assert.equal(serializedDataWarning.includes(data), false);
+  assert.doesNotMatch(serializedDataWarning, /Content-HMAC|fixture-secret-2026/i);
 });
 
 test("wrong TestMode is rejected before Check persistence and an invalid environment is generic", async () => {

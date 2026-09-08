@@ -18,6 +18,10 @@ const IDENTIFIER_MAX_LENGTH = 256;
 const TEXT_MAX_LENGTH = 2048;
 const CHECK_CODES = [10, 11, 12, 13, 20] as const;
 const LIST_STATUSES = new Set(["Authorized", "Completed", "Cancelled", "Declined"]);
+const OPAQUE_PROVIDER_FIELDS = new Set(["Data", "CustomFields"]);
+const STRICT_CONTROL_BYTES = /[\u0000-\u001f\u007f]/u;
+const DANGEROUS_JSON_CONTROL_BYTES = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/u;
+const JSON_WHITESPACE = /[ \t\r\n]/u;
 const DOCUMENTED_FIELDS = new Set([
   "TransactionId",
   "PaymentTransactionId",
@@ -73,12 +77,18 @@ export class TipTopPayloadError extends Error {
   readonly rejectedField?: string;
   readonly duplicateField?: string;
   readonly occurrenceCount?: number;
+  readonly valueTooLong?: boolean;
+  readonly valueLength?: number;
+  readonly hasJsonWhitespace?: boolean;
 
   constructor(details: {
     receivedFields?: readonly string[];
     rejectedField?: string;
     duplicateField?: string;
     occurrenceCount?: number;
+    valueTooLong?: boolean;
+    valueLength?: number;
+    hasJsonWhitespace?: boolean;
   } = {}) {
     super("Invalid TipTop webhook payload");
     this.name = "TipTopPayloadError";
@@ -86,6 +96,9 @@ export class TipTopPayloadError extends Error {
     this.rejectedField = details.rejectedField;
     this.duplicateField = details.duplicateField;
     this.occurrenceCount = details.occurrenceCount;
+    this.valueTooLong = details.valueTooLong;
+    this.valueLength = details.valueLength;
+    this.hasJsonWhitespace = details.hasJsonWhitespace;
   }
 }
 
@@ -155,13 +168,18 @@ export type TipTopTransitionResult =
 function invalid(
   rejectedField?: string,
   receivedFields?: readonly string[],
-  duplicate?: { field: string; occurrenceCount: number },
+  details: {
+    duplicateField?: string;
+    occurrenceCount?: number;
+    valueTooLong?: boolean;
+    valueLength?: number;
+    hasJsonWhitespace?: boolean;
+  } = {},
 ): never {
   throw new TipTopPayloadError({
     rejectedField,
     receivedFields,
-    duplicateField: duplicate?.field,
-    occurrenceCount: duplicate?.occurrenceCount,
+    ...details,
   });
 }
 
@@ -178,13 +196,43 @@ function decodeFormComponent(value: string): string {
   }
 }
 
-function boundedText(value: string, maxLength = TEXT_MAX_LENGTH): string {
-  if (
-    value.length === 0 ||
-    value.length > maxLength ||
-    /[\u0000-\u001f\u007f]/u.test(value)
-  ) {
-    invalid();
+function boundedText(
+  value: string,
+  maxLength = TEXT_MAX_LENGTH,
+  rejectedField?: string,
+  receivedFields?: readonly string[],
+): string {
+  const valueTooLong = value.length > maxLength;
+  if (value.length === 0 || valueTooLong || STRICT_CONTROL_BYTES.test(value)) {
+    invalid(rejectedField, receivedFields, {
+      ...(valueTooLong ? { valueTooLong: true } : {}),
+      valueLength: value.length,
+    });
+  }
+  return value;
+}
+
+function jsonValueDetails(value: string): {
+  valueLength: number;
+  hasJsonWhitespace?: true;
+} {
+  return {
+    valueLength: value.length,
+    ...(JSON_WHITESPACE.test(value) ? { hasJsonWhitespace: true } : {}),
+  };
+}
+
+function opaqueProviderField(
+  value: string,
+  rejectedField: string,
+  receivedFields: readonly string[],
+): string {
+  const valueTooLong = new TextEncoder().encode(value).byteLength > TIPTOP_BODY_MAX_BYTES;
+  if (valueTooLong || DANGEROUS_JSON_CONTROL_BYTES.test(value)) {
+    invalid(rejectedField, receivedFields, {
+      ...(valueTooLong ? { valueTooLong: true } : {}),
+      ...jsonValueDetails(value),
+    });
   }
   return value;
 }
@@ -192,11 +240,7 @@ function boundedText(value: string, maxLength = TEXT_MAX_LENGTH): string {
 function requiredField(fields: TipTopFormFields, name: string): string {
   const value = fields[name];
   if (value === undefined) invalid(name, Object.keys(fields));
-  try {
-    return boundedText(value, IDENTIFIER_MAX_LENGTH);
-  } catch {
-    invalid(name, Object.keys(fields));
-  }
+  return boundedText(value, IDENTIFIER_MAX_LENGTH, name, Object.keys(fields));
 }
 
 function identifier(fields: TipTopFormFields, name: string): string {
@@ -207,7 +251,9 @@ function identifier(fields: TipTopFormFields, name: string): string {
 
 function optionalText(fields: TipTopFormFields, name: string): string | undefined {
   const value = fields[name];
-  return value === undefined || value === "" ? undefined : boundedText(value);
+  return value === undefined || value === ""
+    ? undefined
+    : boundedText(value, TEXT_MAX_LENGTH, name, Object.keys(fields));
 }
 
 function assertDocumentedFields(fields: TipTopFormFields): void {
@@ -307,6 +353,13 @@ function mapFailureCode(reason: string, reasonCode: number): string {
 }
 
 export function parseFormPayload(rawBody: Uint8Array | string): TipTopFormFields {
+  const rawBodyBytes = typeof rawBody === "string"
+    ? new TextEncoder().encode(rawBody).byteLength
+    : rawBody.byteLength;
+  if (rawBodyBytes > TIPTOP_BODY_MAX_BYTES) {
+    invalid("body", [], { valueTooLong: true, valueLength: rawBodyBytes });
+  }
+
   let body: string;
   try {
     body = typeof rawBody === "string"
@@ -338,24 +391,23 @@ export function parseFormPayload(rawBody: Uint8Array | string): TipTopFormFields
     } catch {
       invalid(key, [...Object.keys(fields), key]);
     }
-    if (value !== "") {
-      try {
-        value = boundedText(value);
-      } catch {
-        invalid(key, [...Object.keys(fields), key]);
-      }
+    const receivedFields = [...Object.keys(fields), key];
+    if (OPAQUE_PROVIDER_FIELDS.has(key)) {
+      value = opaqueProviderField(value, key, receivedFields);
+    } else if (value !== "") {
+      value = boundedText(value, TEXT_MAX_LENGTH, key, receivedFields);
     }
     if (key === "SubscriptionId") {
       subscriptionIds.push(value);
       const allEmpty = subscriptionIds.every((subscriptionId) => subscriptionId === "");
       const allEqual = subscriptionIds.every((subscriptionId) => subscriptionId === subscriptionIds[0]);
       if (!allEmpty && !allEqual) {
-        invalid(key, [...Object.keys(fields), key], { field: key, occurrenceCount });
+        invalid(key, receivedFields, { duplicateField: key, occurrenceCount });
       }
       continue;
     }
     if (fields[key] !== undefined) {
-      invalid(key, [...Object.keys(fields), key], { field: key, occurrenceCount });
+      invalid(key, receivedFields, { duplicateField: key, occurrenceCount });
     }
     fields[key] = value;
   }
@@ -395,20 +447,23 @@ export function parseFail(fields: TipTopFormFields): TipTopFail {
   };
 }
 
-function parseRefundOperationKey(value: string | undefined): string | undefined {
-  if (value === undefined) return undefined;
+function parseRefundOperationKey(fields: TipTopFormFields): string | undefined {
+  const value = fields.Data;
+  if (value === undefined || value === "") return undefined;
   let parsed: unknown;
   try {
     parsed = JSON.parse(value);
   } catch {
-    invalid();
+    invalid("Data", Object.keys(fields), jsonValueDetails(value));
   }
-  if (!isRecord(parsed)) return undefined;
+  if (!isRecord(parsed)) invalid("Data", Object.keys(fields), jsonValueDetails(value));
   const operationKey = parsed.operationKey ?? parsed.requestId;
   if (operationKey === undefined) return undefined;
-  if (typeof operationKey !== "string") invalid();
-  const bounded = boundedText(operationKey, IDENTIFIER_MAX_LENGTH);
-  if (bounded.trim() !== bounded || /\s/u.test(bounded)) invalid();
+  if (typeof operationKey !== "string") invalid("Data", Object.keys(fields), jsonValueDetails(value));
+  const bounded = boundedText(operationKey, IDENTIFIER_MAX_LENGTH, "Data", Object.keys(fields));
+  if (bounded.trim() !== bounded || /\s/u.test(bounded)) {
+    invalid("Data", Object.keys(fields), jsonValueDetails(value));
+  }
   return bounded;
 }
 
@@ -429,7 +484,7 @@ export function parseRefund(fields: TipTopFormFields): TipTopRefund {
   if (fields.TestMode !== undefined) invalid();
   const invoiceId = fields.InvoiceId === undefined ? undefined : identifier(fields, "InvoiceId");
   const accountId = fields.AccountId === undefined ? undefined : identifier(fields, "AccountId");
-  const operationKey = parseRefundOperationKey(fields.Data);
+  const operationKey = parseRefundOperationKey(fields);
   return {
     transactionId: parseTransactionId(requiredField(fields, "TransactionId")),
     paymentTransactionId: parseTransactionId(requiredField(fields, "PaymentTransactionId")),
@@ -662,6 +717,9 @@ export async function handleSignedTipTopWebhook<T>(
           rejectedField: error.rejectedField,
           ...(error.duplicateField === undefined ? {} : { duplicateField: error.duplicateField }),
           ...(error.occurrenceCount === undefined ? {} : { occurrenceCount: error.occurrenceCount }),
+          ...(error.valueTooLong === undefined ? {} : { valueTooLong: error.valueTooLong }),
+          ...(error.valueLength === undefined ? {} : { valueLength: error.valueLength }),
+          ...(error.hasJsonWhitespace === undefined ? {} : { hasJsonWhitespace: error.hasJsonWhitespace }),
         });
         return Response.json({ code: 20 });
       }
