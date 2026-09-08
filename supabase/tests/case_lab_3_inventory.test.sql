@@ -213,18 +213,126 @@ language plpgsql
 as $$
 begin
   update public.case_lab_3_reservations
-  set admitted_payment_attempt_id = null;
-  delete from public.case_lab_3_provider_events;
-  delete from public.case_lab_3_fiscal_operations;
-  delete from public.case_lab_3_email_deliveries;
-  delete from public.case_lab_3_analytics_events;
-  delete from public.case_lab_3_jobs;
-  delete from public.case_lab_3_incidents;
-  delete from public.case_lab_3_refunds;
-  delete from public.case_lab_3_payment_attempts;
-  delete from public.case_lab_3_inventory_allocations;
-  delete from public.case_lab_3_reservations;
-  delete from public.case_lab_3_orders;
+  set admitted_payment_attempt_id = null
+  where environment = 'test'
+    and order_id in (
+      select id
+      from public.case_lab_3_orders
+      where environment = 'test'
+        and idempotency_key like 'inventory-test-%'
+    );
+  delete from public.case_lab_3_check_ins
+  where environment = 'test'
+    and ticket_id in (
+      select id
+      from public.case_lab_3_tickets
+      where environment = 'test'
+        and order_id in (
+          select id
+          from public.case_lab_3_orders
+          where environment = 'test'
+            and idempotency_key like 'inventory-test-%'
+        )
+    );
+  delete from public.case_lab_3_ticket_revisions
+  where environment = 'test'
+    and ticket_id in (
+      select id
+      from public.case_lab_3_tickets
+      where environment = 'test'
+        and order_id in (
+          select id
+          from public.case_lab_3_orders
+          where environment = 'test'
+            and idempotency_key like 'inventory-test-%'
+        )
+    );
+  delete from public.case_lab_3_tickets
+  where environment = 'test'
+    and order_id in (
+      select id
+      from public.case_lab_3_orders
+      where environment = 'test'
+        and idempotency_key like 'inventory-test-%'
+    );
+  delete from public.case_lab_3_provider_events
+  where environment = 'test'
+    and order_id in (
+      select id
+      from public.case_lab_3_orders
+      where environment = 'test'
+        and idempotency_key like 'inventory-test-%'
+    );
+  delete from public.case_lab_3_fiscal_operations
+  where environment = 'test'
+    and order_id in (
+      select id
+      from public.case_lab_3_orders
+      where environment = 'test'
+        and idempotency_key like 'inventory-test-%'
+    );
+  delete from public.case_lab_3_email_deliveries
+  where environment = 'test'
+    and order_id in (
+      select id
+      from public.case_lab_3_orders
+      where environment = 'test'
+        and idempotency_key like 'inventory-test-%'
+    );
+  delete from public.case_lab_3_analytics_events
+  where environment = 'test'
+    and order_id in (
+      select id
+      from public.case_lab_3_orders
+      where environment = 'test'
+        and idempotency_key like 'inventory-test-%'
+    );
+  delete from public.case_lab_3_jobs
+  where environment = 'test'
+    and order_id in (
+      select id
+      from public.case_lab_3_orders
+      where environment = 'test'
+        and idempotency_key like 'inventory-test-%'
+    );
+  delete from public.case_lab_3_incidents
+  where environment = 'test'
+    and order_id in (
+      select id
+      from public.case_lab_3_orders
+      where environment = 'test'
+        and idempotency_key like 'inventory-test-%'
+    );
+  delete from public.case_lab_3_refunds
+  where environment = 'test'
+    and order_id in (
+      select id
+      from public.case_lab_3_orders
+      where environment = 'test'
+        and idempotency_key like 'inventory-test-%'
+    );
+  delete from public.case_lab_3_payment_attempts
+  where environment = 'test'
+    and order_id in (
+      select id
+      from public.case_lab_3_orders
+      where environment = 'test'
+        and idempotency_key like 'inventory-test-%'
+    );
+  delete from public.case_lab_3_inventory_allocations
+  where environment = 'test'
+    and actor_label = 'pgTAP';
+  delete from public.case_lab_3_reservations
+  where environment = 'test'
+    and order_id in (
+      select id
+      from public.case_lab_3_orders
+      where environment = 'test'
+        and idempotency_key like 'inventory-test-%'
+    );
+  delete from public.case_lab_3_orders
+  where environment = 'test'
+    and idempotency_key like 'inventory-test-%';
 end;
 $$;
 
@@ -254,6 +362,49 @@ as $$
     ),
     p_idempotency_key,
     repeat('f', 64)
+  );
+$$;
+
+create or replace function pg_temp.cl3_remaining_early_bird_places()
+returns integer
+language sql
+as $$
+  select greatest(
+    0,
+    settings.early_bird_quota - (
+      select count(*)::integer
+      from public.case_lab_3_orders
+      where environment = 'test'
+        and tier = 'early_bird'
+        and paid_amount_minor > 0
+        and payment_status in ('paid', 'refund_pending', 'partially_refunded', 'refunded')
+    ) - (
+      select coalesce(sum(quantity), 0)::integer
+      from public.case_lab_3_inventory_allocations
+      where environment = 'test'
+        and allocation_category = 'paid'
+        and tier = 'early_bird'
+    )
+  )
+  from public.case_lab_3_event_settings settings
+  where settings.environment = 'test';
+$$;
+
+create or replace function pg_temp.cl3_existing_online_commitment()
+returns integer
+language sql
+as $$
+  select (
+    select count(*)::integer
+    from public.case_lab_3_reservations
+    where environment = 'test'
+      and status in ('active', 'processing', 'consumed')
+  ) + (
+    select coalesce(sum(quantity), 0)::integer
+    from public.case_lab_3_inventory_allocations
+    where environment = 'test'
+      and counts_toward_online_limit
+      and released_at is null
   );
 $$;
 
@@ -863,7 +1014,7 @@ do $$
 declare
   v_order_id uuid;
 begin
-  for i in 1..19 loop
+  for i in 1..greatest(0, pg_temp.cl3_remaining_early_bird_places() - 1) loop
     v_order_id := pg_temp.cl3_seed_reservation(i, 'early_bird', true, 'consumed');
   end loop;
 end;
@@ -982,7 +1133,7 @@ do $$ begin perform pg_temp.cl3_reset_inventory(); end $$;
 
 do $$
 begin
-  for i in 1..69 loop
+  for i in 1..greatest(0, 69 - pg_temp.cl3_existing_online_commitment()) loop
     perform pg_temp.cl3_seed_reservation(2000 + i, 'standard', false, 'active');
   end loop;
 end;
@@ -1012,7 +1163,7 @@ do $$ begin perform pg_temp.cl3_reset_inventory(); end $$;
 
 do $$
 begin
-  for i in 1..69 loop
+  for i in 1..greatest(0, 69 - pg_temp.cl3_existing_online_commitment()) loop
     perform pg_temp.cl3_seed_reservation(2500 + i, 'standard', false, 'active');
   end loop;
 end;
@@ -1037,7 +1188,7 @@ do $$ begin perform pg_temp.cl3_reset_inventory(); end $$;
 
 do $$
 begin
-  for i in 1..20 loop
+  for i in 1..pg_temp.cl3_remaining_early_bird_places() loop
     perform pg_temp.cl3_seed_reservation(3000 + i, 'early_bird', true, 'consumed');
   end loop;
 end;
@@ -1120,7 +1271,7 @@ do $$ begin perform pg_temp.cl3_reset_inventory(); end $$;
 
 do $$
 begin
-  for i in 1..19 loop
+  for i in 1..greatest(0, pg_temp.cl3_remaining_early_bird_places() - 1) loop
     perform pg_temp.cl3_seed_reservation(6000 + i, 'early_bird', true, 'consumed');
   end loop;
 end;
@@ -1187,7 +1338,7 @@ do $$ begin perform pg_temp.cl3_reset_inventory(); end $$;
 
 do $$
 begin
-  for i in 1..19 loop
+  for i in 1..greatest(0, pg_temp.cl3_remaining_early_bird_places() - 1) loop
     perform pg_temp.cl3_seed_reservation(7000 + i, 'early_bird', true, 'consumed');
   end loop;
 end;

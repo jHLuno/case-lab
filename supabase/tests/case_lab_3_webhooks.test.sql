@@ -33,6 +33,15 @@ select sales_enabled, sales_cutoff
 from public.case_lab_3_event_settings
 where environment = 'test';
 
+create temp table cl3_webhook_baseline on commit drop as
+select
+  (select count(*)::bigint from public.case_lab_3_provider_events) as provider_event_count,
+  (select count(*)::bigint from public.case_lab_3_tickets) as ticket_count,
+  (select count(*)::bigint from public.case_lab_3_email_deliveries
+   where operation_key like 'email:ticket:%') as ticket_email_count,
+  (select count(*)::bigint from public.case_lab_3_incidents
+   where incident_type = 'unknown_provider_result') as unknown_provider_result_count;
+
 create or replace function pg_temp.cl3_seed_order(
   p_number integer,
   p_status text default 'pending',
@@ -224,8 +233,8 @@ select is(
 
 select is(
   (select count(*)::bigint from public.case_lab_3_provider_events),
-  0::bigint,
-  'provider event fixtures start empty'
+  (select provider_event_count from cl3_webhook_baseline),
+  'provider event fixtures add no rows before callbacks'
 );
 
 select public.case_lab_3_apply_check(
@@ -284,7 +293,7 @@ select public.case_lab_3_apply_check(
 
 select is(
   (select count(*)::bigint from public.case_lab_3_incidents where incident_type = 'unknown_provider_result'),
-  1::bigint,
+  (select unknown_provider_result_count + 1 from cl3_webhook_baseline),
   'a reused Check event id with a different body becomes an incident'
 );
 
@@ -423,7 +432,7 @@ select is(
 select is(
   (select count(*)::bigint from public.case_lab_3_email_deliveries
    where operation_key like 'email:ticket:%'),
-  1::bigint,
+  (select ticket_email_count + 1 from cl3_webhook_baseline),
   'Pay creates one ticket email delivery'
 );
 
@@ -446,7 +455,7 @@ select public.case_lab_3_apply_pay(
 
 select is(
   (select count(*)::bigint from public.case_lab_3_tickets),
-  1::bigint,
+  (select ticket_count + 1 from cl3_webhook_baseline),
   'duplicate Pay does not create another ticket'
 );
 
@@ -508,7 +517,7 @@ select public.case_lab_3_apply_fail(
 
 select is(
   (select count(*)::bigint from public.case_lab_3_incidents where incident_type = 'unknown_provider_result'),
-  2::bigint,
+  (select unknown_provider_result_count + 2 from cl3_webhook_baseline),
   'terminal contradictory Fail creates one durable conflict incident'
 );
 
@@ -895,7 +904,7 @@ select is(
 
 select is(
   (select count(*)::bigint from public.case_lab_3_provider_events),
-   24::bigint,
+  (select provider_event_count + 24 from cl3_webhook_baseline),
    'replayed and ordered events preserve one row per provider event'
 );
 
