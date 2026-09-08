@@ -120,6 +120,12 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
               orderId={detail.id}
               participant={{ firstName: detail.firstName, lastName: detail.lastName, email: detail.participantEmail, phone: detail.phone, company: detail.company, position: detail.position }}
               hasReceipt={detail.fiscalOperations.some((operation) => Boolean(operation.receiptUrl))}
+              ticketStatus={detail.ticketStatus}
+              paymentStatus={detail.paymentStatus}
+              paidAmountMinor={detail.paidAmountMinor}
+              refundedAmountMinor={detail.refundedAmountMinor}
+              refundableAmountMinor={detail.refundableAmountMinor}
+              refunds={detail.refunds}
             />
             <RowList title="Email-доставки">
               <div className="space-y-3 text-sm">

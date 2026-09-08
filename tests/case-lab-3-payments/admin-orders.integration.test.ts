@@ -335,5 +335,5 @@ test("ticket cancellation uses the audited RPC without releasing paid capacity",
     reason: "Organizer cancellation",
     actorId: "crm_admin",
   });
-  assert.doesNotMatch(JSON.stringify(cancelled), /release|allocation/i);
+  assert.doesNotMatch(JSON.stringify(cancelled), /refund|release|allocation/i);
 });
