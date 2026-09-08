@@ -124,6 +124,47 @@ test("Check accepts repeated SubscriptionId values without retaining the non-rec
   );
 });
 
+test("Check accepts empty documented optional fields after HMAC verification", async () => {
+  const route = await import("../../app/api/tiptoppay/[environment]/check/route");
+  const baseBody = await fixture("check-percent-encoded.form");
+  const body = `${baseBody.replace("Name=%D0%90%D0%B9%D0%B4%D0%B0%D0%BD", "Name=")}&Email=&Description=&SubscriptionId=`;
+  let seenPayload: TipTopCheck | undefined;
+  const response = await route.handlePost(
+    signedRequestWithSecret("/api/tiptoppay/test/check", body),
+    { params: Promise.resolve({ environment: "test" }) },
+    {
+      getSecret: () => SECRET,
+      applyCheck: async (_environment: "test" | "live", payload: TipTopCheck) => {
+        seenPayload = payload;
+        return { kind: "accepted", code: 0 };
+      },
+    },
+  );
+
+  assert.equal(await responseCode(response), 0);
+  assert.equal(seenPayload?.name, undefined);
+});
+
+test("Check keeps required values strict when their form values are empty", async () => {
+  const baseBody = await fixture("check-percent-encoded.form");
+  for (const field of [
+    "TransactionId",
+    "Amount",
+    "Currency",
+    "OperationType",
+    "InvoiceId",
+    "AccountId",
+    "DateTime",
+    "TestMode",
+    "Status",
+  ]) {
+    const body = baseBody.replace(new RegExp(`${field}=[^&]*`), `${field}=`);
+    const fields = parseFormPayload(body);
+    assert.equal(fields[field], "", field);
+    assert.throws(() => parseCheck(fields), /invalid tiptop webhook payload/i, field);
+  }
+});
+
 test("typed parsers keep only strict, provider-documented transition data", async () => {
   const check = parseCheck(parseFormPayload(await fixture("check-plus-space.form")));
   assert.deepEqual(check, {

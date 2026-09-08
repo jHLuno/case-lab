@@ -207,7 +207,7 @@ function identifier(fields: TipTopFormFields, name: string): string {
 
 function optionalText(fields: TipTopFormFields, name: string): string | undefined {
   const value = fields[name];
-  return value === undefined ? undefined : boundedText(value);
+  return value === undefined || value === "" ? undefined : boundedText(value);
 }
 
 function assertDocumentedFields(fields: TipTopFormFields): void {
@@ -338,12 +338,12 @@ export function parseFormPayload(rawBody: Uint8Array | string): TipTopFormFields
     } catch {
       invalid(key, [...Object.keys(fields), key]);
     }
-    try {
-      if (!(key === "SubscriptionId" && value === "")) {
+    if (value !== "") {
+      try {
         value = boundedText(value);
+      } catch {
+        invalid(key, [...Object.keys(fields), key]);
       }
-    } catch {
-      invalid(key, [...Object.keys(fields), key]);
     }
     if (key === "SubscriptionId") {
       subscriptionIds.push(value);
