@@ -1,6 +1,18 @@
 begin;
 
-select plan(59);
+select plan(68);
+
+create temp table cl3_refund_test_baseline on commit drop as
+select
+  (select count(*)::bigint from public.case_lab_3_refunds) as refund_count,
+  (select count(*)::bigint from public.case_lab_3_incidents where incident_type = 'reconciliation_mismatch') as reconciliation_mismatch_count,
+  (select count(*)::bigint from public.case_lab_3_incidents where incident_type = 'overdue_receipt') as overdue_receipt_count,
+  (select count(*)::bigint from public.case_lab_3_provider_events where event_type = 'Refund') as refund_provider_event_count;
+
+create temp table cl3_refund_worker_fixture on commit drop as
+select
+  (100000000 + (txid_current() % 1000000)::integer) as processing_number,
+  (100001000 + (txid_current() % 1000000)::integer) as unknown_number;
 
 insert into public.case_lab_3_legal_document_versions (
   id, environment, document_kind, version_id, url, publication_label,
@@ -85,8 +97,8 @@ select is(
 
 select is(
   (select count(*)::bigint from public.case_lab_3_refunds),
-  0::bigint,
-  'refund fixtures start empty'
+  (select refund_count from cl3_refund_test_baseline),
+  'refund fixtures preserve pre-existing rows'
 );
 
 select public.case_lab_3_create_refund(
@@ -130,7 +142,7 @@ select is(
 
 select is(
   (select count(*)::bigint from public.case_lab_3_incidents where incident_type = 'reconciliation_mismatch'),
-  1::bigint,
+  (select reconciliation_mismatch_count + 1::bigint from cl3_refund_test_baseline),
   'a refund identity conflict becomes a reconciliation incident'
 );
 
@@ -147,7 +159,7 @@ select is(
 
 select is(
   (select count(*)::bigint from public.case_lab_3_incidents where incident_type = 'reconciliation_mismatch'),
-  2::bigint,
+  (select reconciliation_mismatch_count + 2::bigint from cl3_refund_test_baseline),
   'a mismatched provider refund amount becomes a reconciliation incident'
 );
 
@@ -452,7 +464,7 @@ select public.case_lab_3_apply_receipt(
 
 select is(
   (select count(*)::bigint from public.case_lab_3_incidents where incident_type = 'overdue_receipt'),
-  1::bigint,
+  (select overdue_receipt_count + 1::bigint from cl3_refund_test_baseline),
   'a Receipt with the wrong operation amount becomes an incident'
 );
 
@@ -558,7 +570,7 @@ select public.case_lab_3_apply_receipt(
 
 select is(
   (select count(*)::bigint from public.case_lab_3_incidents where incident_type = 'overdue_receipt'),
-  2::bigint,
+  (select overdue_receipt_count + 2::bigint from cl3_refund_test_baseline),
   'a Kassir ID match with a conflicting operation key becomes an overdue receipt incident'
 );
 
@@ -824,8 +836,108 @@ select is(
 
 select is(
   (select count(*)::bigint from public.case_lab_3_provider_events where event_type = 'Refund'),
-  22::bigint,
-  'refund provider events remain durable and replay-safe'
+  (select refund_provider_event_count + 22::bigint from cl3_refund_test_baseline),
+  'refund provider events remain durable and replay-safe alongside pre-existing events'
+);
+
+select public.case_lab_3_create_refund(
+  'test', pg_temp.cl3_seed_paid_refund_order((select processing_number from cl3_refund_worker_fixture)),
+  format('refund-op-worker-%s', (select processing_number from cl3_refund_worker_fixture)),
+  500000, 'worker failure transition'
+);
+
+select is(
+  public.case_lab_3_begin_refund(
+    'test',
+    (select order_id from public.case_lab_3_refunds where operation_key = format('refund-op-worker-%s', (select processing_number from cl3_refund_worker_fixture))),
+    (select id from public.case_lab_3_refunds where operation_key = format('refund-op-worker-%s', (select processing_number from cl3_refund_worker_fixture))),
+    format('refund-op-worker-%s', (select processing_number from cl3_refund_worker_fixture)),
+    500000
+  )->>'kind',
+  'claimed',
+  'refund worker claims a requested refund atomically'
+);
+
+select is(
+  (select status from public.case_lab_3_refunds where operation_key = format('refund-op-worker-%s', (select processing_number from cl3_refund_worker_fixture))),
+  'processing',
+  'claimed refund is durable in processing state'
+);
+
+select is(
+  public.case_lab_3_begin_refund(
+    'test',
+    (select order_id from public.case_lab_3_refunds where operation_key = format('refund-op-worker-%s', (select processing_number from cl3_refund_worker_fixture))),
+    (select id from public.case_lab_3_refunds where operation_key = format('refund-op-worker-%s', (select processing_number from cl3_refund_worker_fixture))),
+    format('refund-op-worker-%s', (select processing_number from cl3_refund_worker_fixture)),
+    500000
+  )->>'kind',
+  'already_processing',
+  'duplicate refund worker claims do not start a second provider request'
+);
+
+select is(
+  public.case_lab_3_fail_refund(
+    'test',
+    (select order_id from public.case_lab_3_refunds where operation_key = format('refund-op-worker-%s', (select processing_number from cl3_refund_worker_fixture))),
+    (select id from public.case_lab_3_refunds where operation_key = format('refund-op-worker-%s', (select processing_number from cl3_refund_worker_fixture))),
+    format('refund-op-worker-%s', (select processing_number from cl3_refund_worker_fixture)),
+    500000,
+    'provider_refused_refund'
+  )->>'kind',
+  'failed',
+  'provider refusal restores a processing refund through one failure transition'
+);
+
+select is(
+  (select status from public.case_lab_3_refunds where operation_key = format('refund-op-worker-%s', (select processing_number from cl3_refund_worker_fixture))),
+  'failed',
+  'failed refund is durable and no longer outstanding'
+);
+
+select public.case_lab_3_create_refund(
+  'test', pg_temp.cl3_seed_paid_refund_order((select unknown_number from cl3_refund_worker_fixture)),
+  format('refund-op-unknown-%s', (select unknown_number from cl3_refund_worker_fixture)),
+  500000, 'worker unknown transition'
+);
+
+select public.case_lab_3_begin_refund(
+  'test',
+  (select order_id from public.case_lab_3_refunds where operation_key = format('refund-op-unknown-%s', (select unknown_number from cl3_refund_worker_fixture))),
+  (select id from public.case_lab_3_refunds where operation_key = format('refund-op-unknown-%s', (select unknown_number from cl3_refund_worker_fixture))),
+  format('refund-op-unknown-%s', (select unknown_number from cl3_refund_worker_fixture)),
+  500000
+);
+
+select is(
+  public.case_lab_3_mark_refund_unknown(
+    'test',
+    (select order_id from public.case_lab_3_refunds where operation_key = format('refund-op-unknown-%s', (select unknown_number from cl3_refund_worker_fixture))),
+    (select id from public.case_lab_3_refunds where operation_key = format('refund-op-unknown-%s', (select unknown_number from cl3_refund_worker_fixture))),
+    format('refund-op-unknown-%s', (select unknown_number from cl3_refund_worker_fixture)),
+    'provider_result_unknown'
+  )->>'kind',
+  'unknown',
+  'unknown provider result moves the refund into reconciliation state'
+);
+
+select is(
+  (select status from public.case_lab_3_refunds where operation_key = format('refund-op-unknown-%s', (select unknown_number from cl3_refund_worker_fixture))),
+  'unknown',
+  'unknown refund is durable and not eligible for blind retry'
+);
+
+select ok(
+  (select uncertain_since_at is not null from public.case_lab_3_refunds where operation_key = format('refund-op-unknown-%s', (select unknown_number from cl3_refund_worker_fixture))),
+  'unknown refund persists an uncertainty timestamp'
+);
+
+select is(
+  (select payment_status from public.case_lab_3_orders where id = (
+    select order_id from public.case_lab_3_refunds where operation_key = format('refund-op-unknown-%s', (select unknown_number from cl3_refund_worker_fixture))
+  )),
+  'refund_pending',
+  'unknown refund keeps the order pending reconciliation'
 );
 
 select * from finish();

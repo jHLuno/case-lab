@@ -11,8 +11,9 @@ import {
   RetryableJobError,
   UnknownJobError,
 } from "../../app/lib/case-lab-3/jobs.server";
-import { createProductionCaseLab3JobHandlers, runCaseLab3Worker } from "../../app/lib/case-lab-3/worker.server";
+import { createInitiateRefundHandler, createProductionCaseLab3JobHandlers, runCaseLab3Worker } from "../../app/lib/case-lab-3/worker.server";
 import { handlePost as handleWorkerPost } from "../../app/api/internal/case-lab-3/jobs/route";
+import { TipTopApiError } from "../../app/lib/case-lab-3/tiptoppay.server";
 
 const ENVIRONMENT = "test" as const;
 
@@ -29,6 +30,60 @@ function claimedJob(index: number) {
     leasedUntil: "2026-09-08T01:02:00.000Z",
   };
 }
+
+const REFUND_JOB_ID = "00000000-0000-4000-8000-000000000941";
+const REFUND_ID = "00000000-0000-4000-8000-000000000942";
+const REFUND_ORDER_ID = "00000000-0000-4000-8000-000000000943";
+const PAYMENT_ATTEMPT_ID = "00000000-0000-4000-8000-000000000944";
+const REFUND_OPERATION_KEY = "refund-operation-941";
+
+function refundJob(overrides: Record<string, unknown> = {}) {
+  return {
+    jobId: REFUND_JOB_ID,
+    jobType: "initiate_refund" as const,
+    logicalKey: `refund:${REFUND_OPERATION_KEY}`,
+    payloadReference: {
+      refundId: REFUND_ID,
+      operationKey: REFUND_OPERATION_KEY,
+      amountMinor: 789000,
+    },
+    orderId: REFUND_ORDER_ID,
+    ticketId: null,
+    refundId: REFUND_ID,
+    leaseToken: "refund-lease",
+    leasedUntil: "2026-09-09T01:02:00.000Z",
+    ...overrides,
+  };
+}
+
+function refundState(overrides: Record<string, unknown> = {}) {
+  return {
+    environment: ENVIRONMENT,
+    orderId: REFUND_ORDER_ID,
+    orderNumber: "CL3-REFUND-941",
+    paymentStatus: "refund_pending",
+    paidAmountMinor: 789000,
+    ticketStatus: "cancelled",
+    refundId: REFUND_ID,
+    paymentAttemptId: PAYMENT_ATTEMPT_ID,
+    paymentProviderTransactionId: "12345",
+    operationKey: REFUND_OPERATION_KEY,
+    refundType: "full",
+    amountMinor: 789000,
+    currency: "KZT",
+    refundStatus: "requested",
+    attemptCount: 0,
+    uncertainSinceAt: null,
+    ...overrides,
+  };
+}
+
+const refundContext = {
+  environment: ENVIRONMENT,
+  signal: new AbortController().signal,
+  timeoutMs: WORKER_EXTERNAL_TIMEOUT_MS,
+  now: () => 0,
+};
 
 test("worker claims at most five jobs, preserves lease tokens, and runs registered handlers", async () => {
   const claimed = Array.from({ length: 6 }, (_, index) => claimedJob(index + 1));
@@ -193,7 +248,173 @@ test("production handler registry covers fiscal and mail jobs but not GA4", () =
   assert.equal(typeof handlers.send_ticket_email, "function");
   assert.equal(typeof handlers.send_refund_notification, "function");
   assert.equal(typeof handlers.send_organizer_alert, "function");
+  assert.equal(typeof handlers.initiate_refund, "function");
   assert.equal(handlers.send_analytics_event, undefined);
+});
+
+test("valid initiate_refund calls TipTop Pay once and leaves confirmation to the callback", async () => {
+  let providerCalls = 0;
+  const transitions: string[] = [];
+  const handler = createInitiateRefundHandler({
+    loadState: async () => refundState(),
+    markProcessing: async () => {
+      transitions.push("processing");
+      return "claimed";
+    },
+    refundPayment: async (environment, input, options) => {
+      providerCalls += 1;
+      assert.equal(environment, ENVIRONMENT);
+      assert.deepEqual(input, {
+        paymentTransactionId: "12345",
+        amountMinor: 789000,
+        operationKey: REFUND_OPERATION_KEY,
+        invoiceId: "CL3-REFUND-941",
+      });
+      assert.equal(options.signal, refundContext.signal);
+      return { success: true, message: "Queued", model: {}, status: 200 };
+    },
+  });
+
+  const result = await handler(refundJob(), refundContext);
+
+  assert.equal(providerCalls, 1);
+  assert.deepEqual(transitions, ["processing"]);
+  assert.deepEqual(result, {
+    status: "processing",
+    providerStatus: "accepted",
+    failureKind: "none",
+  });
+});
+
+test("a duplicate initiate_refund job with the same operation key does not call TipTop Pay again", async () => {
+  let providerCalls = 0;
+  const handler = createInitiateRefundHandler({
+    loadState: async () => refundState({ refundStatus: "processing" }),
+    refundPayment: async () => {
+      providerCalls += 1;
+      return { success: true, message: "Queued", model: {}, status: 200 };
+    },
+  });
+
+  const result = await handler(refundJob(), refundContext);
+
+  assert.equal(providerCalls, 0);
+  assert.deepEqual(result, {
+    status: "processing",
+    providerStatus: "already_processing",
+    failureKind: "none",
+  });
+});
+
+test("a cancelled ticket does not block a valid paid refund", async () => {
+  let providerCalls = 0;
+  const handler = createInitiateRefundHandler({
+    loadState: async () => refundState({ ticketStatus: "cancelled" }),
+    markProcessing: async () => "claimed",
+    refundPayment: async () => {
+      providerCalls += 1;
+      return { success: true, message: "Queued", model: {}, status: 200 };
+    },
+  });
+
+  await handler(refundJob(), refundContext);
+
+  assert.equal(providerCalls, 1);
+});
+
+test("a final TipTop Pay refusal restores the refundable request through the failure transition", async () => {
+  let failed = 0;
+  const handler = createInitiateRefundHandler({
+    loadState: async () => refundState(),
+    markProcessing: async () => "claimed",
+    markFailed: async () => {
+      failed += 1;
+    },
+    refundPayment: async () => ({ success: false, message: "Authentication failed", model: null, status: 401 }),
+  });
+
+  const result = await handler(refundJob(), refundContext);
+
+  assert.equal(failed, 1);
+  assert.deepEqual(result, {
+    status: "failed",
+    providerStatus: "http_401",
+    failureKind: "permanent",
+  });
+});
+
+test("an unknown TipTop result marks reconciliation and never blindly retries", async () => {
+  let providerCalls = 0;
+  let markedUnknown = 0;
+  const handler = createInitiateRefundHandler({
+    loadState: async () => refundState(),
+    markProcessing: async () => "claimed",
+    markUnknown: async () => {
+      markedUnknown += 1;
+    },
+    refundPayment: async () => {
+      providerCalls += 1;
+      throw new TipTopApiError();
+    },
+  });
+
+  await assert.rejects(() => handler(refundJob(), refundContext), UnknownJobError);
+  assert.equal(providerCalls, 1);
+  assert.equal(markedUnknown, 1);
+
+  const reconciledHandler = createInitiateRefundHandler({
+    loadState: async () => refundState({ refundStatus: "unknown" }),
+    refundPayment: async () => {
+      providerCalls += 1;
+      return { success: true, message: "must not retry", model: {}, status: 200 };
+    },
+  });
+  const result = await reconciledHandler(refundJob(), refundContext);
+
+  assert.equal(providerCalls, 1);
+  assert.deepEqual(result, {
+    status: "review_required",
+    providerStatus: "unknown",
+    failureKind: "unknown",
+  });
+});
+
+test("initiate_refund rejects invalid environment, order, refund, and amount before TipTop Pay", async () => {
+  const cases = [
+    { name: "environment", job: refundJob(), state: refundState({ environment: "live" }) },
+    { name: "order", job: refundJob({ orderId: "00000000-0000-4000-8000-000000000945" }), state: refundState() },
+    { name: "refund", job: refundJob({ refundId: "00000000-0000-4000-8000-000000000946" }), state: refundState() },
+    { name: "amount", job: refundJob(), state: refundState({ amountMinor: 700000 }) },
+  ];
+
+  for (const item of cases) {
+    const handler = createInitiateRefundHandler({
+      loadState: async () => item.state,
+      refundPayment: async () => {
+        assert.fail(`${item.name} must be rejected before provider call`);
+      },
+    });
+    await assert.rejects(() => handler(item.job, refundContext), PermanentJobError, item.name);
+  }
+});
+
+test("initiate_refund rejects a missing or malformed original provider transaction before changing state", async () => {
+  let processingCalls = 0;
+  for (const transactionId of [null, "not-numeric"]) {
+    const handler = createInitiateRefundHandler({
+      loadState: async () => refundState({ paymentProviderTransactionId: transactionId }),
+      markProcessing: async () => {
+        processingCalls += 1;
+        return "claimed";
+      },
+      refundPayment: async () => {
+        assert.fail("invalid provider transaction must be rejected before the provider call");
+      },
+    });
+
+    await assert.rejects(() => handler(refundJob(), refundContext), PermanentJobError);
+  }
+  assert.equal(processingCalls, 0);
 });
 
 test("production handler execution returns durable metadata for queued receipts and email delivery", async () => {

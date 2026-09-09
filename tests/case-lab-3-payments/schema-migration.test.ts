@@ -45,3 +45,17 @@ test("atomic refund creation queues one idempotent initiate_refund job", async (
   assert.match(refundFunction, /p_environment,\s*'initiate_refund',\s*'refund:'\s*\|\|\s*p_operation_key/iu);
   assert.match(refundFunction, /on conflict \(environment, logical_key\) do nothing/iu);
 });
+
+test("refund worker transitions are atomic and persist uncertainty timestamps", async () => {
+  const source = await readFile(
+    "supabase/migrations/20260909000000_add_case_lab_3_refund_worker_transitions.sql",
+    "utf8",
+  );
+
+  assert.match(source, /add column if not exists uncertain_since_at timestamptz/iu);
+  assert.match(source, /case_lab_3_begin_refund/iu);
+  assert.match(source, /case_lab_3_fail_refund/iu);
+  assert.match(source, /case_lab_3_mark_refund_unknown/iu);
+  assert.match(source, /pg_advisory_xact_lock/iu);
+  assert.match(source, /grant execute on function public\.case_lab_3_begin_refund/iu);
+});

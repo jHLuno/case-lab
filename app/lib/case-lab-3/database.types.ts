@@ -493,13 +493,14 @@ export type RefundRow = {
   reason: string | null;
   attempt_count: number;
   next_attempt_at: string | null;
+  uncertain_since_at: string | null;
   last_error: string | null;
   confirmed_at: string | null;
   created_at: string;
   updated_at: string;
 };
 
-export type RefundInsert = Omit<RefundRow, "id" | "created_at" | "updated_at" | "currency" | "status" | "attempt_count" | "remaining_refundable_amount_minor"> & {
+export type RefundInsert = Omit<RefundRow, "id" | "created_at" | "updated_at" | "currency" | "status" | "attempt_count" | "remaining_refundable_amount_minor" | "uncertain_since_at"> & {
   id?: string;
   created_at?: string;
   updated_at?: string;
@@ -507,6 +508,7 @@ export type RefundInsert = Omit<RefundRow, "id" | "created_at" | "updated_at" | 
   status?: RefundStatus;
   attempt_count?: number;
   remaining_refundable_amount_minor?: number;
+  uncertain_since_at?: string | null;
 };
 
 export type RefundUpdate = Partial<RefundInsert>;
@@ -780,6 +782,14 @@ export type CreateRefundRpcResult =
       status: RefundStatus;
     };
 
+export type RefundWorkerTransitionResult =
+  | { kind: "claimed"; status: "processing" }
+  | { kind: "already_processing"; status: "processing" }
+  | { kind: "terminal"; status: "confirmed" | "failed" }
+  | { kind: "review_required"; status: "unknown" | "review_required" }
+  | { kind: "failed"; status: "failed" }
+  | { kind: "unknown"; status: "unknown" };
+
 export type Database = {
   public: {
     Tables: {
@@ -876,6 +886,37 @@ export type Database = {
           p_reason: string;
         };
         Returns: CreateRefundRpcResult;
+      };
+      case_lab_3_begin_refund: {
+        Args: {
+          p_environment: PaymentEnvironment;
+          p_order_id: string;
+          p_refund_id: string;
+          p_operation_key: string;
+          p_amount_minor: number;
+        };
+        Returns: RefundWorkerTransitionResult;
+      };
+      case_lab_3_fail_refund: {
+        Args: {
+          p_environment: PaymentEnvironment;
+          p_order_id: string;
+          p_refund_id: string;
+          p_operation_key: string;
+          p_amount_minor: number;
+          p_error: string;
+        };
+        Returns: RefundWorkerTransitionResult;
+      };
+      case_lab_3_mark_refund_unknown: {
+        Args: {
+          p_environment: PaymentEnvironment;
+          p_order_id: string;
+          p_refund_id: string;
+          p_operation_key: string;
+          p_error: string;
+        };
+        Returns: RefundWorkerTransitionResult;
       };
     };
     Enums: Record<never, never>;

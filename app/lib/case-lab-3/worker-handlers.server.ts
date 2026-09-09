@@ -33,7 +33,19 @@ import {
   type ClaimedCaseLab3Job,
   type CaseLab3JobType,
 } from "./jobs.server";
-import type { Json, EmailStatus } from "./database.types";
+import {
+  refundPayment,
+  type RefundPaymentInput,
+  type TipTopApiOptions,
+  type TipTopApiResponse,
+} from "./tiptoppay.server";
+import type {
+  Json,
+  EmailStatus,
+  OrderSummaryTicketStatus,
+  PaymentStatus,
+  RefundStatus,
+} from "./database.types";
 import type { PaymentEnvironment } from "./contracts";
 
 export type WorkerHandlerContext = {
@@ -50,10 +62,44 @@ export type ProductionHandlerOverrides = {
   pollReceipt?: WorkerHandler;
   sendTicketEmail?: WorkerHandler;
   sendRefundNotification?: WorkerHandler;
+  initiateRefund?: WorkerHandler;
   sendOrganizerAlert?: WorkerHandler;
 };
 
 export type ProductionJobHandlers = Partial<Record<CaseLab3JobType, WorkerHandler>>;
+
+export type InitiateRefundState = {
+  environment: PaymentEnvironment;
+  orderId: string;
+  orderNumber: string;
+  paymentStatus: PaymentStatus;
+  paidAmountMinor: number;
+  ticketStatus: OrderSummaryTicketStatus;
+  refundId: string;
+  paymentAttemptId: string | null;
+  paymentProviderTransactionId: string | null;
+  operationKey: string;
+  refundType: "full" | "partial";
+  amountMinor: number;
+  currency: "KZT";
+  refundStatus: RefundStatus;
+  attemptCount: number;
+  uncertainSinceAt: string | null;
+};
+
+type RefundStartResult = "claimed" | "already_processing" | "confirmed" | "failed" | "review_required";
+
+export type InitiateRefundHandlerOverrides = {
+  loadState?: (job: ClaimedCaseLab3Job, context: WorkerHandlerContext) => Promise<unknown>;
+  markProcessing?: (state: InitiateRefundState, job: ClaimedCaseLab3Job, context: WorkerHandlerContext) => Promise<RefundStartResult>;
+  markFailed?: (state: InitiateRefundState, job: ClaimedCaseLab3Job, context: WorkerHandlerContext) => Promise<void>;
+  markUnknown?: (state: InitiateRefundState, job: ClaimedCaseLab3Job, context: WorkerHandlerContext) => Promise<void>;
+  refundPayment?: (
+    environment: PaymentEnvironment,
+    input: RefundPaymentInput,
+    options: TipTopApiOptions & { signal: AbortSignal },
+  ) => Promise<TipTopApiResponse>;
+};
 
 type WorkerQuery = {
   eq(column: string, value: unknown): WorkerQuery;
@@ -100,6 +146,252 @@ function uuid(value: unknown, name: string): string {
 function payloadText(job: ClaimedCaseLab3Job, name: string, maxLength = 256): string {
   const payload = record(job.payloadReference);
   return text(payload[name], name, maxLength);
+}
+
+function payloadInteger(job: ClaimedCaseLab3Job, name: string): number {
+  const payload = record(job.payloadReference);
+  const value = payload[name];
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value <= 0) {
+    throw new PermanentJobError(`Invalid worker ${name}`);
+  }
+  return value;
+}
+
+function oneOf<T extends string>(value: unknown, name: string, values: readonly T[]): T {
+  if (typeof value !== "string" || !values.includes(value as T)) throw new PermanentJobError(`Invalid worker ${name}`);
+  return value as T;
+}
+
+function optionalUuid(value: unknown, name: string): string | null {
+  return value === null || value === undefined ? null : uuid(value, name);
+}
+
+function optionalWorkerText(value: unknown, name: string, maxLength = 256): string | null {
+  return value === null || value === undefined ? null : text(value, name, maxLength);
+}
+
+function refundState(value: unknown): InitiateRefundState {
+  const source = record(value);
+  return {
+    environment: oneOf(source.environment, "environment", ["test", "live"] as const),
+    orderId: uuid(source.orderId, "order id"),
+    orderNumber: text(source.orderNumber, "order number", 128),
+    paymentStatus: oneOf(source.paymentStatus, "payment status", [
+      "pending",
+      "processing",
+      "paid",
+      "failed",
+      "refund_pending",
+      "partially_refunded",
+      "refunded",
+      "review_required",
+    ] as const) as PaymentStatus,
+    paidAmountMinor: workerAmount(source.paidAmountMinor, "paid amount"),
+    ticketStatus: oneOf(source.ticketStatus, "ticket status", ["pending", "valid", "used", "cancelled"] as const),
+    refundId: uuid(source.refundId, "refund id"),
+    paymentAttemptId: optionalUuid(source.paymentAttemptId, "payment attempt id"),
+    paymentProviderTransactionId: optionalWorkerText(source.paymentProviderTransactionId, "payment provider transaction id"),
+    operationKey: text(source.operationKey, "operation key", 200),
+    refundType: oneOf(source.refundType, "refund type", ["full", "partial"] as const),
+    amountMinor: workerAmount(source.amountMinor, "refund amount"),
+    currency: oneOf(source.currency, "currency", ["KZT"] as const),
+    refundStatus: oneOf(source.refundStatus, "refund status", [
+      "requested",
+      "processing",
+      "confirmed",
+      "failed",
+      "unknown",
+      "review_required",
+    ] as const),
+    attemptCount: workerCount(source.attemptCount, "attempt count"),
+    uncertainSinceAt: optionalWorkerText(source.uncertainSinceAt, "uncertain since", 128),
+  };
+}
+
+function workerAmount(value: unknown, name: string): number {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value <= 0) {
+    throw new PermanentJobError(`Invalid worker ${name}`);
+  }
+  return value;
+}
+
+function workerCount(value: unknown, name: string): number {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) {
+    throw new PermanentJobError(`Invalid worker ${name}`);
+  }
+  return value;
+}
+
+function validateRefundJob(job: ClaimedCaseLab3Job, context: WorkerHandlerContext, state: InitiateRefundState): {
+  operationKey: string;
+  amountMinor: number;
+} {
+  if (state.environment !== context.environment) throw new PermanentJobError("Refund environment mismatch");
+  if (!job.orderId || state.orderId !== job.orderId) throw new PermanentJobError("Refund order mismatch");
+  if (!job.refundId || state.refundId !== job.refundId) throw new PermanentJobError("Refund id mismatch");
+
+  const refundId = uuid(payloadText(job, "refundId"), "refund id");
+  const operationKey = payloadText(job, "operationKey", 200);
+  const amountMinor = payloadInteger(job, "amountMinor");
+  if (refundId !== state.refundId || operationKey !== state.operationKey || amountMinor !== state.amountMinor) {
+    throw new PermanentJobError("Refund payload does not match durable state");
+  }
+  if (state.amountMinor > state.paidAmountMinor) throw new PermanentJobError("Refund exceeds paid amount");
+  if (state.refundStatus === "requested" && state.paymentStatus !== "paid" && state.paymentStatus !== "refund_pending" && state.paymentStatus !== "partially_refunded") {
+    throw new PermanentJobError("Refund order is not refundable");
+  }
+  if (
+    state.refundStatus === "requested" &&
+    (!state.paymentProviderTransactionId || !/^\d+$/u.test(state.paymentProviderTransactionId) || !Number.isSafeInteger(Number(state.paymentProviderTransactionId)) || Number(state.paymentProviderTransactionId) < 1)
+  ) {
+    throw new PermanentJobError("Refund payment transaction is invalid");
+  }
+  return { operationKey, amountMinor };
+}
+
+async function loadInitiateRefundState(job: ClaimedCaseLab3Job, context: WorkerHandlerContext): Promise<unknown> {
+  if (!job.orderId || !job.refundId) throw new PermanentJobError("Refund job identifiers are missing");
+  const refundId = uuid(payloadText(job, "refundId"), "refund id");
+  const operationKey = payloadText(job, "operationKey", 200);
+  payloadInteger(job, "amountMinor");
+  const client = database();
+  const order = await selectOne(client, "case_lab_3_orders", "id, order_number, environment, payment_status, paid_amount_minor, ticket_status", [
+    ["id", job.orderId],
+    ["environment", context.environment],
+  ]);
+  const refund = await selectOne(client, "case_lab_3_refunds", "id, order_id, payment_attempt_id, payment_provider_transaction_id, environment, operation_key, refund_type, amount_minor, currency, status, attempt_count, uncertain_since_at", [
+    ["id", refundId],
+    ["order_id", job.orderId],
+    ["environment", context.environment],
+    ["operation_key", operationKey],
+  ]);
+  return {
+    environment: context.environment,
+    orderId: order.id,
+    orderNumber: order.order_number,
+    paymentStatus: order.payment_status,
+    paidAmountMinor: order.paid_amount_minor,
+    ticketStatus: order.ticket_status,
+    refundId: refund.id,
+    paymentAttemptId: refund.payment_attempt_id,
+    paymentProviderTransactionId: refund.payment_provider_transaction_id,
+    operationKey: refund.operation_key,
+    refundType: refund.refund_type,
+    amountMinor: refund.amount_minor,
+    currency: refund.currency,
+    refundStatus: refund.status,
+    attemptCount: refund.attempt_count,
+    uncertainSinceAt: refund.uncertain_since_at ?? null,
+  };
+}
+
+async function refundTransition(name: string, args: Record<string, unknown>): Promise<WorkerRecord> {
+  let result: { data: unknown; error: unknown };
+  try {
+    result = await database().rpc(name, args);
+  } catch {
+    throw new RetryableJobError("Refund state transition unavailable");
+  }
+  if (result.error || !result.data) throw new RetryableJobError("Refund state transition unavailable");
+  return record(result.data);
+}
+
+async function markRefundProcessing(state: InitiateRefundState): Promise<RefundStartResult> {
+  const result = await refundTransition("case_lab_3_begin_refund", {
+    p_environment: state.environment,
+    p_order_id: state.orderId,
+    p_refund_id: state.refundId,
+    p_operation_key: state.operationKey,
+    p_amount_minor: state.amountMinor,
+  });
+  const kind = result.kind;
+  if (kind === "claimed" || kind === "already_processing") return kind;
+  if (kind === "terminal" && (result.status === "confirmed" || result.status === "failed")) return result.status;
+  if (kind === "review_required") return kind;
+  throw new RetryableJobError("Invalid refund state transition");
+}
+
+async function markRefundFailed(state: InitiateRefundState): Promise<void> {
+  const result = await refundTransition("case_lab_3_fail_refund", {
+    p_environment: state.environment,
+    p_order_id: state.orderId,
+    p_refund_id: state.refundId,
+    p_operation_key: state.operationKey,
+    p_amount_minor: state.amountMinor,
+    p_error: "provider_refused_refund",
+  });
+  if (result.kind !== "failed" && result.kind !== "terminal" && result.kind !== "review_required") {
+    throw new RetryableJobError("Invalid refund failure transition");
+  }
+}
+
+async function markRefundUnknown(state: InitiateRefundState): Promise<void> {
+  const result = await refundTransition("case_lab_3_mark_refund_unknown", {
+    p_environment: state.environment,
+    p_order_id: state.orderId,
+    p_refund_id: state.refundId,
+    p_operation_key: state.operationKey,
+    p_error: "provider_result_unknown",
+  });
+  if (result.kind !== "unknown" && result.kind !== "terminal" && result.kind !== "review_required") {
+    throw new RetryableJobError("Invalid refund uncertainty transition");
+  }
+}
+
+function refundStateResult(status: RefundStatus): Json {
+  if (status === "confirmed") return { status: "confirmed", providerStatus: "confirmed", failureKind: "none" };
+  if (status === "failed") return { status: "failed", providerStatus: "failed", failureKind: "permanent" };
+  if (status === "processing") return { status: "processing", providerStatus: "already_processing", failureKind: "none" };
+  return { status: "review_required", providerStatus: status, failureKind: "unknown" };
+}
+
+function refundStartResult(status: RefundStartResult): Json {
+  if (status === "claimed") throw new RetryableJobError("Refund transition did not produce a result");
+  if (status === "already_processing") return refundStateResult("processing");
+  return refundStateResult(status);
+}
+
+function refundProviderOptions(context: WorkerHandlerContext): TipTopApiOptions & { signal: AbortSignal } {
+  return {
+    signal: context.signal,
+    timeoutMs: context.timeoutMs,
+    now: context.now,
+    getConfig: (environment) => ({ tiptop: getCaseLab3Config(environment).tiptop }),
+  };
+}
+
+async function initiateRefund(job: ClaimedCaseLab3Job, context: WorkerHandlerContext, overrides: InitiateRefundHandlerOverrides): Promise<Json> {
+  const state = refundState(await (overrides.loadState ?? loadInitiateRefundState)(job, context));
+  const { operationKey, amountMinor } = validateRefundJob(job, context, state);
+
+  if (state.refundStatus !== "requested") return refundStateResult(state.refundStatus);
+
+  const markProcessing = overrides.markProcessing ?? markRefundProcessing;
+  const start = await markProcessing(state, job, context);
+  if (start !== "claimed") {
+    return refundStartResult(start);
+  }
+  const paymentTransactionId = state.paymentProviderTransactionId;
+  if (!paymentTransactionId) throw new PermanentJobError("Refund payment transaction is missing");
+  const provider = overrides.refundPayment ?? refundPayment;
+  let response: TipTopApiResponse;
+  try {
+    response = await provider(context.environment, {
+      paymentTransactionId,
+      amountMinor,
+      operationKey,
+      invoiceId: state.orderNumber,
+    }, refundProviderOptions(context));
+    if (response.success) {
+      return { status: "processing", providerStatus: "accepted", failureKind: "none" };
+    }
+  } catch {
+    await (overrides.markUnknown ?? markRefundUnknown)(state, job, context);
+    throw new UnknownJobError("TipTop refund result is unknown", context.now());
+  }
+
+  await (overrides.markFailed ?? markRefundFailed)(state, job, context);
+  return { status: "failed", providerStatus: `http_${response.status}`, failureKind: "permanent" };
 }
 
 async function selectOne(
@@ -535,8 +827,13 @@ function defaultHandlers(): ProductionJobHandlers {
     poll_receipt: pollReceipt,
     send_ticket_email: sendTicket,
     send_refund_notification: sendRefund,
+    initiate_refund: createInitiateRefundHandler(),
     send_organizer_alert: sendAlert,
   };
+}
+
+export function createInitiateRefundHandler(overrides: InitiateRefundHandlerOverrides = {}): WorkerHandler {
+  return (job, context) => initiateRefund(job, context, overrides);
 }
 
 export function createProductionCaseLab3JobHandlers(overrides: ProductionHandlerOverrides = {}): ProductionJobHandlers {
@@ -545,6 +842,7 @@ export function createProductionCaseLab3JobHandlers(overrides: ProductionHandler
   if (overrides.pollReceipt) handlers.poll_receipt = overrides.pollReceipt;
   if (overrides.sendTicketEmail) handlers.send_ticket_email = overrides.sendTicketEmail;
   if (overrides.sendRefundNotification) handlers.send_refund_notification = overrides.sendRefundNotification;
+  if (overrides.initiateRefund) handlers.initiate_refund = overrides.initiateRefund;
   if (overrides.sendOrganizerAlert) handlers.send_organizer_alert = overrides.sendOrganizerAlert;
   return handlers;
 }

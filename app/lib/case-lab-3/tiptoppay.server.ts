@@ -809,6 +809,7 @@ export type TipTopApiOptions = {
   getConfig?: (environment: PaymentEnvironment) => TipTopApiConfig;
   timeoutMs?: number;
   now?: () => number;
+  signal?: AbortSignal;
 };
 
 function validateApiEnvironment(environment: string): asserts environment is PaymentEnvironment {
@@ -889,6 +890,9 @@ async function tipTopApiRequest(
   if (idempotencyKey !== undefined) headers.set("X-Request-ID", requestId(idempotencyKey));
 
   const controller = new AbortController();
+  const abortFromCaller = () => controller.abort();
+  if (options.signal?.aborted) controller.abort();
+  else options.signal?.addEventListener("abort", abortFromCaller, { once: true });
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetcher(`${TIPTOP_API_BASE_URL}${path}`, {
@@ -911,6 +915,7 @@ async function tipTopApiRequest(
     throw new TipTopApiError();
   } finally {
     clearTimeout(timeout);
+    options.signal?.removeEventListener("abort", abortFromCaller);
   }
 }
 

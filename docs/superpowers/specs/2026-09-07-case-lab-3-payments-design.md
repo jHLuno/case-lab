@@ -557,6 +557,10 @@ Manual acceptance covers iPhone Safari, Android Chrome, desktop browsers, phone 
 - Register exact HTTPS Check, Pay, Fail, Refund, and Receipt callback URLs in provider dashboards.
 - Enable only the test sales row after its fiscal policy and legal versions pass validation; verify the live row remains disabled before Tasks 7-9 acceptance.
 - Confirm initial consumed inventory is still zero immediately before enabling sales.
+
+## 22. Future Ideas
+
+- Add a protected, audited recovery action for an `unknown` worker job that requeues the existing job without creating a second refund or manually changing the refund state.
 - Reserve an acceptance window for a real purchase and full refund, including accountant verification of every receipt required by the approved fiscal policy.
 
 ## 22. Completion Criterion
