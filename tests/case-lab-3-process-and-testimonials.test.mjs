@@ -41,6 +41,7 @@ test("testimonial proof keeps its content and exposes a mobile carousel", () => 
   assert.match(proofSource, /<span className=\{styles\.testimonialReviewLabel\} aria-hidden="true">/);
   assert.match(proofSource, /reviewHref:\s*"https:\/\/www\.instagram\.com\/p\/DcYwmZZsQq1\/"/);
   assert.match(proofSource, /reviewHref:\s*"https:\/\/www\.instagram\.com\/p\/DcbLF_MsX5Q\/"/);
+  assert.match(proofSource, /reviewHref:\s*"https:\/\/www\.instagram\.com\/p\/Dcdv6Uys3FZ\/"/);
   assert.match(proofSource, /href=\{testimonial\.reviewHref\}/);
   assert.match(proofSource, /target="_blank"/);
   assert.match(proofSource, /rel="noopener noreferrer"/);

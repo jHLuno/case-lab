@@ -34,7 +34,7 @@ const testimonials = [
     quote:
       "Разбор кейсов без прикрас — это то, чего часто не хватает в индустрии. После Case Lab появилось больше смелости принимать решения и тестировать.",
     photo: "/testimonial-aida.webp",
-    reviewHref: undefined,
+    reviewHref: "https://www.instagram.com/p/Dcdv6Uys3FZ/",
   },
 ] as const;
 
