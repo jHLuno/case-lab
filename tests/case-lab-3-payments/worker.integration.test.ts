@@ -15,7 +15,6 @@ import {
 import {
   createInitiateRefundHandler,
   createProductionCaseLab3JobHandlers,
-  createReconcilePaymentHandler,
   createSendAnalyticsEventHandler,
   runCaseLab3Worker,
 } from "../../app/lib/case-lab-3/worker.server";
@@ -62,15 +61,6 @@ function refundJob(overrides: Record<string, unknown> = {}) {
     leasedUntil: "2026-09-09T01:02:00.000Z",
     ...overrides,
   };
-}
-
-function refundReconciliationJob(overrides: Record<string, unknown> = {}) {
-  return refundJob({
-    jobType: "reconcile_payment" as const,
-    logicalKey: `reconcile:refund:${REFUND_ID}`,
-    payloadReference: { refundId: REFUND_ID },
-    ...overrides,
-  });
 }
 
 function refundState(overrides: Record<string, unknown> = {}) {
@@ -281,7 +271,6 @@ test("production handler registry handles GA4 jobs explicitly", () => {
   assert.equal(typeof handlers.send_refund_notification, "function");
   assert.equal(typeof handlers.send_organizer_alert, "function");
   assert.equal(typeof handlers.initiate_refund, "function");
-  assert.equal(typeof handlers.reconcile_payment, "function");
   assert.equal(typeof handlers.send_analytics_event, "function");
 });
 
@@ -379,7 +368,7 @@ test("valid initiate_refund calls TipTop Pay once and leaves confirmation to the
         invoiceId: "CL3-REFUND-941",
       });
       assert.equal(options.signal, refundContext.signal);
-      return { success: true, message: "Queued", model: { TransactionId: "67890" }, status: 200 };
+      return { success: true, message: "Queued", model: {}, status: 200 };
     },
   });
 
@@ -394,107 +383,6 @@ test("valid initiate_refund calls TipTop Pay once and leaves confirmation to the
   });
 });
 
-test("a successful TipTop response without a refund transaction id becomes unknown instead of accepted", async () => {
-  let markedUnknown = 0;
-  let markedFailed = 0;
-  const handler = createInitiateRefundHandler({
-    loadState: async () => refundState(),
-    markProcessing: async () => "claimed",
-    markUnknown: async () => {
-      markedUnknown += 1;
-    },
-    markFailed: async () => {
-      markedFailed += 1;
-    },
-    refundPayment: async () => ({ success: true, message: "Queued", model: {}, status: 200 }),
-  });
-
-  await assert.rejects(() => handler(refundJob(), refundContext), UnknownJobError);
-  assert.equal(markedUnknown, 1);
-  assert.equal(markedFailed, 0);
-});
-
-test("refund reconciliation uses read-only provider lookup before the durable confirmation transition", async () => {
-  const calls: string[] = [];
-  const handler = createReconcilePaymentHandler({
-    loadState: async () => refundState({ refundStatus: "unknown" }),
-    reconcileRefund: async (_environment, input, options) => {
-      calls.push("lookup");
-      assert.equal(input.paymentTransactionId, "12345");
-      assert.equal(input.amountMinor, 789000);
-      assert.equal(input.operationKey, REFUND_OPERATION_KEY);
-      assert.equal(input.invoiceId, "CL3-REFUND-941");
-      assert.equal(options.signal, refundContext.signal);
-      return { kind: "confirmed", model: { TransactionId: "67890" } };
-    },
-    applyRefund: async (environment, payload, context) => {
-      calls.push("apply");
-      assert.equal(environment, ENVIRONMENT);
-      assert.deepEqual(payload, {
-        transactionId: "67890",
-        paymentTransactionId: "12345",
-        amountMinor: 789000,
-        currency: "KZT",
-        invoiceId: "CL3-REFUND-941",
-        operationKey: REFUND_OPERATION_KEY,
-        status: "Completed",
-        operationType: "Refund",
-      });
-      assert.equal(context.providerEventId, "Reconciliation:Refund:67890");
-      assert.match(context.bodyHash, /^[0-9a-f]{64}$/u);
-      return { kind: "accepted", result: "confirmed" };
-    },
-  });
-
-  assert.deepEqual(await handler(refundReconciliationJob(), refundContext), {
-    status: "confirmed",
-    providerStatus: "reconciled",
-    failureKind: "none",
-  });
-  assert.deepEqual(calls, ["lookup", "apply"]);
-});
-
-test("a duplicate reconciliation transition does not confirm an unresolved refund", async () => {
-  const handler = createReconcilePaymentHandler({
-    loadState: async () => refundState({ refundStatus: "unknown" }),
-    reconcileRefund: async () => ({ kind: "confirmed", model: { TransactionId: "67890" } }),
-    applyRefund: async () => ({ kind: "accepted", duplicate: true }),
-  });
-
-  assert.deepEqual(await handler(refundReconciliationJob(), refundContext), {
-    status: "review_required",
-    providerStatus: "reconciliation_mismatch",
-    failureKind: "unknown",
-  });
-});
-
-test("a duplicate reconciliation transition accepts only a durable confirmed refund", async () => {
-  let loadCount = 0;
-  const handler = createReconcilePaymentHandler({
-    loadState: async () => refundState({ refundStatus: loadCount++ === 0 ? "unknown" : "confirmed" }),
-    reconcileRefund: async () => ({ kind: "confirmed", model: { TransactionId: "67890" } }),
-    applyRefund: async () => ({ kind: "accepted", duplicate: true }),
-  });
-
-  assert.deepEqual(await handler(refundReconciliationJob(), refundContext), {
-    status: "confirmed",
-    providerStatus: "reconciled",
-    failureKind: "none",
-  });
-  assert.equal(loadCount, 2);
-});
-
-test("payment reconciliation jobs are not misclassified as refund reconciliation jobs", async () => {
-  const handler = createReconcilePaymentHandler();
-  await assert.rejects(
-    () => handler(refundReconciliationJob({
-      refundId: null,
-      payloadReference: { attemptId: PAYMENT_ATTEMPT_ID, incidentId: REFUND_ID },
-    }), refundContext),
-    /dedicated payment handler/i,
-  );
-});
-
 test("refund worker diagnostics expose transition and provider stages without identifiers", async () => {
   const diagnostics: unknown[][] = [];
   const originalInfo = console.info;
@@ -503,7 +391,7 @@ test("refund worker diagnostics expose transition and provider stages without id
     const handler = createInitiateRefundHandler({
       loadState: async () => refundState(),
       markProcessing: async () => "claimed",
-      refundPayment: async () => ({ success: true, message: "Queued", model: { TransactionId: "67890" }, status: 200 }),
+      refundPayment: async () => ({ success: true, message: "Queued", model: {}, status: 200 }),
     });
     await handler(refundJob(), refundContext);
   } finally {
@@ -526,7 +414,7 @@ test("refund worker continues when diagnostic logging fails", async () => {
     const handler = createInitiateRefundHandler({
       loadState: async () => refundState(),
       markProcessing: async () => "claimed",
-      refundPayment: async () => ({ success: true, message: "Queued", model: { TransactionId: "67890" }, status: 200 }),
+      refundPayment: async () => ({ success: true, message: "Queued", model: {}, status: 200 }),
     });
     assert.deepEqual(await handler(refundJob(), refundContext), {
       status: "processing",
@@ -565,7 +453,7 @@ test("a cancelled ticket does not block a valid paid refund", async () => {
     markProcessing: async () => "claimed",
     refundPayment: async () => {
       providerCalls += 1;
-      return { success: true, message: "Queued", model: { TransactionId: "67890" }, status: 200 };
+      return { success: true, message: "Queued", model: {}, status: 200 };
     },
   });
 

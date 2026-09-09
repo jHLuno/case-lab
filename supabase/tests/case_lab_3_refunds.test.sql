@@ -1,6 +1,6 @@
 begin;
 
-select plan(71);
+select plan(68);
 
 create temp table cl3_refund_test_baseline on commit drop as
 select
@@ -925,34 +925,6 @@ select is(
   (select status from public.case_lab_3_refunds where operation_key = format('refund-op-unknown-%s', (select unknown_number from cl3_refund_worker_fixture))),
   'unknown',
   'unknown refund is durable and not eligible for blind retry'
-);
-
-select is(
-  (select count(*)::bigint from public.case_lab_3_jobs
-   where job_type = 'reconcile_payment'
-      and refund_id = (select id from public.case_lab_3_refunds where operation_key = format('refund-op-unknown-%s', (select unknown_number from cl3_refund_worker_fixture)))),
-  1::bigint,
-  'unknown refund queues one idempotent reconciliation job'
-);
-
-select is(
-  public.case_lab_3_mark_refund_unknown(
-    'test',
-    (select order_id from public.case_lab_3_refunds where operation_key = format('refund-op-unknown-%s', (select unknown_number from cl3_refund_worker_fixture))),
-    (select id from public.case_lab_3_refunds where operation_key = format('refund-op-unknown-%s', (select unknown_number from cl3_refund_worker_fixture))),
-    format('refund-op-unknown-%s', (select unknown_number from cl3_refund_worker_fixture)),
-    'provider_result_unknown_retry'
-  )->>'kind',
-  'review_required',
-  'repeating the unknown transition preserves the reconciliation review state'
-);
-
-select is(
-  (select count(*)::bigint from public.case_lab_3_jobs
-   where job_type = 'reconcile_payment'
-     and refund_id = (select id from public.case_lab_3_refunds where operation_key = format('refund-op-unknown-%s', (select unknown_number from cl3_refund_worker_fixture)))),
-  1::bigint,
-  'repeating the unknown transition does not create a second reconciliation job'
 );
 
 select ok(

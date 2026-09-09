@@ -31,7 +31,7 @@ export type CaseLab3JobHandler = WorkerHandler;
 
 export type CaseLab3JobHandlers = Partial<Record<CaseLab3JobType, CaseLab3JobHandler>>;
 export { createProductionCaseLab3JobHandlers };
-export { createInitiateRefundHandler, createReconcilePaymentHandler, createSendAnalyticsEventHandler } from "./worker-handlers.server";
+export { createInitiateRefundHandler, createSendAnalyticsEventHandler } from "./worker-handlers.server";
 export type { ProductionHandlerOverrides, ProductionJobHandlers };
 
 export type WorkerDependencies = Partial<CaseLab3JobStore> & {

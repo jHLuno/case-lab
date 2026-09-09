@@ -643,14 +643,6 @@ export type KassirWebhookContext = {
   providerEventId: string;
 };
 
-export type KassirWebhookDiagnostic = {
-  eventType: "Receipt";
-  receiptType: KassirReceiptType | null;
-  stage: "environment" | "content_type" | "body" | "hmac" | "parse" | "transition" | "unexpected_error";
-  rejectedField?: string;
-  rpcReason?: string;
-};
-
 export type KassirTransitionResult =
   | { kind: "accepted"; duplicate?: boolean; pendingMatch?: boolean; status?: string }
   | { kind: "review_required" };
@@ -762,56 +754,20 @@ export function kassirSecret(environment: PaymentEnvironment): string {
 export type KassirWebhookDependencies = {
   getSecret: (environment: PaymentEnvironment) => string;
   applyReceipt: (environment: PaymentEnvironment, payload: KassirReceiptPayload, context: KassirWebhookContext) => Promise<KassirTransitionResult>;
-  onDiagnostic?: (diagnostic: KassirWebhookDiagnostic) => void;
 };
-
-function emitKassirWebhookDiagnostic(
-  dependencies: KassirWebhookDependencies,
-  diagnostic: KassirWebhookDiagnostic,
-): void {
-  try {
-    (dependencies.onDiagnostic ?? ((entry) => console.warn("Case Lab III Kassir webhook", entry)))(diagnostic);
-  } catch {
-    // Diagnostics must never alter webhook acknowledgement handling.
-  }
-}
 
 export async function handleSignedKassirReceipt(
   request: Request,
   environmentValue: string,
   dependencies: KassirWebhookDependencies,
 ): Promise<Response> {
-  let stage: KassirWebhookDiagnostic["stage"] = "environment";
-  let receiptType: KassirReceiptType | null = null;
   try {
-    if (environmentValue !== "test" && environmentValue !== "live") {
-      emitKassirWebhookDiagnostic(dependencies, {
-        eventType: "Receipt",
-        receiptType,
-        stage,
-        rejectedField: "environment",
-      });
-      return Response.json({ code: 20 });
-    }
-    stage = "content_type";
+    if (environmentValue !== "test" && environmentValue !== "live") return Response.json({ code: 20 });
     requireForm(request);
-    stage = "body";
     const rawBody = await readBoundedBody(request, KASSIR_BODY_MAX_BYTES);
-    stage = "hmac";
     const secret = dependencies.getSecret(environmentValue);
-    if (!verifyProviderHmac(rawBody, request.headers, secret, "raw-body")) {
-      emitKassirWebhookDiagnostic(dependencies, {
-        eventType: "Receipt",
-        receiptType,
-        stage,
-        rejectedField: "Content-HMAC",
-      });
-      return Response.json({ code: 20 });
-    }
-    stage = "parse";
+    if (!verifyProviderHmac(rawBody, request.headers, secret, "raw-body")) return Response.json({ code: 20 });
     const payload = parseReceiptForm(rawBody);
-    receiptType = payload.type;
-    stage = "transition";
     const result = await dependencies.applyReceipt(environmentValue, payload, {
       environment: environmentValue,
       bodyHash: hashKassirBody(rawBody),
@@ -821,12 +777,6 @@ export async function handleSignedKassirReceipt(
       ? Response.json({ code: 0 })
       : Response.json({ code: 20 });
   } catch {
-    emitKassirWebhookDiagnostic(dependencies, {
-      eventType: "Receipt",
-      receiptType,
-      stage,
-      ...(stage === "transition" ? { rpcReason: "apply_receipt_error" } : { rejectedField: stage }),
-    });
     return Response.json({ code: 20 });
   }
 }
