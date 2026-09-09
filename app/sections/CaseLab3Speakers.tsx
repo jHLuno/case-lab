@@ -255,7 +255,13 @@ export default function CaseLab3Speakers() {
                         className={styles.speakerStageCard}
                         aria-hidden="true"
                       >
-                        <Image src={item.image} alt="" fill sizes="(max-width: 1100px) 22vw, 24vw" className="object-cover" />
+                        <Image
+                          src={item.image}
+                          alt=""
+                          fill
+                          sizes="(max-width: 1100px) 22vw, 24vw"
+                          className={item.company === "Малика Караджанова" ? `object-cover ${styles.speakerStageSmallMalika}` : "object-cover"}
+                        />
                         <div className={styles.speakerVisualShade} aria-hidden="true" />
                         <figcaption>
                           {item.captionLines.map((line) => <span key={line}>{line}</span>)}

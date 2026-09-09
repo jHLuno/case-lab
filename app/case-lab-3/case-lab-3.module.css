@@ -948,6 +948,10 @@
   object-position: center 0%;
 }
 
+.speakerStageSmallMalika {
+  object-position: center 20%;
+}
+
 .speakerStageCard,
 .speakerStageCopyLayer {
   position: absolute;
