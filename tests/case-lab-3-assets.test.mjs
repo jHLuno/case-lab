@@ -100,7 +100,7 @@ test("hero event details keep the date number and use the compact copy", () => {
 });
 
 test("Case Lab 3 topics are synchronized across Hero and speakers", () => {
-  const invictusTopic = "Как построить маркетинг, который масштабируется вместе с бизнесом?";
+  const invictusTopic = "Как репозиционирование ускорило рост Invictus?";
   const qaraTopic = "Как коллаборации и маркетинг масштабировали OYU Fest?";
   const forteTopic = "Как искусство изменило восприятие ForteBank?";
 

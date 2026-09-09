@@ -98,7 +98,7 @@ export default function CaseLab3Hero() {
           <div className={styles.caseRoomCase} style={{ position: "relative" }}>
             <Image src="/Invictus GO.webp" alt="" fill loading="eager" sizes="(max-width: 640px) 100vw, 33vw" aria-hidden="true" />
             <strong>Invictus GO</strong>
-            <span className={styles.caseRoomCaseFeaturedDescription}>Как построить маркетинг, который масштабируется вместе с бизнесом?</span>
+            <span className={styles.caseRoomCaseFeaturedDescription}>Как репозиционирование ускорило рост Invictus?</span>
             <span className={styles.caseRoomCaseArrow} aria-hidden="true">
               <ArrowUpRight size={22} strokeWidth={2} />
             </span>
