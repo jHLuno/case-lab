@@ -260,6 +260,39 @@ test("receipt route verifies the raw signature before parsing and persists befor
   assert.equal(calls, 1);
 });
 
+test("receipt route reports the safe rejection stage before returning code twenty", async () => {
+  const route = await import("../../app/api/kassir/[environment]/receipt/route");
+  const body = await fixture("receipt-issued.form");
+  const diagnostics: unknown[] = [];
+  const dependencies = {
+    getSecret: () => SECRET,
+    applyReceipt: async () => ({ kind: "accepted" as const }),
+    onDiagnostic: (diagnostic: unknown) => diagnostics.push(diagnostic),
+  };
+
+  const response = await route.handlePost(
+    new Request("https://caselab.kz/api/kassir/test/receipt", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-HMAC": "invalid-signature",
+      },
+      body,
+    }),
+    { params: Promise.resolve({ environment: "test" }) },
+    dependencies,
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { code: 20 });
+  assert.deepEqual(diagnostics, [{
+    eventType: "Receipt",
+    receiptType: null,
+    stage: "hmac",
+    rejectedField: "Content-HMAC",
+  }]);
+});
+
 test("receipt parser returns strict durable identity without raw payload fields", async () => {
   const payload = parseReceiptForm(await fixture("receipt-issued.form"));
   assert.deepEqual(

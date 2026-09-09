@@ -34,10 +34,18 @@ import {
   type CaseLab3JobType,
 } from "./jobs.server";
 import {
+  applyRefund,
+  getValidModelTransactionId,
+  hasValidModelTransactionId,
+  hashTipTopBody,
+  reconcileRefund,
   refundPayment,
   type RefundPaymentInput,
   type TipTopApiOptions,
   type TipTopApiResponse,
+  type TipTopRefund,
+  type TipTopRefundReconciliation,
+  type TipTopTransitionResult,
 } from "./tiptoppay.server";
 import type {
   Json,
@@ -63,6 +71,7 @@ export type ProductionHandlerOverrides = {
   sendTicketEmail?: WorkerHandler;
   sendRefundNotification?: WorkerHandler;
   initiateRefund?: WorkerHandler;
+  reconcilePayment?: WorkerHandler;
   sendAnalyticsEvent?: WorkerHandler;
   sendOrganizerAlert?: WorkerHandler;
 };
@@ -120,6 +129,16 @@ export type InitiateRefundHandlerOverrides = {
     input: RefundPaymentInput,
     options: TipTopApiOptions & { signal: AbortSignal },
   ) => Promise<TipTopApiResponse>;
+};
+
+export type ReconcilePaymentHandlerOverrides = {
+  loadState?: (job: ClaimedCaseLab3Job, context: WorkerHandlerContext) => Promise<unknown>;
+  reconcileRefund?: (
+    environment: PaymentEnvironment,
+    input: RefundPaymentInput,
+    options: TipTopApiOptions & { signal: AbortSignal },
+  ) => Promise<TipTopRefundReconciliation>;
+  applyRefund?: typeof applyRefund;
 };
 
 type WorkerQuery = {
@@ -422,18 +441,165 @@ async function initiateRefund(job: ClaimedCaseLab3Job, context: WorkerHandlerCon
       operationKey,
       invoiceId: state.orderNumber,
     }, refundProviderOptions(context));
-    logRefundWorkerDiagnostic(context, "provider_response", { httpStatus: response.status, success: response.success });
-    if (response.success) {
-      return { status: "processing", providerStatus: "accepted", failureKind: "none" };
-    }
   } catch {
     logRefundWorkerDiagnostic(context, "provider_result_unknown");
     await (overrides.markUnknown ?? markRefundUnknown)(state, job, context);
     throw new UnknownJobError("TipTop refund result is unknown", context.now());
   }
 
+  logRefundWorkerDiagnostic(context, "provider_response", {
+    httpStatus: response.status,
+    success: response.success,
+    modelPresent: response.model !== null,
+    modelTransactionIdPresent: hasValidModelTransactionId(response.model),
+  });
+  if (response.success) {
+    if (hasValidModelTransactionId(response.model)) {
+      return { status: "processing", providerStatus: "accepted", failureKind: "none" };
+    }
+    logRefundWorkerDiagnostic(context, "provider_result_unknown", { reason: "missing_refund_transaction_id" });
+    await (overrides.markUnknown ?? markRefundUnknown)(state, job, context);
+    throw new UnknownJobError("TipTop refund result is unknown", context.now());
+  }
+
   await (overrides.markFailed ?? markRefundFailed)(state, job, context);
   return { status: "failed", providerStatus: `http_${response.status}`, failureKind: "permanent" };
+}
+
+type RefundReconciliationState = {
+  environment: PaymentEnvironment;
+  orderId: string;
+  orderNumber: string;
+  refundId: string;
+  paymentProviderTransactionId: string | null;
+  operationKey: string;
+  amountMinor: number;
+  currency: "KZT";
+  refundStatus: RefundStatus;
+};
+
+async function loadRefundReconciliationState(job: ClaimedCaseLab3Job, context: WorkerHandlerContext): Promise<RefundReconciliationState> {
+  if (!job.orderId || !job.refundId) throw new PermanentJobError("Refund reconciliation identifiers are missing");
+  const payload = record(job.payloadReference);
+  const payloadRefundId = uuid(payload.refundId, "refund id");
+  if (payloadRefundId !== job.refundId) throw new PermanentJobError("Refund reconciliation payload does not match the job");
+
+  const client = database();
+  const order = await selectOne(client, "case_lab_3_orders", "id, order_number, environment", [
+    ["id", job.orderId],
+    ["environment", context.environment],
+  ]);
+  const refund = await selectOne(client, "case_lab_3_refunds", "id, order_id, environment, operation_key, payment_provider_transaction_id, amount_minor, currency, status", [
+    ["id", job.refundId],
+    ["order_id", job.orderId],
+    ["environment", context.environment],
+  ]);
+  if (order.environment !== context.environment || refund.environment !== context.environment) {
+    throw new PermanentJobError("Refund reconciliation environment mismatch");
+  }
+  const orderId = uuid(order.id, "order id");
+  const refundId = uuid(refund.id, "refund id");
+
+  const amountMinor = refund.amount_minor;
+  if (typeof amountMinor !== "number" || !Number.isSafeInteger(amountMinor) || amountMinor <= 0) {
+    throw new PermanentJobError("Refund reconciliation amount is invalid");
+  }
+  if (refund.currency !== "KZT") throw new PermanentJobError("Refund reconciliation currency is invalid");
+  const refundStatus = refund.status;
+  if (refundStatus !== "unknown" && refundStatus !== "review_required" && refundStatus !== "confirmed" && refundStatus !== "failed") {
+    throw new PermanentJobError("Refund reconciliation status is invalid");
+  }
+
+  return {
+    environment: context.environment,
+    orderId,
+    orderNumber: text(order.order_number, "order number"),
+    refundId,
+    paymentProviderTransactionId: typeof refund.payment_provider_transaction_id === "string" ? refund.payment_provider_transaction_id : null,
+    operationKey: text(refund.operation_key, "refund operation key", 200),
+    amountMinor,
+    currency: "KZT",
+    refundStatus,
+  };
+}
+
+function reconciliationBody(state: RefundReconciliationState, refundTransactionId: string): Uint8Array {
+  return new TextEncoder().encode(JSON.stringify({
+    type: "refund_reconciliation",
+    refundId: state.refundId,
+    paymentTransactionId: state.paymentProviderTransactionId,
+    refundTransactionId,
+    amountMinor: state.amountMinor,
+  }));
+}
+
+async function reconcilePayment(
+  job: ClaimedCaseLab3Job,
+  context: WorkerHandlerContext,
+  overrides: ReconcilePaymentHandlerOverrides = {},
+): Promise<Json> {
+  const jobPayload = record(job.payloadReference);
+  if (!job.refundId || jobPayload.refundId === undefined) {
+    throw new PermanentJobError("Payment reconciliation requires a dedicated payment handler");
+  }
+  const state = await (overrides.loadState ?? loadRefundReconciliationState)(job, context);
+  const reconciliationState = state as RefundReconciliationState;
+  if (reconciliationState.refundStatus === "confirmed") return refundStateResult("confirmed");
+  if (reconciliationState.refundStatus === "failed") return refundStateResult("failed");
+  if (!reconciliationState.paymentProviderTransactionId) throw new PermanentJobError("Refund reconciliation payment transaction is missing");
+
+  const input: RefundPaymentInput = {
+    paymentTransactionId: reconciliationState.paymentProviderTransactionId,
+    amountMinor: reconciliationState.amountMinor,
+    operationKey: reconciliationState.operationKey,
+    invoiceId: reconciliationState.orderNumber,
+  };
+  let result: TipTopRefundReconciliation;
+  try {
+    result = await (overrides.reconcileRefund ?? reconcileRefund)(context.environment, input, refundProviderOptions(context));
+  } catch {
+    throw new RetryableJobError("Refund reconciliation lookup unavailable");
+  }
+  if (result.kind === "not_found") return { status: "review_required", providerStatus: "not_found", failureKind: "unknown" };
+  if (result.kind !== "confirmed") throw new UnknownJobError("Refund reconciliation is inconclusive", context.now());
+
+  const refundTransactionId = getValidModelTransactionId(result.model);
+  if (!refundTransactionId) throw new UnknownJobError("Refund reconciliation transaction is invalid", context.now());
+  const payload: TipTopRefund = {
+    transactionId: refundTransactionId,
+    paymentTransactionId: reconciliationState.paymentProviderTransactionId,
+    amountMinor: reconciliationState.amountMinor,
+    currency: reconciliationState.currency,
+    invoiceId: reconciliationState.orderNumber,
+    operationKey: reconciliationState.operationKey,
+    status: "Completed",
+    operationType: "Refund",
+  };
+  let transition: TipTopTransitionResult;
+  try {
+    transition = await (overrides.applyRefund ?? applyRefund)(context.environment, payload, {
+      environment: context.environment,
+      bodyHash: hashTipTopBody(reconciliationBody(reconciliationState, refundTransactionId)),
+      providerEventId: `Reconciliation:Refund:${refundTransactionId}`,
+    });
+  } catch {
+    throw new RetryableJobError("Refund reconciliation transition unavailable");
+  }
+  if (transition.kind === "accepted" && transition.result === "confirmed") {
+    return { status: "confirmed", providerStatus: "reconciled", failureKind: "none" };
+  }
+  if (transition.kind === "accepted" && transition.duplicate === true) {
+    let currentState: RefundReconciliationState;
+    try {
+      currentState = (await (overrides.loadState ?? loadRefundReconciliationState)(job, context)) as RefundReconciliationState;
+    } catch {
+      throw new RetryableJobError("Refund reconciliation state unavailable");
+    }
+    if (currentState.refundStatus === "confirmed") {
+      return { status: "confirmed", providerStatus: "reconciled", failureKind: "none" };
+    }
+  }
+  return { status: "review_required", providerStatus: "reconciliation_mismatch", failureKind: "unknown" };
 }
 
 async function selectOne(
@@ -1017,6 +1183,7 @@ function defaultHandlers(): ProductionJobHandlers {
     send_ticket_email: sendTicket,
     send_refund_notification: sendRefund,
     initiate_refund: createInitiateRefundHandler(),
+    reconcile_payment: createReconcilePaymentHandler(),
     send_analytics_event: createSendAnalyticsEventHandler(),
     send_organizer_alert: sendAlert,
   };
@@ -1024,6 +1191,10 @@ function defaultHandlers(): ProductionJobHandlers {
 
 export function createInitiateRefundHandler(overrides: InitiateRefundHandlerOverrides = {}): WorkerHandler {
   return (job, context) => initiateRefund(job, context, overrides);
+}
+
+export function createReconcilePaymentHandler(overrides: ReconcilePaymentHandlerOverrides = {}): WorkerHandler {
+  return (job, context) => reconcilePayment(job, context, overrides);
 }
 
 export function createSendAnalyticsEventHandler(overrides: AnalyticsHandlerOverrides = {}): WorkerHandler {
@@ -1037,6 +1208,7 @@ export function createProductionCaseLab3JobHandlers(overrides: ProductionHandler
   if (overrides.sendTicketEmail) handlers.send_ticket_email = overrides.sendTicketEmail;
   if (overrides.sendRefundNotification) handlers.send_refund_notification = overrides.sendRefundNotification;
   if (overrides.initiateRefund) handlers.initiate_refund = overrides.initiateRefund;
+  if (overrides.reconcilePayment) handlers.reconcile_payment = overrides.reconcilePayment;
   if (overrides.sendAnalyticsEvent) handlers.send_analytics_event = overrides.sendAnalyticsEvent;
   if (overrides.sendOrganizerAlert) handlers.send_organizer_alert = overrides.sendOrganizerAlert;
   return handlers;

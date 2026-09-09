@@ -833,6 +833,8 @@ export type TipTopApiDiagnostic = {
   stage: "request" | "response" | "parse" | "transport";
   httpStatus?: number;
   success?: boolean;
+  modelPresent?: boolean;
+  modelTransactionIdPresent?: boolean;
   messageCode?: "accepted" | "duplicate" | "provider_error" | "provider_message";
   responseShape?: "object" | "array" | "null" | "http_error" | "invalid_json" | "invalid_response";
   durationMs?: number;
@@ -1011,6 +1013,8 @@ async function tipTopApiRequest(
         stage: "response",
         httpStatus: parsed.status,
         success: parsed.success,
+        modelPresent: parsed.model !== null,
+        modelTransactionIdPresent: hasValidModelTransactionId(parsed.model),
         ...(parsedMessageCode === undefined ? {} : { messageCode: parsedMessageCode }),
         responseShape: responseShape(parsed.model),
         durationMs: durationMs(),
@@ -1078,6 +1082,19 @@ function field(record: TipTopJsonObject, ...names: string[]): unknown {
   return undefined;
 }
 
+export function getValidModelTransactionId(model: TipTopApiResponse["model"]): string | null {
+  if (!isRecord(model)) return null;
+  const value = field(model, "TransactionId", "transactionId");
+  if (typeof value === "number") return Number.isSafeInteger(value) && value > 0 ? String(value) : null;
+  if (typeof value !== "string" || !/^\d+$/u.test(value)) return null;
+  const numericValue = Number(value);
+  return Number.isSafeInteger(numericValue) && numericValue > 0 ? value : null;
+}
+
+export function hasValidModelTransactionId(model: TipTopApiResponse["model"]): boolean {
+  return getValidModelTransactionId(model) !== null;
+}
+
 function normalizedApiId(value: unknown): string | null {
   return typeof value === "number" && Number.isSafeInteger(value) ? String(value) : typeof value === "string" && /^\d+$/u.test(value) ? value : null;
 }
@@ -1092,12 +1109,14 @@ function confirmedRefundFound(
     const transactionType = field(item, "Type", "type");
     const status = field(item, "Status", "status");
     const originalId = normalizedApiId(field(item, "PaymentTransactionId", "paymentTransactionId", "OriginalTransactionId", "originalTransactionId"));
+    const refundTransactionId = getValidModelTransactionId(item);
     const amount = field(item, "Amount", "amount");
     const parsedAmount = typeof amount === "number" ? Math.round(amount * 100) : typeof amount === "string" && /^\d+(?:\.\d{1,2})?$/u.test(amount) ? parseAmount(amount) : null;
     if (
       ((typeof operationType === "string" && operationType.toLowerCase() === "refund") || transactionType === 1 || transactionType === "Refund") &&
       typeof status === "string" && ["completed", "confirmed", "processed"].includes(status.toLowerCase()) &&
       originalId === paymentTransactionId && parsedAmount === amountMinor
+      && refundTransactionId !== null
     ) {
       return item;
     }
@@ -1105,16 +1124,26 @@ function confirmedRefundFound(
   return null;
 }
 
-async function reconcileRefund(
+export type TipTopRefundReconciliation =
+  | { kind: "confirmed"; model: TipTopJsonObject }
+  | { kind: "not_found" }
+  | { kind: "uncertain" };
+
+export async function reconcileRefund(
   environment: PaymentEnvironment,
   input: RefundPaymentInput,
   options: TipTopApiOptions,
-): Promise<{ kind: "confirmed"; model: TipTopJsonObject } | { kind: "not_found" } | { kind: "uncertain" }> {
+): Promise<TipTopRefundReconciliation> {
   const transaction = await getTransaction(environment, input.paymentTransactionId, options);
   const operations = await findInvoiceOperations(environment, input.invoiceId, options);
-  const confirmed = confirmedRefundFound(operations.model, String(apiTransactionId(input.paymentTransactionId)), input.amountMinor);
-  if (confirmed) return { kind: "confirmed", model: confirmed };
-  if (transaction.success && !operations.success && operations.message?.toLowerCase() === "not found") return { kind: "not_found" };
+  const paymentTransactionId = String(apiTransactionId(input.paymentTransactionId));
+  const transactionModelId = transaction.success ? getValidModelTransactionId(transaction.model) : null;
+  if (transactionModelId !== paymentTransactionId) return { kind: "uncertain" };
+  if (operations.success) {
+    const confirmed = confirmedRefundFound(operations.model, paymentTransactionId, input.amountMinor);
+    if (confirmed) return { kind: "confirmed", model: confirmed };
+  }
+  if (!operations.success && operations.message?.toLowerCase() === "not found") return { kind: "not_found" };
   return { kind: "uncertain" };
 }
 
@@ -1132,16 +1161,20 @@ export async function refundPayment(
       if (reconciliation.kind === "confirmed") {
         return { success: true, message: "Reconciled", model: reconciliation.model, status: 200, reconciled: true };
       }
-      if (reconciliation.kind === "uncertain") throw new TipTopReconciliationRequiredError();
+      throw new TipTopReconciliationRequiredError();
     }
   }
-  return tipTopApiRequest(
+  const response = await tipTopApiRequest(
     environment,
     "/payments/refund",
     { TransactionId: transactionId, Amount: amount, JsonData: { operationKey: input.operationKey } },
     options,
     input.operationKey,
   );
+  if (response.success && !hasValidModelTransactionId(response.model)) {
+    throw new TipTopReconciliationRequiredError();
+  }
+  return response;
 }
 
 export async function getTransaction(

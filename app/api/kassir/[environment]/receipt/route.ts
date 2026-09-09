@@ -6,6 +6,7 @@ import {
   kassirSecret,
   type KassirReceiptPayload,
   type KassirTransitionResult,
+  type KassirWebhookDiagnostic,
   type KassirWebhookContext,
 } from "@/lib/case-lab-3/kassir.server";
 
@@ -15,6 +16,7 @@ export const runtime = "nodejs";
 export type ReceiptRouteDependencies = {
   getSecret: typeof kassirSecret;
   applyReceipt: (environment: "test" | "live", payload: KassirReceiptPayload, context: KassirWebhookContext) => Promise<KassirTransitionResult>;
+  onDiagnostic?: (diagnostic: KassirWebhookDiagnostic) => void;
 };
 
 const productionDependencies: ReceiptRouteDependencies = {

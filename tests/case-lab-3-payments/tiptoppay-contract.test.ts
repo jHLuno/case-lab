@@ -883,7 +883,7 @@ test("TipTop API methods use environment credentials, JSON, Basic Auth, bounded 
   const requests: Array<{ url: string; init: RequestInit }> = [];
   const fakeFetch: typeof fetch = async (input, init) => {
     requests.push({ url: String(input), init: init ?? {} });
-    return new Response(JSON.stringify({ Success: true, Message: "Queued", Model: { Id: "provider-1" } }), {
+    return new Response(JSON.stringify({ Success: true, Message: "Queued", Model: { TransactionId: "67890" } }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
@@ -937,21 +937,60 @@ test("TipTop API methods use environment credentials, JSON, Basic Auth, bounded 
 
 test("TipTop API diagnostics expose request and response stages without credentials or payloads", async () => {
   const diagnostics: unknown[] = [];
-  await refundPayment("test", {
-    paymentTransactionId: "12345",
-    amountMinor: 400000,
-    operationKey: "refund-operation-1",
-    invoiceId: "provider-invoice-001",
-  }, {
-    fetch: async () => new Response(JSON.stringify({ Success: true, Message: "Queued", Model: {} }), { status: 200 }),
-    getConfig: () => ({ tiptop: { publicId: "test-public", apiSecret: "test-api-secret" } }),
-    onDiagnostic: (diagnostic: unknown) => diagnostics.push(diagnostic),
-  });
+  await assert.rejects(
+    () => refundPayment("test", {
+      paymentTransactionId: "12345",
+      amountMinor: 400000,
+      operationKey: "refund-operation-1",
+      invoiceId: "provider-invoice-001",
+    }, {
+      fetch: async () => new Response(JSON.stringify({ Success: true, Message: "Queued", Model: {} }), { status: 200 }),
+      getConfig: () => ({ tiptop: { publicId: "test-public", apiSecret: "test-api-secret" } }),
+      onDiagnostic: (diagnostic: unknown) => diagnostics.push(diagnostic),
+    }),
+    /reconciliation/i,
+  );
 
   assert.deepEqual(diagnostics.map((diagnostic) => (diagnostic as { stage: string }).stage), ["request", "response"]);
   assert.equal((diagnostics[1] as { httpStatus: number }).httpStatus, 200);
   assert.equal((diagnostics[1] as { messageCode?: string }).messageCode, "accepted");
   assert.doesNotMatch(JSON.stringify(diagnostics), /test-api-secret|refund-operation-1|12345|4000/iu);
+});
+
+test("TipTop response diagnostics expose only Model and refund transaction id presence", async () => {
+  const diagnostics: TipTopApiDiagnostic[] = [];
+  await assert.rejects(
+    () => refundPayment("test", {
+      paymentTransactionId: "12345",
+      amountMinor: 400000,
+      operationKey: "refund-operation-1",
+      invoiceId: "provider-invoice-001",
+    }, {
+      fetch: async () => new Response(JSON.stringify({ Success: true, Message: "Queued", Model: {} }), { status: 200 }),
+      getConfig: () => ({ tiptop: { publicId: "test-public", apiSecret: "test-api-secret" } }),
+      onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
+    }),
+    /reconciliation/i,
+  );
+
+  assert.equal(diagnostics[1]?.modelPresent, true);
+  assert.equal(diagnostics[1]?.modelTransactionIdPresent, false);
+  assert.doesNotMatch(JSON.stringify(diagnostics), /test-api-secret|refund-operation-1|12345|4000/iu);
+});
+
+test("refundPayment rejects Success true when Model has no valid refund transaction id", async () => {
+  await assert.rejects(
+    () => refundPayment("test", {
+      paymentTransactionId: "12345",
+      amountMinor: 400000,
+      operationKey: "refund-operation-1",
+      invoiceId: "provider-invoice-001",
+    }, {
+      fetch: async () => new Response(JSON.stringify({ Success: true, Message: "Queued", Model: {} }), { status: 200 }),
+      getConfig: () => ({ tiptop: { publicId: "test-public", apiSecret: "test-api-secret" } }),
+    }),
+    /reconciliation/i,
+  );
 });
 
 test("TipTop diagnostics classify unsuccessful provider messages as errors", async () => {
@@ -1015,6 +1054,144 @@ test("an uncertain refund older than one hour is reconciled before any retry", a
       paymentTransactionId: "12345",
       amountMinor: 400000,
       operationKey: "refund-operation-2",
+      invoiceId: "provider-invoice-001",
+      uncertainSince: new Date("2026-09-08T00:00:00.000Z"),
+    }, {
+      fetch: fakeFetch,
+      getConfig: () => ({ tiptop: { publicId: "test-public", apiSecret: "test-api-secret" } }),
+      now: () => Date.parse("2026-09-08T01:00:01.000Z"),
+    }),
+    /reconciliation/i,
+  );
+  assert.deepEqual(calls, [
+    "https://api.tiptoppay.kz/payments/get",
+    "https://api.tiptoppay.kz/payments/find",
+  ]);
+});
+
+test("refund reconciliation does not confirm a completed operation without a refund transaction id", async () => {
+  const fakeFetch: typeof fetch = async (input) => {
+    if (String(input).endsWith("/payments/get")) {
+      return new Response(JSON.stringify({ Success: true, Model: { TransactionId: "12345" } }), { status: 200 });
+    }
+    return new Response(JSON.stringify({
+      Success: true,
+      Model: [{ OperationType: "Refund", Status: "Completed", PaymentTransactionId: "12345", Amount: "4000" }],
+    }), { status: 200 });
+  };
+
+  await assert.rejects(
+    () => refundPayment("test", {
+      paymentTransactionId: "12345",
+      amountMinor: 400000,
+      operationKey: "refund-operation-3",
+      invoiceId: "provider-invoice-001",
+      uncertainSince: new Date("2026-09-08T00:00:00.000Z"),
+    }, {
+      fetch: fakeFetch,
+      getConfig: () => ({ tiptop: { publicId: "test-public", apiSecret: "test-api-secret" } }),
+      now: () => Date.parse("2026-09-08T01:00:01.000Z"),
+    }),
+    /reconciliation/i,
+  );
+});
+
+test("refund reconciliation ignores a matching Model when the provider response is unsuccessful", async () => {
+  const fakeFetch: typeof fetch = async (input) => {
+    if (String(input).endsWith("/payments/get")) {
+      return new Response(JSON.stringify({ Success: true, Model: { TransactionId: "12345" } }), { status: 200 });
+    }
+    return new Response(JSON.stringify({
+      Success: false,
+      Message: "Provider error",
+      Model: [{
+        OperationType: "Refund",
+        Status: "Completed",
+        TransactionId: "67890",
+        PaymentTransactionId: "12345",
+        Amount: "4000",
+      }],
+    }), { status: 200 });
+  };
+
+  await assert.rejects(
+    () => refundPayment("test", {
+      paymentTransactionId: "12345",
+      amountMinor: 400000,
+      operationKey: "refund-operation-4",
+      invoiceId: "provider-invoice-001",
+      uncertainSince: new Date("2026-09-08T00:00:00.000Z"),
+    }, {
+      fetch: fakeFetch,
+      getConfig: () => ({ tiptop: { publicId: "test-public", apiSecret: "test-api-secret" } }),
+      now: () => Date.parse("2026-09-08T01:00:01.000Z"),
+    }),
+    /reconciliation/i,
+  );
+});
+
+test("refund reconciliation requires a successful original payment lookup", async () => {
+  const fakeFetch: typeof fetch = async (input) => {
+    if (String(input).endsWith("/payments/get")) {
+      return new Response(JSON.stringify({ Success: false, Model: { TransactionId: "12345" } }), { status: 200 });
+    }
+    return new Response(JSON.stringify({
+      Success: true,
+      Model: [{
+        OperationType: "Refund",
+        Status: "Completed",
+        TransactionId: "67890",
+        PaymentTransactionId: "12345",
+        Amount: "4000",
+      }],
+    }), { status: 200 });
+  };
+
+  await assert.rejects(
+    () => refundPayment("test", {
+      paymentTransactionId: "12345",
+      amountMinor: 400000,
+      operationKey: "refund-operation-5",
+      invoiceId: "provider-invoice-001",
+      uncertainSince: new Date("2026-09-08T00:00:00.000Z"),
+    }, {
+      fetch: fakeFetch,
+      getConfig: () => ({ tiptop: { publicId: "test-public", apiSecret: "test-api-secret" } }),
+      now: () => Date.parse("2026-09-08T01:00:01.000Z"),
+    }),
+    /reconciliation/i,
+  );
+});
+
+test("a not-found refund reconciliation never falls through to another provider refund request", async () => {
+  const calls: string[] = [];
+  const fakeFetch: typeof fetch = async (input) => {
+    const url = String(input);
+    calls.push(url);
+    if (url.endsWith("/payments/get")) {
+      return new Response(JSON.stringify({ Success: true, Model: { TransactionId: "12345" } }), { status: 200 });
+    }
+    if (url.endsWith("/payments/find")) {
+      return new Response(JSON.stringify({
+        Success: false,
+        Message: "Not found",
+        Model: [{
+          OperationType: "Refund",
+          Status: "Completed",
+          TransactionId: "67890",
+          PaymentTransactionId: "12345",
+          Amount: "4000",
+        }],
+      }), { status: 200 });
+    }
+    return new Response(JSON.stringify({ Success: true, Model: { TransactionId: "99999" } }), { status: 200 });
+  };
+
+  await assert.rejects(
+    () => refundPayment("test", {
+      paymentTransactionId: "12345",
+      amountMinor: 400000,
+      operationKey: "refund-operation-6",
       invoiceId: "provider-invoice-001",
       uncertainSince: new Date("2026-09-08T00:00:00.000Z"),
     }, {
