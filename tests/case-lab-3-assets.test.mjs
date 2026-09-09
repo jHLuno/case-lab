@@ -102,7 +102,7 @@ test("hero event details keep the date number and use the compact copy", () => {
 test("Case Lab 3 topics are synchronized across Hero and speakers", () => {
   const invictusTopic = "Как построить маркетинг, который масштабируется вместе с бизнесом?";
   const qaraTopic = "Как коллаборации и маркетинг масштабировали OYU Fest?";
-  const forteTopic = "Как арт-инсталляция ForteBank разошлась по всему миру?";
+  const forteTopic = "Как искусство изменило восприятие ForteBank?";
 
   assert.equal(heroSource.split(invictusTopic).length - 1, 1);
   assert.equal(speakersSource.split(invictusTopic).length - 1, 1);

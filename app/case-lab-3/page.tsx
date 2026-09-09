@@ -33,7 +33,7 @@ const caseLab3EventSchema = {
     {
       "@type": "Person",
       name: "Ануар Абдрахманов",
-      jobTitle: "ex-CMO Invictus Go · нынешний CMO Bayan Sulu",
+      jobTitle: "ex-CMO Invictus Go · CMO KazFoodProducts",
     },
     {
       "@type": "Person",
