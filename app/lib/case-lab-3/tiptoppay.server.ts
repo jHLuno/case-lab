@@ -725,6 +725,19 @@ function ignoredFieldDetails(fields: TipTopFormFields | undefined): {
   return ignoredFields.length === 0 ? {} : { ignoredFields };
 }
 
+function hasRequiredPaymentMetadata(
+  fields: TipTopFormFields | undefined,
+  eventType: TipTopEventType | undefined,
+): boolean {
+  if (eventType !== "Check" && eventType !== "Pay" && eventType !== "Fail") return true;
+  return fields?.InvoiceId !== undefined
+    && fields.InvoiceId.length > 0
+    && fields.AccountId !== undefined
+    && fields.AccountId.length > 0
+    && fields.TestMode !== undefined
+    && fields.TestMode.length > 0;
+}
+
 export async function handleSignedTipTopWebhook<T>(
   request: Request,
   environmentValue: string,
@@ -770,6 +783,14 @@ export async function handleSignedTipTopWebhook<T>(
         return Response.json({ code: 20 });
       }
       throw error;
+    }
+    if (!hasRequiredPaymentMetadata(fields, dependencies.eventType)) {
+      logWebhookRejection(environmentValue, dependencies.eventType, "invalid_payload", undefined, {
+        receivedFields: Object.keys(fields ?? {}),
+        rejectedField: "InvoiceId/AccountId/TestMode",
+        ...ignoredFieldDetails(fields),
+      });
+      return Response.json({ code: 20 });
     }
     const testMode = (payload as T & { testMode?: unknown }).testMode;
     if (typeof testMode === "boolean" && testMode !== (environmentValue === "test")) {

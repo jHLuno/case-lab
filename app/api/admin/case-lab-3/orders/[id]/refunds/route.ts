@@ -299,6 +299,9 @@ export async function handlePost(
     const state = await active.getRefundState(orderId, operationKey);
     if (!state) return noStoreJson({ error: "not_found" }, { status: 404 });
     if (!validRefundState(state)) return noStoreJson({ error: "service_unavailable" }, { status: 503 });
+    if (state.environment === "live") {
+      return noStoreJson({ error: "automatic_refunds_disabled", message: "Возврат выполняется вручную через кабинет TipTop Pay." }, { status: 410 });
+    }
 
     const sameKeyFullRefund = isSameKeyFullRefund(state, orderId, operationKey);
     if (state.existingRefund !== null && !sameKeyFullRefund) {

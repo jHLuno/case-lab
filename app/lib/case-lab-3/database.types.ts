@@ -148,6 +148,24 @@ export type EventSettingsRow = {
   updated_at: string;
 };
 
+export type IdempotencyScope = "order" | "payment" | "ticket" | "email" | "fiscal" | "worker";
+
+export type IdempotencyRecordRow = {
+  id: string;
+  environment: PaymentEnvironment;
+  scope: IdempotencyScope;
+  idempotency_key: string;
+  request_hash: string;
+  result: Json;
+  created_at: string;
+  expires_at: string | null;
+};
+
+export type IdempotencyRecordInsert = Omit<IdempotencyRecordRow, "id" | "created_at"> & {
+  id?: string;
+  created_at?: string;
+};
+
 export type EventSettingsInsert = Omit<
   EventSettingsRow,
   | "id"

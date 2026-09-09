@@ -545,6 +545,13 @@ function optionalFormField(fields: KassirFormFields, name: string, maxLength = 2
   return value;
 }
 
+function nullableFormField(fields: KassirFormFields, name: string, maxLength = 2048): string | null | undefined {
+  const value = fields[name];
+  if (value === undefined) return undefined;
+  if (value.length > maxLength || /[\u0000-\u001f\u007f]/u.test(value)) invalidPayload();
+  return value === "" ? null : value;
+}
+
 function receiptAmount(value: string): number {
   if (!/^\d+(?:\.\d{1,2})?$/u.test(value)) invalidPayload();
   const [whole, fraction = ""] = value.split(".");
@@ -579,7 +586,7 @@ export type KassirReceiptPayload = {
   url: string;
   transactionId?: string;
   receipt: Record<string, unknown>;
-  fiscalFields: Record<string, string>;
+  fiscalFields: Record<string, string | null>;
   sanitizedFields: Record<string, string | number>;
 };
 
@@ -594,7 +601,7 @@ export function parseReceiptForm(rawBody: Uint8Array | string): KassirReceiptPay
   requiredFormField(fields, "FiscalSign", 256);
   requiredFormField(fields, "DeviceNumber", 256);
   requiredFormField(fields, "RegNumber", 256);
-  requiredFormField(fields, "FiscalNumber", 256);
+  const fiscalNumber = nullableFormField(fields, "FiscalNumber", 256);
   requiredFormField(fields, "Inn", 32);
   requiredFormField(fields, "Ofd", 256);
   const url = requiredFormField(fields, "Url", 2048);
@@ -605,6 +612,22 @@ export function parseReceiptForm(rawBody: Uint8Array | string): KassirReceiptPay
   const transactionIdValue = optionalFormField(fields, "TransactionId", 64);
   const transactionId = transactionIdValue === undefined ? undefined : receiptInteger(transactionIdValue);
   const receipt = receiptJson(requiredFormField(fields, "Receipt", 64 * 1024));
+  const receiptUrl = typeof receipt.OfdUrl === "string"
+    ? receipt.OfdUrl
+    : typeof receipt.OFDUrl === "string"
+      ? receipt.OFDUrl
+      : typeof receipt.Url === "string"
+        ? receipt.Url
+        : null;
+  const qrUrl = typeof receipt.QrUrl === "string"
+    ? receipt.QrUrl
+    : typeof receipt.QRUrl === "string"
+      ? receipt.QRUrl
+      : typeof receipt.QRCodeUrl === "string"
+        ? receipt.QRCodeUrl
+        : null;
+  const fiscalSign = fields.FiscalSign ?? null;
+  const ofd = fields.Ofd ?? null;
 
   return {
     id,
@@ -617,7 +640,14 @@ export function parseReceiptForm(rawBody: Uint8Array | string): KassirReceiptPay
     url,
     ...(transactionId === undefined ? {} : { transactionId }),
     receipt,
-    fiscalFields: { fiscalDocumentNumber: documentNumber },
+    fiscalFields: {
+      fiscalDocumentNumber: documentNumber,
+      fiscalSign,
+      fiscalNumber: fiscalNumber ?? null,
+      ofd,
+      ofdUrl: receiptUrl,
+      qrUrl,
+    },
     sanitizedFields: {
       receiptId: id,
       kassirReceiptId: id,

@@ -57,7 +57,7 @@ export async function renderTicketPdf(ticket: RenderableTicketRevision): Promise
   const fields = renderableFields(ticket);
   const qrPng = await QRCode.toBuffer(fields.qrPayload, {
     errorCorrectionLevel: "M",
-    margin: 2,
+    margin: 4,
     width: 320,
     type: "png",
   });

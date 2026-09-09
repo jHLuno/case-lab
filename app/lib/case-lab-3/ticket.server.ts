@@ -231,7 +231,7 @@ async function ticketPresentation(
   const manualCode = deriveManualCheckInCode(secret, ticket.id, revision.revision_number);
   const qrDataUrl = await QRCode.toDataURL(qrPayload, {
     errorCorrectionLevel: "M",
-    margin: 2,
+    margin: 4,
     width: 280,
   });
 

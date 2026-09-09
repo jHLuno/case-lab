@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHmac } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
@@ -281,4 +282,37 @@ test("receipt parser returns strict durable identity without raw payload fields"
     },
   );
   assert.equal("rawBody" in payload.sanitizedFields, false);
+});
+
+test("production-equivalent Income callback accepts empty FiscalNumber and unknown Receipt item fields", async () => {
+  const route = await import("../../app/api/kassir/[environment]/receipt/route");
+  const body = await fixture("receipt-income-production-equivalent.form");
+  const signature = createHmac("sha256", SECRET).update(body).digest("base64");
+  let received: ReturnType<typeof parseReceiptForm> | undefined;
+  const response = await route.handlePost(
+    new Request("https://caselab.kz/api/kassir/live/receipt", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-HMAC": signature,
+      },
+      body,
+    }),
+    { params: Promise.resolve({ environment: "live" }) },
+    {
+      getSecret: () => SECRET,
+      applyReceipt: async (_environment, payload) => {
+        received = payload;
+        return { kind: "accepted" };
+      },
+    },
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { code: 0 });
+  assert.equal(received?.type, "Income");
+  assert.equal(received?.amountMinor, 789000);
+  assert.equal(received?.fiscalFields.fiscalNumber, null);
+  assert.equal(received?.fiscalFields.fiscalSign, "fiscal-sign-redacted");
+  assert.equal(received?.fiscalFields.qrUrl, "https://ofd.example.test/qr/redacted");
 });

@@ -70,6 +70,7 @@ export type AdminOrderDetail = {
     status: string;
     kassirReceiptId: string | null;
     receiptUrl: string | null;
+    fiscalFields: Record<string, unknown>;
     issuedAt: string | null;
   }>;
   refunds: Array<{
@@ -179,7 +180,7 @@ export async function loadAdminOrderDetail(
       .order("created_at", { ascending: false }),
     client
       .from("case_lab_3_fiscal_operations")
-      .select("id, policy_purpose, provider_receipt_type, amount_minor, status, kassir_receipt_id, receipt_url, issued_at")
+      .select("id, policy_purpose, provider_receipt_type, amount_minor, status, kassir_receipt_id, receipt_url, fiscal_fields, issued_at")
       .eq("order_id", typedOrder.id)
       .order("created_at", { ascending: false }),
     client
@@ -281,6 +282,7 @@ export async function loadAdminOrderDetail(
       status: row.status,
       kassirReceiptId: row.kassir_receipt_id,
       receiptUrl: row.receipt_url,
+      fiscalFields: (row.fiscal_fields ?? {}) as Record<string, unknown>,
       issuedAt: row.issued_at,
     })),
     refunds: (refundsResult.data ?? []).map((row) => ({

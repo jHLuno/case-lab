@@ -72,6 +72,29 @@ test("full refund accepts same-origin CRM requests on test and live origins", as
   }
 });
 
+test("production live refund requests are blocked before any refund RPC", async () => {
+  const { handlePost } = await refundRoute();
+  let created = false;
+  const response = await handlePost(
+    request(`/api/admin/case-lab-3/orders/${ORDER_UUID}/refunds`),
+    { params: Promise.resolve({ id: ORDER_UUID }) },
+    authorizedDependencies({
+      getRefundState: async () => fullRefundState({ environment: "live" }),
+      createRefund: async () => {
+        created = true;
+        return {};
+      },
+    }),
+  );
+
+  assert.equal(response.status, 410);
+  assert.deepEqual(await response.json(), {
+    error: "automatic_refunds_disabled",
+    message: "Возврат выполняется вручную через кабинет TipTop Pay.",
+  });
+  assert.equal(created, false);
+});
+
 test("full refund requires an authenticated CRM admin and rejects an exact-origin violation before parsing", async () => {
   const { handlePost } = await refundRoute();
   let parsed = false;

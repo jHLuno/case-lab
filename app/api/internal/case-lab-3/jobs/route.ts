@@ -12,6 +12,7 @@ const MAX_BODY_BYTES = 16 * 1024;
 
 export type WorkerRouteDependencies = {
   getCronSecret: () => string;
+  getEnvironment?: () => "test" | "live";
   runWorker: (options: { environment: "test" | "live" }) => Promise<WorkerRunResult>;
 };
 
@@ -19,6 +20,11 @@ const productionDependencies: WorkerRouteDependencies = {
   getCronSecret: () => {
     const value = process.env.CASE_LAB_3_CRON_SECRET?.trim();
     if (!value) throw new Error("Worker configuration incomplete");
+    return value;
+  },
+  getEnvironment: () => {
+    const value = process.env.CASE_LAB_3_PAYMENT_MODE?.trim();
+    if (value !== "test" && value !== "live") throw new Error("Worker configuration incomplete");
     return value;
   },
   runWorker: runCaseLab3Worker,
@@ -52,6 +58,10 @@ export async function handlePost(
     if (!body || typeof body !== "object" || Array.isArray(body)) return noStoreJson({ error: "invalid_request" }, { status: 400 });
     const selectedEnvironment = (body as Record<string, unknown>).environment;
     if (!environment(selectedEnvironment)) return noStoreJson({ error: "invalid_request" }, { status: 400 });
+    const configuredEnvironment = dependencies.getEnvironment?.();
+    if (configuredEnvironment !== undefined && selectedEnvironment !== configuredEnvironment) {
+      return noStoreJson({ error: "invalid_request" }, { status: 400 });
+    }
     const result = await dependencies.runWorker({ environment: selectedEnvironment });
     return noStoreJson(result);
   } catch (error) {

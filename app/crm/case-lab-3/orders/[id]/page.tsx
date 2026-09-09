@@ -106,8 +106,8 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
 
             <RowList title="Оплата, чеки и возвраты">
               <div className="space-y-3 text-sm">
-                {detail.paymentAttempts.map((attempt) => <div key={attempt.id} className="flex flex-wrap justify-between gap-2 border-b border-black/[0.06] pb-3"><span>{attempt.externalId} / {statusLabel(attempt.status)}</span><span className="text-black/45">{formatDate(attempt.createdAt)}</span></div>)}
-                {detail.fiscalOperations.map((operation) => <div key={operation.id} className="flex flex-wrap justify-between gap-2 border-b border-black/[0.06] pb-3"><span>{operation.receiptType} / {statusLabel(operation.status)} / {formatAmount(operation.amountMinor)}</span><span className="text-black/45">{operation.kassirReceiptId ?? "Без ID Kassir"}</span></div>)}
+                {detail.paymentAttempts.map((attempt) => <div key={attempt.id} className="border-b border-black/[0.06] pb-3"><div className="flex flex-wrap justify-between gap-2"><span>{attempt.externalId} / {statusLabel(attempt.status)}</span><span className="text-black/45">{formatDate(attempt.createdAt)}</span></div><p className="mt-1 text-xs text-black/45">TipTop transaction ID: {attempt.providerTransactionId ?? "Не присвоен"}</p></div>)}
+                {detail.fiscalOperations.map((operation) => <div key={operation.id} className="border-b border-black/[0.06] pb-3"><div className="flex flex-wrap justify-between gap-2"><span>{operation.receiptType} / {statusLabel(operation.status)} / {formatAmount(operation.amountMinor)}</span><span className="text-black/45">Kassir ID: {operation.kassirReceiptId ?? "Не присвоен"}</span></div><p className="mt-1 text-xs text-black/45">DocumentNumber: {typeof operation.fiscalFields.fiscalDocumentNumber === "string" ? operation.fiscalFields.fiscalDocumentNumber : "Не присвоен"} · FiscalSign: {typeof operation.fiscalFields.fiscalSign === "string" ? operation.fiscalFields.fiscalSign : "Не присвоен"}</p>{operation.receiptUrl ? <a href={operation.receiptUrl} target="_blank" rel="noreferrer" className="mt-1 block text-xs text-[#040082] hover:underline">Открыть чек / OFD</a> : null}</div>)}
                 {detail.refunds.map((refund) => <div key={refund.id} className="flex flex-wrap justify-between gap-2 border-b border-black/[0.06] pb-3"><span>Возврат {formatAmount(refund.amountMinor)} / {statusLabel(refund.status)}</span><span className="text-black/45">{refund.operationKey}</span></div>)}
                 {!detail.paymentAttempts.length && !detail.fiscalOperations.length && !detail.refunds.length ? <p className="text-black/45">Операций пока нет.</p> : null}
               </div>
@@ -121,11 +121,6 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
               participant={{ firstName: detail.firstName, lastName: detail.lastName, email: detail.participantEmail, phone: detail.phone, company: detail.company, position: detail.position }}
               hasReceipt={detail.fiscalOperations.some((operation) => Boolean(operation.receiptUrl))}
               ticketStatus={detail.ticketStatus}
-              paymentStatus={detail.paymentStatus}
-              paidAmountMinor={detail.paidAmountMinor}
-              refundedAmountMinor={detail.refundedAmountMinor}
-              refundableAmountMinor={detail.refundableAmountMinor}
-              refunds={detail.refunds}
             />
             <RowList title="Email-доставки">
               <div className="space-y-3 text-sm">
