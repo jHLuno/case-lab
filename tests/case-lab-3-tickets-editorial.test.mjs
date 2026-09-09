@@ -25,7 +25,7 @@ test("ticket section matches the dark reference and keeps CTA button-only", () =
   assert.match(ticketSource, /case-lab-3-ticket-early-bird\.webp/);
   assert.match(ticketSource, /case-lab-3-ticket-standard\.webp/);
   assert.doesNotMatch(ticketSource, /case-lab-3-ticket-(early-bird-v4|standard-v5)\.webp/);
-  assert.match(ticketSource, /alt: "Early Bird: 7 890 ₸, первые 20 билетов"/);
+  assert.match(ticketSource, /alt: "Early Bird: 7 980 ₸, первые 20 билетов"/);
   assert.match(ticketSource, /alt: "Стандарт: 15 000 ₸ после первых 20 билетов"/);
   assert.match(ticketSource, /<CaseLab3CheckoutButton\s+source="tickets"\s+className=\{styles\.ticketCta\}>/);
   assert.match(ticketSource, /24 сентября 2026/);
@@ -38,7 +38,7 @@ test("ticket section matches the dark reference and keeps CTA button-only", () =
   assert.match(ticketSource, /Знакомства с коллегами и кейтеринг/);
   assert.match(ticketSource, /Участие в рейтинге и призы для топ-3/);
   assert.match(ticketSource, /БИЛЕТЫ НА CASE LAB III/);
-  assert.match(ticketSource, /Купить билет за 7 890 ₸/);
+  assert.match(ticketSource, /Купить билет за 7 980 ₸/);
   assert.match(ticketSource, /Один билет — вся программа Case Lab III/);
   assert.match(ticketSource, /className=\{styles\.ticketPurchaseArea\}/);
   assert.match(ticketSource, /className=\{styles\.ticketPurchaseMeta\}/);

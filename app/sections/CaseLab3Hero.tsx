@@ -89,7 +89,7 @@ export default function CaseLab3Hero() {
                 Купить билет
                 <ArrowUpRight size={20} strokeWidth={2} aria-hidden="true" />
               </CaseLab3CheckoutButton>
-              <p>Первые 20 билетов — 7 890 ₸.<br /> Далее — 15 000 ₸.</p>
+              <p>Первые 20 билетов — 7 980 ₸.<br /> Далее — 15 000 ₸.</p>
             </div>
           </div>
         </div>

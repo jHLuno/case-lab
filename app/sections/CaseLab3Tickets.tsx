@@ -20,7 +20,7 @@ const tickets = [
   },
   {
     src: "/case-lab-3-ticket-early-bird.webp",
-    alt: "Early Bird: 7 890 ₸, первые 20 билетов",
+    alt: "Early Bird: 7 980 ₸, первые 20 билетов",
     width: 2400,
     height: 1200,
   },
@@ -80,7 +80,7 @@ export default function CaseLab3Tickets() {
                 <span>Затем — <strong>15 000 ₸</strong></span>
               </div>
               <CaseLab3CheckoutButton source="tickets" className={styles.ticketCta}>
-                <span>Купить билет за 7 890 ₸</span>
+                <span>Купить билет за 7 980 ₸</span>
                 <ArrowUpRight size={23} strokeWidth={1.5} aria-hidden="true" />
               </CaseLab3CheckoutButton>
               <p className={styles.ticketPurchaseNote}>Один билет — вся программа Case Lab III</p>

@@ -20,7 +20,7 @@ export default function CaseLab3Footer() {
             className="mx-auto mb-10 max-w-md text-[15px] font-light leading-[1.4] text-black/60 md:mb-10 md:text-[18px]"
             style={{ fontFamily: "var(--font-body)" }}
           >
-            Первые 20 билетов стоят 7 890 ₸. Дальше цена будет 15 000 ₸.
+            Первые 20 билетов стоят 7 980 ₸. Дальше цена будет 15 000 ₸.
           </p>
           <CaseLab3CheckoutButton
             source="footer"

@@ -113,7 +113,7 @@ declare
   v_privacy_version_id uuid;
   v_reservation_id uuid;
 begin
-  v_amount := case when p_tier = 'early_bird' then 789000 else 1500000 end;
+  v_amount := case when p_tier = 'early_bird' then 798000 else 1500000 end;
   v_payment_status := case when p_paid then 'paid' else 'pending' end;
 
   select active_offer_version_id, active_privacy_version_id
@@ -427,7 +427,7 @@ select is(
 );
 
 select is(
-  (pg_temp.cl3_create_order('inventory-test-sales-closed', 'early_bird', 789000)->>'kind'),
+  (pg_temp.cl3_create_order('inventory-test-sales-closed', 'early_bird', 798000)->>'kind'),
   'unavailable',
   'disabled sales prevent order creation'
 );
@@ -515,13 +515,13 @@ select is(
 );
 
 select is(
-  (pg_temp.cl3_create_order('inventory-test-idempotent', 'early_bird', 789000)->>'kind'),
+  (pg_temp.cl3_create_order('inventory-test-idempotent', 'early_bird', 798000)->>'kind'),
   'created',
   'the first order request creates one reservation'
 );
 
 select is(
-  (pg_temp.cl3_create_order('inventory-test-idempotent', 'early_bird', 789000)->>'orderId'),
+  (pg_temp.cl3_create_order('inventory-test-idempotent', 'early_bird', 798000)->>'orderId'),
   (select id::text from public.case_lab_3_orders where idempotency_key = 'inventory-test-idempotent'),
   'an exact idempotency repeat returns the original order'
 );
@@ -535,7 +535,7 @@ select throws_ok(
         'lastName', 'Coverage',
         'email', 'inventory-test-idempotent@example.test',
         'expectedTier', 'early_bird',
-        'expectedAmountMinor', 789000,
+        'expectedAmountMinor', 798000,
         'offerVersionId', 'offer-2026-09-07',
         'privacyVersionId', 'privacy-2026-09-07',
         'marketingConsent', false,
@@ -566,7 +566,7 @@ select throws_ok(
         'lastName', 'Coverage',
         'email', 'inventory-test-idempotent@example.test',
         'expectedTier', 'early_bird',
-        'expectedAmountMinor', 789000,
+        'expectedAmountMinor', 798000,
         'offerVersionId', 'offer-active-alternative-test',
         'privacyVersionId', 'privacy-2026-09-07',
         'marketingConsent', false,
@@ -590,7 +590,7 @@ select throws_ok(
         'lastName', 'Coverage',
         'email', 'inventory-test-idempotent@example.test',
         'expectedTier', 'early_bird',
-        'expectedAmountMinor', 789000,
+        'expectedAmountMinor', 798000,
         'offerVersionId', 'offer-2026-09-07',
         'privacyVersionId', 'privacy-2026-09-07',
         'marketingConsent', false,
@@ -642,7 +642,7 @@ select throws_ok(
         'lastName', 'Kind',
         'email', 'wrong-kind@example.test',
         'expectedTier', 'early_bird',
-        'expectedAmountMinor', 789000,
+        'expectedAmountMinor', 798000,
         'offerVersionId', 'privacy-2026-09-07',
         'privacyVersionId', 'privacy-2026-09-07',
         'marketingConsent', false,
@@ -666,7 +666,7 @@ select throws_ok(
         'lastName', 'Offer',
         'email', 'inactive-offer@example.test',
         'expectedTier', 'early_bird',
-        'expectedAmountMinor', 789000,
+        'expectedAmountMinor', 798000,
         'offerVersionId', 'offer-inactive-test',
         'privacyVersionId', 'privacy-2026-09-07',
         'marketingConsent', false,
@@ -707,7 +707,7 @@ select ok(
 );
 
 select is(
-  (pg_temp.cl3_create_order('inventory-test-attempt', 'early_bird', 789000)->>'kind'),
+  (pg_temp.cl3_create_order('inventory-test-attempt', 'early_bird', 798000)->>'kind'),
   'created',
   'payment-attempt coverage has an active reservation'
 );
@@ -780,7 +780,7 @@ select throws_ok(
 do $$ begin perform pg_temp.cl3_reset_inventory(); end $$;
 
 select is(
-  (pg_temp.cl3_create_order('inventory-test-retry', 'early_bird', 789000)->>'kind'),
+  (pg_temp.cl3_create_order('inventory-test-retry', 'early_bird', 798000)->>'kind'),
   'created',
   'retry coverage has a fresh reservation'
 );
@@ -861,7 +861,7 @@ select is(
 );
 
 select is(
-  (pg_temp.cl3_create_order('inventory-test-expired-retry', 'early_bird', 789000)->>'kind'),
+  (pg_temp.cl3_create_order('inventory-test-expired-retry', 'early_bird', 798000)->>'kind'),
   'created',
   'expired retry coverage has a fresh reservation'
 );
@@ -914,7 +914,7 @@ select is(
     'inventory-retry-check-1',
      repeat('c', 64),
      attempt.external_id,
-     789000,
+     798000,
      'KZT',
       jsonb_build_object(
         'invoiceId', attempt.external_id,
@@ -943,7 +943,7 @@ select is(
 );
 
 select is(
-  (pg_temp.cl3_create_order('inventory-test-order-state', 'early_bird', 789000)->>'kind'),
+  (pg_temp.cl3_create_order('inventory-test-order-state', 'early_bird', 798000)->>'kind'),
   'created',
   'payment status block coverage has a fresh order'
 );
@@ -1032,7 +1032,7 @@ select lives_ok(
         'company', null,
         'position', null,
         'expectedTier', 'early_bird',
-        'expectedAmountMinor', 789000,
+        'expectedAmountMinor', 798000,
         'offerVersionId', 'offer-2026-09-07',
         'privacyVersionId', 'privacy-2026-09-07',
         'marketingConsent', false,
@@ -1075,7 +1075,7 @@ select lives_ok(
         'company', null,
         'position', null,
         'expectedTier', 'early_bird',
-        'expectedAmountMinor', 789000,
+        'expectedAmountMinor', 798000,
         'offerVersionId', 'offer-2026-09-07',
         'privacyVersionId', 'privacy-2026-09-07',
         'marketingConsent', false,

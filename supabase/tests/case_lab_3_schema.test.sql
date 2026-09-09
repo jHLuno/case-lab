@@ -115,8 +115,8 @@ select results_eq(
     select environment collate "C", early_bird_amount_minor, standard_amount_minor,
            early_bird_quota, online_sales_limit, venue_capacity
     from (values
-      ('live', 789000::bigint, 1500000::bigint, 20, 70, 100),
-      ('test', 789000::bigint, 1500000::bigint, 20, 70, 100)
+      ('live', 798000::bigint, 1500000::bigint, 20, 70, 100),
+      ('test', 798000::bigint, 1500000::bigint, 20, 70, 100)
     ) as expected(environment, early_bird_amount_minor, standard_amount_minor, early_bird_quota, online_sales_limit, venue_capacity)
     order by environment
   $$,

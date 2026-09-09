@@ -53,7 +53,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Case Lab 3 | Кейсы, которые обычно не попадают в презентации",
     description:
-      "Три реальных кейса в Алматы 24 сентября 2026 года, 10:00–14:00 (UTC+5). Early Bird — 7 890 ₸.",
+      "Три реальных кейса в Алматы 24 сентября 2026 года, 10:00–14:00 (UTC+5). Early Bird — 7 980 ₸.",
     url: "/case-lab-3/",
     images: [
       {
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Case Lab 3 | Кейсы, которые обычно не попадают в презентации",
     description:
-      "Три реальных кейса в Алматы 24 сентября 2026 года, 10:00–14:00 (UTC+5). Early Bird — 7 890 ₸.",
+      "Три реальных кейса в Алматы 24 сентября 2026 года, 10:00–14:00 (UTC+5). Early Bird — 7 980 ₸.",
     images: ["/case-lab-3/opengraph-image"],
   },
 };
