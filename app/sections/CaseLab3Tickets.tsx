@@ -19,10 +19,10 @@ const tickets = [
     height: 1200,
   },
   {
-    src: "/case-lab-3-ticket-early-bird.webp",
+    src: "/case-lab-early-bird-7980.webp",
     alt: "Early Bird: 7 980 ₸, первые 20 билетов",
-    width: 2400,
-    height: 1200,
+    width: 2098,
+    height: 1050,
   },
 ] as const;
 

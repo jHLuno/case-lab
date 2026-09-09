@@ -22,7 +22,7 @@ test("tickets appear after process and before proof", () => {
 
 test("ticket section matches the dark reference and keeps CTA button-only", () => {
   assert.match(ticketSource, /id="tickets"/);
-  assert.match(ticketSource, /case-lab-3-ticket-early-bird\.webp/);
+  assert.match(ticketSource, /case-lab-early-bird-7980\.webp/);
   assert.match(ticketSource, /case-lab-3-ticket-standard\.webp/);
   assert.doesNotMatch(ticketSource, /case-lab-3-ticket-(early-bird-v4|standard-v5)\.webp/);
   assert.match(ticketSource, /alt: "Early Bird: 7 980 ₸, первые 20 билетов"/);
@@ -49,7 +49,7 @@ test("ticket section matches the dark reference and keeps CTA button-only", () =
 
 test("ticket section exposes the reference composition", () => {
   const standardTicketIndex = ticketSource.indexOf('src: "/case-lab-3-ticket-standard.webp"');
-  const earlyBirdTicketIndex = ticketSource.indexOf('src: "/case-lab-3-ticket-early-bird.webp"');
+  const earlyBirdTicketIndex = ticketSource.indexOf('src: "/case-lab-early-bird-7980.webp"');
 
   assert.ok(standardTicketIndex >= 0);
   assert.ok(earlyBirdTicketIndex > standardTicketIndex);

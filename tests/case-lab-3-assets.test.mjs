@@ -12,14 +12,14 @@ const heroSource = await readFile(new URL("../app/sections/CaseLab3Hero.tsx", im
 const speakersSource = await readFile(new URL("../app/sections/CaseLab3Speakers.tsx", import.meta.url), "utf8");
 const ticketsSource = await readFile(new URL("../app/sections/CaseLab3Tickets.tsx", import.meta.url), "utf8");
 const caseLabStyles = await readFile(new URL("../app/case-lab-3/case-lab-3.module.css", import.meta.url), "utf8");
-const ticketAssetPairs = [
-  ["case-lab-3-ticket-early-bird.webp", "early bird.png"],
-  ["case-lab-3-ticket-standard.webp", "standard.png"],
-].map(([optimized, source]) => ({
-  optimized: fileURLToPath(new URL(`../public/${optimized}`, import.meta.url)),
-  source: fileURLToPath(new URL(`../public/${source}`, import.meta.url)),
+const ticketAssets = [
+  { name: "case-lab-early-bird-7980.webp", width: 2098, height: 1050 },
+  { name: "case-lab-3-ticket-standard.webp", width: 2400, height: 1200 },
+].map(({ name, width, height }) => ({
+  path: fileURLToPath(new URL(`../public/${name}`, import.meta.url)),
+  width,
+  height,
 }));
-const ticketBackgroundAsset = fileURLToPath(new URL("../public/case-lab-3-tickets-bg.png", import.meta.url));
 
 test("Case Lab 3 mounts the main Case Lab cases section", () => {
   assert.match(pageSource, /import Cases from "\.\.\/sections\/Cases"/);
@@ -49,16 +49,6 @@ test("hero fill images have positioned parents and load eagerly", () => {
   for (const heroCard of heroCards) {
     assert.match(heroCard, /loading="eager"/);
   }
-});
-
-test("ticket section background asset exists", async () => {
-  const [backgroundStats, backgroundMetadata] = await Promise.all([
-    stat(ticketBackgroundAsset),
-    sharp(ticketBackgroundAsset).metadata(),
-  ]);
-
-  assert.ok(backgroundStats.size > 0);
-  assert.equal(backgroundMetadata.format, "png");
 });
 
 test("semantic speaker image parents stay positioned outside the mobile media query", () => {
@@ -138,23 +128,24 @@ test("Qara hero topic uses the extra-wide text measure", () => {
 });
 
 test("ticket cards use explicit source dimensions and quality 100", () => {
-  assert.equal((ticketsSource.match(/width: 2400,\s*height: 1200/g) ?? []).length, 2);
+  assert.equal((ticketsSource.match(/width: 2400,\s*height: 1200/g) ?? []).length, 1);
+  assert.equal((ticketsSource.match(/width: 2098,\s*height: 1050/g) ?? []).length, 1);
   assert.match(
     ticketsSource,
     /src=\{ticket\.src\}[\s\S]*?width=\{ticket\.width\}[\s\S]*?height=\{ticket\.height\}[\s\S]*?quality=\{100\}/,
   );
 });
 
-test("ticket WebP assets keep 2400x1200 dimensions and reduce file size", async () => {
-  for (const { optimized } of ticketAssetPairs) {
+test("ticket assets use optimized WebP files with their intrinsic dimensions", async () => {
+  for (const asset of ticketAssets) {
     const [metadata, optimizedStats] = await Promise.all([
-      sharp(optimized).metadata(),
-      stat(optimized),
+      sharp(asset.path).metadata(),
+      stat(asset.path),
     ]);
 
     assert.equal(metadata.format, "webp");
-    assert.equal(metadata.width, 2400);
-    assert.equal(metadata.height, 1200);
+    assert.equal(metadata.width, asset.width);
+    assert.equal(metadata.height, asset.height);
     assert.ok(optimizedStats.size < 1_000_000);
   }
 });
