@@ -9,8 +9,12 @@ import type { TicketPdfRevision, TicketPresentation } from "./ticket.server";
 
 export type RenderableTicketRevision = TicketPdfRevision | TicketPresentation;
 
-const FONT_REGULAR = resolve(process.cwd(), "public/fonts/Gilroy-Regular.woff2");
-const FONT_MEDIUM = resolve(process.cwd(), "public/fonts/Gilroy-Medium.woff2");
+const PAGE_WIDTH = 595.28;
+const PAGE_HEIGHT = 841.89;
+const TICKET_TEMPLATE = resolve(process.cwd(), "public/case-lab-3-ticket-template.png");
+const QR_SIZE = 202;
+const QR_LEFT = (PAGE_WIDTH - QR_SIZE) / 2;
+const QR_TOP = 579;
 const PDF_CREATION_DATE = new Date("2026-09-24T00:00:00.000Z");
 
 function renderableFields(ticket: RenderableTicketRevision): TicketPdfRevision {
@@ -37,12 +41,6 @@ function renderableFields(ticket: RenderableTicketRevision): TicketPdfRevision {
   return ticket;
 }
 
-function ticketState(status: TicketPdfRevision["status"]): string {
-  if (status === "used") return "Использован";
-  if (status === "cancelled") return "Отменен";
-  return "Действителен";
-}
-
 function collectDocument(document: PDFKit.PDFDocument): Promise<Buffer> {
   return new Promise((resolveDocument, reject) => {
     const chunks: Buffer[] = [];
@@ -58,7 +56,7 @@ export async function renderTicketPdf(ticket: RenderableTicketRevision): Promise
   const qrPng = await QRCode.toBuffer(fields.qrPayload, {
     errorCorrectionLevel: "M",
     margin: 4,
-    width: 320,
+    width: 640,
     type: "png",
   });
   const document = new PDFDocument({
@@ -73,47 +71,8 @@ export async function renderTicketPdf(ticket: RenderableTicketRevision): Promise
     },
   });
 
-  document.registerFont("Gilroy", FONT_REGULAR);
-  document.registerFont("Gilroy Medium", FONT_MEDIUM);
-
-  document.rect(0, 0, 595.28, 841.89).fill("#080811");
-  document.fillColor("#ffffff").font("Gilroy Medium").fontSize(10).text("CASE LAB III", 52, 54, {
-    characterSpacing: 1.8,
-  });
-  document.fillColor("#aeb5ff").font("Gilroy").fontSize(9).text("24 СЕНТЯБРЯ 2026 · ALMATY", 52, 72, {
-    characterSpacing: 1.2,
-  });
-
-  document.fillColor("#ffffff").font("Gilroy Medium").fontSize(31).text("БИЛЕТ НА МЕРОПРИЯТИЕ", 52, 142, {
-    width: 330,
-    lineGap: 2,
-  });
-  document.fillColor("#d4d2e9").font("Gilroy").fontSize(15).text(fields.eventName, 52, 232);
-  document.fillColor("#ffffff").font("Gilroy Medium").fontSize(21).text(`${fields.firstName} ${fields.lastName}`, 52, 286, {
-    width: 300,
-  });
-
-  document.fillColor("#9d9bad").font("Gilroy").fontSize(10).text("ДАТА И ВРЕМЯ", 52, 362, { characterSpacing: 1.1 });
-  document.fillColor("#ffffff").font("Gilroy Medium").fontSize(14).text(`${fields.eventDate}, ${fields.eventTime}`, 52, 381);
-  document.fillColor("#9d9bad").font("Gilroy").fontSize(10).text("МЕСТО", 52, 423, { characterSpacing: 1.1 });
-  document.fillColor("#ffffff").font("Gilroy").fontSize(14).text(fields.venue, 52, 442, { width: 270, lineGap: 3 });
-
-  document.image(qrPng, 365, 150, { fit: [174, 174], align: "center", valign: "center" });
-  document.fillColor("#9d9bad").font("Gilroy").fontSize(9).text("QR-КОД ДЛЯ ВХОДА", 365, 336, {
-    width: 174,
-    align: "center",
-    characterSpacing: 1,
-  });
-
-  document.roundedRect(52, 548, 491, 92, 14).fill("#15152a");
-  document.fillColor("#9d9bad").font("Gilroy").fontSize(9).text("НОМЕР БИЛЕТА", 74, 570, { characterSpacing: 1 });
-  document.fillColor("#ffffff").font("Gilroy Medium").fontSize(16).text(fields.publicTicketNumber, 74, 590);
-  document.fillColor("#9d9bad").font("Gilroy").fontSize(9).text("КОД ДЛЯ РУЧНОЙ ПРОВЕРКИ", 326, 570, { characterSpacing: 1 });
-  document.fillColor("#ffffff").font("Gilroy Medium").fontSize(16).text(fields.manualCode, 326, 590);
-
-  document.fillColor("#d4d2e9").font("Gilroy").fontSize(12).text(`Статус: ${ticketState(fields.status)}`, 52, 692);
-  document.fillColor("#9d9bad").font("Gilroy").fontSize(10).text(`Поддержка: ${fields.supportEmail}`, 52, 733);
-  document.fillColor("#65647a").font("Gilroy").fontSize(9).text("Сохраните этот билет и предъявите QR-код на входе.", 52, 781);
+  document.image(TICKET_TEMPLATE, 0, 0, { width: PAGE_WIDTH, height: PAGE_HEIGHT });
+  document.image(qrPng, QR_LEFT, QR_TOP, { width: QR_SIZE, height: QR_SIZE });
 
   return collectDocument(document);
 }

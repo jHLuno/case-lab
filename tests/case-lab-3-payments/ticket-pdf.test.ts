@@ -191,6 +191,17 @@ test("ticket PDF contains the event and participant contract without provider se
   assert.equal(pdf.includes(Buffer.from("4111111111111111", "utf8")), false);
 });
 
+test("ticket PDF uses the supplied template and overlays a generated QR image", async () => {
+  process.env.CASE_LAB_3_TOKEN_SECRET = SECRET;
+  const { deriveManualCheckInCode } = await import("../../app/lib/case-lab-3/tokens.server");
+  const { renderTicketPdf } = await import("../../app/lib/case-lab-3/pdf.server");
+  const manualCode = deriveManualCheckInCode(SECRET, TICKET_ID, 2);
+  const pdf = await renderTicketPdf(pdfRevision(manualCode));
+  const imageObjectCount = (pdf.toString("latin1").match(/\/Subtype \/Image/gu) ?? []).length;
+
+  assert.ok(imageObjectCount >= 3, "the template image and generated QR image must both be embedded");
+});
+
 test("ticket PDF bytes are deterministic for the same immutable revision", async () => {
   process.env.CASE_LAB_3_TOKEN_SECRET = SECRET;
   const { deriveManualCheckInCode } = await import("../../app/lib/case-lab-3/tokens.server");
