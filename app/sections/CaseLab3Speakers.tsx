@@ -8,7 +8,7 @@ const cases = [
   {
     company: "Ануар Абдрахманов",
     captionLines: ["Ануар", "Абдрахманов"],
-    role: "exCMO Invictus Go & CCO Bayan Sulu",
+    role: "exCMO Invictus Go & CMO KazFoodProducts",
     title: "Как построить маркетинг, который масштабируется вместе с бизнесом?",
     description: "О решениях, которые стояли за открытием успешных залов в Алматы и за его пределами. Какие точки роста команда проверяла первой. И что пришлось пересобрать внутри бизнеса.",
     image: "/Anuar.webp",
@@ -24,13 +24,13 @@ const cases = [
     alt: "Визуальные материалы кейса OYU Fest 2026",
   },
   {
-    company: "Малика Каражанова",
-    captionLines: ["Малика", "Каражанова"],
+    company: "Малика Караджанова",
+    captionLines: ["Малика", "Караджанова"],
     role: "PR Director Forte Bank",
-    title: "Как арт-инсталляция ForteBank разошлась по всему миру?",
-    description: "ForteBank превратил локальную историю в арт-инсталляцию, которая получила международный резонанс. Разберем, как сильная идея и культурный контекст помогли проекту выйти за пределы Казахстана и стать глобальным инфоповодом.",
+    title: "Как искусство изменило восприятие ForteBank?",
+    description: "ForteBank превратил локальную историю в арт-инсталляцию с международным резонансом. Разберем, как идея и культурный контекст изменили восприятие бренда.",
     image: "/Malika.webp",
-    alt: "Малика Каражанова — спикер кейса Forte Bank",
+    alt: "Малика Караджанова — спикер кейса Forte Bank",
   },
 ];
 
@@ -231,7 +231,7 @@ export default function CaseLab3Speakers() {
                       alt=""
                       fill
                       sizes="(max-width: 1100px) 55vw, 58vw"
-                      className={item.company === "Ануар Абдрахманов" ? `object-cover ${styles.speakerStageFeatureAnuar}` : item.company === "Перизат Сейфульмаликова" ? `object-cover ${styles.speakerStageFeaturePerizat}` : item.company === "Малика Каражанова" ? `object-cover ${styles.speakerStageFeatureMalika}` : "object-cover"}
+                      className={item.company === "Ануар Абдрахманов" ? `object-cover ${styles.speakerStageFeatureAnuar}` : item.company === "Перизат Сейфульмаликова" ? `object-cover ${styles.speakerStageFeaturePerizat}` : item.company === "Малика Караджанова" ? `object-cover ${styles.speakerStageFeatureMalika}` : "object-cover"}
                     />
                     <div className={styles.speakerVisualShade} aria-hidden="true" />
                     <figcaption>

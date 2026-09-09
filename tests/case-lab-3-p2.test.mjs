@@ -404,7 +404,7 @@ test("large speaker photos show each speaker role under the name", () => {
     speakersSource,
     /speakerStageFeature[\s\S]*?<figcaption>[\s\S]*?<span>\{item\.company\}<\/span>[\s\S]*?<small>\{item\.role\}<\/small>/,
   );
-  assert.match(speakersSource, /role: "exCMO Invictus Go & CCO Bayan Sulu"/);
+  assert.match(speakersSource, /role: "exCMO Invictus Go & CMO KazFoodProducts"/);
   assert.match(
     caseLabStylesSource,
     /\.speakerStageFeature \.speakerStageCard figcaption\s*\{[^}]*display:\s*flex;[^}]*flex-direction:\s*column;/s,
@@ -795,13 +795,13 @@ test("Case Lab 3 removes the former partner name from visible case labels", () =
   assert.doesNotMatch(speakersSource, /GForce\s+Grey/);
   assert.match(heroSource, /<strong>Forte Bank<\/strong>/);
   assert.match(speakersSource, /role: "PR Director Forte Bank"/);
-  assert.match(speakersSource, /alt: "Малика Каражанова — спикер кейса Forte Bank"/);
+  assert.match(speakersSource, /alt: "Малика Караджанова — спикер кейса Forte Bank"/);
 });
 
 test("Case Lab 3 uses the approved Forte speaker description", () => {
   assert.match(
     speakersSource,
-    /description: "ForteBank превратил локальную историю в арт-инсталляцию, которая получила международный резонанс\. Разберем, как сильная идея и культурный контекст помогли проекту выйти за пределы Казахстана и стать глобальным инфоповодом\."/,
+    /description: "ForteBank превратил локальную историю в арт-инсталляцию с международным резонансом\. Разберем, как идея и культурный контекст изменили восприятие бренда\."/,
   );
 });
 
