@@ -472,6 +472,14 @@ test("Fail maps a provider fraud decline to a terminal failed outcome", () => {
   assert.equal(fail.failureCode, "failed");
 });
 
+test("Fail preserves an indeterminate timeout even when the provider sends Error status", () => {
+  const fail = parseFail(parseFormPayload(
+    "TransactionId=4718843737&Amount=7980.00&Currency=KZT&DateTime=2026-09-09%2018%3A43%3A25&TestMode=0&Status=Error&Reason=Timeout&ReasonCode=5091&OperationType=Payment&InvoiceId=cl3-timeout&AccountId=timeout-account",
+  ));
+  assert.equal(fail.status, "Error");
+  assert.equal(fail.failureCode, "timeout");
+});
+
 test("typed parsers reject fields that bypass the form decoder", () => {
   assert.throws(() => parseCheck({
       TransactionId: "12345",

@@ -343,13 +343,13 @@ function commonFields(fields: TipTopFormFields, requireStatus: boolean): CommonT
 }
 
 function mapFailureCode(reason: string, reasonCode: number, status?: string): string {
-  if (status !== undefined && FAIL_STATUSES.has(status)) return "failed";
   const normalized = reason.toLowerCase();
   if (normalized.includes("timeout")) return "timeout";
   if (reasonCode === 5091) return "timeout";
   if (reasonCode === 5092 || reasonCode === 5096 || normalized.includes("network") || normalized.includes("system")) return "indeterminate";
   if (normalized.includes("indeterminate")) return "indeterminate";
   if (normalized.includes("unknown")) return "unknown";
+  if (status === "Declined" || normalized.includes("fraud")) return "failed";
   if (
     normalized.includes("declin") ||
     normalized.includes("fail") ||
