@@ -114,7 +114,10 @@ export default function OrderActionsClient({
         },
         body: JSON.stringify({ confirm: true, reason: trimmedReason }),
       });
-      if (response.status !== 202) throw new Error("refund");
+      if (response.status !== 202) {
+        setMessage(`Возврат не создан: запрос отклонён (${response.status})`);
+        return;
+      }
       setRefundRequested(true);
       setMessage("Возврат поставлен в очередь.");
       startTransition(() => router.refresh());

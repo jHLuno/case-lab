@@ -16,7 +16,6 @@ import { getCaseLab3AdminClient } from "@/lib/case-lab-3/supabase-admin.server";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const ADMIN_ORIGIN = "https://caselab.kz";
 const MAX_BODY_BYTES = 4 * 1024;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const PENDING_REFUND_STATUSES = new Set<RefundStatus>(["requested", "processing", "unknown", "review_required"]);
@@ -110,17 +109,6 @@ function parseOperationKey(request: Request): string | null {
     return null;
   }
   return value;
-}
-
-function requireAdminOrigin(request: Request, checkOrigin: typeof requireSameOrigin): void {
-  let requestOrigin: string;
-  try {
-    requestOrigin = new URL(request.url).origin;
-  } catch {
-    throw new RequestGuardError("Invalid request origin", 403);
-  }
-  if (requestOrigin !== ADMIN_ORIGIN) throw new RequestGuardError("Cross-origin request", 403);
-  checkOrigin(request, ADMIN_ORIGIN);
 }
 
 function parseBody(value: unknown): { reason: string } | null {
@@ -296,7 +284,7 @@ export async function handlePost(
     const session = await active.requireCrmAdmin();
     if (!session) return noStoreJson({ error: "unauthorized" }, { status: 401 });
     if (session.role !== "crm_admin") return noStoreJson({ error: "forbidden" }, { status: 403 });
-    requireAdminOrigin(request, active.requireSameOrigin);
+    active.requireSameOrigin(request);
     if (!active.verifyCrmMutation(request, session, undefined, { requireIdempotencyKey: true })) {
       return noStoreJson({ error: "forbidden" }, { status: 403 });
     }

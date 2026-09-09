@@ -30,3 +30,18 @@ test("provider conflict helper declares the settings row it locks", async () => 
 
   assert.match(helper, /v_settings\s+public\.case_lab_3_event_settings%rowtype;/);
 });
+
+test("atomic refund creation queues one idempotent initiate_refund job", async () => {
+  const source = await readFile(
+    "supabase/migrations/20260907020000_add_case_lab_3_provider_functions.sql",
+    "utf8",
+  );
+  const start = source.indexOf("create or replace function public.case_lab_3_create_refund(");
+  const end = source.indexOf("\ncreate or replace function", start + 1);
+  const refundFunction = source.slice(start, end < 0 ? source.length : end);
+
+  assert.notEqual(start, -1);
+  assert.match(refundFunction, /insert into public\.case_lab_3_jobs/iu);
+  assert.match(refundFunction, /p_environment,\s*'initiate_refund',\s*'refund:'\s*\|\|\s*p_operation_key/iu);
+  assert.match(refundFunction, /on conflict \(environment, logical_key\) do nothing/iu);
+});

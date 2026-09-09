@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import "./server-only-test-loader";
+import { crmAuthModule } from "./server-only-test-loader";
 import { createCaseLab3JobHandlers } from "../../app/lib/case-lab-3/worker.server";
 
 const ORDER_UUID = "00000000-0000-4000-8000-000000000801";
@@ -13,12 +13,12 @@ async function refundRoute() {
   return import("../../app/api/admin/case-lab-3/orders/[id]/refunds/route");
 }
 
-function request(url: string, init: RequestInit = {}): Request {
-  return new Request(`https://caselab.kz${url}`, {
+function request(url: string, init: RequestInit = {}, requestOrigin = "https://caselab.kz", origin = requestOrigin): Request {
+  return new Request(`${requestOrigin}${url}`, {
     method: "POST",
     ...init,
     headers: {
-      Origin: "https://caselab.kz",
+      Origin: origin,
       "Content-Type": "application/json",
       "Idempotency-Key": OPERATION_KEY,
       "X-CSRF-Token": "csrf-token",
@@ -57,6 +57,20 @@ function authorizedDependencies(extra: Record<string, unknown> = {}) {
     ...extra,
   };
 }
+
+test("full refund accepts same-origin CRM requests on test and live origins", async () => {
+  const { handlePost } = await refundRoute();
+
+  for (const origin of ["https://case-lab-test-payments.vercel.app", "https://caselab.kz"]) {
+    const response = await handlePost(
+      request(`/api/admin/case-lab-3/orders/${ORDER_UUID}/refunds`, {}, origin),
+      { params: Promise.resolve({ id: ORDER_UUID }) },
+      authorizedDependencies(),
+    );
+
+    assert.equal(response.status, 202, origin);
+  }
+});
 
 test("full refund requires an authenticated CRM admin and rejects an exact-origin violation before parsing", async () => {
   const { handlePost } = await refundRoute();
@@ -128,6 +142,22 @@ test("full refund requires an authenticated CRM admin and rejects an exact-origi
   );
 
   assert.equal(wrongRequestOrigin.status, 403);
+
+  const missingOrigin = await handlePost(
+    new Request(`https://case-lab-test-payments.vercel.app/api/admin/case-lab-3/orders/${ORDER_UUID}/refunds`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Idempotency-Key": OPERATION_KEY,
+        "X-CSRF-Token": "csrf-token",
+      },
+      body: JSON.stringify({ confirm: true, reason: "Buyer requested a full refund" }),
+    }),
+    { params: Promise.resolve({ id: ORDER_UUID }) },
+    authorizedDependencies(),
+  );
+
+  assert.equal(missingOrigin.status, 403);
 });
 
 test("full refund requires the existing CRM mutation guard and never parses an unauthorized mutation", async () => {
@@ -156,6 +186,28 @@ test("full refund requires the existing CRM mutation guard and never parses an u
   assert.equal(parsed, false);
   assert.equal(stateRead, false);
   assert.deepEqual(await response.json(), { error: "forbidden" });
+});
+
+test("full refund rejects an invalid CSRF token before reading refund state", async () => {
+  const { verifyCrmMutation } = await crmAuthModule;
+  const { handlePost } = await refundRoute();
+  let stateRead = false;
+  process.env.CASE_LAB_3_TOKEN_SECRET = "t".repeat(32);
+
+  const response = await handlePost(
+    request(`/api/admin/case-lab-3/orders/${ORDER_UUID}/refunds`),
+    { params: Promise.resolve({ id: ORDER_UUID }) },
+    authorizedDependencies({
+      verifyCrmMutation,
+      getRefundState: async () => {
+        stateRead = true;
+        return fullRefundState();
+      },
+    }),
+  );
+
+  assert.equal(response.status, 403);
+  assert.equal(stateRead, false);
 });
 
 test("full refund rejects partial or already-refunded state without creating a refund", async () => {
@@ -273,6 +325,98 @@ test("same-key retry reaches the idempotent RPC even after the order has a pendi
     operationKey: OPERATION_KEY,
     status: "requested",
   });
+});
+
+test("repeating the same Idempotency-Key creates one refund row and one initiate_refund job", async () => {
+  const { handlePost } = await refundRoute();
+  let rpcCalls = 0;
+  let refundRows = 0;
+  let initiateRefundJobs = 0;
+
+  const dependencies = authorizedDependencies({
+    getRefundState: async () => refundRows === 0
+      ? fullRefundState()
+      : fullRefundState({
+          paymentStatus: "refund_pending",
+          refundableAmountMinor: 0,
+          pendingRefundAmountMinor: 1_500_000,
+          existingRefund: {
+            orderId: ORDER_UUID,
+            refundId: REFUND_UUID,
+            operationKey: OPERATION_KEY,
+            refundType: "full",
+            amountMinor: 1_500_000,
+            status: "requested",
+          },
+        }),
+    createRefund: async () => {
+      rpcCalls += 1;
+      if (refundRows > 0) {
+        return {
+          kind: "accepted" as const,
+          duplicate: true as const,
+          refundId: REFUND_UUID,
+          operationKey: OPERATION_KEY,
+          status: "requested" as const,
+        };
+      }
+      refundRows += 1;
+      initiateRefundJobs += 1;
+      return {
+        kind: "created" as const,
+        refundId: REFUND_UUID,
+        operationKey: OPERATION_KEY,
+        refundType: "full" as const,
+        amountMinor: 1_500_000,
+        remainingRefundableAmountMinor: 0,
+      };
+    },
+  });
+
+  const first = await handlePost(
+    request(`/api/admin/case-lab-3/orders/${ORDER_UUID}/refunds`),
+    { params: Promise.resolve({ id: ORDER_UUID }) },
+    dependencies,
+  );
+  const second = await handlePost(
+    request(`/api/admin/case-lab-3/orders/${ORDER_UUID}/refunds`),
+    { params: Promise.resolve({ id: ORDER_UUID }) },
+    dependencies,
+  );
+
+  assert.equal(first.status, 202);
+  assert.equal(second.status, 202);
+  assert.equal(rpcCalls, 2);
+  assert.equal(refundRows, 1);
+  assert.equal(initiateRefundJobs, 1);
+});
+
+test("a cancelled ticket remains eligible for a full refund while payment is paid", async () => {
+  const { handlePost } = await refundRoute();
+  let createCalls = 0;
+
+  const response = await handlePost(
+    request(`/api/admin/case-lab-3/orders/${ORDER_UUID}/refunds`),
+    { params: Promise.resolve({ id: ORDER_UUID }) },
+    authorizedDependencies({
+      // Ticket cancellation is a separate mutation and does not change this paid refund state.
+      getRefundState: async () => fullRefundState({ ticketStatus: "cancelled" }),
+      createRefund: async () => {
+        createCalls += 1;
+        return {
+          kind: "created" as const,
+          refundId: REFUND_UUID,
+          operationKey: OPERATION_KEY,
+          refundType: "full" as const,
+          amountMinor: 1_500_000,
+          remainingRefundableAmountMinor: 0,
+        };
+      },
+    }),
+  );
+
+  assert.equal(response.status, 202);
+  assert.equal(createCalls, 1);
 });
 
 test("bounded JSON and invalid confirmation are rejected without exposing provider or database errors", async () => {

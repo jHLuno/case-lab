@@ -16,6 +16,7 @@ test("CRM keeps ticket cancellation separate from the full refund action", async
   assert.match(source, /refundReason\.trim\(\)/u);
   assert.match(source, /refundRequestKeyRef/u);
   assert.match(source, /response\.status !== 202/u);
+  assert.match(source, /Возврат не создан: запрос отклонён \(\$\{response\.status\}\)/u);
   assert.match(source, /Возврат поставлен в очередь/u);
   assert.match(source, /router\.refresh\(\)/u);
   assert.match(source, /Оформить полный возврат \{formatAmount\(refundableAmountMinor\)\}/u);
