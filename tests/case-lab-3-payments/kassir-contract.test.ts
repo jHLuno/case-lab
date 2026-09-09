@@ -253,11 +253,32 @@ test("Kassir API diagnostics expose safe provider response shape and status", as
       stage: "response",
       httpStatus: 401,
       success: false,
-      messageCode: "provider_error",
+      messageCode: "authentication_error",
       responseShape: "null",
     },
   ]);
   assert.doesNotMatch(JSON.stringify(diagnostics), /Unauthorized|public-id|fixture-kassir-secret/iu);
+});
+
+test("Kassir diagnostics classify account and cashbox refusals without logging provider text", async () => {
+  const diagnostics: KassirApiDiagnostic[] = [];
+  const fakeFetch: typeof fetch = async () => new Response(JSON.stringify({
+    Success: false,
+    Message: "ККТ не найдена для указанного ИНН",
+    Model: {},
+  }), { status: 200 });
+
+  await assert.rejects(
+    () => queueReceipt("test", operation(), policy, {
+      fetch: fakeFetch,
+      getConfig: () => ({ kassir: { publicId: "public-id", apiSecret: SECRET }, seller: { inn: "123456789012" } }),
+      onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
+    }),
+    KassirApiError,
+  );
+
+  assert.equal(diagnostics[1]?.messageCode, "cashbox_configuration");
+  assert.doesNotMatch(JSON.stringify(diagnostics), /ККТ|ИНН/iu);
 });
 
 test("receipt route verifies the raw signature before parsing and persists before code zero", async () => {

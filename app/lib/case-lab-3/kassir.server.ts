@@ -325,7 +325,7 @@ export type KassirApiDiagnostic = {
   stage: "request" | "response" | "parse" | "transport";
   httpStatus?: number;
   success?: boolean;
-  messageCode?: "accepted" | "provider_error" | "provider_message";
+  messageCode?: "accepted" | "duplicate" | "authentication_error" | "cashbox_configuration" | "invalid_request" | "provider_error" | "provider_message";
   responseShape?: "object" | "string" | "null" | "http_error" | "invalid_json" | "invalid_response";
   durationMs?: number;
   errorKind?: "timeout" | "aborted" | "network";
@@ -356,8 +356,13 @@ function responseShape(model: KassirApiResponse["model"]): KassirApiDiagnostic["
 function messageCode(message: string | null): KassirApiDiagnostic["messageCode"] {
   if (message === null || message.trim() === "") return undefined;
   const normalized = message.toLowerCase();
+  if (/duplicate|already|повтор|дубликат/iu.test(normalized)) return "duplicate";
+  if (/unauthor|forbidden|auth|credential|authorization|доступ|авторизац/iu.test(normalized)) return "authentication_error";
+  if (/ккт|касс|cash|fiscal|receipt|чек|фиск/iu.test(normalized)) return "cashbox_configuration";
+  if (/инн|иин|бин|seller|tax|vat|налог/iu.test(normalized)) return "cashbox_configuration";
+  if (/invalid|required|missing|некоррект|обязательн|не указан/iu.test(normalized)) return "invalid_request";
   if (/accept|queue|success|complet/iu.test(normalized)) return "accepted";
-  if (/declin|fail|error|invalid|reject|unauthor|forbidden/iu.test(normalized)) return "provider_error";
+  if (/declin|fail|error|reject/iu.test(normalized)) return "provider_error";
   return "provider_message";
 }
 
