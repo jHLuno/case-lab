@@ -20,7 +20,7 @@ import {
   type RefundEmailInput,
   type TicketEmailInput,
 } from "./mail.server";
-import { getCaseLab3Config } from "./config.server";
+import { getCaseLab3Config, type CaseLab3Config } from "./config.server";
 import { getCaseLab3AdminClient } from "./supabase-admin.server";
 import { buildTicketQrPayload, deriveManualCheckInCode, derivePurposeToken } from "./tokens.server";
 import { CASE_LAB_3_EVENT } from "./ticket.server";
@@ -63,10 +63,31 @@ export type ProductionHandlerOverrides = {
   sendTicketEmail?: WorkerHandler;
   sendRefundNotification?: WorkerHandler;
   initiateRefund?: WorkerHandler;
+  sendAnalyticsEvent?: WorkerHandler;
   sendOrganizerAlert?: WorkerHandler;
 };
 
 export type ProductionJobHandlers = Partial<Record<CaseLab3JobType, WorkerHandler>>;
+
+export type AnalyticsEventState = {
+  id: string;
+  environment: PaymentEnvironment;
+  eventKey: string;
+  eventName: "purchase" | "refund";
+  orderId: string;
+  refundId: string | null;
+  gaClientId: string | null;
+  payloadSnapshot: WorkerRecord;
+  deliveryStatus: EmailStatus;
+};
+
+type AnalyticsConfig = Pick<CaseLab3Config, "ga4">;
+type AnalyticsHandlerOverrides = {
+  getConfig?: (environment: PaymentEnvironment) => AnalyticsConfig;
+  loadEvent?: (environment: PaymentEnvironment, eventKey: string) => Promise<AnalyticsEventState>;
+  updateEvent?: (environment: PaymentEnvironment, eventKey: string, values: Record<string, unknown>) => Promise<void>;
+  sendEvent?: (event: AnalyticsEventState, config: NonNullable<AnalyticsConfig["ga4"]>, signal: AbortSignal) => Promise<void>;
+};
 
 export type InitiateRefundState = {
   environment: PaymentEnvironment;
@@ -351,6 +372,22 @@ function refundStartResult(status: RefundStartResult): Json {
   return refundStateResult(status);
 }
 
+function logRefundWorkerDiagnostic(
+  context: WorkerHandlerContext,
+  stage: "processing_transition_start" | "processing_transition_result" | "provider_request" | "provider_response" | "provider_result_unknown",
+  details: Readonly<Record<string, boolean | number | string>> = {},
+): void {
+  try {
+    console.info("Case Lab III refund worker", {
+      environment: context.environment,
+      stage,
+      ...details,
+    });
+  } catch {
+    // Diagnostics must never alter refund state handling.
+  }
+}
+
 function refundProviderOptions(context: WorkerHandlerContext): TipTopApiOptions & { signal: AbortSignal } {
   return {
     signal: context.signal,
@@ -367,7 +404,9 @@ async function initiateRefund(job: ClaimedCaseLab3Job, context: WorkerHandlerCon
   if (state.refundStatus !== "requested") return refundStateResult(state.refundStatus);
 
   const markProcessing = overrides.markProcessing ?? markRefundProcessing;
+  logRefundWorkerDiagnostic(context, "processing_transition_start");
   const start = await markProcessing(state, job, context);
+  logRefundWorkerDiagnostic(context, "processing_transition_result", { outcome: start });
   if (start !== "claimed") {
     return refundStartResult(start);
   }
@@ -376,16 +415,19 @@ async function initiateRefund(job: ClaimedCaseLab3Job, context: WorkerHandlerCon
   const provider = overrides.refundPayment ?? refundPayment;
   let response: TipTopApiResponse;
   try {
+    logRefundWorkerDiagnostic(context, "provider_request");
     response = await provider(context.environment, {
       paymentTransactionId,
       amountMinor,
       operationKey,
       invoiceId: state.orderNumber,
     }, refundProviderOptions(context));
+    logRefundWorkerDiagnostic(context, "provider_response", { httpStatus: response.status, success: response.success });
     if (response.success) {
       return { status: "processing", providerStatus: "accepted", failureKind: "none" };
     }
   } catch {
+    logRefundWorkerDiagnostic(context, "provider_result_unknown");
     await (overrides.markUnknown ?? markRefundUnknown)(state, job, context);
     throw new UnknownJobError("TipTop refund result is unknown", context.now());
   }
@@ -821,6 +863,153 @@ async function sendAlert(job: ClaimedCaseLab3Job, context: WorkerHandlerContext)
   }, operationKey, false);
 }
 
+function analyticsEventState(value: unknown): AnalyticsEventState {
+  const source = record(value);
+  return {
+    id: uuid(source.id, "analytics event id"),
+    environment: oneOf(source.environment, "analytics environment", ["test", "live"] as const),
+    eventKey: text(source.eventKey ?? source.event_key, "analytics event key", 200),
+    eventName: oneOf(source.eventName ?? source.event_name, "analytics event name", ["purchase", "refund"] as const),
+    orderId: uuid(source.orderId ?? source.order_id, "analytics order id"),
+    refundId: optionalUuid(source.refundId ?? source.refund_id, "analytics refund id"),
+    gaClientId: source.gaClientId === null || source.gaClientId === undefined
+      ? source.ga_client_id === null || source.ga_client_id === undefined
+        ? null
+        : text(source.ga_client_id, "GA client id", 256)
+      : text(source.gaClientId, "GA client id", 256),
+    payloadSnapshot: jsonObject(source.payloadSnapshot ?? source.payload_snapshot),
+    deliveryStatus: oneOf(source.deliveryStatus ?? source.delivery_status, "analytics delivery status", [
+      "pending",
+      "sent",
+      "failed",
+      "unknown",
+    ] as const),
+  };
+}
+
+async function loadAnalyticsEvent(environment: PaymentEnvironment, eventKey: string): Promise<AnalyticsEventState> {
+  const event = await selectOne(database(), "case_lab_3_analytics_events", "*", [
+    ["environment", environment],
+    ["event_key", eventKey],
+  ]);
+  return analyticsEventState(event);
+}
+
+async function updateAnalyticsEvent(
+  environment: PaymentEnvironment,
+  eventKey: string,
+  values: Record<string, unknown>,
+): Promise<void> {
+  await update(database(), "case_lab_3_analytics_events", values, [
+    ["environment", environment],
+    ["event_key", eventKey],
+  ]);
+}
+
+function analyticsParams(event: AnalyticsEventState): Record<string, string | number> {
+  const transactionId = text(event.payloadSnapshot.transactionId, "analytics transaction id", 128);
+  const valueMinor = event.payloadSnapshot.valueMinor;
+  if (typeof valueMinor !== "number" || !Number.isSafeInteger(valueMinor) || valueMinor <= 0) {
+    throw new PermanentJobError("Invalid analytics value");
+  }
+  const params: Record<string, string | number> = {
+    transaction_id: transactionId,
+    value: valueMinor / 100,
+    currency: oneOf(event.payloadSnapshot.currency, "analytics currency", ["KZT"] as const),
+  };
+  if (event.eventName === "refund") {
+    params.refund_operation_id = text(event.payloadSnapshot.refundOperationId, "refund operation id", 128);
+  }
+  return params;
+}
+
+function analyticsClientId(event: AnalyticsEventState): string {
+  return event.gaClientId ?? createHash("sha256")
+    .update(`case-lab-3-ga4\0${event.orderId}`, "utf8")
+    .digest("hex");
+}
+
+async function sendGa4Event(
+  event: AnalyticsEventState,
+  config: NonNullable<AnalyticsConfig["ga4"]>,
+  signal: AbortSignal,
+): Promise<void> {
+  const endpoint = new URL("https://www.google-analytics.com/mp/collect");
+  endpoint.searchParams.set("measurement_id", config.measurementId);
+  endpoint.searchParams.set("api_secret", config.apiSecret);
+  let response: Response;
+  try {
+    response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({
+        client_id: analyticsClientId(event),
+        events: [{ name: event.eventName, params: analyticsParams(event) }],
+      }),
+      signal,
+    });
+  } catch {
+    throw new RetryableJobError("GA4 analytics request failed");
+  }
+  if (response.status === 408 || response.status === 429 || response.status >= 500) {
+    throw new RetryableJobError("GA4 analytics request failed");
+  }
+  if (!response.ok) throw new PermanentJobError("GA4 analytics request was rejected");
+}
+
+async function sendAnalyticsEvent(
+  job: ClaimedCaseLab3Job,
+  context: WorkerHandlerContext,
+  overrides: AnalyticsHandlerOverrides = {},
+): Promise<Json> {
+  const payload = record(job.payloadReference);
+  const eventKey = text(payload.eventKey, "analytics event key", 200);
+  const eventName = oneOf(payload.eventName, "analytics event name", ["purchase", "refund"] as const);
+  const event = await (overrides.loadEvent ?? loadAnalyticsEvent)(context.environment, eventKey);
+  if (
+    event.environment !== context.environment
+    || event.eventKey !== eventKey
+    || event.eventName !== eventName
+    || event.orderId !== job.orderId
+    || event.refundId !== (job.refundId ?? null)
+  ) {
+    throw new PermanentJobError("Analytics event does not match its job");
+  }
+  if (event.deliveryStatus === "sent") return { status: "sent", duplicate: true };
+
+  const config = (overrides.getConfig ?? ((environment) => getCaseLab3Config(environment)))(context.environment);
+  const updateEvent = overrides.updateEvent ?? updateAnalyticsEvent;
+  if (config.ga4 === null) {
+    await updateEvent(context.environment, eventKey, {
+      delivery_status: "failed",
+      next_attempt_at: null,
+      last_error: "GA4 is not configured",
+      sent_at: null,
+    });
+    return { status: "skipped", reason: "ga4_not_configured" };
+  }
+
+  try {
+    await (overrides.sendEvent ?? sendGa4Event)(event, config.ga4, context.signal);
+    await updateEvent(context.environment, eventKey, {
+      delivery_status: "sent",
+      next_attempt_at: null,
+      last_error: null,
+      sent_at: iso(context.now()),
+    });
+    return { status: "sent" };
+  } catch (error) {
+    await updateEvent(context.environment, eventKey, {
+      delivery_status: "failed",
+      next_attempt_at: null,
+      last_error: "GA4 delivery failed",
+      sent_at: null,
+    });
+    if (error instanceof PermanentJobError) return { status: "failed", reason: "invalid_or_rejected_event" };
+    throw error;
+  }
+}
+
 function defaultHandlers(): ProductionJobHandlers {
   return {
     issue_fiscal_operation: queueFiscalOperation,
@@ -828,12 +1017,17 @@ function defaultHandlers(): ProductionJobHandlers {
     send_ticket_email: sendTicket,
     send_refund_notification: sendRefund,
     initiate_refund: createInitiateRefundHandler(),
+    send_analytics_event: createSendAnalyticsEventHandler(),
     send_organizer_alert: sendAlert,
   };
 }
 
 export function createInitiateRefundHandler(overrides: InitiateRefundHandlerOverrides = {}): WorkerHandler {
   return (job, context) => initiateRefund(job, context, overrides);
+}
+
+export function createSendAnalyticsEventHandler(overrides: AnalyticsHandlerOverrides = {}): WorkerHandler {
+  return (job, context) => sendAnalyticsEvent(job, context, overrides);
 }
 
 export function createProductionCaseLab3JobHandlers(overrides: ProductionHandlerOverrides = {}): ProductionJobHandlers {
@@ -843,6 +1037,7 @@ export function createProductionCaseLab3JobHandlers(overrides: ProductionHandler
   if (overrides.sendTicketEmail) handlers.send_ticket_email = overrides.sendTicketEmail;
   if (overrides.sendRefundNotification) handlers.send_refund_notification = overrides.sendRefundNotification;
   if (overrides.initiateRefund) handlers.initiate_refund = overrides.initiateRefund;
+  if (overrides.sendAnalyticsEvent) handlers.send_analytics_event = overrides.sendAnalyticsEvent;
   if (overrides.sendOrganizerAlert) handlers.send_organizer_alert = overrides.sendOrganizerAlert;
   return handlers;
 }

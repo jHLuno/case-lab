@@ -7,11 +7,17 @@ import {
   JOB_LEASE_MS,
   WORKER_EXTERNAL_TIMEOUT_MS,
   classifyJobError,
+  incidentTypeForJob,
   PermanentJobError,
   RetryableJobError,
   UnknownJobError,
 } from "../../app/lib/case-lab-3/jobs.server";
-import { createInitiateRefundHandler, createProductionCaseLab3JobHandlers, runCaseLab3Worker } from "../../app/lib/case-lab-3/worker.server";
+import {
+  createInitiateRefundHandler,
+  createProductionCaseLab3JobHandlers,
+  createSendAnalyticsEventHandler,
+  runCaseLab3Worker,
+} from "../../app/lib/case-lab-3/worker.server";
 import { handlePost as handleWorkerPost } from "../../app/api/internal/case-lab-3/jobs/route";
 import { TipTopApiError } from "../../app/lib/case-lab-3/tiptoppay.server";
 
@@ -36,6 +42,7 @@ const REFUND_ID = "00000000-0000-4000-8000-000000000942";
 const REFUND_ORDER_ID = "00000000-0000-4000-8000-000000000943";
 const PAYMENT_ATTEMPT_ID = "00000000-0000-4000-8000-000000000944";
 const REFUND_OPERATION_KEY = "refund-operation-941";
+const ANALYTICS_ORDER_ID = "00000000-0000-4000-8000-000000000945";
 
 function refundJob(overrides: Record<string, unknown> = {}) {
   return {
@@ -74,6 +81,21 @@ function refundState(overrides: Record<string, unknown> = {}) {
     refundStatus: "requested",
     attemptCount: 0,
     uncertainSinceAt: null,
+    ...overrides,
+  };
+}
+
+function analyticsJob(overrides: Record<string, unknown> = {}) {
+  return {
+    jobId: "00000000-0000-4000-8000-000000000946",
+    jobType: "send_analytics_event" as const,
+    logicalKey: "job:ga4:purchase:945",
+    payloadReference: { eventKey: "purchase-event-945", eventName: "purchase" },
+    orderId: ANALYTICS_ORDER_ID,
+    ticketId: null,
+    refundId: null,
+    leaseToken: "analytics-lease",
+    leasedUntil: "2026-09-09T01:02:00.000Z",
     ...overrides,
   };
 }
@@ -234,7 +256,7 @@ test("internal worker route requires a constant-time cron bearer secret and vali
   assert.deepEqual(workerCalls, ["live"]);
 });
 
-test("production handler registry covers fiscal and mail jobs but not GA4", () => {
+test("production handler registry handles GA4 jobs explicitly", () => {
   const handlers = createProductionCaseLab3JobHandlers({
     issueFiscalOperation: async () => ({}),
     pollReceipt: async () => ({}),
@@ -249,7 +271,82 @@ test("production handler registry covers fiscal and mail jobs but not GA4", () =
   assert.equal(typeof handlers.send_refund_notification, "function");
   assert.equal(typeof handlers.send_organizer_alert, "function");
   assert.equal(typeof handlers.initiate_refund, "function");
-  assert.equal(handlers.send_analytics_event, undefined);
+  assert.equal(typeof handlers.send_analytics_event, "function");
+});
+
+test("analytics job failures do not create provider-result incidents", () => {
+  assert.equal(incidentTypeForJob("send_analytics_event"), null);
+  assert.equal(incidentTypeForJob("initiate_refund"), "unknown_provider_result");
+});
+
+test("analytics handler explicitly records disabled GA4 delivery without creating a provider incident", async () => {
+  const updates: Array<Record<string, unknown>> = [];
+  const handler = createSendAnalyticsEventHandler({
+    getConfig: () => ({ ga4: null }),
+    loadEvent: async () => ({
+      id: "00000000-0000-4000-8000-000000000947",
+      environment: ENVIRONMENT,
+      eventKey: "purchase-event-945",
+      eventName: "purchase",
+      orderId: ANALYTICS_ORDER_ID,
+      refundId: null,
+      gaClientId: null,
+      payloadSnapshot: { transactionId: "CL3-945", valueMinor: 789000, currency: "KZT" },
+      deliveryStatus: "pending",
+    }),
+    updateEvent: async (_environment, _eventKey, values) => {
+      updates.push(values);
+    },
+  });
+
+  assert.deepEqual(await handler(analyticsJob(), refundContext), {
+    status: "skipped",
+    reason: "ga4_not_configured",
+  });
+  assert.deepEqual(updates, [{
+    delivery_status: "failed",
+    next_attempt_at: null,
+    last_error: "GA4 is not configured",
+    sent_at: null,
+  }]);
+});
+
+test("analytics handler records a successful configured GA4 delivery", async () => {
+  const updates: Array<Record<string, unknown>> = [];
+  let sends = 0;
+  const handler = createSendAnalyticsEventHandler({
+    getConfig: () => ({ ga4: { measurementId: "G-test", apiSecret: "ga-secret" } }),
+    loadEvent: async () => ({
+      id: "00000000-0000-4000-8000-000000000947",
+      environment: ENVIRONMENT,
+      eventKey: "purchase-event-945",
+      eventName: "purchase",
+      orderId: ANALYTICS_ORDER_ID,
+      refundId: null,
+      gaClientId: null,
+      payloadSnapshot: { transactionId: "CL3-945", valueMinor: 789000, currency: "KZT" },
+      deliveryStatus: "pending",
+    }),
+    sendEvent: async (event, config, signal) => {
+      sends += 1;
+      assert.equal(event.eventName, "purchase");
+      assert.equal(event.payloadSnapshot.valueMinor, 789000);
+      assert.equal(config.measurementId, "G-test");
+      assert.equal(signal, refundContext.signal);
+    },
+    updateEvent: async (_environment, _eventKey, values) => {
+      updates.push(values);
+    },
+  });
+
+  assert.deepEqual(await handler(analyticsJob(), refundContext), { status: "sent" });
+  assert.equal(sends, 1);
+  assert.deepEqual(updates, [{
+    delivery_status: "sent",
+    next_attempt_at: null,
+    last_error: null,
+    sent_at: "1970-01-01T00:00:00.000Z",
+  }]);
 });
 
 test("valid initiate_refund calls TipTop Pay once and leaves confirmation to the callback", async () => {
@@ -284,6 +381,49 @@ test("valid initiate_refund calls TipTop Pay once and leaves confirmation to the
     providerStatus: "accepted",
     failureKind: "none",
   });
+});
+
+test("refund worker diagnostics expose transition and provider stages without identifiers", async () => {
+  const diagnostics: unknown[][] = [];
+  const originalInfo = console.info;
+  console.info = (...args) => diagnostics.push(args);
+  try {
+    const handler = createInitiateRefundHandler({
+      loadState: async () => refundState(),
+      markProcessing: async () => "claimed",
+      refundPayment: async () => ({ success: true, message: "Queued", model: {}, status: 200 }),
+    });
+    await handler(refundJob(), refundContext);
+  } finally {
+    console.info = originalInfo;
+  }
+
+  assert.deepEqual(diagnostics.map((entry) => (entry[1] as { stage: string }).stage), [
+    "processing_transition_start",
+    "processing_transition_result",
+    "provider_request",
+    "provider_response",
+  ]);
+  assert.doesNotMatch(JSON.stringify(diagnostics), /12345|refund-operation-941|refund-lease/iu);
+});
+
+test("refund worker continues when diagnostic logging fails", async () => {
+  const originalInfo = console.info;
+  console.info = () => { throw new Error("logger unavailable"); };
+  try {
+    const handler = createInitiateRefundHandler({
+      loadState: async () => refundState(),
+      markProcessing: async () => "claimed",
+      refundPayment: async () => ({ success: true, message: "Queued", model: {}, status: 200 }),
+    });
+    assert.deepEqual(await handler(refundJob(), refundContext), {
+      status: "processing",
+      providerStatus: "accepted",
+      failureKind: "none",
+    });
+  } finally {
+    console.info = originalInfo;
+  }
 });
 
 test("a duplicate initiate_refund job with the same operation key does not call TipTop Pay again", async () => {

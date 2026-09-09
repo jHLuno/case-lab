@@ -176,10 +176,13 @@ export async function recordWorkerHeartbeat(environmentValue: PaymentEnvironment
   return rpcResult(response.data, response.error);
 }
 
-function incidentType(jobType: CaseLab3JobType): "overdue_receipt" | "overdue_email" | "reconciliation_mismatch" | "unknown_provider_result" {
+export type JobIncidentType = "overdue_receipt" | "overdue_email" | "reconciliation_mismatch" | "unknown_provider_result";
+
+export function incidentTypeForJob(jobType: CaseLab3JobType): JobIncidentType | null {
   if (jobType === "issue_fiscal_operation" || jobType === "poll_receipt") return "overdue_receipt";
   if (jobType === "send_ticket_email" || jobType === "send_refund_notification" || jobType === "send_organizer_alert") return "overdue_email";
   if (jobType === "reconcile_payment" || jobType === "daily_provider_reconciliation") return "reconciliation_mismatch";
+  if (jobType === "send_analytics_event") return null;
   return "unknown_provider_result";
 }
 
@@ -188,9 +191,12 @@ export async function recordJobIncident(
   job: ClaimedCaseLab3Job,
   error: string,
 ): Promise<Json> {
+  const type = incidentTypeForJob(job.jobType);
+  if (!type) return {};
+
   const response = await rpcClient().rpc("case_lab_3_record_provider_conflict", {
     p_environment: environment(environmentValue),
-    p_incident_type: incidentType(job.jobType),
+    p_incident_type: type,
     p_order_id: job.orderId,
     p_payment_attempt_id: null,
     p_refund_id: job.refundId,

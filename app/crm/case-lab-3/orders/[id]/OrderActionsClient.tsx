@@ -46,6 +46,7 @@ export default function OrderActionsClient({
   const [busy, setBusy] = useState(false);
   const [refundBusy, setRefundBusy] = useState(false);
   const [refundRequested, setRefundRequested] = useState(false);
+  const [refundProcessingAmountMinor, setRefundProcessingAmountMinor] = useState<number | null>(null);
   const [ticketCancelled, setTicketCancelled] = useState(initialTicketStatus === "cancelled");
   const [message, setMessage] = useState("");
   const refundRequestKeyRef = useRef<string | null>(null);
@@ -55,9 +56,11 @@ export default function OrderActionsClient({
     && refundedAmountMinor === 0
     && refundableAmountMinor === paidAmountMinor;
   const refundAlreadyCreated = refunds.length > 0;
+  const processingRefund = refunds.find((refund) => refund.status === "requested" || refund.status === "processing");
+  const refundProcessing = refundRequested || processingRefund !== undefined;
   const refundDisabled = refundAlreadyCreated
     || refundBusy
-    || refundRequested
+    || refundProcessing
     || refundableAmountMinor <= 0
     || !paymentAllowsFullRefund;
 
@@ -118,8 +121,11 @@ export default function OrderActionsClient({
         setMessage(`Возврат не создан: запрос отклонён (${response.status})`);
         return;
       }
-      setRefundRequested(true);
-      setMessage("Возврат поставлен в очередь.");
+      const responseBody = await response.json() as { kind?: unknown; status?: unknown };
+      const responseRefundProcessing = responseBody.kind === "created" || responseBody.status === "requested" || responseBody.status === "processing";
+      setRefundProcessingAmountMinor(responseRefundProcessing ? refundableAmountMinor : null);
+      setRefundRequested(responseRefundProcessing);
+      setMessage(responseRefundProcessing ? "Возврат поставлен в очередь." : "Возврат требует проверки.");
       startTransition(() => router.refresh());
     } catch {
       setMessage("Возврат не оформлен. Проверьте состояние заказа и повторите попытку.");
@@ -173,7 +179,7 @@ export default function OrderActionsClient({
             placeholder="Например: возврат по запросу покупателя"
           />
         </label>
-        <button type="submit" disabled={refundDisabled} className="mt-3 w-full rounded-full bg-[#040082] px-4 py-2 text-sm text-white hover:bg-[#030066] disabled:cursor-not-allowed disabled:opacity-50">Оформить полный возврат {formatAmount(refundableAmountMinor)}</button>
+        <button type="submit" disabled={refundDisabled} className="mt-3 w-full rounded-full bg-[#040082] px-4 py-2 text-sm text-white hover:bg-[#030066] disabled:cursor-not-allowed disabled:opacity-50">{refundProcessing ? `Возврат ${formatAmount(refundProcessingAmountMinor ?? processingRefund?.amountMinor ?? refundableAmountMinor)} обрабатывается` : `Оформить полный возврат ${formatAmount(refundableAmountMinor)}`}</button>
       </form>
       {message ? <p className="mt-4 text-xs text-black/60" role="status">{message}</p> : null}
     </section>

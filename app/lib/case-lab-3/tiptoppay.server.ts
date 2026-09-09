@@ -683,13 +683,35 @@ function logWebhookRejection(
   error?: unknown,
   details?: Readonly<Record<string, boolean | number | string | readonly string[] | undefined>>,
 ): void {
-  console.warn("Case Lab III TipTop webhook rejected", {
-    environment,
-    eventType: eventType ?? "unknown",
-    stage,
-    ...(error === undefined ? {} : { errorType: error instanceof Error ? error.name : "unknown_error" }),
-    ...details,
-  });
+  try {
+    console.warn("Case Lab III TipTop webhook rejected", {
+      environment,
+      eventType: eventType ?? "unknown",
+      stage,
+      ...(error === undefined ? {} : { errorType: error instanceof Error ? error.name : "unknown_error" }),
+      ...details,
+    });
+  } catch {
+    // Diagnostics must never alter webhook acknowledgement handling.
+  }
+}
+
+function logWebhookTransition(
+  environment: string,
+  eventType: TipTopEventType | undefined,
+  result: TipTopTransitionResult,
+): void {
+  try {
+    console.info("Case Lab III TipTop webhook transition", {
+      environment,
+      eventType: eventType ?? "unknown",
+      stage: "transition",
+      outcome: result.kind,
+      responseCode: responseCode(result),
+    });
+  } catch {
+    // Diagnostics must never alter webhook acknowledgement handling.
+  }
 }
 
 function responseCode(result: TipTopTransitionResult): number {
@@ -776,6 +798,7 @@ export async function handleSignedTipTopWebhook<T>(
       ),
     };
     const transition = await dependencies.apply(payload, context);
+    logWebhookTransition(environmentValue, dependencies.eventType, transition);
     if (transition.kind === "rejected" || transition.kind === "review_required") {
       const rpcReason = transition.result;
       logWebhookRejection(
@@ -804,13 +827,34 @@ export type TipTopApiConfig = {
   };
 };
 
+export type TipTopApiDiagnostic = {
+  environment: PaymentEnvironment;
+  path: string;
+  stage: "request" | "response" | "parse" | "transport";
+  httpStatus?: number;
+  success?: boolean;
+  messageCode?: "accepted" | "duplicate" | "provider_error" | "provider_message";
+  responseShape?: "object" | "array" | "null" | "http_error" | "invalid_json" | "invalid_response";
+  durationMs?: number;
+  errorKind?: "timeout" | "aborted" | "network";
+};
+
 export type TipTopApiOptions = {
   fetch?: typeof fetch;
   getConfig?: (environment: PaymentEnvironment) => TipTopApiConfig;
   timeoutMs?: number;
   now?: () => number;
   signal?: AbortSignal;
+  onDiagnostic?: (diagnostic: TipTopApiDiagnostic) => void;
 };
+
+function emitTipTopApiDiagnostic(options: TipTopApiOptions, diagnostic: TipTopApiDiagnostic): void {
+  try {
+    (options.onDiagnostic ?? ((entry) => console.info("Case Lab III TipTop API", entry)))(diagnostic);
+  } catch {
+    // Diagnostics must never alter provider state handling.
+  }
+}
 
 function validateApiEnvironment(environment: string): asserts environment is PaymentEnvironment {
   if (environment !== "test" && environment !== "live") throw new TipTopApiError();
@@ -864,6 +908,20 @@ function parseApiResponse(value: unknown, status: number): TipTopApiResponse {
   };
 }
 
+function responseShape(model: TipTopApiResponse["model"]): TipTopApiDiagnostic["responseShape"] {
+  if (model === null) return "null";
+  return Array.isArray(model) ? "array" : "object";
+}
+
+function messageCode(message: string | null): TipTopApiDiagnostic["messageCode"] {
+  if (message === null || message.trim() === "") return undefined;
+  const normalized = message.toLowerCase();
+  if (/duplicate|already/iu.test(normalized)) return "duplicate";
+  if (/declin|fail|error|invalid|reject|unsuccess/iu.test(normalized)) return "provider_error";
+  if (/accept|queue|success|complet/iu.test(normalized)) return "accepted";
+  return "provider_message";
+}
+
 export type TipTopJsonObject = Record<string, unknown>;
 
 export type TipTopApiResponse = {
@@ -882,6 +940,8 @@ async function tipTopApiRequest(
   idempotencyKey?: string,
 ): Promise<TipTopApiResponse> {
   const { fetch: fetcher, config, timeoutMs } = apiOptions(environment, options);
+  const startedAt = Date.now();
+  const durationMs = () => Math.max(0, Date.now() - startedAt);
   const headers = new Headers({
     Accept: "application/json",
     "Content-Type": "application/json; charset=utf-8",
@@ -893,7 +953,12 @@ async function tipTopApiRequest(
   const abortFromCaller = () => controller.abort();
   if (options.signal?.aborted) controller.abort();
   else options.signal?.addEventListener("abort", abortFromCaller, { once: true });
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  let timedOut = false;
+  const timeout = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
+  emitTipTopApiDiagnostic(options, { environment, path, stage: "request" });
   try {
     const response = await fetcher(`${TIPTOP_API_BASE_URL}${path}`, {
       method: "POST",
@@ -902,16 +967,75 @@ async function tipTopApiRequest(
       signal: controller.signal,
       cache: "no-store",
     });
-    if (!response.ok) throw new TipTopApiError();
+    if (!response.ok) {
+      emitTipTopApiDiagnostic(options, {
+        environment,
+        path,
+        stage: "response",
+        httpStatus: response.status,
+        responseShape: "http_error",
+        durationMs: durationMs(),
+      });
+      throw new TipTopApiError();
+    }
     let json: unknown;
     try {
       json = await response.json();
     } catch {
+      if (controller.signal.aborted) {
+        emitTipTopApiDiagnostic(options, {
+          environment,
+          path,
+          stage: "transport",
+          durationMs: durationMs(),
+          errorKind: timedOut ? "timeout" : "aborted",
+        });
+      } else {
+        emitTipTopApiDiagnostic(options, {
+          environment,
+          path,
+          stage: "parse",
+          httpStatus: response.status,
+          responseShape: "invalid_json",
+          durationMs: durationMs(),
+        });
+      }
       throw new TipTopApiError();
     }
-    return parseApiResponse(json, response.status);
+    try {
+      const parsed = parseApiResponse(json, response.status);
+      const parsedMessageCode = messageCode(parsed.message);
+      emitTipTopApiDiagnostic(options, {
+        environment,
+        path,
+        stage: "response",
+        httpStatus: parsed.status,
+        success: parsed.success,
+        ...(parsedMessageCode === undefined ? {} : { messageCode: parsedMessageCode }),
+        responseShape: responseShape(parsed.model),
+        durationMs: durationMs(),
+      });
+      return parsed;
+    } catch {
+      emitTipTopApiDiagnostic(options, {
+        environment,
+        path,
+        stage: "parse",
+        httpStatus: response.status,
+        responseShape: "invalid_response",
+        durationMs: durationMs(),
+      });
+      throw new TipTopApiError();
+    }
   } catch (error) {
     if (error instanceof TipTopApiError) throw error;
+    emitTipTopApiDiagnostic(options, {
+      environment,
+      path,
+      stage: "transport",
+      durationMs: durationMs(),
+      errorKind: timedOut ? "timeout" : controller.signal.aborted ? "aborted" : "network",
+    });
     throw new TipTopApiError();
   } finally {
     clearTimeout(timeout);

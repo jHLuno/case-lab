@@ -10,6 +10,7 @@ const MAX_LENGTHS = {
   offerVersionId: 100,
   privacyVersionId: 100,
   attributionValue: 512,
+  gaClientId: 128,
 } as const;
 
 const ORDER_FIELDS = new Set([
@@ -42,7 +43,7 @@ const TICKET_TIERS = new Set<TicketTier>(["early_bird", "standard"]);
 
 export type ValidationIssue = {
   field: string;
-  code: "invalid_type" | "required" | "must_accept" | "too_long" | "invalid_email" | "invalid_phone" | "invalid_enum" | "invalid_money" | "invalid_version_id" | "unknown_field";
+  code: "invalid_type" | "required" | "must_accept" | "too_long" | "invalid_email" | "invalid_phone" | "invalid_enum" | "invalid_money" | "invalid_version_id" | "invalid_ga_client_id" | "unknown_field";
 };
 
 export class OrderInputValidationError extends Error {
@@ -221,6 +222,9 @@ function parseAttribution(record: Record<string, unknown>, issues: ValidationIss
     const normalized = item.trim();
     if (normalized.length > MAX_LENGTHS.attributionValue) {
       issues.push({ field: `attribution.${key}`, code: "too_long" });
+    }
+    if (key === "ga_client_id" && (normalized.length > MAX_LENGTHS.gaClientId || !/^\d+\.\d+$/u.test(normalized))) {
+      issues.push({ field: "attribution.ga_client_id", code: "invalid_ga_client_id" });
     }
     attribution[key] = normalized;
   }

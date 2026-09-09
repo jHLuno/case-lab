@@ -15,6 +15,7 @@ import {
   parsePay,
   parseRefund,
   refundPayment,
+  type TipTopApiDiagnostic,
   type TipTopApiResponse,
   type TipTopCheck,
   type TipTopFail,
@@ -815,6 +816,69 @@ test("Pay, late Fail, and Refund call their matching transition exactly once", a
   assert.equal(seenRefund?.operationKey, "refund-op-001");
 });
 
+test("accepted TipTop webhook diagnostics expose the transition stage without provider identifiers", async () => {
+  const route = await import("../../app/api/tiptoppay/[environment]/refund/route");
+  const body = await fixture("refund.form");
+  const diagnostics: unknown[][] = [];
+  const originalInfo = console.info;
+  console.info = (...args) => diagnostics.push(args);
+  try {
+    await route.handlePost(
+      signedRequest("/api/tiptoppay/test/refund", body, SIGNATURES["refund.form"]),
+      { params: Promise.resolve({ environment: "test" }) },
+      {
+        getSecret: () => SECRET,
+        applyRefund: async () => ({ kind: "accepted", result: "confirmed" }),
+      },
+    );
+  } finally {
+    console.info = originalInfo;
+  }
+
+  assert.deepEqual(diagnostics, [[
+    "Case Lab III TipTop webhook transition",
+    { environment: "test", eventType: "Refund", stage: "transition", outcome: "accepted", responseCode: 0 },
+  ]]);
+  assert.doesNotMatch(JSON.stringify(diagnostics), /77777|order-001|refund-op-001/iu);
+});
+
+test("webhook transition continues when diagnostic logging fails", async () => {
+  const route = await import("../../app/api/tiptoppay/[environment]/refund/route");
+  const body = await fixture("refund.form");
+  const originalInfo = console.info;
+  console.info = () => { throw new Error("logger unavailable"); };
+  try {
+    const response = await route.handlePost(
+      signedRequest("/api/tiptoppay/test/refund", body, SIGNATURES["refund.form"]),
+      { params: Promise.resolve({ environment: "test" }) },
+      {
+        getSecret: () => SECRET,
+        applyRefund: async () => ({ kind: "accepted", result: "confirmed" }),
+      },
+    );
+    assert.equal(await responseCode(response), 0);
+  } finally {
+    console.info = originalInfo;
+  }
+});
+
+test("webhook rejection continues when diagnostic logging fails", async () => {
+  const route = await import("../../app/api/tiptoppay/[environment]/refund/route");
+  const body = await fixture("refund.form");
+  const originalWarn = console.warn;
+  console.warn = () => { throw new Error("logger unavailable"); };
+  try {
+    const response = await route.handlePost(
+      signedRequest("/api/tiptoppay/test/refund", body, "invalid-signature"),
+      { params: Promise.resolve({ environment: "test" }) },
+      { getSecret: () => SECRET, applyRefund: async () => ({ kind: "accepted", result: "confirmed" }) },
+    );
+    assert.equal(await responseCode(response), 20);
+  } finally {
+    console.warn = originalWarn;
+  }
+});
+
 test("TipTop API methods use environment credentials, JSON, Basic Auth, bounded timeout, and refund request IDs", async () => {
   const requests: Array<{ url: string; init: RequestInit }> = [];
   const fakeFetch: typeof fetch = async (input, init) => {
@@ -871,6 +935,36 @@ test("TipTop API methods use environment credentials, JSON, Basic Auth, bounded 
   }, options), /TipTop API request failed/i);
 });
 
+test("TipTop API diagnostics expose request and response stages without credentials or payloads", async () => {
+  const diagnostics: unknown[] = [];
+  await refundPayment("test", {
+    paymentTransactionId: "12345",
+    amountMinor: 400000,
+    operationKey: "refund-operation-1",
+    invoiceId: "provider-invoice-001",
+  }, {
+    fetch: async () => new Response(JSON.stringify({ Success: true, Message: "Queued", Model: {} }), { status: 200 }),
+    getConfig: () => ({ tiptop: { publicId: "test-public", apiSecret: "test-api-secret" } }),
+    onDiagnostic: (diagnostic: unknown) => diagnostics.push(diagnostic),
+  });
+
+  assert.deepEqual(diagnostics.map((diagnostic) => (diagnostic as { stage: string }).stage), ["request", "response"]);
+  assert.equal((diagnostics[1] as { httpStatus: number }).httpStatus, 200);
+  assert.equal((diagnostics[1] as { messageCode?: string }).messageCode, "accepted");
+  assert.doesNotMatch(JSON.stringify(diagnostics), /test-api-secret|refund-operation-1|12345|4000/iu);
+});
+
+test("TipTop diagnostics classify unsuccessful provider messages as errors", async () => {
+  const diagnostics: TipTopApiDiagnostic[] = [];
+  await getTransaction("test", "12345", {
+    fetch: async () => new Response(JSON.stringify({ Success: false, Message: "Unsuccessful", Model: {} }), { status: 200 }),
+    getConfig: () => ({ tiptop: { publicId: "test-public", apiSecret: "test-api-secret" } }),
+    onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
+  });
+
+  assert.equal(diagnostics[1]?.messageCode, "provider_error");
+});
+
 test("TipTop API requests abort when their bounded timeout expires", async () => {
   let aborted = false;
   const fetcher: typeof fetch = async (_input, init) => new Promise<Response>((_resolve, reject) => {
@@ -886,6 +980,23 @@ test("TipTop API requests abort when their bounded timeout expires", async () =>
     getConfig: () => ({ tiptop: { publicId: "test-public", apiSecret: "test-api-secret" } }),
   }), /TipTop API request failed/i);
   assert.equal(aborted, true);
+});
+
+test("TipTop response parsing aborts are diagnosed as transport timeouts", async () => {
+  const diagnostics: TipTopApiDiagnostic[] = [];
+  await assert.rejects(() => getTransaction("test", "12345", {
+    fetch: async () => ({
+      ok: true,
+      status: 200,
+      json: async () => new Promise<never>((_resolve, reject) => setTimeout(() => reject(new Error("body aborted")), 25)),
+    } as unknown as Response),
+    timeoutMs: 10,
+    getConfig: () => ({ tiptop: { publicId: "test-public", apiSecret: "test-api-secret" } }),
+    onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
+  }), /TipTop API request failed/i);
+
+  assert.deepEqual(diagnostics.map((diagnostic) => diagnostic.stage), ["request", "transport"]);
+  assert.equal(diagnostics[1]?.errorKind, "timeout");
 });
 
 test("an uncertain refund older than one hour is reconciled before any retry", async () => {

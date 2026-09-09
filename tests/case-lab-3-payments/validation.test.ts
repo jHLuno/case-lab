@@ -101,3 +101,11 @@ test("rejects unknown top-level and attribution keys", () => {
     "unknown_field",
   );
 });
+
+test("rejects a malformed GA4 client id instead of forwarding arbitrary attribution", () => {
+  expectValidationIssue(
+    { ...validOrder, attribution: { ...validOrder.attribution, ga_client_id: "buyer@example.com" } },
+    "attribution.ga_client_id",
+    "invalid_ga_client_id",
+  );
+});

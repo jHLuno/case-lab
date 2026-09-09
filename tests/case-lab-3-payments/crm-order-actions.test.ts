@@ -19,8 +19,15 @@ test("CRM keeps ticket cancellation separate from the full refund action", async
   assert.match(source, /Возврат не создан: запрос отклонён \(\$\{response\.status\}\)/u);
   assert.match(source, /Возврат поставлен в очередь/u);
   assert.match(source, /router\.refresh\(\)/u);
-  assert.match(source, /Оформить полный возврат \{formatAmount\(refundableAmountMinor\)\}/u);
+  assert.match(source, /Оформить полный возврат \$\{formatAmount\(refundableAmountMinor\)\}/u);
   assert.match(source, /disabled=\{refundDisabled\}/u);
+  assert.match(source, /const \[refundProcessingAmountMinor, setRefundProcessingAmountMinor\] = useState<number \| null>\(null\)/u);
+  assert.match(source, /const processingRefund = refunds\.find\(\(refund\) => refund\.status === "requested" \|\| refund\.status === "processing"\)/u);
+  assert.match(source, /setRefundProcessingAmountMinor\(responseRefundProcessing \? refundableAmountMinor : null\)/u);
+  assert.match(source, /Возврат \$\{formatAmount\(refundProcessingAmountMinor \?\? processingRefund\?\.amountMinor \?\? refundableAmountMinor\)\} обрабатывается/u);
+  assert.match(source, /const responseBody = await response\.json\(\) as \{ kind\?: unknown; status\?: unknown \}/u);
+  assert.match(source, /const responseRefundProcessing = responseBody\.kind === "created" \|\| responseBody\.status === "requested" \|\| responseBody\.status === "processing"/u);
+  assert.match(source, /setRefundRequested\(responseRefundProcessing\)/u);
   assert.match(source, /refundableAmountMinor <= 0/u);
   assert.match(source, /refunds\.length > 0/u);
   assert.match(source, /ticketCancelled/u);
