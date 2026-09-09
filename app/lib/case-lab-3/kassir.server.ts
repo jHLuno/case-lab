@@ -319,13 +319,47 @@ export type KassirApiConfig = {
   };
 };
 
+export type KassirApiDiagnostic = {
+  environment: PaymentEnvironment;
+  path: string;
+  stage: "request" | "response" | "parse" | "transport";
+  httpStatus?: number;
+  success?: boolean;
+  messageCode?: "accepted" | "provider_error" | "provider_message";
+  responseShape?: "object" | "string" | "null" | "http_error" | "invalid_json" | "invalid_response";
+  durationMs?: number;
+  errorKind?: "timeout" | "aborted" | "network";
+};
+
 export type KassirApiOptions = {
   fetch?: typeof fetch;
   getConfig?: (environment: PaymentEnvironment) => KassirApiConfig;
   timeoutMs?: number;
   signal?: AbortSignal;
   now?: () => number;
+  onDiagnostic?: (diagnostic: KassirApiDiagnostic) => void;
 };
+
+function emitKassirApiDiagnostic(options: KassirApiOptions, diagnostic: KassirApiDiagnostic): void {
+  try {
+    (options.onDiagnostic ?? ((entry) => console.info("Case Lab III Kassir API", entry)))(diagnostic);
+  } catch {
+    // Diagnostics must never alter provider state handling.
+  }
+}
+
+function responseShape(model: KassirApiResponse["model"]): KassirApiDiagnostic["responseShape"] {
+  if (model === null) return "null";
+  return typeof model === "string" ? "string" : "object";
+}
+
+function messageCode(message: string | null): KassirApiDiagnostic["messageCode"] {
+  if (message === null || message.trim() === "") return undefined;
+  const normalized = message.toLowerCase();
+  if (/accept|queue|success|complet/iu.test(normalized)) return "accepted";
+  if (/declin|fail|error|invalid|reject|unauthor|forbidden/iu.test(normalized)) return "provider_error";
+  return "provider_message";
+}
 
 export type KassirApiResponse = {
   success: boolean;
@@ -400,19 +434,26 @@ async function kassirApiRequest(
   mutating = false,
 ): Promise<KassirApiResponse> {
   const { fetch: fetcher, config, timeoutMs } = apiOptions(environment, options);
+  const startedAt = Date.now();
+  const durationMs = () => Math.max(0, Date.now() - startedAt);
   const controller = new AbortController();
   const parentAbort = () => controller.abort();
   if (options.signal) {
     if (options.signal.aborted) controller.abort();
     else options.signal.addEventListener("abort", parentAbort, { once: true });
   }
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  let timedOut = false;
+  const timeout = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
   const headers = new Headers({
     Accept: "application/json",
     "Content-Type": "application/json; charset=utf-8",
     Authorization: `Basic ${Buffer.from(`${config.kassir.publicId}:${config.kassir.apiSecret}`, "utf8").toString("base64")}`,
   });
   if (requestId !== undefined) headers.set("X-Request-ID", operationRequestId(requestId));
+  emitKassirApiDiagnostic(options, { environment, path, stage: "request" });
 
   try {
     const response = await fetcher(`${KASSIR_API_BASE_URL}${path}`, {
@@ -426,14 +467,63 @@ async function kassirApiRequest(
     try {
       json = await response.json();
     } catch {
+      if (controller.signal.aborted) {
+        emitKassirApiDiagnostic(options, {
+          environment,
+          path,
+          stage: "transport",
+          durationMs: durationMs(),
+          errorKind: timedOut ? "timeout" : "aborted",
+        });
+      } else {
+        emitKassirApiDiagnostic(options, {
+          environment,
+          path,
+          stage: "parse",
+          httpStatus: response.status,
+          responseShape: "invalid_json",
+          durationMs: durationMs(),
+        });
+      }
       throw new KassirApiError(response.status >= 500 ? "retryable" : "permanent");
     }
-    const parsed = parseApiResponse(json, response.status);
+    let parsed: KassirApiResponse;
+    try {
+      parsed = parseApiResponse(json, response.status);
+    } catch {
+      emitKassirApiDiagnostic(options, {
+        environment,
+        path,
+        stage: "parse",
+        httpStatus: response.status,
+        responseShape: "invalid_response",
+        durationMs: durationMs(),
+      });
+      throw new KassirApiError(response.status >= 500 ? "retryable" : "permanent");
+    }
+    const parsedMessageCode = messageCode(parsed.message);
+    emitKassirApiDiagnostic(options, {
+      environment,
+      path,
+      stage: "response",
+      httpStatus: parsed.httpStatus,
+      success: parsed.success,
+      ...(parsedMessageCode === undefined ? {} : { messageCode: parsedMessageCode }),
+      responseShape: responseShape(parsed.model),
+      durationMs: durationMs(),
+    });
     if (!response.ok) throw new KassirApiError(response.status >= 500 || response.status === 429 ? "retryable" : "permanent");
     return parsed;
   } catch (error) {
     if (error instanceof KassirApiError) throw error;
     const uncertainSince = options.now?.() ?? Date.now();
+    emitKassirApiDiagnostic(options, {
+      environment,
+      path,
+      stage: "transport",
+      durationMs: durationMs(),
+      errorKind: timedOut ? "timeout" : controller.signal.aborted ? "aborted" : "network",
+    });
     throw new KassirApiError(mutating ? "unknown" : "retryable", mutating ? uncertainSince : null);
   } finally {
     clearTimeout(timeout);

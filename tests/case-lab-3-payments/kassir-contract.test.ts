@@ -8,9 +8,11 @@ import {
   buildFiscalPayload,
   getReceiptDetails,
   getReceiptStatus,
+  KassirApiError,
   parseReceiptForm,
   queueReceipt,
   type KassirFiscalOperation,
+  type KassirApiDiagnostic,
   type KassirFiscalPolicy,
 } from "../../app/lib/case-lab-3/kassir.server";
 
@@ -213,6 +215,49 @@ test("status inspects Model and details are fetched only as a separate call", as
     "https://api.tiptoppay.kz/kkt/receipt/status/get",
     "https://api.tiptoppay.kz/kkt/receipt/get",
   ]);
+});
+
+test("Kassir API diagnostics expose safe provider response shape and status", async () => {
+  const diagnostics: KassirApiDiagnostic[] = [];
+  const fakeFetch: typeof fetch = async () => new Response(JSON.stringify({
+    Success: false,
+    Message: "Unauthorized",
+    Model: null,
+  }), { status: 401 });
+
+  await assert.rejects(
+    () => queueReceipt("test", operation(), policy, {
+      fetch: fakeFetch,
+      getConfig: () => ({
+        kassir: { publicId: "public-id", apiSecret: SECRET },
+        seller: { inn: "123456789012" },
+      }),
+      onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
+    }),
+    KassirApiError,
+  );
+
+  assert.deepEqual(diagnostics.map(({ environment, path, stage, httpStatus, success, messageCode, responseShape }) => ({
+    environment,
+    path,
+    stage,
+    ...(httpStatus === undefined ? {} : { httpStatus }),
+    ...(success === undefined ? {} : { success }),
+    ...(messageCode === undefined ? {} : { messageCode }),
+    ...(responseShape === undefined ? {} : { responseShape }),
+  })), [
+    { environment: "test", path: "/kkt/receipt", stage: "request" },
+    {
+      environment: "test",
+      path: "/kkt/receipt",
+      stage: "response",
+      httpStatus: 401,
+      success: false,
+      messageCode: "provider_error",
+      responseShape: "null",
+    },
+  ]);
+  assert.doesNotMatch(JSON.stringify(diagnostics), /Unauthorized|public-id|fixture-kassir-secret/iu);
 });
 
 test("receipt route verifies the raw signature before parsing and persists before code zero", async () => {
