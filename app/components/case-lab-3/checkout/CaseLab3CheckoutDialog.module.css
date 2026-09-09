@@ -263,9 +263,55 @@
   color: #040082;
 }
 
+.contactOptions {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(10, 10, 22, .12);
+}
+
+.contactButton {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(4, 0, 130, .2);
+  border-radius: 24px;
+  background: #f5f4fb;
+  padding: 12px 18px;
+  color: #040082;
+  font-family: var(--font-body);
+  font-size: 14px;
+  text-decoration: none;
+  transition: background-color .2s ease, transform .2s ease;
+}
+
+.contactButton:hover {
+  background: #ecebf8;
+  transform: translateY(-1px);
+}
+
+.contactNote {
+  margin: 0;
+  color: #4f4e5b;
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.contactNote a {
+  color: #040082;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .closeButton:focus-visible,
 .submitButton:focus-visible,
 .secondaryButton:focus-visible,
+.contactButton:focus-visible,
 .checkboxLabel input:focus-visible {
   outline: 3px solid #040082;
   outline-offset: 3px;
@@ -312,12 +358,14 @@
 
   .closeButton,
   .submitButton,
+  .contactButton,
   .fields input {
     transition: none;
   }
 
   .closeButton:hover,
-  .submitButton:hover:not(:disabled) {
+  .submitButton:hover:not(:disabled),
+  .contactButton:hover {
     transform: none;
   }
 }

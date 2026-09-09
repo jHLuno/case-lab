@@ -356,6 +356,21 @@ export default function CaseLab3CheckoutDialog({
             Закрыть
           </button>
         )}
+
+        <div className={styles.contactOptions}>
+          <a
+            href="https://wa.me/77072124410"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.contactButton}
+          >
+            Для юридических лиц
+            <ArrowUpRight size={17} strokeWidth={2} aria-hidden="true" />
+          </a>
+          <p className={styles.contactNote}>
+            По вопросам оплаты: <a href="mailto:hello@caselab.kz">hello@caselab.kz</a>
+          </p>
+        </div>
       </div>
     </div>
   );

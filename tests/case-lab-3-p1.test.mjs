@@ -4,7 +4,7 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-const [layoutSource, globalsSource, navbarSource, caseLab3NavbarSource, casesSource, scrollRevealSource, proofSource, ticketsSource, faqSource, pageSource, jsonLdSource, sitemapSource, caseLabStyles, heroSource, speakersSource, checkoutProviderSource, checkoutDialogSource, checkoutButtonSource] = await Promise.all([
+const [layoutSource, globalsSource, navbarSource, caseLab3NavbarSource, casesSource, scrollRevealSource, proofSource, ticketsSource, faqSource, pageSource, jsonLdSource, sitemapSource, caseLabStyles, heroSource, speakersSource, checkoutProviderSource, checkoutDialogSource, checkoutDialogStylesSource, checkoutButtonSource] = await Promise.all([
   read("app/layout.tsx"),
   read("app/globals.css"),
   read("app/components/Navbar.tsx"),
@@ -22,6 +22,7 @@ const [layoutSource, globalsSource, navbarSource, caseLab3NavbarSource, casesSou
   read("app/sections/CaseLab3Speakers.tsx"),
   read("app/components/case-lab-3/checkout/CaseLab3CheckoutProvider.tsx"),
   read("app/components/case-lab-3/checkout/CaseLab3CheckoutDialog.tsx"),
+  read("app/components/case-lab-3/checkout/CaseLab3CheckoutDialog.module.css"),
   read("app/components/case-lab-3/checkout/CaseLab3CheckoutButton.tsx"),
 ]);
 
@@ -91,6 +92,17 @@ test("Case Lab 3 exposes all four purchase CTA sources through the client leaf",
   assert.doesNotMatch(pageSource + checkoutProviderSource + checkoutDialogSource, /caseLab3CheckoutHref/);
   assert.match(checkoutDialogSource, /amountMinor/);
   assert.match(checkoutDialogSource, /formatKzt/);
+});
+
+test("checkout popup provides legal-entity and payment contact paths", () => {
+  assert.match(checkoutDialogSource, /href="https:\/\/wa\.me\/77072124410"/);
+  assert.match(checkoutDialogSource, /Для юридических лиц/);
+  assert.match(checkoutDialogSource, /href="mailto:hello@caselab\.kz"/);
+  assert.match(checkoutDialogSource, /По вопросам оплаты/);
+  assert.match(checkoutDialogSource, /target="_blank"/);
+  assert.match(checkoutDialogSource, /rel="noopener noreferrer"/);
+  assert.match(checkoutDialogStylesSource, /\.contactOptions\s*\{/);
+  assert.match(checkoutDialogStylesSource, /\.contactButton:focus-visible/);
 });
 
 test("all cases points to the homepage archive and the event is internally linked", () => {
