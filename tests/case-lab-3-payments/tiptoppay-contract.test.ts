@@ -452,10 +452,24 @@ test("Refund parses only a strict Data operation key and accepts an empty Data f
   assert.throws(() => parseRefund(parseFormPayload(`${common}&Data=%5B%5D`)), /invalid/i);
 });
 
-test("Fail rejects the undocumented Status field", () => {
-  assert.throws(() => parseFail(parseFormPayload(
+test("Fail accepts a provider Declined status and rejects successful statuses", () => {
+  const fail = parseFail(parseFormPayload(
     "TransactionId=12345&Amount=15000.00&Currency=KZT&DateTime=2026-09-08T00%3A00%3A00Z&TestMode=1&Status=Declined&Reason=InsufficientFunds&ReasonCode=5051&OperationType=Payment",
+  ));
+  assert.equal(fail.status, "Declined");
+  assert.equal(fail.failureCode, "failed");
+
+  assert.throws(() => parseFail(parseFormPayload(
+    "TransactionId=12345&Amount=15000.00&Currency=KZT&DateTime=2026-09-08T00%3A00%3A00Z&TestMode=1&Status=Completed&Reason=InsufficientFunds&ReasonCode=5051&OperationType=Payment",
   )), /invalid/i);
+});
+
+test("Fail maps a provider fraud decline to a terminal failed outcome", () => {
+  const fail = parseFail(parseFormPayload(
+    "TransactionId=4718843736&Amount=7980.00&Currency=KZT&DateTime=2026-09-09%2018%3A43%3A25&TestMode=0&Status=Declined&Reason=SuspectedFraud&ReasonCode=5034&OperationType=Payment&InvoiceId=cl3-644b7fc948474c2196aa4ebe553df3d0&AccountId=6d295798-eb57-4dc1-b0ce-07e95aa3c4f6",
+  ));
+  assert.equal(fail.status, "Declined");
+  assert.equal(fail.failureCode, "failed");
 });
 
 test("typed parsers reject fields that bypass the form decoder", () => {

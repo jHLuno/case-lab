@@ -18,6 +18,7 @@ const IDENTIFIER_MAX_LENGTH = 256;
 const TEXT_MAX_LENGTH = 2048;
 const CHECK_CODES = [10, 11, 12, 13, 20] as const;
 const LIST_STATUSES = new Set(["Authorized", "Completed", "Cancelled", "Declined"]);
+const FAIL_STATUSES = new Set(["Declined", "Failed", "Error"]);
 const OPAQUE_PROVIDER_FIELDS = new Set(["Data", "CustomFields"]);
 const STRICT_CONTROL_BYTES = /[\u0000-\u001f\u007f]/u;
 const DANGEROUS_JSON_CONTROL_BYTES = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/u;
@@ -341,7 +342,8 @@ function commonFields(fields: TipTopFormFields, requireStatus: boolean): CommonT
   };
 }
 
-function mapFailureCode(reason: string, reasonCode: number): string {
+function mapFailureCode(reason: string, reasonCode: number, status?: string): string {
+  if (status !== undefined && FAIL_STATUSES.has(status)) return "failed";
   const normalized = reason.toLowerCase();
   if (normalized.includes("timeout")) return "timeout";
   if (reasonCode === 5091) return "timeout";
@@ -449,7 +451,8 @@ export function parsePay(fields: TipTopFormFields): TipTopPay {
 
 export function parseFail(fields: TipTopFormFields): TipTopFail {
   assertDocumentedFields(fields);
-  if (fields.Status !== undefined) invalid();
+  const status = fields.Status;
+  if (status !== undefined && !FAIL_STATUSES.has(status)) invalid("Status", Object.keys(fields));
   const dateTime = requiredField(fields, "DateTime");
   if (!dateTime) invalid();
   const common = commonFields(fields, false);
@@ -457,7 +460,8 @@ export function parseFail(fields: TipTopFormFields): TipTopFail {
   const reasonCode = parseReasonCode(requiredField(fields, "ReasonCode"));
   return {
     ...common,
-    failureCode: mapFailureCode(failureReason, reasonCode),
+    ...(status === undefined ? {} : { status }),
+    failureCode: mapFailureCode(failureReason, reasonCode, status),
     failureReason,
     reasonCode,
   };
