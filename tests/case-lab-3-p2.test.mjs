@@ -828,7 +828,7 @@ test("Case Lab 3 customer-facing text uses the current Early Bird price", () => 
 test("Case Lab 3 mobile speaker cards keep titles compact and reveal photo tops", () => {
   assert.match(
     caseLabStylesSource,
-    /@media \(max-width: 767px\)[\s\S]*?\.speakerAccessibleCase h3\s*\{[\s\S]*?font-size:\s*clamp\(14px,\s*5vw,\s*18px\);[\s\S]*?line-height:\s*1\.02;/,
+    /@media \(max-width: 767px\)[\s\S]*?\.speakerAccessibleCase h3\s*\{[\s\S]*?font-size:\s*clamp\(14px,\s*4\.4vw,\s*16px\);[\s\S]*?line-height:\s*1\.02;[\s\S]*?overflow-wrap:\s*normal;/,
   );
   assert.match(
     caseLabStylesSource,
