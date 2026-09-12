@@ -29,6 +29,7 @@ const RECEIPT_FORM_FIELDS = new Set([
   "Type",
   "Ofd",
   "Url",
+  "QrCodeUrl",
   "TransactionId",
   "Amount",
   "DateTime",
@@ -706,6 +707,7 @@ export function parseReceiptForm(rawBody: Uint8Array | string): KassirReceiptPay
   const accountId = optionalFormField(fields, "AccountId", 256);
   const transactionIdValue = optionalFormField(fields, "TransactionId", 64);
   const transactionId = transactionIdValue === undefined ? undefined : receiptInteger(transactionIdValue);
+  const topLevelQrUrl = optionalFormField(fields, "QrCodeUrl", 2048);
   const receipt = receiptJson(requiredFormField(fields, "Receipt", 64 * 1024));
   const receiptUrl = typeof receipt.OfdUrl === "string"
     ? receipt.OfdUrl
@@ -714,13 +716,14 @@ export function parseReceiptForm(rawBody: Uint8Array | string): KassirReceiptPay
       : typeof receipt.Url === "string"
         ? receipt.Url
         : null;
-  const qrUrl = typeof receipt.QrUrl === "string"
-    ? receipt.QrUrl
-    : typeof receipt.QRUrl === "string"
-      ? receipt.QRUrl
-      : typeof receipt.QRCodeUrl === "string"
-        ? receipt.QRCodeUrl
-        : null;
+  const qrUrl = topLevelQrUrl
+    ?? (typeof receipt.QrUrl === "string"
+      ? receipt.QrUrl
+      : typeof receipt.QRUrl === "string"
+        ? receipt.QRUrl
+        : typeof receipt.QRCodeUrl === "string"
+          ? receipt.QRCodeUrl
+          : null);
   const fiscalSign = fields.FiscalSign ?? null;
   const ofd = fields.Ofd ?? null;
 

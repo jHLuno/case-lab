@@ -382,3 +382,36 @@ test("production-equivalent Income callback accepts empty FiscalNumber and unkno
   assert.equal(received?.fiscalFields.fiscalSign, "fiscal-sign-redacted");
   assert.equal(received?.fiscalFields.qrUrl, "https://ofd.example.test/qr/redacted");
 });
+
+test("production Income callback accepts the top-level QrCodeUrl field", async () => {
+  const route = await import("../../app/api/kassir/[environment]/receipt/route");
+  const body = (await fixture("receipt-income-production-equivalent.form")).replace(
+    "&Amount=7890.00",
+    "&QrCodeUrl=https%3A%2F%2Fqr.tiptoppay.kz%2Freceipt%3Fq%3Dfixture&Amount=7890.00",
+  );
+  const signature = createHmac("sha256", SECRET).update(body).digest("base64");
+  let received: ReturnType<typeof parseReceiptForm> | undefined;
+
+  const response = await route.handlePost(
+    new Request("https://caselab.kz/api/kassir/live/receipt", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-HMAC": signature,
+      },
+      body,
+    }),
+    { params: Promise.resolve({ environment: "live" }) },
+    {
+      getSecret: () => SECRET,
+      applyReceipt: async (_environment, payload) => {
+        received = payload;
+        return { kind: "accepted" };
+      },
+    },
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { code: 0 });
+  assert.equal(received?.fiscalFields.qrUrl, "https://qr.tiptoppay.kz/receipt?q=fixture");
+});
