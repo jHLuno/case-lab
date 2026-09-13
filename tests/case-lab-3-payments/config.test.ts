@@ -48,6 +48,17 @@ test("configuration selects the requested environment and keeps server values gr
   assert.equal("apiSecret" in config.widget, false);
 });
 
+test("configuration accepts a private GA4 measurement ID", async () => {
+  const { getCaseLab3Config } = await configModule;
+  const config = getCaseLab3Config("test", {
+    ...completeTestEnvironment,
+    GA4_MEASUREMENT_ID: "G-PRIVATE123",
+    NEXT_PUBLIC_GA4_MEASUREMENT_ID: undefined,
+  });
+
+  assert.equal(config.ga4?.measurementId, "G-PRIVATE123");
+});
+
 test("sandbox payment configuration remains valid when GA4 is not configured", async () => {
   const { getCaseLab3Config } = await configModule;
   const source = {
@@ -133,7 +144,7 @@ test("the committed environment template contains no credential-like values or o
     "CASE_LAB_3_ALERT_EMAIL",
     "CASE_LAB_3_TOKEN_SECRET",
     "CASE_LAB_3_CRON_SECRET",
-    "NEXT_PUBLIC_GA4_MEASUREMENT_ID",
+    "GA4_MEASUREMENT_ID",
     "GA4_API_SECRET",
     "JWT_SECRET",
   ];

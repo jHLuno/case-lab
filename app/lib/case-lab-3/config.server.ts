@@ -97,7 +97,8 @@ export function getCaseLab3Config(
   const kassirApiSecret = required(source, `KASSIR_${environmentLabel}_API_SECRET`);
   const tokenSecret = assertSecretLength(required(source, "CASE_LAB_3_TOKEN_SECRET"));
   const cronSecret = assertSecretLength(required(source, "CASE_LAB_3_CRON_SECRET"));
-  const ga4MeasurementId = optional(source, "NEXT_PUBLIC_GA4_MEASUREMENT_ID");
+  const ga4MeasurementId = optional(source, "GA4_MEASUREMENT_ID")
+    ?? optional(source, "NEXT_PUBLIC_GA4_MEASUREMENT_ID");
   const ga4ApiSecret = optional(source, "GA4_API_SECRET");
 
   return {
