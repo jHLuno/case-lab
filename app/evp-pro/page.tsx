@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import EVPProPage from "../components/EVPProPage";
+import GoogleTagManager from "../components/GoogleTagManager";
 
 export const metadata: Metadata = {
   title: "EVP PRO - Практическая сессия по EVP | Case Lab",
@@ -10,6 +12,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Page() {
-  return <EVPProPage />;
+export default async function Page() {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
+  return (
+    <>
+      <GoogleTagManager nonce={nonce} />
+      <EVPProPage />
+    </>
+  );
 }

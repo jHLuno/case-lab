@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import CaseLab3Page from "../components/CaseLab3Page";
+import GoogleTagManager from "../components/GoogleTagManager";
 
 const caseLab3EventSchema = {
   "@context": "https://schema.org",
@@ -78,6 +79,7 @@ export default async function Page() {
 
   return (
     <>
+      <GoogleTagManager nonce={nonce} />
       <script
         type="application/ld+json"
         nonce={nonce}

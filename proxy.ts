@@ -15,6 +15,15 @@ function isCaseLab3Path(pathname: string): boolean {
   return pathname === "/case-lab-3" || pathname.startsWith("/case-lab-3/");
 }
 
+function isGtmPath(pathname: string): boolean {
+  const normalizedPathname = pathname.length > 1 ? pathname.replace(/\/$/, "") : pathname;
+  return (
+    normalizedPathname === "/" ||
+    normalizedPathname === "/evp-pro" ||
+    normalizedPathname === "/case-lab-3"
+  );
+}
+
 function createNonce(): string {
   const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
@@ -27,24 +36,32 @@ export function proxy(request: NextRequest) {
   const nonce = createNonce();
   const isDev = process.env.NODE_ENV === "development";
   const supabaseOrigin = getSupabaseOrigin();
-  const caseLab3WidgetOrigin = isCaseLab3Path(request.nextUrl.pathname)
+  const isCaseLab3 = isCaseLab3Path(request.nextUrl.pathname);
+  const isGtm = isGtmPath(request.nextUrl.pathname);
+  const caseLab3WidgetOrigin = isCaseLab3
     ? " https://widget.tiptoppay.kz"
     : "";
-  const caseLab3FrameDirective = isCaseLab3Path(request.nextUrl.pathname)
-    ? `frame-src 'self'${caseLab3WidgetOrigin}`
-    : null;
+  const gtmScriptOrigin = isGtm ? " https://www.googletagmanager.com" : "";
+  const gtmConnectOrigins = isGtm
+    ? " https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com"
+    : "";
+  const gtmImageOrigins = isGtm ? " https://www.google-analytics.com" : "";
+  const frameDirective =
+    isCaseLab3 || isGtm
+      ? `frame-src 'self'${caseLab3WidgetOrigin}${isGtm ? " https://www.googletagmanager.com" : ""}`
+      : null;
   const cspHeader = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}${caseLab3WidgetOrigin}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}${caseLab3WidgetOrigin}${gtmScriptOrigin}`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' blob: data:",
+    `img-src 'self' blob: data:${gtmImageOrigins}`,
     "font-src 'self'",
-    caseLab3FrameDirective,
+    frameDirective,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    `connect-src 'self'${supabaseOrigin ? ` ${supabaseOrigin}` : ""}`,
+    `connect-src 'self'${supabaseOrigin ? ` ${supabaseOrigin}` : ""}${gtmConnectOrigins}`,
     "upgrade-insecure-requests",
   ].filter((directive): directive is string => directive !== null).join("; ");
 
