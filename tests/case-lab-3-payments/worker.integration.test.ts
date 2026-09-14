@@ -642,6 +642,29 @@ test("poll receipt details read fiscal fields from Kassir AdditionalData", () =>
   });
 });
 
+test("poll receipt details read serialized Kassir AdditionalData", () => {
+  const extracted = extractPolledReceiptFields({
+    AdditionalData: JSON.stringify({
+      DocumentNumber: "1324",
+      FiscalSign: "13224",
+      FiscalNumber: "9999078900005431",
+      OfdReceiptUrl: "https://ofd.example.test/receipt/3",
+      QrCodeUrl: "https://qr.example.test/receipt/3",
+    }),
+  });
+
+  assert.deepEqual(extracted, {
+    receiptUrl: "https://ofd.example.test/receipt/3",
+    fiscalFields: {
+      fiscalDocumentNumber: "1324",
+      fiscalSign: "13224",
+      fiscalNumber: "9999078900005431",
+      ofdUrl: "https://ofd.example.test/receipt/3",
+      qrUrl: "https://qr.example.test/receipt/3",
+    },
+  });
+});
+
 test("worker awaits production handlers and completes each job with its lease token", async () => {
   const completed: string[] = [];
   const jobs = [

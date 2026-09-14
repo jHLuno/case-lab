@@ -644,12 +644,23 @@ function providerUrl(...values: unknown[]): string | null {
   return null;
 }
 
+function providerObject(value: unknown): WorkerRecord {
+  const object = jsonObject(value);
+  if (Object.keys(object).length > 0 || (value !== null && typeof value === "object")) return object;
+  if (typeof value !== "string" || value.length === 0 || value.length > 64 * 1024) return {};
+  try {
+    return jsonObject(JSON.parse(value));
+  } catch {
+    return {};
+  }
+}
+
 export function extractPolledReceiptFields(model: WorkerRecord): {
   receiptUrl: string | null;
   fiscalFields: Record<string, string>;
 } {
-  const receipt = jsonObject(model.Receipt ?? model.receipt);
-  const additionalData = jsonObject(model.AdditionalData ?? model.additionalData);
+  const receipt = providerObject(model.Receipt ?? model.receipt);
+  const additionalData = providerObject(model.AdditionalData ?? model.additionalData);
   const receiptUrl = providerUrl(
     model.Url,
     model.url,
