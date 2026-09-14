@@ -18,7 +18,10 @@ import {
   createSendAnalyticsEventHandler,
   runCaseLab3Worker,
 } from "../../app/lib/case-lab-3/worker.server";
-import { extractPolledReceiptFields } from "../../app/lib/case-lab-3/worker-handlers.server";
+import {
+  extractPolledReceiptFields,
+  mergePolledReceiptFields,
+} from "../../app/lib/case-lab-3/worker-handlers.server";
 import { handlePost as handleWorkerPost } from "../../app/api/internal/case-lab-3/jobs/route";
 import { TipTopApiError } from "../../app/lib/case-lab-3/tiptoppay.server";
 
@@ -661,6 +664,30 @@ test("poll receipt details read serialized Kassir AdditionalData", () => {
       fiscalNumber: "9999078900005431",
       ofdUrl: "https://ofd.example.test/receipt/3",
       qrUrl: "https://qr.example.test/receipt/3",
+    },
+  });
+});
+
+test("poll receipt details do not erase fields already received by webhook", () => {
+  const merged = mergePolledReceiptFields(
+    {
+      receiptUrl: "https://receipt.example.test/existing",
+      fiscalFields: {
+        fiscalDocumentNumber: "1323",
+        fiscalSign: "13223",
+      },
+    },
+    {
+      receiptUrl: null,
+      fiscalFields: {},
+    },
+  );
+
+  assert.deepEqual(merged, {
+    receiptUrl: "https://receipt.example.test/existing",
+    fiscalFields: {
+      fiscalDocumentNumber: "1323",
+      fiscalSign: "13223",
     },
   });
 });

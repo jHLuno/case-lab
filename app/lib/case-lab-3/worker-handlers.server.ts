@@ -508,6 +508,8 @@ function fiscalOperationFromRows(
     amountMinor,
     email: text(order.fiscal_email ?? order.purchaser_email, "fiscal email", 320),
     kassirReceiptId: typeof operation.kassir_receipt_id === "string" ? operation.kassir_receipt_id : null,
+    receiptUrl: typeof operation.receipt_url === "string" ? operation.receipt_url : null,
+    fiscalFields: jsonObject(operation.fiscal_fields) as Record<string, string>,
     attemptCount: Number.isSafeInteger(operation.attempt_count) ? operation.attempt_count as number : 0,
     uncertainSinceAt: typeof operation.uncertain_since_at === "string" ? operation.uncertain_since_at : null,
     createdAt: typeof operation.created_at === "string" ? operation.created_at : null,
@@ -732,13 +734,33 @@ export function extractPolledReceiptFields(model: WorkerRecord): {
   return { receiptUrl, fiscalFields };
 }
 
+export function mergePolledReceiptFields(
+  existing: {
+    receiptUrl?: string | null;
+    fiscalFields?: Record<string, string>;
+  },
+  extracted: {
+    receiptUrl: string | null;
+    fiscalFields: Record<string, string>;
+  },
+): { receiptUrl: string | null; fiscalFields: Record<string, string> } {
+  return {
+    receiptUrl: extracted.receiptUrl ?? existing.receiptUrl ?? null,
+    fiscalFields: {
+      ...(existing.fiscalFields ?? {}),
+      ...extracted.fiscalFields,
+    },
+  };
+}
+
 async function applyPolledReceipt(
   environment: PaymentEnvironment,
   operation: KassirFiscalOperation,
   receiptId: string,
   model: WorkerRecord,
 ): Promise<void> {
-  const { receiptUrl: url, fiscalFields } = extractPolledReceiptFields(model);
+  const extracted = extractPolledReceiptFields(model);
+  const { receiptUrl: url, fiscalFields } = mergePolledReceiptFields(operation, extracted);
   const sanitizedFields = {
     receiptId,
     kassirReceiptId: receiptId,

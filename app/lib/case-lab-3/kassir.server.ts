@@ -81,6 +81,8 @@ export type KassirFiscalOperation = {
   email: string;
   phone?: string | null;
   kassirReceiptId?: string | null;
+  receiptUrl?: string | null;
+  fiscalFields?: Record<string, string>;
   attemptCount?: number;
   uncertainSinceAt?: string | null;
   createdAt?: string | null;
