@@ -45,7 +45,9 @@ export function proxy(request: NextRequest) {
   const gtmConnectOrigins = isGtm
     ? " https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com"
     : "";
-  const gtmImageOrigins = isGtm ? " https://www.google-analytics.com" : "";
+  const gtmImageOrigins = isGtm
+    ? " https://www.google-analytics.com https://www.googletagmanager.com"
+    : "";
   const frameDirective =
     isCaseLab3 || isGtm
       ? `frame-src 'self'${caseLab3WidgetOrigin}${isGtm ? " https://www.googletagmanager.com" : ""}`

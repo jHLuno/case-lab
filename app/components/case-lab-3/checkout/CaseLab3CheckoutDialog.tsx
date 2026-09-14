@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type Dispatch, type FormEvent, type Keyboa
 import { ArrowUpRight, X } from "lucide-react";
 
 import { formatKzt } from "../../../lib/case-lab-3/money";
+import { pushCaseLab3Event } from "../analytics";
 import {
   initialCheckoutForm,
   type CheckoutEvent,
@@ -118,7 +119,10 @@ export default function CaseLab3CheckoutDialog({
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (event.currentTarget.reportValidity()) dispatch({ type: "SUBMIT" });
+    if (event.currentTarget.reportValidity()) {
+      pushCaseLab3Event({ name: "case_lab_3_form_submitted" });
+      dispatch({ type: "SUBMIT" });
+    }
   };
 
   const form = state.form ?? initialCheckoutForm;

@@ -603,6 +603,8 @@ test("Case Lab 3 CSP adds the TipTop script and frame origin only on the event p
   assert.match(proxySource, /frame-src/);
   assert.match(proxySource, /strict-dynamic/);
   assert.match(proxySource, /pathname/);
+  const gtmImageOriginsSource = proxySource.match(/const gtmImageOrigins[\s\S]*?;/)?.[0] ?? "";
+  assert.match(gtmImageOriginsSource, /www\.googletagmanager\.com/);
 });
 
 test("Case Lab 3 route tokens stay scoped and semantic", () => {

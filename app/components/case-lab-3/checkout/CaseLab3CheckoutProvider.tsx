@@ -11,6 +11,7 @@ import {
 } from "react";
 
 import type { AvailabilityResponse, OrderStatusResponse, TipTopWidgetParams } from "../../../lib/case-lab-3/contracts";
+import { pushCaseLab3Event } from "../analytics";
 import { checkoutReducer, initialCheckoutState, type CheckoutPhase, type CheckoutSource } from "./checkout-machine";
 import CaseLab3CheckoutDialog from "./CaseLab3CheckoutDialog";
 import { loadTipTopWidget, startTipTopPayment } from "./tiptoppay-widget.client";
@@ -167,6 +168,7 @@ export default function CaseLab3CheckoutProvider({
     if (typeof document !== "undefined") {
       openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     }
+    pushCaseLab3Event({ name: "case_lab_3_checkout_opened", source });
     dispatch({ type: "OPEN", source });
   }, []);
 
@@ -354,6 +356,7 @@ export default function CaseLab3CheckoutProvider({
         if (controller.signal.aborted) return;
         if (!isCurrentOperation(operationRef.current, generation, "loading_widget")) return;
         widgetOperation.widgetOpen = true;
+        pushCaseLab3Event({ name: "case_lab_3_payment_started" });
         dispatch({ type: "WIDGET_OPEN", generation });
         widgetOpen = true;
         const result = await startTipTopPayment(widget);
@@ -362,6 +365,9 @@ export default function CaseLab3CheckoutProvider({
         }
       } catch (error) {
         const requestPhase = widgetOpen ? "payment_open" : "loading_widget";
+        if (!controller.signal.aborted) {
+          pushCaseLab3Event({ name: "case_lab_3_widget_error", stage: widgetOpen ? "payment" : "load" });
+        }
         if (!controller.signal.aborted && operationRef.current.generation === generation) {
           dispatch({ type: "SCRIPT_ERROR", generation, requestPhase, message: error instanceof Error ? error.message : undefined });
         }
@@ -394,7 +400,10 @@ export default function CaseLab3CheckoutProvider({
         if (!response.ok || !isOrderStatus(payload)) throw new Error("Status unavailable");
 
         if (payload.paymentStatus === "paid" || payload.paymentStatus === "failed" || payload.paymentStatus === "review_required") {
-           dispatch({ type: "STATUS", generation, status: payload.paymentStatus });
+          if (payload.paymentStatus === "failed") {
+            pushCaseLab3Event({ name: "case_lab_3_payment_failed" });
+          }
+          dispatch({ type: "STATUS", generation, status: payload.paymentStatus });
           return;
         }
 

@@ -10,6 +10,12 @@ const securityHeaders = [
   },
 ];
 
+const checkInSecurityHeaders = securityHeaders.map((header) =>
+  header.key === "Permissions-Policy"
+    ? { ...header, value: "accelerometer=(), camera=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()" }
+    : header,
+);
+
 const nextConfig: NextConfig = {
   trailingSlash: true,
   images: {
@@ -20,6 +26,10 @@ const nextConfig: NextConfig = {
       {
         source: "/:path*",
         headers: securityHeaders,
+      },
+      {
+        source: "/crm/check-in/:path*",
+        headers: checkInSecurityHeaders,
       },
     ];
   },
