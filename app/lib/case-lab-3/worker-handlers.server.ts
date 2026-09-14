@@ -649,18 +649,63 @@ export function extractPolledReceiptFields(model: WorkerRecord): {
   fiscalFields: Record<string, string>;
 } {
   const receipt = jsonObject(model.Receipt ?? model.receipt);
-  const receiptUrl = providerUrl(model.Url, model.url, receipt.Url, receipt.url, model.QrCodeUrl, model.qrCodeUrl);
-  const fiscalDocumentNumber = providerText(model.DocumentNumber ?? model.documentNumber ?? receipt.DocumentNumber ?? receipt.documentNumber);
-  const fiscalSign = providerText(model.FiscalSign ?? model.fiscalSign ?? receipt.FiscalSign ?? receipt.fiscalSign);
-  const fiscalNumber = providerText(model.FiscalNumber ?? model.fiscalNumber ?? receipt.FiscalNumber ?? receipt.fiscalNumber);
-  const ofd = providerText(model.Ofd ?? model.ofd ?? model.OFD ?? receipt.Ofd ?? receipt.ofd ?? receipt.OFD);
-  const ofdUrl = providerUrl(receipt.OfdUrl, receipt.OFDUrl, receipt.ofdUrl, receipt.Url, receipt.url);
+  const additionalData = jsonObject(model.AdditionalData ?? model.additionalData);
+  const receiptUrl = providerUrl(
+    model.Url,
+    model.url,
+    additionalData.OfdReceiptUrl,
+    additionalData.OFDReceiptUrl,
+    additionalData.OfdUrl,
+    additionalData.ofdUrl,
+    receipt.Url,
+    receipt.url,
+    model.QrCodeUrl,
+    model.qrCodeUrl,
+    additionalData.QrCodeUrl,
+    additionalData.qrCodeUrl,
+  );
+  const fiscalDocumentNumber = providerText(
+    model.DocumentNumber ?? model.documentNumber
+      ?? additionalData.DocumentNumber ?? additionalData.documentNumber
+      ?? receipt.DocumentNumber ?? receipt.documentNumber,
+  );
+  const fiscalSign = providerText(
+    model.FiscalSign ?? model.fiscalSign
+      ?? additionalData.FiscalSign ?? additionalData.fiscalSign
+      ?? receipt.FiscalSign ?? receipt.fiscalSign,
+  );
+  const fiscalNumber = providerText(
+    model.FiscalNumber ?? model.fiscalNumber
+      ?? additionalData.FiscalNumber ?? additionalData.fiscalNumber
+      ?? receipt.FiscalNumber ?? receipt.fiscalNumber,
+  );
+  const ofd = providerText(
+    model.Ofd ?? model.ofd ?? model.OFD
+      ?? additionalData.Ofd ?? additionalData.ofd ?? additionalData.OFD
+      ?? receipt.Ofd ?? receipt.ofd ?? receipt.OFD,
+  );
+  const ofdUrl = providerUrl(
+    receipt.OfdUrl,
+    receipt.OFDUrl,
+    receipt.ofdUrl,
+    additionalData.OfdReceiptUrl,
+    additionalData.OFDReceiptUrl,
+    additionalData.OfdUrl,
+    additionalData.ofdUrl,
+    receipt.Url,
+    receipt.url,
+  );
   const qrUrl = providerUrl(
     model.QrCodeUrl,
     model.qrCodeUrl,
     model.QRCodeUrl,
     model.QRUrl,
     model.qrUrl,
+    additionalData.QrCodeUrl,
+    additionalData.qrCodeUrl,
+    additionalData.QRCodeUrl,
+    additionalData.QRUrl,
+    additionalData.qrUrl,
     receipt.QrUrl,
     receipt.QRUrl,
     receipt.QRCodeUrl,
