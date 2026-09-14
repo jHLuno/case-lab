@@ -624,9 +624,56 @@ async function queueFiscalOperation(job: ClaimedCaseLab3Job, context: WorkerHand
   }
 }
 
-function receiptUrl(model: WorkerRecord): string | null {
-  const value = model.Url ?? model.url;
-  return typeof value === "string" && value.length > 0 && value.length <= 2048 && /^https:\/\//u.test(value) ? value : null;
+function providerText(value: unknown): string | null {
+  const candidate = typeof value === "string"
+    ? value
+    : typeof value === "number" && Number.isSafeInteger(value)
+      ? String(value)
+      : null;
+  return candidate && candidate.length > 0 && candidate.length <= 256 && !/[\u0000-\u001f\u007f]/u.test(candidate)
+    ? candidate
+    : null;
+}
+
+function providerUrl(...values: unknown[]): string | null {
+  for (const value of values) {
+    if (typeof value === "string" && value.length > 0 && value.length <= 2048 && /^https:\/\//u.test(value) && !/[\u0000-\u001f\u007f]/u.test(value)) {
+      return value;
+    }
+  }
+  return null;
+}
+
+export function extractPolledReceiptFields(model: WorkerRecord): {
+  receiptUrl: string | null;
+  fiscalFields: Record<string, string>;
+} {
+  const receipt = jsonObject(model.Receipt ?? model.receipt);
+  const receiptUrl = providerUrl(model.Url, model.url, receipt.Url, receipt.url, model.QrCodeUrl, model.qrCodeUrl);
+  const fiscalDocumentNumber = providerText(model.DocumentNumber ?? model.documentNumber ?? receipt.DocumentNumber ?? receipt.documentNumber);
+  const fiscalSign = providerText(model.FiscalSign ?? model.fiscalSign ?? receipt.FiscalSign ?? receipt.fiscalSign);
+  const fiscalNumber = providerText(model.FiscalNumber ?? model.fiscalNumber ?? receipt.FiscalNumber ?? receipt.fiscalNumber);
+  const ofd = providerText(model.Ofd ?? model.ofd ?? model.OFD ?? receipt.Ofd ?? receipt.ofd ?? receipt.OFD);
+  const ofdUrl = providerUrl(receipt.OfdUrl, receipt.OFDUrl, receipt.ofdUrl, receipt.Url, receipt.url);
+  const qrUrl = providerUrl(
+    model.QrCodeUrl,
+    model.qrCodeUrl,
+    model.QRCodeUrl,
+    model.QRUrl,
+    model.qrUrl,
+    receipt.QrUrl,
+    receipt.QRUrl,
+    receipt.QRCodeUrl,
+    receipt.qrCodeUrl,
+  );
+  const fiscalFields: Record<string, string> = {};
+  if (fiscalDocumentNumber) fiscalFields.fiscalDocumentNumber = fiscalDocumentNumber;
+  if (fiscalSign) fiscalFields.fiscalSign = fiscalSign;
+  if (fiscalNumber) fiscalFields.fiscalNumber = fiscalNumber;
+  if (ofd) fiscalFields.ofd = ofd;
+  if (ofdUrl) fiscalFields.ofdUrl = ofdUrl;
+  if (qrUrl) fiscalFields.qrUrl = qrUrl;
+  return { receiptUrl, fiscalFields };
 }
 
 async function applyPolledReceipt(
@@ -635,7 +682,7 @@ async function applyPolledReceipt(
   receiptId: string,
   model: WorkerRecord,
 ): Promise<void> {
-  const url = receiptUrl(model);
+  const { receiptUrl: url, fiscalFields } = extractPolledReceiptFields(model);
   const sanitizedFields = {
     receiptId,
     kassirReceiptId: receiptId,
@@ -644,6 +691,7 @@ async function applyPolledReceipt(
     type: operation.providerReceiptType,
     amountMinor: operation.amountMinor,
     ...(url ? { receiptUrl: url } : {}),
+    ...(fiscalFields.fiscalDocumentNumber ? { fiscalDocumentNumber: fiscalFields.fiscalDocumentNumber } : {}),
   };
   const bodyHash = createHash("sha256")
     .update(`${operation.operationKey}\0${receiptId}\0Processed\0${operation.amountMinor}`, "utf8")
@@ -661,7 +709,7 @@ async function applyPolledReceipt(
     p_receipt_status: "Processed",
     p_amount_minor: operation.amountMinor,
     p_receipt_url: url,
-    p_fiscal_fields: {},
+    p_fiscal_fields: fiscalFields,
     p_sanitized_fields: sanitizedFields,
   });
   const applied = result.error ? null : result.data === undefined ? null : record(result.data);

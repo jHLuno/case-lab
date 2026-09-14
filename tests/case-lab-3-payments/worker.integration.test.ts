@@ -18,6 +18,7 @@ import {
   createSendAnalyticsEventHandler,
   runCaseLab3Worker,
 } from "../../app/lib/case-lab-3/worker.server";
+import { extractPolledReceiptFields } from "../../app/lib/case-lab-3/worker-handlers.server";
 import { handlePost as handleWorkerPost } from "../../app/api/internal/case-lab-3/jobs/route";
 import { TipTopApiError } from "../../app/lib/case-lab-3/tiptoppay.server";
 
@@ -589,6 +590,32 @@ test("production handler execution returns durable metadata for queued receipts 
   assert.deepEqual(result, { status: "queued", receiptId: "receipt-1" });
   assert.deepEqual(email, { status: "sent", messageId: "message-1" });
   assert.deepEqual(events, ["queue", "ticket-email"]);
+});
+
+test("poll receipt details preserve fiscal fields and receipt links", () => {
+  const extracted = extractPolledReceiptFields({
+    DocumentNumber: 42,
+    FiscalSign: "fiscal-sign-001",
+    FiscalNumber: "fiscal-number-001",
+    Ofd: "ofd.example.test",
+    Url: "https://receipt.example.test/1",
+    QrCodeUrl: "https://receipt.example.test/1/qr",
+    Receipt: {
+      OfdUrl: "https://ofd.example.test/receipt/1",
+    },
+  });
+
+  assert.deepEqual(extracted, {
+    receiptUrl: "https://receipt.example.test/1",
+    fiscalFields: {
+      fiscalDocumentNumber: "42",
+      fiscalSign: "fiscal-sign-001",
+      fiscalNumber: "fiscal-number-001",
+      ofd: "ofd.example.test",
+      ofdUrl: "https://ofd.example.test/receipt/1",
+      qrUrl: "https://receipt.example.test/1/qr",
+    },
+  });
 });
 
 test("worker awaits production handlers and completes each job with its lease token", async () => {
