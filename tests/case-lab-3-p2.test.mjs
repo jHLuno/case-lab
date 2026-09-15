@@ -617,6 +617,9 @@ test("Case Lab 3 loads the scoped Meta Pixel PageView with matching CSP origins"
   assert.match(metaPixelSource, /fbq\('init', '\$\{META_PIXEL_ID\}'\)/);
   assert.match(metaPixelSource, /fbq\('track', 'PageView'\)/);
   assert.match(metaPixelSource, /https:\/\/www\.facebook\.com\/tr\?id=/);
+  const metaPixelBootstrap = metaPixelSource.match(/const metaPixelBootstrap = `([\s\S]*?)`;/)?.[1] ?? "";
+  assert.match(metaPixelBootstrap, /^!function/);
+  assert.doesNotThrow(() => new Function(metaPixelBootstrap));
   assert.doesNotMatch(layoutSource, /1317409210320189/);
   assert.match(proxySource, /connect\.facebook\.net/);
   assert.match(proxySource, /www\.facebook\.com/);
