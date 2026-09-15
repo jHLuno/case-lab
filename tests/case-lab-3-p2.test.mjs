@@ -187,6 +187,7 @@ const [proofSource, heroSource, grainientBoundarySource, grainientSource, casesS
   read("app/privacy/page.tsx"),
 ]);
 const caseLab3NavbarSource = await read("app/components/CaseLab3Navbar.tsx");
+const metaPixelSource = await readOptional("app/components/CaseLab3MetaPixel.tsx");
 
 const caseLabRouteSources = [
   pageSource,
@@ -605,6 +606,20 @@ test("Case Lab 3 CSP adds the TipTop script and frame origin only on the event p
   assert.match(proxySource, /pathname/);
   const gtmImageOriginsSource = proxySource.match(/const gtmImageOrigins[\s\S]*?;/)?.[0] ?? "";
   assert.match(gtmImageOriginsSource, /www\.googletagmanager\.com/);
+});
+
+test("Case Lab 3 loads the scoped Meta Pixel PageView with matching CSP origins", () => {
+  assert.match(pageSource, /import\s+CaseLab3MetaPixel\s+from\s+["']\.\.\/components\/CaseLab3MetaPixel["']/);
+  assert.match(pageSource, /<CaseLab3MetaPixel\s+nonce=\{nonce\}\s*\/>/);
+  assert.match(metaPixelSource, /1317409210320189/);
+  assert.match(metaPixelSource, /strategy=["']afterInteractive["']/);
+  assert.match(metaPixelSource, /nonce=\{nonce\}/);
+  assert.match(metaPixelSource, /fbq\('init', '\$\{META_PIXEL_ID\}'\)/);
+  assert.match(metaPixelSource, /fbq\('track', 'PageView'\)/);
+  assert.match(metaPixelSource, /https:\/\/www\.facebook\.com\/tr\?id=/);
+  assert.doesNotMatch(layoutSource, /1317409210320189/);
+  assert.match(proxySource, /connect\.facebook\.net/);
+  assert.match(proxySource, /www\.facebook\.com/);
 });
 
 test("Case Lab 3 route tokens stay scoped and semantic", () => {

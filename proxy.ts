@@ -24,6 +24,11 @@ function isGtmPath(pathname: string): boolean {
   );
 }
 
+function isCaseLab3LandingPath(pathname: string): boolean {
+  const normalizedPathname = pathname.length > 1 ? pathname.replace(/\/$/, "") : pathname;
+  return normalizedPathname === "/case-lab-3";
+}
+
 function createNonce(): string {
   const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
@@ -38,6 +43,7 @@ export function proxy(request: NextRequest) {
   const supabaseOrigin = getSupabaseOrigin();
   const isCaseLab3 = isCaseLab3Path(request.nextUrl.pathname);
   const isGtm = isGtmPath(request.nextUrl.pathname);
+  const isCaseLab3Landing = isCaseLab3LandingPath(request.nextUrl.pathname);
   const caseLab3WidgetOrigin = isCaseLab3
     ? " https://widget.tiptoppay.kz"
     : "";
@@ -48,22 +54,31 @@ export function proxy(request: NextRequest) {
   const gtmImageOrigins = isGtm
     ? " https://www.google-analytics.com https://www.googletagmanager.com"
     : "";
+  const metaPixelScriptOrigin = isCaseLab3Landing
+    ? " https://connect.facebook.net"
+    : "";
+  const metaPixelConnectOrigins = isCaseLab3Landing
+    ? " https://connect.facebook.net https://www.facebook.com"
+    : "";
+  const metaPixelImageOrigins = isCaseLab3Landing
+    ? " https://www.facebook.com"
+    : "";
   const frameDirective =
     isCaseLab3 || isGtm
       ? `frame-src 'self'${caseLab3WidgetOrigin}${isGtm ? " https://www.googletagmanager.com" : ""}`
       : null;
   const cspHeader = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}${caseLab3WidgetOrigin}${gtmScriptOrigin}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}${caseLab3WidgetOrigin}${gtmScriptOrigin}${metaPixelScriptOrigin}`,
     "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' blob: data:${gtmImageOrigins}`,
+    `img-src 'self' blob: data:${gtmImageOrigins}${metaPixelImageOrigins}`,
     "font-src 'self'",
     frameDirective,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    `connect-src 'self'${supabaseOrigin ? ` ${supabaseOrigin}` : ""}${gtmConnectOrigins}`,
+    `connect-src 'self'${supabaseOrigin ? ` ${supabaseOrigin}` : ""}${gtmConnectOrigins}${metaPixelConnectOrigins}`,
     "upgrade-insecure-requests",
   ].filter((directive): directive is string => directive !== null).join("; ");
 
