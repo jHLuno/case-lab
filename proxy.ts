@@ -61,7 +61,7 @@ export function proxy(request: NextRequest) {
     ? " https://connect.facebook.net https://www.facebook.com https://md-eecad2978f7a43f5b7838c919258e6de.ecs.us-east-2.on.aws"
     : "";
   const metaPixelImageOrigins = isMetaPixel
-    ? " https://www.facebook.com"
+    ? " https://www.facebook.com https://connect.facebook.net"
     : "";
   const metaPixelFrameOrigin = isMetaPixel ? " https://www.facebook.com" : "";
   const metaPixelFormActionOrigin = isMetaPixel ? " https://www.facebook.com" : "";

@@ -624,6 +624,8 @@ test("Meta Pixel tracks PageView only on the home and Case Lab 3 landing routes"
   assert.match(proxySource, /connect\.facebook\.net/);
   assert.match(proxySource, /www\.facebook\.com/);
   assert.match(proxySource, /md-eecad2978f7a43f5b7838c919258e6de\.ecs\.us-east-2\.on\.aws/);
+  const metaPixelImageOriginsSource = proxySource.match(/const metaPixelImageOrigins[\s\S]*?;/)?.[0] ?? "";
+  assert.match(metaPixelImageOriginsSource, /connect\.facebook\.net/);
   assert.match(proxySource, /metaPixelFrameOrigin/);
   assert.match(proxySource, /metaPixelFormActionOrigin/);
 });
