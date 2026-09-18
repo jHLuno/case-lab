@@ -248,9 +248,10 @@ test("Case Lab 3 purchase CTAs stay button-only until checkout is configured", (
   assert.doesNotMatch(casesSource, /cursor-pointer/);
 });
 
-test("checkout inerting includes the global skip link outside the provider children", () => {
-  assert.match(layoutSource, /data-case-lab-global-skip-link/);
-  assert.match(checkoutProviderSource, /data-case-lab-global-skip-link/);
+test("checkout inerting only covers the provider background", () => {
+  assert.doesNotMatch(layoutSource, /data-case-lab-global-skip-link/);
+  assert.doesNotMatch(checkoutProviderSource, /data-case-lab-global-skip-link/);
+  assert.match(checkoutProviderSource, /backgroundRef\.current/);
   assert.match(checkoutProviderSource, /aria-hidden/);
   assert.match(checkoutProviderSource, /inert/);
 });

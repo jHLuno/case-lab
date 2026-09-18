@@ -181,30 +181,22 @@ export default function CaseLab3CheckoutProvider({
   }, [state.generation, state.phase]);
 
   useEffect(() => {
-    const backgrounds = [
-      backgroundRef.current,
-      document.querySelector<HTMLElement>("[data-case-lab-global-skip-link]"),
-    ].filter((element): element is HTMLElement => element !== null);
-    if (backgrounds.length === 0) return;
+    const background = backgroundRef.current;
+    if (!background) return;
 
-    const previousAttributes = backgrounds.map((element) => ({
-      element,
-      ariaHidden: element.getAttribute("aria-hidden"),
-      inert: element.hasAttribute("inert"),
-    }));
+    const previousAttributes = {
+      ariaHidden: background.getAttribute("aria-hidden"),
+      inert: background.hasAttribute("inert"),
+    };
     const restoreBackground = () => {
-      previousAttributes.forEach(({ element, ariaHidden, inert }) => {
-        if (ariaHidden === null) element.removeAttribute("aria-hidden");
-        else element.setAttribute("aria-hidden", ariaHidden);
-        if (!inert) element.removeAttribute("inert");
-      });
+      if (previousAttributes.ariaHidden === null) background.removeAttribute("aria-hidden");
+      else background.setAttribute("aria-hidden", previousAttributes.ariaHidden);
+      if (!previousAttributes.inert) background.removeAttribute("inert");
     };
 
     if (isOpen) {
-      backgrounds.forEach((element) => {
-        element.setAttribute("aria-hidden", "true");
-        element.setAttribute("inert", "");
-      });
+      background.setAttribute("aria-hidden", "true");
+      background.setAttribute("inert", "");
     } else {
       restoreBackground();
     }

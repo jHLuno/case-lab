@@ -63,9 +63,10 @@ test("hero headline uses the approved event framing", () => {
   assert.doesNotMatch(heroSource, /Как это было|сделано на самом деле/);
 });
 
-test("keyboard users can bypass the fixed navigation and keep it visible on focus", () => {
-  assert.match(layoutSource, /Перейти к содержимому/);
-  assert.match(layoutSource, /href="#main"/);
+test("the global skip link is not rendered", () => {
+  assert.doesNotMatch(layoutSource, /Перейти к содержимому/);
+  assert.doesNotMatch(layoutSource, /data-case-lab-global-skip-link/);
+  assert.doesNotMatch(layoutSource, /href="#main"/);
   assert.match(navbarSource, /focusWithin/);
   assert.match(navbarSource, /onFocusCapture/);
 });
