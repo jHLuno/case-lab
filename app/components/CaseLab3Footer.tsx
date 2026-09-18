@@ -3,7 +3,7 @@ import Image from "next/image";
 import CaseLab3CheckoutButton from "./case-lab-3/checkout/CaseLab3CheckoutButton";
 import styles from "../case-lab-3/case-lab-3.module.css";
 
-export default function CaseLab3Footer() {
+export default function CaseLab3Footer({ isPrivateOffer = false }: { isPrivateOffer?: boolean }) {
   return (
     <footer className="relative z-[2] bg-white px-6 pb-8 pt-20 md:px-10 md:pt-32">
       <div className="absolute top-0 left-0 h-[1px] w-full divider-gradient" />
@@ -20,7 +20,7 @@ export default function CaseLab3Footer() {
             className="mx-auto mb-10 max-w-md text-[15px] font-light leading-[1.4] text-black/60 md:mb-10 md:text-[18px]"
             style={{ fontFamily: "var(--font-body)" }}
           >
-            Первые 20 билетов стоят 7 980 ₸. Дальше цена будет 15 000 ₸.
+            {isPrivateOffer ? "Для вас доступен персональный билет за 5 000 ₸." : "Первые 20 билетов стоят 7 980 ₸. Дальше цена будет 15 000 ₸."}
           </p>
           <CaseLab3CheckoutButton
             source="footer"

@@ -146,9 +146,11 @@ type WidgetOperation = {
 export default function CaseLab3CheckoutProvider({
   children,
   nonce,
+  privateOfferToken,
 }: {
   children: ReactNode;
   nonce?: string;
+  privateOfferToken?: string;
 }) {
   const [state, dispatch] = useReducer(checkoutReducer, initialCheckoutState);
   const backgroundRef = useRef<HTMLDivElement>(null);
@@ -224,7 +226,10 @@ export default function CaseLab3CheckoutProvider({
 
     async function fetchAvailability() {
       try {
-        const response = await fetch("/api/case-lab-3/availability", {
+        const availabilityUrl = privateOfferToken
+          ? `/api/case-lab-3/availability?private_token=${encodeURIComponent(privateOfferToken)}`
+          : "/api/case-lab-3/availability";
+        const response = await fetch(availabilityUrl, {
           signal: controller.signal,
           cache: "no-store",
         });
@@ -242,7 +247,7 @@ export default function CaseLab3CheckoutProvider({
 
     void fetchAvailability();
     return () => controller.abort();
-  }, [state.generation, state.phase]);
+  }, [privateOfferToken, state.generation, state.phase]);
 
   useEffect(() => {
     if (state.phase !== "submitting" || !state.form || !state.offer) return;
@@ -267,11 +272,12 @@ export default function CaseLab3CheckoutProvider({
             position: state.form?.position || null,
             expectedTier: state.offer?.tier,
             expectedAmountMinor: state.offer?.amountMinor,
-             offerVersionId: OFFER_VERSION_ID,
-             privacyVersionId: PRIVACY_VERSION_ID,
-             acceptedTerms: state.form?.acceptedTerms ?? false,
-             marketingConsent: state.form?.marketingConsent ?? false,
+            offerVersionId: OFFER_VERSION_ID,
+            privacyVersionId: PRIVACY_VERSION_ID,
+            acceptedTerms: state.form?.acceptedTerms ?? false,
+            marketingConsent: state.form?.marketingConsent ?? false,
             attribution: attribution(),
+            privateOfferToken,
           }),
         });
         const payload = await readJson(response);
@@ -298,7 +304,7 @@ export default function CaseLab3CheckoutProvider({
 
     void createOrderRequest();
     return () => controller.abort();
-  }, [getOrderRequestIdempotencyKey, state.form, state.generation, state.offer, state.phase]);
+  }, [getOrderRequestIdempotencyKey, privateOfferToken, state.form, state.generation, state.offer, state.phase]);
 
   useEffect(() => {
     if (state.phase !== "reserved" || !state.orderId) return;

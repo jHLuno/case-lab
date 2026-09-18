@@ -1,5 +1,6 @@
 import "server-only";
 
+import { createHash } from "node:crypto";
 import { derivePurposeToken, verifyPurposeToken } from "./tokens.server";
 import { getCaseLab3Config } from "./config.server";
 import { getCaseLab3AdminClient, type CaseLab3RateLimitRpcData } from "./supabase-admin.server";
@@ -123,6 +124,10 @@ export class OfferChangedError extends Error {
     this.name = "OfferChangedError";
     this.availability = availability;
   }
+}
+
+export function hashPrivateOfferToken(token: string): string {
+  return createHash("sha256").update(token, "utf8").digest("hex");
 }
 
 type SessionOrder = {
@@ -588,13 +593,34 @@ export async function getAvailability(environment: PaymentEnvironment): Promise<
   return sanitizeAvailabilityResponse(data);
 }
 
-export async function createOrder(input: OrderInput, context: OrderRequestContext): Promise<CreateOrderResult> {
-  const { data, error } = await getCaseLab3AdminClient().rpc("case_lab_3_create_order", {
-    p_environment: context.environment,
-    p_input: input,
-    p_idempotency_key: context.idempotencyKey,
-    p_hashed_client_ip: context.hashedClientIp,
+export async function getPrivateOfferAvailability(environment: PaymentEnvironment, token: string): Promise<AvailabilityResponse> {
+  if (!isToken(token)) throw new OrderServiceError();
+  const { data, error } = await getCaseLab3AdminClient().rpc("case_lab_3_get_private_offer_availability", {
+    p_environment: environment,
+    p_token_hash: hashPrivateOfferToken(token),
   });
+  if (error) throw new OrderServiceError();
+  return sanitizeAvailabilityResponse(data);
+}
+
+export async function createOrder(input: OrderInput, context: OrderRequestContext): Promise<CreateOrderResult> {
+  const { privateOfferToken, ...publicInput } = input;
+  const rpcName = privateOfferToken ? "case_lab_3_create_private_order" : "case_lab_3_create_order";
+  const rpcArgs = privateOfferToken
+    ? {
+        p_environment: context.environment,
+        p_input: publicInput,
+        p_idempotency_key: context.idempotencyKey,
+        p_hashed_client_ip: context.hashedClientIp,
+        p_private_offer_token_hash: hashPrivateOfferToken(privateOfferToken),
+      }
+    : {
+        p_environment: context.environment,
+        p_input: publicInput,
+        p_idempotency_key: context.idempotencyKey,
+        p_hashed_client_ip: context.hashedClientIp,
+      };
+  const { data, error } = await getCaseLab3AdminClient().rpc(rpcName, rpcArgs);
   if (error) throw new OrderServiceError();
   return sanitizeCreateOrderResult(data);
 }

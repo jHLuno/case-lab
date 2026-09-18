@@ -11,7 +11,7 @@ import CaseLab3CheckoutButton from "../components/case-lab-3/checkout/CaseLab3Ch
 
 const Grainient = dynamic(() => import("../components/Grainient"), { ssr: false });
 
-export default function CaseLab3Hero() {
+export default function CaseLab3Hero({ isPrivateOffer = false }: { isPrivateOffer?: boolean }) {
   const shouldReduceMotion = useReducedMotion() ?? false;
   const [grainientFailed, setGrainientFailed] = useState(false);
   const [grainientAllowed, setGrainientAllowed] = useState(false);
@@ -89,7 +89,9 @@ export default function CaseLab3Hero() {
                 Купить билет
                 <ArrowUpRight size={20} strokeWidth={2} aria-hidden="true" />
               </CaseLab3CheckoutButton>
-              <p>Первые 20 билетов — 7 980 ₸.<br /> Далее — 15 000 ₸.</p>
+              <p>
+                {isPrivateOffer ? "Персональный билет — 5 000 ₸." : <>Первые 20 билетов — 7 980 ₸.<br /> Далее — 15 000 ₸.</>}
+              </p>
             </div>
           </div>
         </div>

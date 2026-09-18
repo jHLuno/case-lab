@@ -26,7 +26,7 @@ const tickets = [
   },
 ] as const;
 
-export default function CaseLab3Tickets() {
+export default function CaseLab3Tickets({ isPrivateOffer = false }: { isPrivateOffer?: boolean }) {
   return (
     <section id="tickets" tabIndex={-1} className={styles.ticketSection} aria-labelledby="case-lab-3-tickets-title">
       <div className={styles.contentShell}>
@@ -80,7 +80,7 @@ export default function CaseLab3Tickets() {
                 <span>Затем — <strong>15 000 ₸</strong></span>
               </div>
               <CaseLab3CheckoutButton source="tickets" className={styles.ticketCta}>
-                <span>Купить билет за 7 980 ₸</span>
+                <span>{isPrivateOffer ? "Купить билет за 5 000 ₸" : "Купить билет за 7 980 ₸"}</span>
                 <ArrowUpRight size={23} strokeWidth={1.5} aria-hidden="true" />
               </CaseLab3CheckoutButton>
               <p className={styles.ticketPurchaseNote}>Один билет — вся программа Case Lab III</p>

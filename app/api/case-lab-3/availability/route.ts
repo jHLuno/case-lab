@@ -4,6 +4,7 @@ import { getHashedClientIp, noStoreJson } from "@/lib/case-lab-3/http.server";
 import {
   consumeRateLimit,
   getAvailability,
+  getPrivateOfferAvailability,
   getOrderRequestSecret,
   getPublicPaymentEnvironment,
   PUBLIC_AVAILABILITY_RATE_LIMIT,
@@ -17,6 +18,7 @@ export const runtime = "nodejs";
 
 export type AvailabilityRouteDependencies = {
   getAvailability: typeof getAvailability;
+  getPrivateOfferAvailability?: typeof getPrivateOfferAvailability;
   getPublicPaymentEnvironment: typeof getPublicPaymentEnvironment;
   getOrderRequestSecret: typeof getOrderRequestSecret;
   getHashedClientIp: typeof getHashedClientIp;
@@ -25,6 +27,7 @@ export type AvailabilityRouteDependencies = {
 
 const productionDependencies: AvailabilityRouteDependencies = {
   getAvailability,
+  getPrivateOfferAvailability,
   getPublicPaymentEnvironment,
   getOrderRequestSecret,
   getHashedClientIp,
@@ -47,8 +50,12 @@ export async function handleGet(
       PUBLIC_AVAILABILITY_RATE_LIMIT.limitCount,
       PUBLIC_AVAILABILITY_RATE_LIMIT.bucketSeconds,
     );
+    const environment = dependencies.getPublicPaymentEnvironment();
+    const privateToken = new URL(request.url).searchParams.get("private_token");
     const availability = sanitizeAvailabilityResponse(
-      await dependencies.getAvailability(dependencies.getPublicPaymentEnvironment()),
+      privateToken === null
+        ? await dependencies.getAvailability(environment)
+        : await (dependencies.getPrivateOfferAvailability ?? getPrivateOfferAvailability)(environment, privateToken),
     );
     return noStoreJson(availability);
   } catch (error) {

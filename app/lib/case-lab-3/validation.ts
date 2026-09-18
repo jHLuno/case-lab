@@ -9,6 +9,7 @@ const MAX_LENGTHS = {
   position: 200,
   offerVersionId: 100,
   privacyVersionId: 100,
+  privateOfferToken: 43,
   attributionValue: 512,
   gaClientId: 128,
 } as const;
@@ -27,6 +28,7 @@ const ORDER_FIELDS = new Set([
   "acceptedTerms",
   "marketingConsent",
   "attribution",
+  "privateOfferToken",
 ]);
 
 const ATTRIBUTION_FIELDS = new Set([
@@ -43,7 +45,7 @@ const TICKET_TIERS = new Set<TicketTier>(["early_bird", "standard"]);
 
 export type ValidationIssue = {
   field: string;
-  code: "invalid_type" | "required" | "must_accept" | "too_long" | "invalid_email" | "invalid_phone" | "invalid_enum" | "invalid_money" | "invalid_version_id" | "invalid_ga_client_id" | "unknown_field";
+  code: "invalid_type" | "required" | "must_accept" | "too_long" | "invalid_email" | "invalid_phone" | "invalid_enum" | "invalid_money" | "invalid_version_id" | "invalid_ga_client_id" | "invalid_private_offer_token" | "unknown_field";
 };
 
 export class OrderInputValidationError extends Error {
@@ -232,6 +234,16 @@ function parseAttribution(record: Record<string, unknown>, issues: ValidationIss
   return attribution;
 }
 
+function parsePrivateOfferToken(record: Record<string, unknown>, issues: ValidationIssue[]): string | null {
+  const value = record.privateOfferToken;
+  if (value === undefined || value === null) return null;
+  if (typeof value !== "string" || !/^[A-Za-z0-9_-]{43}$/u.test(value)) {
+    issues.push({ field: "privateOfferToken", code: "invalid_private_offer_token" });
+    return null;
+  }
+  return value;
+}
+
 export function parseOrderInput(value: unknown): OrderInput {
   if (!isRecord(value)) {
     throw new OrderInputValidationError([{ field: "input", code: "invalid_type" }]);
@@ -262,12 +274,13 @@ export function parseOrderInput(value: unknown): OrderInput {
     issues.push({ field: "marketingConsent", code: marketingConsent === undefined ? "required" : "invalid_type" });
   }
   const attribution = parseAttribution(value, issues);
+  const privateOfferToken = parsePrivateOfferToken(value, issues);
 
   if (issues.length > 0) {
     throw new OrderInputValidationError(issues);
   }
 
-  return {
+  const parsed: OrderInput = {
     firstName,
     lastName,
     email,
@@ -282,4 +295,7 @@ export function parseOrderInput(value: unknown): OrderInput {
     marketingConsent: marketingConsent as boolean,
     attribution,
   };
+
+  if (privateOfferToken !== null) parsed.privateOfferToken = privateOfferToken;
+  return parsed;
 }

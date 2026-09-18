@@ -227,6 +227,7 @@ export type OrderRow = {
   idempotency_key: string;
   environment: PaymentEnvironment;
   order_type: "single_ticket";
+  private_offer_id: string | null;
   first_name: string;
   last_name: string;
   participant_email: string;
@@ -276,6 +277,7 @@ export type OrderInsert = Omit<
   | "created_at"
   | "updated_at"
   | "order_type"
+  | "private_offer_id"
   | "currency"
   | "taxation_system"
   | "marketing_consent"
@@ -292,6 +294,7 @@ export type OrderInsert = Omit<
   created_at?: string;
   updated_at?: string;
   order_type?: "single_ticket";
+  private_offer_id?: string | null;
   currency?: "KZT";
   taxation_system?: number;
   marketing_consent?: boolean;
@@ -306,6 +309,36 @@ export type OrderInsert = Omit<
 };
 
 export type OrderUpdate = Partial<OrderInsert>;
+
+export type PrivateOfferStatus = "active" | "redeemed" | "revoked";
+
+export type PrivateOfferRow = {
+  id: string;
+  environment: PaymentEnvironment;
+  token_hash: string;
+  amount_minor: number;
+  status: PrivateOfferStatus;
+  claimed_order_id: string | null;
+  claimed_until: string | null;
+  redeemed_order_id: string | null;
+  redeemed_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type PrivateOfferInsert = Omit<PrivateOfferRow, "id" | "created_at" | "updated_at" | "amount_minor" | "status" | "claimed_order_id" | "claimed_until" | "redeemed_order_id" | "redeemed_at"> & {
+  id?: string;
+  amount_minor?: number;
+  status?: PrivateOfferStatus;
+  claimed_order_id?: string | null;
+  claimed_until?: string | null;
+  redeemed_order_id?: string | null;
+  redeemed_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type PrivateOfferUpdate = Partial<PrivateOfferInsert>;
 
 export type ReservationRow = {
   id: string;
@@ -816,6 +849,7 @@ export type Database = {
       case_lab_3_inventory_allocations: Table<InventoryAllocationRow, InventoryAllocationInsert, InventoryAllocationUpdate>;
       case_lab_3_legal_document_versions: Table<LegalDocumentVersionRow, LegalDocumentVersionInsert, LegalDocumentVersionUpdate>;
       case_lab_3_orders: Table<OrderRow, OrderInsert, OrderUpdate>;
+      case_lab_3_private_offers: Table<PrivateOfferRow, PrivateOfferInsert, PrivateOfferUpdate>;
       case_lab_3_reservations: Table<ReservationRow, ReservationInsert, ReservationUpdate>;
       case_lab_3_payment_attempts: Table<PaymentAttemptRow, PaymentAttemptInsert, PaymentAttemptUpdate>;
       case_lab_3_provider_events: Table<ProviderEventRow, ProviderEventInsert, ProviderEventUpdate>;
@@ -838,6 +872,10 @@ export type Database = {
         Args: { p_environment: PaymentEnvironment };
         Returns: AvailabilityRpcResult;
       };
+      case_lab_3_get_private_offer_availability: {
+        Args: { p_environment: PaymentEnvironment; p_token_hash: string };
+        Returns: AvailabilityRpcResult;
+      };
       case_lab_3_create_order: {
         Args: {
           p_environment: PaymentEnvironment;
@@ -846,6 +884,26 @@ export type Database = {
           p_hashed_client_ip: string;
         };
         Returns: CreateOrderRpcResult;
+      };
+      case_lab_3_create_private_order: {
+        Args: {
+          p_environment: PaymentEnvironment;
+          p_input: Omit<OrderInput, "privateOfferToken">;
+          p_idempotency_key: string;
+          p_hashed_client_ip: string;
+          p_private_offer_token_hash: string;
+        };
+        Returns: CreateOrderRpcResult;
+      };
+      case_lab_3_create_private_offer: {
+        Args: { p_environment: PaymentEnvironment; p_token_hash: string; p_amount_minor?: number };
+        Returns: {
+          kind: "created";
+          offerId: string;
+          environment: PaymentEnvironment;
+          amountMinor: number;
+          status: "active";
+        };
       };
       case_lab_3_create_payment_attempt: {
         Args: { p_order_id: string };

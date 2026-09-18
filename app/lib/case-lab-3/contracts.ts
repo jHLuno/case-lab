@@ -32,6 +32,7 @@ export type OrderInput = {
   acceptedTerms: boolean;
   marketingConsent: boolean;
   attribution: Record<string, string>;
+  privateOfferToken?: string;
 };
 
 export type CreateOrderResult =
