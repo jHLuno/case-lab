@@ -45,6 +45,23 @@ type OrdersClientProps = {
 };
 
 const initialSettings = { onlineSalesLimit: 70, salesEnabled: false };
+const ORDERS_PAGE_SIZE = 30;
+
+type PaginationItem = number | "ellipsis";
+
+function getPaginationItems(currentPage: number, totalPages: number): PaginationItem[] {
+  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1);
+
+  const visiblePages = [...new Set([1, totalPages, currentPage - 1, currentPage, currentPage + 1])]
+    .filter((pageNumber) => pageNumber >= 1 && pageNumber <= totalPages)
+    .sort((left, right) => left - right);
+
+  return visiblePages.reduce<PaginationItem[]>((items, pageNumber, index) => {
+    if (index > 0 && pageNumber - visiblePages[index - 1] > 1) items.push("ellipsis");
+    items.push(pageNumber);
+    return items;
+  }, []);
+}
 
 function labelStatus(value: string): string {
   return value.replaceAll("_", " ");
@@ -61,6 +78,7 @@ export default function OrdersClient({ csrfToken, initialData }: OrdersClientPro
   const [ticketStatus, setTicketStatus] = useState("");
   const [orders, setOrders] = useState(initialData.orders);
   const [pagination, setPagination] = useState(initialData.pagination);
+  const [page, setPage] = useState(1);
   const [settings, setSettings] = useState(initialSettings);
   const [allocations, setAllocations] = useState<Allocation[]>([]);
   const [allocationReason, setAllocationReason] = useState("");
@@ -72,7 +90,7 @@ export default function OrdersClient({ csrfToken, initialData }: OrdersClientPro
 
   useEffect(() => {
     const controller = new AbortController();
-    const params = new URLSearchParams({ environment, page: "1", pageSize: "25" });
+    const params = new URLSearchParams({ environment, page: String(page), pageSize: String(ORDERS_PAGE_SIZE) });
     if (deferredSearch.trim()) params.set("search", deferredSearch.trim());
     if (paymentStatus) params.set("paymentStatus", paymentStatus);
     if (ticketStatus) params.set("ticketStatus", ticketStatus);
@@ -93,7 +111,7 @@ export default function OrdersClient({ csrfToken, initialData }: OrdersClientPro
       .finally(() => setLoading(false));
 
     return () => controller.abort();
-  }, [deferredSearch, environment, paymentStatus, ticketStatus]);
+  }, [deferredSearch, environment, page, paymentStatus, ticketStatus]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -203,18 +221,18 @@ export default function OrdersClient({ csrfToken, initialData }: OrdersClientPro
       <section className="mb-6 grid gap-3 rounded-2xl border border-black/[0.08] bg-white p-4 md:grid-cols-[140px_minmax(220px,1fr)_170px_170px]">
         <label className="text-xs text-black/50" style={{ fontFamily: "var(--font-body)" }}>
           Среда
-          <select value={environment} onChange={(event) => setEnvironment(event.target.value as Environment)} className="mt-1.5 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black">
+          <select value={environment} onChange={(event) => { setPage(1); setEnvironment(event.target.value as Environment); }} className="mt-1.5 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black">
             <option value="test">Тест</option>
             <option value="live">Live</option>
           </select>
         </label>
         <label className="text-xs text-black/50" style={{ fontFamily: "var(--font-body)" }}>
           Заказ, билет или точный email
-          <input value={search} onChange={(event) => setSearch(event.target.value)} className="mt-1.5 w-full rounded-lg border border-black/10 px-3 py-2 text-sm text-black" placeholder="CL3-... или name@example.com" />
+          <input value={search} onChange={(event) => { setPage(1); setSearch(event.target.value); }} className="mt-1.5 w-full rounded-lg border border-black/10 px-3 py-2 text-sm text-black" placeholder="CL3-... или name@example.com" />
         </label>
         <label className="text-xs text-black/50" style={{ fontFamily: "var(--font-body)" }}>
           Оплата
-          <select value={paymentStatus} onChange={(event) => setPaymentStatus(event.target.value)} className="mt-1.5 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black">
+          <select value={paymentStatus} onChange={(event) => { setPage(1); setPaymentStatus(event.target.value); }} className="mt-1.5 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black">
             <option value="">Все статусы</option>
             <option value="paid">Оплачено</option>
             <option value="failed">Ошибка</option>
@@ -224,7 +242,7 @@ export default function OrdersClient({ csrfToken, initialData }: OrdersClientPro
         </label>
         <label className="text-xs text-black/50" style={{ fontFamily: "var(--font-body)" }}>
           Билет
-          <select value={ticketStatus} onChange={(event) => setTicketStatus(event.target.value)} className="mt-1.5 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black">
+          <select value={ticketStatus} onChange={(event) => { setPage(1); setTicketStatus(event.target.value); }} className="mt-1.5 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black">
             <option value="">Все статусы</option>
             <option value="pending">Ожидает</option>
             <option value="valid">Действителен</option>
@@ -267,6 +285,49 @@ export default function OrdersClient({ csrfToken, initialData }: OrdersClientPro
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section className="mb-6 flex flex-col gap-3 rounded-2xl border border-black/[0.08] bg-white p-4 sm:flex-row sm:items-center sm:justify-between" style={{ fontFamily: "var(--font-body)" }}>
+        <p className="text-xs text-black/45">
+          {pagination.total === 0 ? "0 из 0" : `${(pagination.page - 1) * pagination.pageSize + 1}–${Math.min(pagination.page * pagination.pageSize, pagination.total)} из ${pagination.total}`} заказов
+        </p>
+        {pagination.totalPages > 1 ? (
+          <nav aria-label="Пагинация заказов" className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
+              disabled={loading || pagination.page <= 1}
+              className="rounded-full border border-black/10 px-3 py-1.5 text-xs text-black transition hover:border-black/20 hover:bg-black/[0.03] focus:outline-none focus:ring-2 focus:ring-[#040082]/30 disabled:cursor-not-allowed disabled:opacity-35"
+              aria-label="Предыдущая страница"
+            >
+              Назад
+            </button>
+            {getPaginationItems(pagination.page, pagination.totalPages).map((item, index) => item === "ellipsis" ? (
+              <span key={`ellipsis-${index}`} className="px-1 text-xs text-black/35" aria-hidden="true">…</span>
+            ) : (
+              <button
+                key={item}
+                type="button"
+                onClick={() => setPage(item)}
+                disabled={loading || item === pagination.page}
+                className={`min-w-8 rounded-full px-2.5 py-1.5 text-xs transition focus:outline-none focus:ring-2 focus:ring-[#040082]/30 disabled:cursor-default ${item === pagination.page ? "bg-[#040082] text-white" : "border border-black/10 text-black hover:border-black/20 hover:bg-black/[0.03] disabled:opacity-100"}`}
+                aria-label={`Страница ${item}`}
+                aria-current={item === pagination.page ? "page" : undefined}
+              >
+                {item}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setPage((currentPage) => Math.min(pagination.totalPages, currentPage + 1))}
+              disabled={loading || pagination.page >= pagination.totalPages}
+              className="rounded-full border border-black/10 px-3 py-1.5 text-xs text-black transition hover:border-black/20 hover:bg-black/[0.03] focus:outline-none focus:ring-2 focus:ring-[#040082]/30 disabled:cursor-not-allowed disabled:opacity-35"
+              aria-label="Следующая страница"
+            >
+              Вперёд
+            </button>
+          </nav>
+        ) : null}
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
