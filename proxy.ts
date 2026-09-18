@@ -58,14 +58,16 @@ export function proxy(request: NextRequest) {
     ? " https://connect.facebook.net"
     : "";
   const metaPixelConnectOrigins = isMetaPixel
-    ? " https://connect.facebook.net https://www.facebook.com"
+    ? " https://connect.facebook.net https://www.facebook.com https://md-eecad2978f7a43f5b7838c919258e6de.ecs.us-east-2.on.aws"
     : "";
   const metaPixelImageOrigins = isMetaPixel
     ? " https://www.facebook.com"
     : "";
+  const metaPixelFrameOrigin = isMetaPixel ? " https://www.facebook.com" : "";
+  const metaPixelFormActionOrigin = isMetaPixel ? " https://www.facebook.com" : "";
   const frameDirective =
     isCaseLab3 || isGtm
-      ? `frame-src 'self'${caseLab3WidgetOrigin}${isGtm ? " https://www.googletagmanager.com" : ""}`
+      ? `frame-src 'self'${caseLab3WidgetOrigin}${isGtm ? " https://www.googletagmanager.com" : ""}${metaPixelFrameOrigin}`
       : null;
   const cspHeader = [
     "default-src 'self'",
@@ -76,7 +78,7 @@ export function proxy(request: NextRequest) {
     frameDirective,
     "object-src 'none'",
     "base-uri 'self'",
-    "form-action 'self'",
+    `form-action 'self'${metaPixelFormActionOrigin}`,
     "frame-ancestors 'none'",
     `connect-src 'self'${supabaseOrigin ? ` ${supabaseOrigin}` : ""}${gtmConnectOrigins}${metaPixelConnectOrigins}`,
     "upgrade-insecure-requests",
