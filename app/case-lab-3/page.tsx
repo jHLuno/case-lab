@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import CaseLab3Page from "../components/CaseLab3Page";
-import CaseLab3MetaPixel from "../components/CaseLab3MetaPixel";
 import GoogleTagManager from "../components/GoogleTagManager";
 
 const caseLab3EventSchema = {
@@ -80,7 +79,6 @@ export default async function Page() {
 
   return (
     <>
-      <CaseLab3MetaPixel nonce={nonce} />
       <GoogleTagManager nonce={nonce} />
       <script
         type="application/ld+json"

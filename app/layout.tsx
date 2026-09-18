@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import "./globals.css";
 import JsonLd from "./components/JsonLd";
+import MetaPixel from "./components/MetaPixel";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://caselab.kz"),
@@ -60,6 +61,7 @@ export default async function RootLayout({
       </head>
       <body className="antialiased" suppressHydrationWarning>
         <JsonLd nonce={nonce} />
+        <MetaPixel nonce={nonce} />
         <a
           href="#main"
           data-case-lab-global-skip-link

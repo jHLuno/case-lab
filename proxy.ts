@@ -24,9 +24,9 @@ function isGtmPath(pathname: string): boolean {
   );
 }
 
-function isCaseLab3LandingPath(pathname: string): boolean {
+function isMetaPixelPath(pathname: string): boolean {
   const normalizedPathname = pathname.length > 1 ? pathname.replace(/\/$/, "") : pathname;
-  return normalizedPathname === "/case-lab-3";
+  return normalizedPathname === "/" || normalizedPathname === "/case-lab-3";
 }
 
 function createNonce(): string {
@@ -43,7 +43,7 @@ export function proxy(request: NextRequest) {
   const supabaseOrigin = getSupabaseOrigin();
   const isCaseLab3 = isCaseLab3Path(request.nextUrl.pathname);
   const isGtm = isGtmPath(request.nextUrl.pathname);
-  const isCaseLab3Landing = isCaseLab3LandingPath(request.nextUrl.pathname);
+  const isMetaPixel = isMetaPixelPath(request.nextUrl.pathname);
   const caseLab3WidgetOrigin = isCaseLab3
     ? " https://widget.tiptoppay.kz"
     : "";
@@ -54,13 +54,13 @@ export function proxy(request: NextRequest) {
   const gtmImageOrigins = isGtm
     ? " https://www.google-analytics.com https://www.googletagmanager.com"
     : "";
-  const metaPixelScriptOrigin = isCaseLab3Landing
+  const metaPixelScriptOrigin = isMetaPixel
     ? " https://connect.facebook.net"
     : "";
-  const metaPixelConnectOrigins = isCaseLab3Landing
+  const metaPixelConnectOrigins = isMetaPixel
     ? " https://connect.facebook.net https://www.facebook.com"
     : "";
-  const metaPixelImageOrigins = isCaseLab3Landing
+  const metaPixelImageOrigins = isMetaPixel
     ? " https://www.facebook.com"
     : "";
   const frameDirective =
