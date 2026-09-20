@@ -1,7 +1,7 @@
 # Case Lab III Live Answers, AI Shortlist, and Leaderboard
 
 Date: 20 September 2026  
-Status: awaiting final user review  
+Status: approved by user on 20 September 2026
 Target event: Case Lab III, 24 September 2026
 
 ## 1. Goal
