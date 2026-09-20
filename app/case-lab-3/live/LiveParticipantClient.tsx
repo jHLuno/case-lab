@@ -1,0 +1,346 @@
+"use client";
+
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+
+import type { LiveParticipantStateResponse } from "@/lib/case-lab-3/live/contracts";
+import styles from "./live.module.css";
+
+type Phase = "loading" | "claim" | "ready" | "error";
+
+const STATE_ENDPOINT = "/api/case-lab-3/live/state";
+const SESSION_ENDPOINT = "/api/case-lab-3/live/session";
+
+async function responseJson<T>(response: Response): Promise<T> {
+  return await response.json() as T;
+}
+
+function stateLabel(state: LiveParticipantStateResponse["activeCase"] extends infer T
+  ? T extends { state: infer S } ? S : never
+  : never): string {
+  switch (state) {
+    case "open": return "Приём ответов открыт";
+    case "analyzing": return "Ответы анализируются";
+    case "shortlist_ready": return "Спикер выбирает победителей";
+    case "awarded": return "Результаты опубликованы";
+    default: return "Кейс готовится";
+  }
+}
+
+function formatDeadline(value: string | null): string | null {
+  if (!value) return null;
+  const timestamp = Date.parse(value);
+  if (!Number.isFinite(timestamp)) return null;
+  return new Intl.DateTimeFormat("ru-KZ", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Almaty",
+  }).format(timestamp);
+}
+
+export default function LiveParticipantClient() {
+  const [phase, setPhase] = useState<Phase>("loading");
+  const [view, setView] = useState<LiveParticipantStateResponse | null>(null);
+  const [answer, setAnswer] = useState("");
+  const [needsTicketNumber, setNeedsTicketNumber] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [notice, setNotice] = useState("Загрузка live-сессии");
+  const activeCaseId = useRef<string | null>(null);
+  const answerDirty = useRef(false);
+
+  const loadState = useCallback(async (signal?: AbortSignal, silent = false) => {
+    try {
+      const response = await fetch(STATE_ENDPOINT, { cache: "no-store", signal });
+      if (response.status === 401) {
+        setView(null);
+        setPhase("claim");
+        if (!silent) setNotice("Введите имя и фамилию из билета");
+        return;
+      }
+      if (!response.ok) throw new Error("state_unavailable");
+
+      const next = await responseJson<LiveParticipantStateResponse>(response);
+      const nextCaseId = next.activeCase?.id ?? null;
+      if (nextCaseId !== activeCaseId.current) {
+        activeCaseId.current = nextCaseId;
+        answerDirty.current = false;
+        setAnswer(next.activeCase?.answer ?? "");
+      } else if (!answerDirty.current && next.activeCase?.answer !== undefined) {
+        setAnswer(next.activeCase?.answer ?? "");
+      }
+      setView(next);
+      setPhase("ready");
+      if (!silent) setNotice("Live-сессия подключена");
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      if (!silent) {
+        setPhase("error");
+        setNotice("Не удалось загрузить live-сессию");
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void loadState(controller.signal);
+    return () => controller.abort();
+  }, [loadState]);
+
+  useEffect(() => {
+    if (phase !== "ready") return;
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") void loadState(undefined, true);
+    }, 3000);
+    return () => window.clearInterval(interval);
+  }, [loadState, phase]);
+
+  async function claimParticipant(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPending(true);
+    setNotice("Проверяем билет");
+    const form = new FormData(event.currentTarget);
+    const payload = {
+      firstName: String(form.get("firstName") ?? ""),
+      lastName: String(form.get("lastName") ?? ""),
+      ticketNumber: needsTicketNumber ? String(form.get("ticketNumber") ?? "") : null,
+    };
+
+    try {
+      const response = await fetch(SESSION_ENDPOINT, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await responseJson<{ status?: string; error?: string }>(response);
+      if (response.status === 429) {
+        setNotice("Слишком много попыток. Подождите минуту");
+        return;
+      }
+      if (!response.ok) {
+        setNotice("Не удалось проверить данные. Попробуйте ещё раз");
+        return;
+      }
+      if (result.status === "needs_ticket_number") {
+        setNeedsTicketNumber(true);
+        setNotice("Нашли несколько совпадений. Добавьте номер билета");
+        return;
+      }
+      if (result.status !== "claimed") {
+        setNotice("Участник не найден. Проверьте данные или обратитесь к оператору");
+        return;
+      }
+
+      setNeedsTicketNumber(false);
+      await loadState();
+    } catch {
+      setNotice("Сервис временно недоступен. Попробуйте ещё раз");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function saveAnswer(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!view?.activeCase || view.activeCase.state !== "open") return;
+    setPending(true);
+    setNotice("Сохраняем ответ");
+    try {
+      const response = await fetch(`/api/case-lab-3/live/cases/${view.activeCase.id}/submission`, {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ answer }),
+      });
+      if (response.status === 409) {
+        setNotice("Приём ответов уже закрыт");
+        await loadState(undefined, true);
+        return;
+      }
+      if (!response.ok) {
+        const result = await responseJson<{ error?: string }>(response);
+        if (result.error === "invalid_request") {
+          setNotice("Ответ должен содержать от 30 до 300 символов");
+          return;
+        }
+        throw new Error("save_unavailable");
+      }
+      answerDirty.current = false;
+      setNotice("Ответ сохранён. Начислено 10 баллов");
+      await loadState(undefined, true);
+    } catch {
+      setNotice("Не удалось сохранить ответ. Попробуйте ещё раз");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function signOut() {
+    setPending(true);
+    try {
+      await fetch(SESSION_ENDPOINT, { method: "DELETE" });
+    } finally {
+      activeCaseId.current = null;
+      answerDirty.current = false;
+      setAnswer("");
+      setView(null);
+      setPhase("claim");
+      setPending(false);
+      setNotice("Сессия завершена");
+    }
+  }
+
+  const activeCase = view?.activeCase ?? null;
+  const deadline = formatDeadline(activeCase?.closesAt ?? null);
+  const canSubmit = activeCase?.state === "open" && answer.length >= 30 && answer.length <= 300 && !pending;
+
+  return (
+    <div className={styles.shell}>
+      <header className={styles.header}>
+        <a href="/case-lab-3" className={styles.brand} aria-label="Case Lab III">
+          <span>CASE LAB</span>
+          <strong>III</strong>
+        </a>
+        {view ? (
+          <div className={styles.score} aria-label={`Ваши баллы: ${view.participant.points}`}>
+            <span>Баллы</span>
+            <strong>{view.participant.points}</strong>
+          </div>
+        ) : null}
+      </header>
+
+      <p className={styles.liveNotice} aria-live="polite">{notice}</p>
+
+      {phase === "loading" ? (
+        <section className={styles.loading} aria-label="Загрузка">
+          <span className={styles.loadingLine} />
+          <span className={styles.loadingTitle} />
+          <span className={styles.loadingLine} />
+        </section>
+      ) : null}
+
+      {phase === "error" ? (
+        <section className={styles.messagePanel}>
+          <p>Связь с live-сессией прервалась.</p>
+          <button className={styles.primaryButton} type="button" onClick={() => void loadState()}>
+            Повторить
+          </button>
+        </section>
+      ) : null}
+
+      {phase === "claim" ? (
+        <section className={styles.claimPanel}>
+          <div className={styles.intro}>
+            <p className={styles.kicker}>Интерактив в зале</p>
+            <h1>Ваш ответ может попасть в топ</h1>
+            <p>Введите данные из билета. Полную фамилию увидит только оператор.</p>
+          </div>
+          <form className={styles.form} onSubmit={claimParticipant}>
+            <label className={styles.field}>
+              <span>Имя</span>
+              <input name="firstName" autoComplete="given-name" maxLength={100} required />
+            </label>
+            <label className={styles.field}>
+              <span>Фамилия</span>
+              <input name="lastName" autoComplete="family-name" maxLength={100} required />
+            </label>
+            {needsTicketNumber ? (
+              <label className={styles.field}>
+                <span>Номер билета</span>
+                <input name="ticketNumber" autoComplete="off" maxLength={100} required />
+                <small>Номер нужен только для точного совпадения.</small>
+              </label>
+            ) : (
+              <input name="ticketNumber" type="hidden" value="" readOnly />
+            )}
+            <button className={styles.primaryButton} type="submit" disabled={pending}>
+              {pending ? "Проверяем" : "Подключиться"}
+            </button>
+          </form>
+        </section>
+      ) : null}
+
+      {phase === "ready" && view ? (
+        <div className={styles.liveGrid}>
+          <section className={styles.casePanel}>
+            <div className={styles.caseMeta}>
+              <span>{activeCase ? `Кейс ${activeCase.caseNumber}` : "Live"}</span>
+              {view.participant.rank ? <span>Ваше место: {view.participant.rank}</span> : null}
+            </div>
+
+            {activeCase ? (
+              <>
+                <p className={styles.speaker}>{activeCase.speakerLabel}</p>
+                <h1 className={styles.question}>{activeCase.question}</h1>
+                <div className={styles.caseStatus}>
+                  <strong>{stateLabel(activeCase.state)}</strong>
+                  {activeCase.state === "open" && deadline ? <span>до {deadline}</span> : null}
+                </div>
+
+                {activeCase.state === "open" ? (
+                  <form className={styles.answerForm} onSubmit={saveAnswer}>
+                    <label className={styles.field}>
+                      <span>Ваш ответ</span>
+                      <textarea
+                        name="answer"
+                        value={answer}
+                        minLength={30}
+                        maxLength={300}
+                        rows={7}
+                        onChange={(event) => {
+                          answerDirty.current = true;
+                          setAnswer(event.target.value);
+                        }}
+                        placeholder="Опишите решение и коротко объясните, почему оно сработает"
+                        required
+                      />
+                    </label>
+                    <div className={styles.answerFooter}>
+                      <span className={answer.length > 300 ? styles.counterError : undefined}>
+                        {answer.length} / 300
+                      </span>
+                      <button className={styles.primaryButton} type="submit" disabled={!canSubmit}>
+                        {pending ? "Сохраняем" : activeCase.answer ? "Обновить ответ" : "Отправить ответ"}
+                      </button>
+                    </div>
+                    <p className={styles.helper}>За валидный ответ вы получите 10 баллов.</p>
+                  </form>
+                ) : (
+                  <div className={styles.lockedAnswer}>
+                    <span>Ваш ответ</span>
+                    <p>{activeCase.answer ?? "Вы не отправили ответ на этот кейс."}</p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className={styles.waiting}>
+                <h1>Пока нет активного кейса</h1>
+                <p>Оставьте страницу открытой. Вопрос появится автоматически.</p>
+              </div>
+            )}
+          </section>
+
+          <aside className={styles.leaderboard} aria-label="Лидерборд">
+            <div className={styles.leaderboardHeader}>
+              <h2>Лидерборд</h2>
+              <span>Топ-5</span>
+            </div>
+            {view.leaderboard.length > 0 ? (
+              <ol>
+                {view.leaderboard.slice(0, 5).map((entry) => (
+                  <li key={entry.participantId}>
+                    <span className={styles.rank}>{entry.rank}</span>
+                    <span className={styles.participantName}>{entry.displayName}</span>
+                    <strong>{entry.points}</strong>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className={styles.emptyLeaderboard}>Первые баллы появятся после ответов.</p>
+            )}
+            <button className={styles.signOutButton} type="button" onClick={() => void signOut()} disabled={pending}>
+              Сменить участника
+            </button>
+          </aside>
+        </div>
+      ) : null}
+    </div>
+  );
+}
