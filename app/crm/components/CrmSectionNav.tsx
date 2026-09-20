@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 
-type CrmSection = "leads" | "case-lab-3" | "check-in";
+type CrmSection = "leads" | "case-lab-3" | "case-lab-3-live" | "check-in";
 
 const links: { href: string; label: string; section: CrmSection }[] = [
   { href: "/crm/", label: "Заявки", section: "leads" },
   { href: "/crm/case-lab-3/", label: "Case Lab III", section: "case-lab-3" },
+  { href: "/crm/case-lab-3/live/", label: "Эфир", section: "case-lab-3-live" },
   { href: "/crm/check-in/", label: "Чек-ин", section: "check-in" },
 ];
 

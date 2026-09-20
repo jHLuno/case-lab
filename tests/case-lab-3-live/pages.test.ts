@@ -5,6 +5,8 @@ import test from "node:test";
 const PAGE = "app/case-lab-3/live/page.tsx";
 const CLIENT = "app/case-lab-3/live/LiveParticipantClient.tsx";
 const CSS = "app/case-lab-3/live/live.module.css";
+const CRM_PAGE = "app/crm/case-lab-3/live/page.tsx";
+const CRM_CLIENT = "app/crm/case-lab-3/live/LiveOperatorClient.tsx";
 
 test("participant live page stays dynamic, private, and server-first", async () => {
   const source = await readFile(PAGE, "utf8");
@@ -38,4 +40,22 @@ test("participant styles preserve keyboard focus and reduced-motion behavior", a
   assert.match(source, /:focus-visible/u);
   assert.match(source, /@media\s*\(prefers-reduced-motion:\s*reduce\)/u);
   assert.match(source, /min-height:\s*100dvh/u);
+});
+
+test("CRM live page is protected and exposes operator controls", async () => {
+  const page = await readFile(CRM_PAGE, "utf8");
+  const client = await readFile(CRM_CLIENT, "utf8");
+  const nav = await readFile("app/crm/components/CrmSectionNav.tsx", "utf8");
+  assert.match(page, /requireCrmAdmin/u);
+  assert.match(page, /issueCrmCsrfToken/u);
+  assert.match(client, /Подготовка кейсов/u);
+  assert.match(client, /Сгенерировать критерии/u);
+  assert.match(client, /Запустить AI-анализ/u);
+  assert.match(client, /Ручной режим/u);
+  assert.match(client, /Опубликовать топ-3/u);
+  assert.match(client, /Сбросить участника/u);
+  assert.match(client, /X-CSRF-Token/u);
+  assert.match(client, /Idempotency-Key/u);
+  assert.doesNotMatch(client, /OPENROUTER_API_KEY|openrouter\.server/u);
+  assert.match(nav, /\/crm\/case-lab-3\/live\//u);
 });

@@ -81,7 +81,7 @@ export default function LiveParticipantClient() {
 
   useEffect(() => {
     const controller = new AbortController();
-    void loadState(controller.signal);
+    queueMicrotask(() => void loadState(controller.signal));
     return () => controller.abort();
   }, [loadState]);
 
