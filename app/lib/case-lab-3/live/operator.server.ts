@@ -441,16 +441,20 @@ export async function publishLiveAwards(input: {
 
 export async function updateShortlist(input: {
   caseId: string;
+  environment: PaymentEnvironment;
   entries: Array<{ submissionId: string; included: boolean; finalOrder: number | null; operatorReason: string | null }>;
 }): Promise<void> {
   const client = getCaseLab3AdminClient();
   for (const entry of input.entries) {
-    const { error } = await client.from("case_lab_3_live_shortlist_entries").update({
+    const { error } = await client.from("case_lab_3_live_shortlist_entries").upsert({
+      environment: input.environment,
+      case_id: input.caseId,
+      submission_id: entry.submissionId,
       included: entry.included,
       final_order: entry.finalOrder,
       operator_reason: entry.operatorReason,
       candidate_type: "manual",
-    }).eq("case_id", input.caseId).eq("submission_id", entry.submissionId);
+    }, { onConflict: "case_id,submission_id" });
     if (error) throw new LiveOperatorRepositoryError();
   }
 }

@@ -8,6 +8,7 @@ import { handlePost as transition } from "../../app/api/admin/case-lab-3/live/ca
 import { handlePost as rubric } from "../../app/api/admin/case-lab-3/live/cases/[id]/rubric/route";
 import { handlePost as analyze } from "../../app/api/admin/case-lab-3/live/cases/[id]/analyze/route";
 import { handlePost as awards } from "../../app/api/admin/case-lab-3/live/cases/[id]/awards/route";
+import { handlePatch as shortlist } from "../../app/api/admin/case-lab-3/live/cases/[id]/shortlist/route";
 import { handlePost as reset } from "../../app/api/admin/case-lab-3/live/participants/[id]/reset/route";
 import { handlePost as tieBreak } from "../../app/api/admin/case-lab-3/live/tie-breaks/route";
 
@@ -139,6 +140,27 @@ test("awards require three distinct submission IDs and preserve server authority
     { place: 2, submissionId: "sub-2" },
     { place: 3, submissionId: "sub-3" },
   ]);
+});
+
+test("manual shortlist mode can add an answer when AI produced no entries", async () => {
+  let input: unknown = null;
+  const response = await shortlist(
+    request(`/api/admin/case-lab-3/live/cases/${CASE_ID}/shortlist`, "PATCH", {
+      environment: "live",
+      entries: [{ submissionId: "sub-1", included: true, finalOrder: 1, operatorReason: "Решение добавлено спикером" }],
+    }),
+    routeContext,
+    {
+      ...auth,
+      updateShortlist: async (value) => { input = value; },
+    },
+  );
+  assert.equal(response.status, 200);
+  assert.deepEqual(input, {
+    caseId: CASE_ID,
+    environment: "live",
+    entries: [{ submissionId: "sub-1", included: true, finalOrder: 1, operatorReason: "Решение добавлено спикером" }],
+  });
 });
 
 test("tie resolution requires a reason and ordered participant decisions", async () => {

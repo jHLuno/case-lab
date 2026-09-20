@@ -6,6 +6,7 @@ import "../case-lab-3-payments/server-only-test-loader";
 import { handleDelete, handlePost } from "../../app/api/case-lab-3/live/session/route";
 import { handleGet } from "../../app/api/case-lab-3/live/state/route";
 import { handlePut } from "../../app/api/case-lab-3/live/cases/[id]/submission/route";
+import { handleGet as getPublicLeaderboard } from "../../app/api/case-lab-3/live/leaderboard/route";
 import { RateLimitExceededError } from "../../app/lib/case-lab-3/orders.server";
 import { issueLiveSession, serializeLiveSession } from "../../app/lib/case-lab-3/live/session.server";
 
@@ -214,4 +215,24 @@ test("submission rejects oversized bodies and hides database failures", async ()
   );
   assert.equal(failed.status, 503);
   assert.deepEqual(await failed.json(), { error: "service_unavailable" });
+});
+
+test("public leaderboard strips internal identifiers and AI rationale", async () => {
+  const response = await getPublicLeaderboard(new Request(`${ORIGIN}/api/case-lab-3/live/leaderboard`), {
+    getPublicData: async () => ({
+      entries: [{ participantId: PARTICIPANT_ID, displayName: "Алия Ё.", points: 60, rank: 1, firstPlaces: 1, podiums: 1 }],
+      activeCase: { caseNumber: 1, state: "awarded" as const },
+      podiumAnswers: [{ place: 1, displayName: "Алия Ё.", answer: "Опубликованный ответ победителя.", submissionId: "hidden" }],
+    }),
+    getEnvironment: () => "live",
+  });
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.deepEqual(body, {
+    entries: [{ displayName: "Алия Ё.", points: 60, rank: 1 }],
+    activeCase: { caseNumber: 1, state: "awarded" },
+    podiumAnswers: [{ place: 1, displayName: "Алия Ё.", answer: "Опубликованный ответ победителя." }],
+  });
+  assert.equal(JSON.stringify(body).includes(PARTICIPANT_ID), false);
+  assert.equal(JSON.stringify(body).includes("submissionId"), false);
 });

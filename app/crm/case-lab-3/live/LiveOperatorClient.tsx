@@ -199,6 +199,18 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
     }
   }
 
+  async function addToShortlist(submissionId: string) {
+    if (!liveCase) return;
+    const nextOrder = selectedSubmissions.reduce((max, entry) => Math.max(max, entry.finalOrder ?? 0), 0) + 1;
+    if (await mutate(`/api/admin/case-lab-3/live/cases/${liveCase.id}/shortlist`, {
+      environment,
+      entries: [{ submissionId, included: true, finalOrder: nextOrder, operatorReason: "Добавлено оператором вручную" }],
+    }, "PATCH")) {
+      setMessage("Ответ добавлен в shortlist");
+      await loadSnapshot();
+    }
+  }
+
   async function publishAwards() {
     const liveCase = snapshot?.cases.find((item) => item.caseNumber === selectedCase);
     if (!liveCase) return;
@@ -298,7 +310,7 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
       <section className="mt-5 rounded-2xl border border-black/10 bg-white p-5 shadow-sm md:p-7">
         <div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-xl font-semibold text-black" style={{ fontFamily: "var(--font-heading)" }}>Ответы и shortlist</h2><p className="mt-1 text-sm text-black/50">AI помогает сузить выбор. Баллы начисляются только сервером после решения спикера.</p></div><span className="text-sm text-black/45">Ответов: {caseSubmissions.length} · В shortlist: {selectedSubmissions.length}</span></div>
         <div className="mt-5 grid gap-3 lg:grid-cols-2">
-          {caseSubmissions.slice(0, 10).map((submission) => { const shortlistEntry = snapshot?.shortlist.find((entry) => entry.submissionId === submission.id); return <article key={submission.id} className="rounded-xl border border-black/10 p-4"><div className="flex justify-between gap-3 text-xs text-black/45"><span>{shortlistEntry?.approachLabel ?? "Ответ участника"}</span><span>{shortlistEntry?.aiScore ?? "без оценки"}</span></div><p className="mt-3 text-sm leading-6 text-black/75">{submission.answer}</p></article>; })}
+          {caseSubmissions.map((submission) => { const shortlistEntry = snapshot?.shortlist.find((entry) => entry.submissionId === submission.id); return <article key={submission.id} className="rounded-xl border border-black/10 p-4"><div className="flex justify-between gap-3 text-xs text-black/45"><span>{shortlistEntry?.approachLabel ?? "Ответ участника"}</span><span>{shortlistEntry?.aiScore ?? "без оценки"}</span></div><p className="mt-3 text-sm leading-6 text-black/75">{submission.answer}</p>{liveCase?.state === "shortlist_ready" && !shortlistEntry?.included ? <button type="button" disabled={pending} onClick={() => void addToShortlist(submission.id)} className="mt-4 rounded-full border border-black/15 px-3 py-1.5 text-xs text-black hover:bg-black/5 disabled:opacity-40">Добавить в shortlist</button> : null}{shortlistEntry?.included ? <p className="mt-4 text-xs text-black/45">В shortlist</p> : null}</article>; })}
         </div>
         {liveCase?.state === "shortlist_ready" ? <div className="mt-6 grid gap-3 border-t border-black/10 pt-5 md:grid-cols-3">{[1, 2, 3].map((place) => <label key={place} className="grid gap-1 text-sm text-black/65">Место {place}<select value={awardSelections[place] ?? ""} onChange={(event) => setAwardSelections((current) => ({ ...current, [place]: event.target.value }))} className="rounded-xl border border-black/10 bg-white px-3 py-2 text-black"><option value="">Выберите ответ</option>{selectedSubmissions.map((entry) => <option key={entry.submissionId} value={entry.submissionId}>{entry.approachLabel ?? entry.submissionId}</option>)}</select></label>)}</div> : null}
       </section>

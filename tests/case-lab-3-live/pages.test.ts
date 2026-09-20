@@ -7,6 +7,8 @@ const CLIENT = "app/case-lab-3/live/LiveParticipantClient.tsx";
 const CSS = "app/case-lab-3/live/live.module.css";
 const CRM_PAGE = "app/crm/case-lab-3/live/page.tsx";
 const CRM_CLIENT = "app/crm/case-lab-3/live/LiveOperatorClient.tsx";
+const LEADERBOARD_PAGE = "app/case-lab-3/live/leaderboard/page.tsx";
+const LEADERBOARD_CLIENT = "app/case-lab-3/live/leaderboard/LeaderboardClient.tsx";
 
 test("participant live page stays dynamic, private, and server-first", async () => {
   const source = await readFile(PAGE, "utf8");
@@ -58,4 +60,17 @@ test("CRM live page is protected and exposes operator controls", async () => {
   assert.match(client, /Idempotency-Key/u);
   assert.doesNotMatch(client, /OPENROUTER_API_KEY|openrouter\.server/u);
   assert.match(nav, /\/crm\/case-lab-3\/live\//u);
+});
+
+test("public leaderboard page polls a sanitized projection", async () => {
+  const page = await readFile(LEADERBOARD_PAGE, "utf8");
+  const client = await readFile(LEADERBOARD_CLIENT, "utf8");
+  assert.match(page, /dynamic\s*=\s*["']force-dynamic["']/u);
+  assert.match(page, /no-store/u);
+  assert.match(client, /Лидерборд/u);
+  assert.match(client, /Топ-10/u);
+  assert.match(client, /podiumAnswers/u);
+  assert.match(client, /setInterval/u);
+  assert.match(client, /prefers-reduced-motion/u);
+  assert.doesNotMatch(client, /ticket|submissionId|aiScore|aiReason/iu);
 });
