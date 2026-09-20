@@ -27,7 +27,7 @@ test("issues and parses the exact participant cookie format", () => {
     httpOnly: true,
     secure: true,
     sameSite: "lax",
-    path: "/case-lab-3/live",
+    path: "/api/case-lab-3/live",
     maxAge: 172800,
   });
 });

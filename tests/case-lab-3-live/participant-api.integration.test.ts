@@ -1,0 +1,217 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import "../case-lab-3-payments/server-only-test-loader";
+
+import { handleDelete, handlePost } from "../../app/api/case-lab-3/live/session/route";
+import { handleGet } from "../../app/api/case-lab-3/live/state/route";
+import { handlePut } from "../../app/api/case-lab-3/live/cases/[id]/submission/route";
+import { RateLimitExceededError } from "../../app/lib/case-lab-3/orders.server";
+import { issueLiveSession, serializeLiveSession } from "../../app/lib/case-lab-3/live/session.server";
+
+const ORIGIN = "https://caselab.kz";
+const CASE_ID = "00000000-0000-4000-8000-000000000101";
+const PARTICIPANT_ID = "00000000-0000-4000-8000-000000000201";
+const SECRET = "live-api-test-secret-that-is-long-enough";
+const serializedSession = serializeLiveSession(issueLiveSession(PARTICIPANT_ID, 1, SECRET));
+
+function jsonRequest(path: string, method: string, body: unknown): Request {
+  return new Request(`${ORIGIN}${path}`, {
+    method,
+    headers: { "content-type": "application/json", origin: ORIGIN },
+    body: JSON.stringify(body),
+  });
+}
+
+function cookieStore(initial = serializedSession) {
+  const writes: Array<{ name: string; value: string; options: unknown }> = [];
+  return {
+    writes,
+    store: {
+      get: (name: string) => name === "cl3_live_session" && initial ? { value: initial } : undefined,
+      set: (name: string, value: string, options: unknown) => writes.push({ name, value, options }),
+    },
+  };
+}
+
+const authorizedParticipant = {
+  id: PARTICIPANT_ID,
+  environment: "live" as const,
+  displayName: "Алия Ё.",
+};
+
+test("claim issues a private participant cookie and exposes only the public name", async () => {
+  const cookies = cookieStore("");
+  const response = await handlePost(
+    jsonRequest("/api/case-lab-3/live/session", "POST", { firstName: "Алия", lastName: "Ёлкина" }),
+    {
+      consumeClaimRateLimit: async () => undefined,
+      getEnvironment: () => "live",
+      claimParticipant: async () => ({
+        kind: "claimed",
+        participantId: PARTICIPANT_ID,
+        tokenVersion: 1,
+        displayName: "Алия Ё.",
+      }),
+      issueSession: (participantId, version) => serializeLiveSession(issueLiveSession(participantId, version, SECRET)),
+      getCookies: async () => cookies.store,
+    },
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { status: "claimed", displayName: "Алия Ё." });
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  assert.equal(cookies.writes[0]?.name, "cl3_live_session");
+  assert.equal(cookies.writes[0]?.value, serializedSession);
+  assert.deepEqual(cookies.writes[0]?.options, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/api/case-lab-3/live",
+    maxAge: 172800,
+  });
+});
+
+test("claim requests ticket disambiguation without leaking ticket records", async () => {
+  const response = await handlePost(
+    jsonRequest("/api/case-lab-3/live/session", "POST", { firstName: "Алия", lastName: "Ёлкина" }),
+    {
+      consumeClaimRateLimit: async () => undefined,
+      getEnvironment: () => "live",
+      claimParticipant: async () => ({ kind: "ambiguous" }),
+    },
+  );
+  assert.deepEqual(await response.json(), { status: "needs_ticket_number" });
+});
+
+test("claim collapses missing and already claimed participants into one public response", async () => {
+  for (const kind of ["not_found", "already_claimed"] as const) {
+    const response = await handlePost(
+      jsonRequest("/api/case-lab-3/live/session", "POST", { firstName: "Нет", lastName: "Гостя" }),
+      {
+        consumeClaimRateLimit: async () => undefined,
+        getEnvironment: () => "live",
+        claimParticipant: async () => ({ kind }),
+      },
+    );
+    assert.deepEqual(await response.json(), { status: "not_available" });
+  }
+});
+
+test("claim enforces database-backed rate limits", async () => {
+  const response = await handlePost(
+    jsonRequest("/api/case-lab-3/live/session", "POST", { firstName: "Алия", lastName: "Ёлкина" }),
+    { consumeClaimRateLimit: async () => { throw new RateLimitExceededError(); } },
+  );
+  assert.equal(response.status, 429);
+  assert.deepEqual(await response.json(), { error: "rate_limited" });
+});
+
+test("logout expires the live cookie", async () => {
+  const cookies = cookieStore();
+  const response = await handleDelete(new Request(`${ORIGIN}/api/case-lab-3/live/session`, {
+    method: "DELETE",
+    headers: { origin: ORIGIN },
+  }), { getCookies: async () => cookies.store });
+
+  assert.equal(response.status, 200);
+  assert.equal(cookies.writes[0]?.value, "");
+  assert.equal((cookies.writes[0]?.options as { maxAge?: number }).maxAge, 0);
+});
+
+test("state rejects a missing session and returns only sanitized participant data", async () => {
+  const missing = cookieStore("");
+  const missingResponse = await handleGet(new Request(`${ORIGIN}/api/case-lab-3/live/state`), {
+    getCookies: async () => missing.store,
+  });
+  assert.equal(missingResponse.status, 401);
+
+  const present = cookieStore();
+  const state = {
+    participant: { displayName: "Алия Ё.", points: 10, rank: 2 },
+    activeCase: {
+      id: CASE_ID,
+      caseNumber: 1,
+      speakerLabel: "Спикер",
+      question: "Что вы предложите?",
+      state: "open" as const,
+      closesAt: "2026-09-24T10:00:00.000Z",
+      answer: null,
+    },
+    leaderboard: [{ participantId: PARTICIPANT_ID, displayName: "Алия Ё.", points: 10, firstPlaces: 0, podiums: 0, rank: 2 }],
+  };
+  const response = await handleGet(new Request(`${ORIGIN}/api/case-lab-3/live/state`), {
+    getCookies: async () => present.store,
+    getEnvironment: () => "live",
+    authorizeParticipant: async () => authorizedParticipant,
+    loadState: async () => state,
+  });
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), state);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+});
+
+test("submission saves an answer for the authorized participant", async () => {
+  const cookies = cookieStore();
+  const response = await handlePut(
+    jsonRequest(`/api/case-lab-3/live/cases/${CASE_ID}/submission`, "PUT", { answer: "а".repeat(30) }),
+    { params: Promise.resolve({ id: CASE_ID }) },
+    {
+      getCookies: async () => cookies.store,
+      getEnvironment: () => "live",
+      authorizeParticipant: async () => authorizedParticipant,
+      saveSubmission: async () => ({
+        kind: "saved",
+        submissionId: "00000000-0000-4000-8000-000000000301",
+        contentVersion: 1,
+        savedAt: "2026-09-24T09:55:00.000Z",
+        participationPoints: 10,
+      }),
+    },
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {
+    status: "saved",
+    contentVersion: 1,
+    savedAt: "2026-09-24T09:55:00.000Z",
+    participationPoints: 10,
+  });
+});
+
+test("submission maps a server-side close to conflict", async () => {
+  const response = await handlePut(
+    jsonRequest(`/api/case-lab-3/live/cases/${CASE_ID}/submission`, "PUT", { answer: "а".repeat(30) }),
+    { params: Promise.resolve({ id: CASE_ID }) },
+    {
+      getCookies: async () => cookieStore().store,
+      getEnvironment: () => "live",
+      authorizeParticipant: async () => authorizedParticipant,
+      saveSubmission: async () => ({ kind: "closed" }),
+    },
+  );
+  assert.equal(response.status, 409);
+  assert.deepEqual(await response.json(), { error: "case_closed" });
+});
+
+test("submission rejects oversized bodies and hides database failures", async () => {
+  const oversized = await handlePut(
+    jsonRequest(`/api/case-lab-3/live/cases/${CASE_ID}/submission`, "PUT", { answer: "а".repeat(5000) }),
+    { params: Promise.resolve({ id: CASE_ID }) },
+  );
+  assert.equal(oversized.status, 413);
+
+  const failed = await handlePut(
+    jsonRequest(`/api/case-lab-3/live/cases/${CASE_ID}/submission`, "PUT", { answer: "а".repeat(30) }),
+    { params: Promise.resolve({ id: CASE_ID }) },
+    {
+      getCookies: async () => cookieStore().store,
+      getEnvironment: () => "live",
+      authorizeParticipant: async () => authorizedParticipant,
+      saveSubmission: async () => { throw new Error("database detail"); },
+    },
+  );
+  assert.equal(failed.status, 503);
+  assert.deepEqual(await failed.json(), { error: "service_unavailable" });
+});

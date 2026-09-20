@@ -1061,7 +1061,8 @@ export type LiveSaveSubmissionRpcResult =
       savedAt: string;
       participationPoints: 10;
     }
-  | { kind: "closed" | "unauthorized" };
+  | { kind: "closed" }
+  | { kind: "unauthorized" };
 
 export type LiveTransitionCaseRpcResult =
   | { kind: "transitioned"; state: LiveCaseState; stateVersion: number; closesAt: string | null }

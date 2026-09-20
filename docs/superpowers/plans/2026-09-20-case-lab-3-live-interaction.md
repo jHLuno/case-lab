@@ -388,7 +388,7 @@ export type LiveParticipantStateResponse = {
 
 - [ ] **Step 5: Implement live session signing**
 
-Use cookie `cl3_live_session`, serialized as `<participant_uuid>.<version>.<43-char-token>`, purpose `live-participant-session`, max age 48 hours, and options `{ httpOnly: true, secure: true, sameSite: "lax", path: "/case-lab-3/live", maxAge: 172800 }`. `assertLiveSession` must load the participant/ticket/current revision and reject reset, cancelled, transferred, or mismatched-environment sessions.
+Use cookie `cl3_live_session`, serialized as `<participant_uuid>.<version>.<43-char-token>`, purpose `live-participant-session`, max age 48 hours, and options `{ httpOnly: true, secure: true, sameSite: "lax", path: "/api/case-lab-3/live", maxAge: 172800 }`. The API path is required so browsers send the cookie to participant Route Handlers while keeping it scoped away from unrelated site routes. `assertLiveSession` must load the participant/ticket/current revision and reject reset, cancelled, transferred, or mismatched-environment sessions.
 
 - [ ] **Step 6: Extend database types with exact new rows/RPC signatures**
 

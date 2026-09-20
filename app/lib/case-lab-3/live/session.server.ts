@@ -13,7 +13,7 @@ export const LIVE_SESSION_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: true,
   sameSite: "lax",
-  path: "/case-lab-3/live",
+  path: "/api/case-lab-3/live",
   maxAge: 172800,
 } as const;
 
