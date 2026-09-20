@@ -1,0 +1,10 @@
+{
+  "id": "google/gemini-3-flash-preview",
+  "choices": [
+    {
+      "message": {
+        "content": "{\"candidates\":[{\"id\":\"candidate_999\",\"score\":96,\"reason\":\"Неизвестный кандидат.\",\"approach\":\"Проверка\",\"candidateType\":\"strong\"}]}"
+      }
+    }
+  ]
+}

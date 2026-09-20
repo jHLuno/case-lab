@@ -1,0 +1,15 @@
+{
+  "id": "google/gemini-3-flash-preview",
+  "usage": {
+    "prompt_tokens": 1840,
+    "completion_tokens": 420,
+    "cost": 0.0012
+  },
+  "choices": [
+    {
+      "message": {
+        "content": "{\"candidates\":[{\"id\":\"candidate_001\",\"score\":96,\"reason\":\"Связывает решение с проверяемой гипотезой и ограничениями кейса.\",\"approach\":\"Быстрый эксперимент\",\"candidateType\":\"strong\"},{\"id\":\"candidate_002\",\"score\":84,\"reason\":\"Предлагает реалистичный следующий шаг и понятную метрику.\",\"approach\":\"Сегментация\",\"candidateType\":\"alternative\"}]}"
+      }
+    }
+  ]
+}
