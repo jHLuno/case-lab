@@ -13,6 +13,7 @@ export const CASE_LAB_3_DB_SUITES = [
   { name: "webhooks", file: "supabase/tests/case_lab_3_webhooks.test.sql" },
   { name: "refunds", file: "supabase/tests/case_lab_3_refunds.test.sql" },
   { name: "jobs", file: "supabase/tests/case_lab_3_jobs.test.sql" },
+  { name: "live", file: "supabase/tests/case_lab_3_live.test.sql" },
 ];
 
 export function buildSupabaseQueryArgs(file) {

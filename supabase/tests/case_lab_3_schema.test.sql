@@ -24,6 +24,13 @@ select results_eq(
       ('case_lab_3_inventory_allocations'),
       ('case_lab_3_jobs'),
       ('case_lab_3_legal_document_versions'),
+      ('case_lab_3_live_ai_runs'),
+      ('case_lab_3_live_awards'),
+      ('case_lab_3_live_cases'),
+      ('case_lab_3_live_participants'),
+      ('case_lab_3_live_shortlist_entries'),
+      ('case_lab_3_live_submissions'),
+      ('case_lab_3_live_tie_breaks'),
       ('case_lab_3_orders'),
       ('case_lab_3_payment_attempts'),
       ('case_lab_3_provider_events'),
@@ -36,7 +43,7 @@ select results_eq(
     ) as expected(value)
     order by value
   $$,
-  'the exact 20 Case Lab III payment tables exist'
+  'the exact 27 Case Lab III payment and live interaction tables exist'
 );
 
 select has_table('public', 'case_lab_3_orders', 'orders table exists');

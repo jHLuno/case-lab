@@ -59,3 +59,35 @@ test("refund worker transitions are atomic and persist uncertainty timestamps", 
   assert.match(source, /pg_advisory_xact_lock/iu);
   assert.match(source, /grant execute on function public\.case_lab_3_begin_refund/iu);
 });
+
+test("live interaction migration defines protected authoritative tables", async () => {
+  const source = await readFile(
+    "supabase/migrations/20260920000000_add_case_lab_3_live_interaction.sql",
+    "utf8",
+  );
+
+  for (const table of [
+    "case_lab_3_live_cases",
+    "case_lab_3_live_participants",
+    "case_lab_3_live_submissions",
+    "case_lab_3_live_ai_runs",
+    "case_lab_3_live_shortlist_entries",
+    "case_lab_3_live_awards",
+    "case_lab_3_live_tie_breaks",
+  ]) {
+    assert.match(source, new RegExp(`create table public\\.${table}`, "iu"));
+    assert.match(source, new RegExp(`alter table public\\.${table} enable row level security`, "iu"));
+  }
+
+  assert.match(source, /revoke all on table[\s\S]+case_lab_3_live_tie_breaks[\s\S]+from public, anon, authenticated/iu);
+  assert.match(source, /case_lab_3_live_claim_participant/iu);
+  assert.match(source, /case_lab_3_live_save_submission/iu);
+  assert.match(source, /case_lab_3_live_transition_case/iu);
+  assert.match(source, /case_lab_3_live_publish_awards/iu);
+  assert.match(source, /case_lab_3_live_resolve_tie/iu);
+  assert.match(source, /case_lab_3_live_get_leaderboard/iu);
+  assert.match(source, /char_length\(btrim\(answer_text\)\) between 30 and 300/iu);
+  assert.match(source, /place = 1 and bonus_points = 50/iu);
+  assert.match(source, /place = 2 and bonus_points = 35/iu);
+  assert.match(source, /place = 3 and bonus_points = 25/iu);
+});

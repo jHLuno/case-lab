@@ -25,10 +25,10 @@ test("remote runner builds the exact linked JSON query command", () => {
   ]);
 });
 
-test("remote runner keeps the seven Case Lab suites in dependency order", () => {
+test("remote runner keeps the eight Case Lab suites in dependency order", () => {
   assert.deepEqual(
     CASE_LAB_3_DB_SUITES.map((suite) => suite.name),
-    ["schema", "rls", "inventory", "check-in", "webhooks", "refunds", "jobs"],
+    ["schema", "rls", "inventory", "check-in", "webhooks", "refunds", "jobs", "live"],
   );
   assert.deepEqual(
     CASE_LAB_3_DB_SUITES.map((suite) => suite.file),
@@ -40,6 +40,7 @@ test("remote runner keeps the seven Case Lab suites in dependency order", () => 
       "supabase/tests/case_lab_3_webhooks.test.sql",
       "supabase/tests/case_lab_3_refunds.test.sql",
       "supabase/tests/case_lab_3_jobs.test.sql",
+      "supabase/tests/case_lab_3_live.test.sql",
     ],
   );
 });
