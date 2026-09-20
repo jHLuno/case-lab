@@ -5,6 +5,7 @@ import type {
   PaymentEnvironment,
   TicketTier,
 } from "./contracts";
+import type { LiveCaseState, PublicLeaderboardEntry } from "./live/contracts";
 
 export type Json =
   | string
@@ -761,6 +762,213 @@ export type ReconciliationStateInsert = Omit<ReconciliationStateRow, "id" | "cre
 
 export type ReconciliationStateUpdate = Partial<ReconciliationStateInsert>;
 
+export type LiveCaseRow = {
+  id: string;
+  environment: PaymentEnvironment;
+  case_number: number;
+  speaker_label: string;
+  title: string;
+  question: string;
+  speaker_reference_answer: string;
+  context: string | null;
+  key_insight: string | null;
+  generated_rubric: Json;
+  approved_rubric: Json;
+  state: LiveCaseState;
+  opens_at: string | null;
+  closes_at: string | null;
+  state_version: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type LiveCaseInsert = Omit<
+  LiveCaseRow,
+  "id" | "generated_rubric" | "approved_rubric" | "state" | "state_version" | "created_at" | "updated_at"
+> & {
+  id?: string;
+  generated_rubric?: Json;
+  approved_rubric?: Json;
+  state?: LiveCaseState;
+  state_version?: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type LiveCaseUpdate = Partial<LiveCaseInsert>;
+
+export type LiveParticipantRow = {
+  id: string;
+  environment: PaymentEnvironment;
+  ticket_id: string;
+  ticket_revision_id: string;
+  normalized_first_name: string;
+  normalized_last_name: string;
+  public_display_name: string;
+  session_token_version: number;
+  claim_status: "active" | "reset";
+  claimed_at: string;
+  reset_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type LiveParticipantInsert = Omit<
+  LiveParticipantRow,
+  "id" | "session_token_version" | "claim_status" | "claimed_at" | "reset_at" | "created_at" | "updated_at"
+> & {
+  id?: string;
+  session_token_version?: number;
+  claim_status?: LiveParticipantRow["claim_status"];
+  claimed_at?: string;
+  reset_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type LiveParticipantUpdate = Partial<LiveParticipantInsert>;
+
+export type LiveSubmissionRow = {
+  id: string;
+  environment: PaymentEnvironment;
+  case_id: string;
+  participant_id: string;
+  answer_text: string;
+  content_version: number;
+  validity_state: "valid" | "invalid";
+  invalid_reason: string | null;
+  participation_points: 0 | 10;
+  first_submitted_at: string;
+  last_submitted_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type LiveSubmissionInsert = Omit<
+  LiveSubmissionRow,
+  | "id"
+  | "content_version"
+  | "validity_state"
+  | "invalid_reason"
+  | "participation_points"
+  | "first_submitted_at"
+  | "last_submitted_at"
+  | "created_at"
+  | "updated_at"
+> & {
+  id?: string;
+  content_version?: number;
+  validity_state?: LiveSubmissionRow["validity_state"];
+  invalid_reason?: string | null;
+  participation_points?: 0 | 10;
+  first_submitted_at?: string;
+  last_submitted_at?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type LiveSubmissionUpdate = Partial<LiveSubmissionInsert>;
+
+export type LiveAiRunRow = {
+  id: string;
+  environment: PaymentEnvironment;
+  case_id: string;
+  run_number: number;
+  requested_models: Json;
+  served_model: string | null;
+  request_hash: string;
+  response_payload: Json | null;
+  usage_payload: Json;
+  latency_ms: number | null;
+  status: "running" | "succeeded" | "failed";
+  error_category: string | null;
+  created_at: string;
+  completed_at: string | null;
+};
+
+export type LiveAiRunInsert = Omit<LiveAiRunRow, "id" | "usage_payload" | "created_at"> & {
+  id?: string;
+  usage_payload?: Json;
+  created_at?: string;
+};
+
+export type LiveAiRunUpdate = Partial<LiveAiRunInsert>;
+
+export type LiveShortlistEntryRow = {
+  id: string;
+  environment: PaymentEnvironment;
+  case_id: string;
+  ai_run_id: string | null;
+  submission_id: string;
+  ai_order: number | null;
+  ai_score: number | null;
+  ai_reason: string | null;
+  approach_label: string | null;
+  candidate_type: "strong" | "alternative" | "wildcard" | "manual" | null;
+  included: boolean;
+  operator_reason: string | null;
+  final_order: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type LiveShortlistEntryInsert = Omit<
+  LiveShortlistEntryRow,
+  "id" | "included" | "created_at" | "updated_at"
+> & {
+  id?: string;
+  included?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type LiveShortlistEntryUpdate = Partial<LiveShortlistEntryInsert>;
+
+export type LiveAwardRow = {
+  id: string;
+  environment: PaymentEnvironment;
+  case_id: string;
+  submission_id: string;
+  place: 1 | 2 | 3;
+  bonus_points: 50 | 35 | 25;
+  actor_id: string;
+  decision_reason: string | null;
+  corrected_from_id: string | null;
+  active: boolean;
+  awarded_at: string;
+  created_at: string;
+};
+
+export type LiveAwardInsert = Omit<LiveAwardRow, "id" | "active" | "awarded_at" | "created_at"> & {
+  id?: string;
+  active?: boolean;
+  awarded_at?: string;
+  created_at?: string;
+};
+
+export type LiveAwardUpdate = Partial<LiveAwardInsert>;
+
+export type LiveTieBreakRow = {
+  id: string;
+  environment: PaymentEnvironment;
+  participant_id: string;
+  resolved_rank: number;
+  actor_id: string;
+  reason: string;
+  active: boolean;
+  decided_at: string;
+  created_at: string;
+};
+
+export type LiveTieBreakInsert = Omit<LiveTieBreakRow, "id" | "active" | "decided_at" | "created_at"> & {
+  id?: string;
+  active?: boolean;
+  decided_at?: string;
+  created_at?: string;
+};
+
+export type LiveTieBreakUpdate = Partial<LiveTieBreakInsert>;
+
 type Table<Row, Insert, Update> = {
   Row: Row;
   Insert: Insert;
@@ -841,6 +1049,28 @@ export type RefundWorkerTransitionResult =
   | { kind: "failed"; status: "failed" }
   | { kind: "unknown"; status: "unknown" };
 
+export type LiveClaimParticipantRpcResult =
+  | { kind: "claimed"; participantId: string; tokenVersion: number; displayName: string }
+  | { kind: "ambiguous" | "not_found" | "already_claimed" };
+
+export type LiveSaveSubmissionRpcResult =
+  | {
+      kind: "saved";
+      submissionId: string;
+      contentVersion: number;
+      savedAt: string;
+      participationPoints: 10;
+    }
+  | { kind: "closed" | "unauthorized" };
+
+export type LiveTransitionCaseRpcResult =
+  | { kind: "transitioned"; state: LiveCaseState; stateVersion: number; closesAt: string | null }
+  | { kind: "conflict" | "invalid_transition" | "incomplete" | "invalid_deadline" | "another_case_active" };
+
+export type LivePublishAwardsRpcResult =
+  | { kind: "published"; state: "awarded"; stateVersion: number }
+  | { kind: "conflict" | "invalid_awards" };
+
 export type Database = {
   public: {
     Tables: {
@@ -865,6 +1095,13 @@ export type Database = {
       case_lab_3_incidents: Table<IncidentRow, IncidentInsert, IncidentUpdate>;
       case_lab_3_rate_limits: Table<RateLimitRow, RateLimitInsert, RateLimitUpdate>;
       case_lab_3_reconciliation_state: Table<ReconciliationStateRow, ReconciliationStateInsert, ReconciliationStateUpdate>;
+      case_lab_3_live_cases: Table<LiveCaseRow, LiveCaseInsert, LiveCaseUpdate>;
+      case_lab_3_live_participants: Table<LiveParticipantRow, LiveParticipantInsert, LiveParticipantUpdate>;
+      case_lab_3_live_submissions: Table<LiveSubmissionRow, LiveSubmissionInsert, LiveSubmissionUpdate>;
+      case_lab_3_live_ai_runs: Table<LiveAiRunRow, LiveAiRunInsert, LiveAiRunUpdate>;
+      case_lab_3_live_shortlist_entries: Table<LiveShortlistEntryRow, LiveShortlistEntryInsert, LiveShortlistEntryUpdate>;
+      case_lab_3_live_awards: Table<LiveAwardRow, LiveAwardInsert, LiveAwardUpdate>;
+      case_lab_3_live_tie_breaks: Table<LiveTieBreakRow, LiveTieBreakInsert, LiveTieBreakUpdate>;
     };
     Views: Record<never, never>;
     Functions: {
@@ -993,6 +1230,60 @@ export type Database = {
           p_error: string;
         };
         Returns: RefundWorkerTransitionResult;
+      };
+      case_lab_3_live_normalize_name: {
+        Args: { p_value: string };
+        Returns: string;
+      };
+      case_lab_3_live_claim_participant: {
+        Args: {
+          p_environment: PaymentEnvironment;
+          p_first_name: string;
+          p_last_name: string;
+          p_ticket_number?: string | null;
+        };
+        Returns: LiveClaimParticipantRpcResult;
+      };
+      case_lab_3_live_save_submission: {
+        Args: {
+          p_environment: PaymentEnvironment;
+          p_case_id: string;
+          p_participant_id: string;
+          p_answer_text: string;
+        };
+        Returns: LiveSaveSubmissionRpcResult;
+      };
+      case_lab_3_live_transition_case: {
+        Args: {
+          p_case_id: string;
+          p_expected_version: number;
+          p_new_state: LiveCaseState;
+          p_closes_at: string | null;
+          p_actor_id: string;
+        };
+        Returns: LiveTransitionCaseRpcResult;
+      };
+      case_lab_3_live_publish_awards: {
+        Args: {
+          p_case_id: string;
+          p_expected_version: number;
+          p_awards: Json;
+          p_actor_id: string;
+          p_reason?: string | null;
+        };
+        Returns: LivePublishAwardsRpcResult;
+      };
+      case_lab_3_live_reset_participant: {
+        Args: { p_participant_id: string; p_actor_id: string; p_reason: string };
+        Returns: { kind: "reset" | "not_found" };
+      };
+      case_lab_3_live_resolve_tie: {
+        Args: { p_environment: PaymentEnvironment; p_decisions: Json; p_actor_id: string; p_reason: string };
+        Returns: { kind: "resolved" };
+      };
+      case_lab_3_live_get_leaderboard: {
+        Args: { p_environment: PaymentEnvironment };
+        Returns: PublicLeaderboardEntry[];
       };
     };
     Enums: Record<never, never>;

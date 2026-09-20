@@ -8,8 +8,9 @@
     "build": "NODE_OPTIONS=--disable-warning=DEP0205 next build",
     "start": "NODE_OPTIONS=--disable-warning=DEP0205 next start",
     "lint": "eslint .",
-    "test": "node --test tests/*.test.mjs && npm run test:case-lab-3-payments",
+    "test": "node --test tests/*.test.mjs && npm run test:case-lab-3-payments && npm run test:case-lab-3-live",
     "test:case-lab-3-payments": "tsx --test tests/case-lab-3-payments/**/*.test.ts",
+    "test:case-lab-3-live": "tsx --test tests/case-lab-3-live/**/*.test.ts",
     "test:case-lab-3-db": "node scripts/run-case-lab-3-db.mjs",
     "test:case-lab-3-db:local": "supabase test db"
   },

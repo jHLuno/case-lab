@@ -1,0 +1,66 @@
+import type { PaymentEnvironment } from "../contracts";
+
+export type LiveCaseState =
+  | "draft"
+  | "ready"
+  | "open"
+  | "analyzing"
+  | "shortlist_ready"
+  | "awarded"
+  | "closed";
+
+export type LiveParticipantClaimInput = {
+  firstName: string;
+  lastName: string;
+  ticketNumber: string | null;
+};
+
+export type LiveSubmissionInput = {
+  answer: string;
+};
+
+export type LeaderboardScore = {
+  participantId: string;
+  displayName: string;
+  points: number;
+  firstPlaces: number;
+  podiums: number;
+};
+
+export type PublicLeaderboardEntry = LeaderboardScore & {
+  rank: number;
+};
+
+export type LiveParticipantStateResponse = {
+  participant: {
+    displayName: string;
+    points: number;
+    rank: number | null;
+  };
+  activeCase: null | {
+    id: string;
+    caseNumber: number;
+    speakerLabel: string;
+    question: string;
+    state: LiveCaseState;
+    closesAt: string | null;
+    answer: string | null;
+  };
+  leaderboard: PublicLeaderboardEntry[];
+};
+
+export type LiveSession = {
+  participantId: string;
+  version: number;
+  token: string;
+};
+
+export type LiveSessionParticipant = {
+  id: string;
+  environment: PaymentEnvironment;
+  sessionTokenVersion: number;
+  claimStatus: "active" | "reset";
+  ticketStatus: "valid" | "used" | "cancelled";
+  ticketRevisionId: string;
+  currentRevisionId: string | null;
+};
