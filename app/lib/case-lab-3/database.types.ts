@@ -784,12 +784,14 @@ export type LiveCaseRow = {
 
 export type LiveCaseInsert = Omit<
   LiveCaseRow,
-  "id" | "generated_rubric" | "approved_rubric" | "state" | "state_version" | "created_at" | "updated_at"
+  "id" | "generated_rubric" | "approved_rubric" | "state" | "opens_at" | "closes_at" | "state_version" | "created_at" | "updated_at"
 > & {
   id?: string;
   generated_rubric?: Json;
   approved_rubric?: Json;
   state?: LiveCaseState;
+  opens_at?: string | null;
+  closes_at?: string | null;
   state_version?: number;
   created_at?: string;
   updated_at?: string;
@@ -886,8 +888,12 @@ export type LiveAiRunRow = {
   completed_at: string | null;
 };
 
-export type LiveAiRunInsert = Omit<LiveAiRunRow, "id" | "usage_payload" | "created_at"> & {
+export type LiveAiRunInsert = Omit<LiveAiRunRow, "id" | "served_model" | "response_payload" | "latency_ms" | "error_category" | "usage_payload" | "created_at"> & {
   id?: string;
+  served_model?: string | null;
+  response_payload?: Json | null;
+  latency_ms?: number | null;
+  error_category?: string | null;
   usage_payload?: Json;
   created_at?: string;
 };
@@ -914,10 +920,18 @@ export type LiveShortlistEntryRow = {
 
 export type LiveShortlistEntryInsert = Omit<
   LiveShortlistEntryRow,
-  "id" | "included" | "created_at" | "updated_at"
+  "id" | "ai_run_id" | "ai_order" | "ai_score" | "ai_reason" | "approach_label" | "candidate_type" | "included" | "operator_reason" | "final_order" | "created_at" | "updated_at"
 > & {
   id?: string;
+  ai_run_id?: string | null;
+  ai_order?: number | null;
+  ai_score?: number | null;
+  ai_reason?: string | null;
+  approach_label?: string | null;
+  candidate_type?: LiveShortlistEntryRow["candidate_type"];
   included?: boolean;
+  operator_reason?: string | null;
+  final_order?: number | null;
   created_at?: string;
   updated_at?: string;
 };
