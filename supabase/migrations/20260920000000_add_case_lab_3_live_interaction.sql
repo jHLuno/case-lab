@@ -255,7 +255,7 @@ begin
   end if;
 
   perform pg_advisory_xact_lock(hashtextextended(
-    p_environment || E'\000' || v_first_name || E'\000' || v_last_name,
+    p_environment || chr(31) || v_first_name || chr(31) || v_last_name,
     0
   ));
 
@@ -771,8 +771,8 @@ as $$
           first_places desc,
           podiums desc,
           coalesce(tie_break.resolved_rank, 2147483647),
-          public_display_name,
-          participant_id
+          base_ranked.public_display_name,
+          base_ranked.participant_id
       )::integer as display_order
     from base_ranked
     left join public.case_lab_3_live_tie_breaks tie_break
