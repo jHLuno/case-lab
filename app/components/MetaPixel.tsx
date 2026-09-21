@@ -2,13 +2,14 @@
 
 import Script from "next/script";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 const META_PIXEL_ID = "1317409210320189";
 const META_PIXEL_PATHS = new Set(["/", "/case-lab-3"]);
 
 type MetaPixelWindow = Window & {
   fbq?: (...args: unknown[]) => void;
+  __caseLabMetaPixelPageViewPath?: string;
 };
 
 const metaPixelBootstrap = `!function(f,b,e,v,n,t,s)
@@ -19,17 +20,30 @@ n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '${META_PIXEL_ID}');`;
+fbq('init', '${META_PIXEL_ID}');
+window.__caseLabMetaPixelPageViewPath = window.location.pathname.length > 1
+  ? window.location.pathname.replace(/\\/+$/, '')
+  : window.location.pathname;
+fbq('track', 'PageView');`;
 
 function normalizePathname(pathname: string): string {
   return pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+}
+
+export function trackMetaPixelEvent(eventName: "Lead"): void {
+  if (typeof window === "undefined") return;
+
+  const pathname = normalizePathname(window.location.pathname);
+  if (!META_PIXEL_PATHS.has(pathname)) return;
+
+  const fbq = (window as MetaPixelWindow).fbq;
+  if (typeof fbq === "function") fbq("track", eventName);
 }
 
 export default function MetaPixel({ nonce }: { nonce?: string }) {
   const pathname = usePathname();
   const normalizedPathname = normalizePathname(pathname);
   const enabled = META_PIXEL_PATHS.has(normalizedPathname);
-  const [ready, setReady] = useState(false);
   const lastTrackedPathname = useRef<string | null>(null);
 
   useEffect(() => {
@@ -38,14 +52,21 @@ export default function MetaPixel({ nonce }: { nonce?: string }) {
       return;
     }
 
-    if (!ready || lastTrackedPathname.current === normalizedPathname) return;
+    if (lastTrackedPathname.current === normalizedPathname) return;
 
-    const fbq = (window as MetaPixelWindow).fbq;
+    const metaPixelWindow = window as MetaPixelWindow;
+    if (metaPixelWindow.__caseLabMetaPixelPageViewPath === normalizedPathname) {
+      lastTrackedPathname.current = normalizedPathname;
+      return;
+    }
+
+    const fbq = metaPixelWindow.fbq;
     if (typeof fbq !== "function") return;
 
     fbq("track", "PageView");
+    metaPixelWindow.__caseLabMetaPixelPageViewPath = normalizedPathname;
     lastTrackedPathname.current = normalizedPathname;
-  }, [enabled, normalizedPathname, ready]);
+  }, [enabled, normalizedPathname]);
 
   if (!enabled) return null;
 
@@ -54,7 +75,6 @@ export default function MetaPixel({ nonce }: { nonce?: string }) {
       id="meta-pixel"
       nonce={nonce}
       strategy="afterInteractive"
-      onReady={() => setReady(true)}
       dangerouslySetInnerHTML={{ __html: metaPixelBootstrap }}
     />
   );

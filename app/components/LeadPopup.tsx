@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
 import { useLeadPopup } from "../lib/LeadPopupContext";
+import { trackMetaPixelEvent } from "./MetaPixel";
 
 const inputFont = { fontFamily: "var(--font-body)" };
 
@@ -154,6 +155,7 @@ export default function LeadPopup() {
         throw new Error(data.error || "Ошибка отправки");
       }
 
+      trackMetaPixelEvent("Lead");
       setStatus("success");
       form.reset();
     } catch (err: unknown) {

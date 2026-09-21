@@ -188,6 +188,7 @@ const [proofSource, heroSource, grainientBoundarySource, grainientSource, casesS
 ]);
 const caseLab3NavbarSource = await read("app/components/CaseLab3Navbar.tsx");
 const metaPixelSource = await readOptional("app/components/MetaPixel.tsx");
+const leadPopupSource = await read("app/components/LeadPopup.tsx");
 
 const caseLabRouteSources = [
   pageSource,
@@ -618,7 +619,16 @@ test("Meta Pixel tracks PageView only on the home and Case Lab 3 landing routes"
   assert.match(metaPixelSource, /new Set\(\[["']\/["'],\s*["']\/case-lab-3["']\]\)/);
   assert.match(metaPixelSource, /usePathname\(\)/);
   assert.match(metaPixelSource, /fbq\(["']track["'],\s*["']PageView["']\)/);
+  assert.match(metaPixelSource, /__caseLabMetaPixelPageViewPath/);
   assert.match(metaPixelSource, /lastTrackedPathname/);
+  const leadHandlerSource = extractEnclosingBraceBlock(leadPopupSource, "const handleSubmit");
+  const responseCheckIndex = leadHandlerSource.indexOf("if (!res.ok)");
+  const leadEventIndex = leadHandlerSource.indexOf('trackMetaPixelEvent("Lead")');
+  const successStateIndex = leadHandlerSource.indexOf('setStatus("success")');
+  assert.match(leadPopupSource, /import\s+\{\s*trackMetaPixelEvent\s*\}\s+from\s+["']\.\/MetaPixel["']/);
+  assert.ok(responseCheckIndex >= 0);
+  assert.ok(leadEventIndex > responseCheckIndex);
+  assert.ok(leadEventIndex < successStateIndex);
   assert.match(proxySource, /isMetaPixelPath/);
   assert.match(proxySource, /normalizedPathname === ["']\/["']/);
   assert.match(proxySource, /normalizedPathname === ["']\/case-lab-3["']/);
