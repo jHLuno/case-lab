@@ -1,7 +1,6 @@
 import "server-only";
 
 import { requireCrmAdmin, verifyCrmMutation } from "@/lib/crm-auth.server";
-import { getPublicPaymentEnvironment } from "@/lib/case-lab-3/orders.server";
 import { noStoreJson, parseJsonBody, readBoundedBody, requireJson, RequestGuardError } from "@/lib/case-lab-3/http.server";
 import {
   getLiveSnapshot,
@@ -16,6 +15,7 @@ export const runtime = "nodejs";
 
 const MAX_BODY_BYTES = 16 * 1024;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/u;
+const LIVE_ENVIRONMENT: PaymentEnvironment = "live";
 
 export type LiveDashboardDependencies = {
   requireCrmAdmin: typeof requireCrmAdmin;
@@ -39,7 +39,7 @@ export type LiveDashboardDependencies = {
 const productionDependencies: LiveDashboardDependencies = {
   requireCrmAdmin,
   verifyCrmMutation,
-  getEnvironment: getPublicPaymentEnvironment,
+  getEnvironment: () => LIVE_ENVIRONMENT,
   getSnapshot: getLiveSnapshot,
   saveCase: saveLiveCase,
 };
@@ -82,9 +82,7 @@ export async function handleGet(request: Request, dependencies: Partial<LiveDash
   try {
     const session = await active.requireCrmAdmin();
     if (!session) return noStoreJson({ error: "unauthorized" }, { status: 401 });
-    const environmentParam = new URL(request.url).searchParams.get("environment");
-    const environment = environmentParam === "test" || environmentParam === "live" ? environmentParam : active.getEnvironment();
-    return noStoreJson(await active.getSnapshot(environment));
+    return noStoreJson(await active.getSnapshot(active.getEnvironment()));
   } catch {
     return noStoreJson({ error: "service_unavailable" }, { status: 503 });
   }

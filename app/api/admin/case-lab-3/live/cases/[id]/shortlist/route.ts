@@ -2,7 +2,6 @@ import "server-only";
 
 import { requireCrmAdmin, verifyCrmMutation } from "@/lib/crm-auth.server";
 import { noStoreJson, parseJsonBody, readBoundedBody, requireJson, RequestGuardError } from "@/lib/case-lab-3/http.server";
-import type { PaymentEnvironment } from "@/lib/case-lab-3/contracts";
 import { updateShortlist } from "@/lib/case-lab-3/live/operator.server";
 
 export const dynamic = "force-dynamic";
@@ -21,14 +20,14 @@ export async function handlePatch(request: Request, context: { params: Promise<{
     requireJson(request);
     const { id } = await context.params;
     const body = parseJsonBody(await readBoundedBody(request, 16 * 1024));
-    if (!isRecord(body) || (body.environment !== "test" && body.environment !== "live") || !Array.isArray(body.entries) || body.entries.length > 100) return noStoreJson({ error: "invalid_request" }, { status: 400 });
+    if (!isRecord(body) || body.environment !== "live" || !Array.isArray(body.entries) || body.entries.length > 100) return noStoreJson({ error: "invalid_request" }, { status: 400 });
     const entries = body.entries.map((entry) => {
       if (!isRecord(entry) || typeof entry.submissionId !== "string" || typeof entry.included !== "boolean" || (entry.finalOrder !== null && !Number.isSafeInteger(entry.finalOrder))) return null;
       const reason = entry.operatorReason === undefined || entry.operatorReason === null || entry.operatorReason === "" ? null : typeof entry.operatorReason === "string" && entry.operatorReason.length <= 500 ? entry.operatorReason : "__invalid__";
       return reason === "__invalid__" ? null : { submissionId: entry.submissionId, included: entry.included, finalOrder: entry.finalOrder as number | null, operatorReason: reason };
     });
     if (entries.some((entry) => entry === null)) return noStoreJson({ error: "invalid_request" }, { status: 400 });
-    await active.updateShortlist({ caseId: id, environment: body.environment as PaymentEnvironment, entries: entries as Array<{ submissionId: string; included: boolean; finalOrder: number | null; operatorReason: string | null }> });
+    await active.updateShortlist({ caseId: id, environment: "live", entries: entries as Array<{ submissionId: string; included: boolean; finalOrder: number | null; operatorReason: string | null }> });
     return noStoreJson({ status: "updated" });
   } catch (error) {
     if (error instanceof RequestGuardError) return noStoreJson({ error: "invalid_request" }, { status: error.status });

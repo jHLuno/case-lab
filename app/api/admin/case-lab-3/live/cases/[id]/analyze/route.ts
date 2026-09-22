@@ -2,7 +2,6 @@ import "server-only";
 
 import { requireCrmAdmin, verifyCrmMutation } from "@/lib/crm-auth.server";
 import { noStoreJson, parseJsonBody, readBoundedBody, requireJson, RequestGuardError } from "@/lib/case-lab-3/http.server";
-import { getPublicPaymentEnvironment } from "@/lib/case-lab-3/orders.server";
 import { generateShortlist } from "@/lib/case-lab-3/live/openrouter.server";
 import {
   getCaseAndSubmissions,
@@ -14,11 +13,12 @@ import type { LiveTransitionCaseRpcResult } from "@/lib/case-lab-3/database.type
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+const LIVE_ENVIRONMENT = "live" as const;
 
 export type AnalyzeDependencies = {
   requireCrmAdmin: typeof requireCrmAdmin;
   verifyCrmMutation: typeof verifyCrmMutation;
-  getEnvironment: typeof getPublicPaymentEnvironment;
+  getEnvironment: () => "live" | "test";
   transitionCase: typeof transitionLiveCase;
   getCaseAndSubmissions: typeof getCaseAndSubmissions;
   generateShortlist: typeof generateShortlist;
@@ -28,7 +28,7 @@ export type AnalyzeDependencies = {
 const productionDependencies: AnalyzeDependencies = {
   requireCrmAdmin,
   verifyCrmMutation,
-  getEnvironment: getPublicPaymentEnvironment,
+  getEnvironment: () => LIVE_ENVIRONMENT,
   transitionCase: transitionLiveCase,
   getCaseAndSubmissions,
   generateShortlist,

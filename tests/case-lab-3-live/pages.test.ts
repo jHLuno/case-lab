@@ -58,6 +58,9 @@ test("CRM live page is protected and exposes operator controls", async () => {
   assert.match(client, /Сбросить участника/u);
   assert.match(client, /X-CSRF-Token/u);
   assert.match(client, /Idempotency-Key/u);
+  assert.match(client, /LIVE_ENVIRONMENT\s*=\s*["']live["']/u);
+  assert.doesNotMatch(client, /<option value=["']test["']>/u);
+  assert.doesNotMatch(client, /Среда/u);
   assert.doesNotMatch(client, /OPENROUTER_API_KEY|openrouter\.server/u);
   assert.match(nav, /\/crm\/case-lab-3\/live\//u);
 });

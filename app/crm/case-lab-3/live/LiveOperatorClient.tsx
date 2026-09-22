@@ -2,7 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 
-type Environment = "test" | "live";
+const LIVE_ENVIRONMENT = "live" as const;
 type CaseState = "draft" | "ready" | "open" | "analyzing" | "shortlist_ready" | "awarded" | "closed";
 type LiveCase = {
   id: string;
@@ -20,7 +20,7 @@ type LiveCase = {
   stateVersion: number;
 };
 type Snapshot = {
-  environment: Environment;
+  environment: typeof LIVE_ENVIRONMENT;
   cases: LiveCase[];
   participants: Array<{ id: string; firstName: string; lastName: string; ticketNumber: string; claimStatus: string }>;
   submissions: Array<{ id: string; caseId: string; participantId: string; answer: string; points: number; validityState: string }>;
@@ -89,7 +89,6 @@ function ConfirmDialog({ title, description, reason, onReasonChange, onCancel, o
 }
 
 export default function LiveOperatorClient({ csrfToken }: { csrfToken: string }) {
-  const [environment, setEnvironment] = useState<Environment>("test");
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [drafts, setDrafts] = useState<Record<number, Draft>>({});
   const [selectedCase, setSelectedCase] = useState(1);
@@ -102,7 +101,7 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
 
   const loadSnapshot = useCallback(async (): Promise<void> => {
     try {
-      const response = await fetch(`/api/admin/case-lab-3/live?environment=${environment}`, { cache: "no-store" });
+      const response = await fetch(`/api/admin/case-lab-3/live?environment=${LIVE_ENVIRONMENT}`, { cache: "no-store" });
       if (!response.ok) throw new Error("snapshot");
       const data = await response.json() as Snapshot;
       setSnapshot(data);
@@ -113,7 +112,7 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
     } finally {
       setLoading(false);
     }
-  }, [environment]);
+  }, []);
 
   useEffect(() => { queueMicrotask(() => void loadSnapshot()); }, [loadSnapshot]);
   useEffect(() => {
@@ -156,7 +155,7 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
       id: liveCase?.id,
       caseNumber: selectedCase,
       ...draft,
-      environment,
+      environment: LIVE_ENVIRONMENT,
     }, "PUT")) {
       setMessage("Данные кейса сохранены");
       await loadSnapshot();
@@ -203,7 +202,7 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
     if (!liveCase) return;
     const nextOrder = selectedSubmissions.reduce((max, entry) => Math.max(max, entry.finalOrder ?? 0), 0) + 1;
     if (await mutate(`/api/admin/case-lab-3/live/cases/${liveCase.id}/shortlist`, {
-      environment,
+      environment: LIVE_ENVIRONMENT,
       entries: [{ submissionId, included: true, finalOrder: nextOrder, operatorReason: "Добавлено оператором вручную" }],
     }, "PATCH")) {
       setMessage("Ответ добавлен в shortlist");
@@ -247,12 +246,6 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
           <h1 className="text-3xl font-bold uppercase tracking-[0.02em] text-black" style={{ fontFamily: "var(--font-heading)" }}>Live-оператор</h1>
           <p className="mt-2 text-sm text-black/50" aria-live="polite">{message}</p>
         </div>
-        <label className="grid gap-1 text-xs text-black/50">Среда
-          <select value={environment} onChange={(event) => setEnvironment(event.target.value as Environment)} className="rounded-full border border-black/10 bg-white px-4 py-2 text-sm text-black outline-none focus:border-[#040082]">
-            <option value="test">test</option>
-            <option value="live">live</option>
-          </select>
-        </label>
       </header>
 
       {loading && !snapshot ? <p className="rounded-2xl bg-white p-6 text-sm text-black/50">Загрузка live-состояния...</p> : null}

@@ -44,6 +44,20 @@ test("operator dashboard rejects unauthenticated access", async () => {
   assert.equal(response.status, 401);
 });
 
+test("operator dashboard ignores test environment overrides", async () => {
+  let requestedEnvironment: string | null = null;
+  const response = await getLive(request("/api/admin/case-lab-3/live?environment=test", "GET"), {
+    ...auth,
+    getEnvironment: () => "live",
+    getSnapshot: async (environment) => {
+      requestedEnvironment = environment;
+      return { environment, cases: [], participants: [], submissions: [], aiRuns: [], shortlist: [], awards: [], tieBreaks: [], leaderboard: [] };
+    },
+  });
+  assert.equal(response.status, 200);
+  assert.equal(requestedEnvironment, "live");
+});
+
 test("operator mutations require CRM mutation verification", async () => {
   const response = await transition(
     request(`/api/admin/case-lab-3/live/cases/${CASE_ID}/transition`, "POST", { expectedVersion: 1, state: "open" }, false),
@@ -161,6 +175,19 @@ test("manual shortlist mode can add an answer when AI produced no entries", asyn
     environment: "live",
     entries: [{ submissionId: "sub-1", included: true, finalOrder: 1, operatorReason: "Решение добавлено спикером" }],
   });
+});
+
+test("manual shortlist rejects the test environment", async () => {
+  const response = await shortlist(
+    request(`/api/admin/case-lab-3/live/cases/${CASE_ID}/shortlist`, "PATCH", {
+      environment: "test",
+      entries: [{ submissionId: "sub-1", included: true, finalOrder: 1, operatorReason: "Решение добавлено спикером" }],
+    }),
+    routeContext,
+    { ...auth, updateShortlist: async () => { throw new Error("should not update test shortlist"); } },
+  );
+  assert.equal(response.status, 400);
+  assert.deepEqual(await response.json(), { error: "invalid_request" });
 });
 
 test("tie resolution requires a reason and ordered participant decisions", async () => {

@@ -2,15 +2,15 @@ import "server-only";
 
 import { requireCrmAdmin, verifyCrmMutation } from "@/lib/crm-auth.server";
 import { noStoreJson, parseJsonBody, readBoundedBody, requireJson, RequestGuardError } from "@/lib/case-lab-3/http.server";
-import { getPublicPaymentEnvironment } from "@/lib/case-lab-3/orders.server";
 import { resolveLiveTie } from "@/lib/case-lab-3/live/operator.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+const LIVE_ENVIRONMENT = "live" as const;
 const UUID_PATTERN = /^[0-9a-f-]{36}$/u;
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }
-type Dependencies = { requireCrmAdmin: typeof requireCrmAdmin; verifyCrmMutation: typeof verifyCrmMutation; getEnvironment: typeof getPublicPaymentEnvironment; resolveTie: typeof resolveLiveTie };
-const productionDependencies: Dependencies = { requireCrmAdmin, verifyCrmMutation, getEnvironment: getPublicPaymentEnvironment, resolveTie: resolveLiveTie };
+type Dependencies = { requireCrmAdmin: typeof requireCrmAdmin; verifyCrmMutation: typeof verifyCrmMutation; getEnvironment: () => "live" | "test"; resolveTie: typeof resolveLiveTie };
+const productionDependencies: Dependencies = { requireCrmAdmin, verifyCrmMutation, getEnvironment: () => LIVE_ENVIRONMENT, resolveTie: resolveLiveTie };
 
 export async function handlePost(request: Request, dependencies: Partial<Dependencies> = {}): Promise<Response> {
   const active = { ...productionDependencies, ...dependencies };
