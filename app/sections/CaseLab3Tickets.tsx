@@ -2,6 +2,7 @@ import Image from "next/image";
 import { ArrowUpRight, CalendarDays, Check, MapPin } from "lucide-react";
 import ScrollReveal from "../components/ScrollReveal";
 import CaseLab3CheckoutButton from "../components/case-lab-3/checkout/CaseLab3CheckoutButton";
+import { formatKzt } from "../lib/case-lab-3/money";
 import styles from "../case-lab-3/case-lab-3.module.css";
 
 const included = [
@@ -26,7 +27,15 @@ const tickets = [
   },
 ] as const;
 
-export default function CaseLab3Tickets({ isPrivateOffer = false }: { isPrivateOffer?: boolean }) {
+export default function CaseLab3Tickets({
+  isPrivateOffer = false,
+  privateOfferAmountMinor,
+}: {
+  isPrivateOffer?: boolean;
+  privateOfferAmountMinor?: number;
+}) {
+  const privateOfferPrice = formatKzt(privateOfferAmountMinor ?? 500000);
+
   return (
     <section id="tickets" tabIndex={-1} className={styles.ticketSection} aria-labelledby="case-lab-3-tickets-title">
       <div className={styles.contentShell}>
@@ -80,7 +89,7 @@ export default function CaseLab3Tickets({ isPrivateOffer = false }: { isPrivateO
                 <span>Затем — <strong>15 000 ₸</strong></span>
               </div>
               <CaseLab3CheckoutButton source="tickets" className={styles.ticketCta}>
-                <span>{isPrivateOffer ? "Купить билет за 5 000 ₸" : "Купить билет за 7 980 ₸"}</span>
+                <span>{isPrivateOffer ? `Купить билет за ${privateOfferPrice}` : "Купить билет за 7 980 ₸"}</span>
                 <ArrowUpRight size={23} strokeWidth={1.5} aria-hidden="true" />
               </CaseLab3CheckoutButton>
               <p className={styles.ticketPurchaseNote}>Один билет — вся программа Case Lab III</p>

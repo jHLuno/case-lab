@@ -60,6 +60,36 @@ test("private offer migration keeps the amount server-authoritative and single-u
   assert.match(source, /claimed_order_id/iu);
 });
 
+test("private offer price migration allows the existing and 7,980 KZT offers", async () => {
+  const source = await readFile(
+    "supabase/migrations/20260922020000_allow_case_lab_3_private_offer_prices.sql",
+    "utf8",
+  );
+
+  assert.match(source, /amount_minor\s+in\s*\(\s*500000\s*,\s*798000\s*\)/iu);
+  assert.match(source, /p_amount_minor\s+not\s+in\s*\(\s*500000\s*,\s*798000\s*\)/iu);
+});
+
+test("private offers pass their server-authoritative amount into creation and page copy", async () => {
+  const [script, route, page, hero, tickets, footer] = await Promise.all([
+    readFile("scripts/create-case-lab-3-private-offer.mjs", "utf8"),
+    readFile("app/case-lab-3/private/[token]/page.tsx", "utf8"),
+    readFile("app/components/CaseLab3Page.tsx", "utf8"),
+    readFile("app/sections/CaseLab3Hero.tsx", "utf8"),
+    readFile("app/sections/CaseLab3Tickets.tsx", "utf8"),
+    readFile("app/components/CaseLab3Footer.tsx", "utf8"),
+  ]);
+
+  assert.match(script, /process\.argv\[3\]/u);
+  assert.match(script, /p_amount_minor:\s*amountMinor/u);
+  assert.match(route, /getPrivateOfferAvailability/u);
+  assert.match(route, /privateOfferAmountMinor/u);
+  assert.match(page, /privateOfferAmountMinor/u);
+  assert.match(hero, /privateOfferAmountMinor/u);
+  assert.match(tickets, /privateOfferAmountMinor/u);
+  assert.match(footer, /privateOfferAmountMinor/u);
+});
+
 test("private checkout route is dynamic, noindex, and keeps the public page available", async () => {
   const [route, page, provider, publicPage] = await Promise.all([
     readFile("app/case-lab-3/private/[token]/page.tsx", "utf8"),

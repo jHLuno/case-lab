@@ -11,21 +11,29 @@ import CaseLab3Footer from "./CaseLab3Footer";
 import CaseLab3CheckoutProvider from "./case-lab-3/checkout/CaseLab3CheckoutProvider";
 import styles from "../case-lab-3/case-lab-3.module.css";
 
-export default function CaseLab3Page({ nonce, privateOfferToken }: { nonce?: string; privateOfferToken?: string }) {
+export default function CaseLab3Page({
+  nonce,
+  privateOfferToken,
+  privateOfferAmountMinor,
+}: {
+  nonce?: string;
+  privateOfferToken?: string;
+  privateOfferAmountMinor?: number;
+}) {
   return (
     <CaseLab3CheckoutProvider nonce={nonce} privateOfferToken={privateOfferToken}>
       <div className={`${styles.caseLabPage} relative overflow-x-clip bg-white`}>
         <CaseLab3Navbar />
         <main id="main" tabIndex={-1}>
-          <CaseLab3Hero isPrivateOffer={Boolean(privateOfferToken)} />
+          <CaseLab3Hero isPrivateOffer={Boolean(privateOfferToken)} privateOfferAmountMinor={privateOfferAmountMinor} />
           <CaseLab3Speakers />
           <CaseLab3HowItWorks />
-          {privateOfferToken ? <CaseLab3Tickets isPrivateOffer /> : <CaseLab3Tickets />}
+          {privateOfferToken ? <CaseLab3Tickets isPrivateOffer privateOfferAmountMinor={privateOfferAmountMinor} /> : <CaseLab3Tickets />}
           <CaseLab3Proof />
           <Cases alignToCaseLab />
           <CaseLab3FAQ />
         </main>
-        <CaseLab3Footer isPrivateOffer={Boolean(privateOfferToken)} />
+        <CaseLab3Footer isPrivateOffer={Boolean(privateOfferToken)} privateOfferAmountMinor={privateOfferAmountMinor} />
         <BackToTop />
       </div>
     </CaseLab3CheckoutProvider>

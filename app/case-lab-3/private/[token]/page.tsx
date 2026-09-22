@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 
 import CaseLab3Page from "../../../components/CaseLab3Page";
+import { getPrivateOfferAvailability, getPublicPaymentEnvironment } from "@/lib/case-lab-3/orders.server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -22,5 +23,13 @@ export default async function PrivateCaseLab3Page({
   const { token } = await params;
   const nonce = (await headers()).get("x-nonce") ?? undefined;
 
-  return <CaseLab3Page nonce={nonce} privateOfferToken={token} />;
+  let privateOfferAmountMinor: number | undefined;
+  try {
+    const availability = await getPrivateOfferAvailability(getPublicPaymentEnvironment(), token);
+    privateOfferAmountMinor = availability.amountMinor ?? undefined;
+  } catch {
+    privateOfferAmountMinor = undefined;
+  }
+
+  return <CaseLab3Page nonce={nonce} privateOfferToken={token} privateOfferAmountMinor={privateOfferAmountMinor} />;
 }

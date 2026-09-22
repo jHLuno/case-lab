@@ -3,8 +3,14 @@ import { createClient } from "@supabase/supabase-js";
 
 const environment = process.argv[2];
 if (environment !== "test" && environment !== "live") {
-  throw new Error("Usage: node scripts/create-case-lab-3-private-offer.mjs <test|live>");
+  throw new Error("Usage: node scripts/create-case-lab-3-private-offer.mjs <test|live> [5000|7980]");
 }
+
+const amountKzt = process.argv[3] === undefined ? 5000 : Number.parseInt(process.argv[3], 10);
+if (!Number.isSafeInteger(amountKzt) || ![5000, 7980].includes(amountKzt)) {
+  throw new Error("Private offer amount must be 5000 or 7980 KZT");
+}
+const amountMinor = amountKzt * 100;
 
 const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -21,7 +27,7 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
 const { data, error } = await supabase.rpc("case_lab_3_create_private_offer", {
   p_environment: environment,
   p_token_hash: tokenHash,
-  p_amount_minor: 500000,
+  p_amount_minor: amountMinor,
 });
 
 if (error || !data || data.kind !== "created") {
