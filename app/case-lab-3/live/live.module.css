@@ -30,12 +30,13 @@
 .loadingTitle { width: min(620px, 86%); height: 76px; }
 .messagePanel { display: grid; min-height: 320px; place-items: center; align-content: center; gap: 22px; padding: 36px; text-align: center; }
 .claimPanel { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr); gap: clamp(34px, 7vw, 96px); padding: clamp(28px, 6vw, 72px); }
-.intro { align-self: center; }
+.intro { align-self: center; container-type: inline-size; }
 .kicker { margin: 0 0 24px; color: rgba(255, 255, 255, .78); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
 .intro h1,
 .question,
 .waiting h1 { margin: 0; font-family: var(--font-heading); font-weight: 400; letter-spacing: -.045em; }
-.intro h1 { max-width: none; font-size: clamp(27px, 3.2vw, 46px); line-height: 1.04; text-wrap: balance; }
+.intro h1 { max-width: 100%; font-size: clamp(20px, 3.2vw, 30px); font-size: clamp(16px, 4.8cqw, 30px); line-height: 1.08; text-transform: none; text-wrap: initial; }
+.intro h1 span { display: block; white-space: nowrap; }
 .intro > p:last-child { max-width: 43ch; margin: 28px 0 0; color: rgba(255, 255, 255, .72); font-size: 16px; line-height: 1.55; }
 .form,
 .answerForm { display: grid; align-content: start; gap: 18px; }
@@ -113,7 +114,6 @@
   .liveNotice { margin-top: 10px; }
   .casePanel { min-height: 0; padding: 26px 20px; }
   .speaker { margin-top: 48px; }
-  .intro h1 { font-size: clamp(24px, 7vw, 34px); }
   .question { font-size: 31px; }
   .caseMeta,
   .answerFooter { align-items: stretch; flex-direction: column; }

@@ -246,9 +246,8 @@ export default function LiveParticipantClient() {
         <section className={styles.claimPanel}>
           <div className={styles.intro}>
             <h1>
-              Попадите в топ-3 лидерборда
-              <br />
-              и получите ценные призы!
+              <span>Попадите в топ-3 лидерборда</span>
+              <span>и получите ценные призы!</span>
             </h1>
             <p>Введите имя и фамилию. Они будут отображаться в лидерборде.</p>
           </div>
