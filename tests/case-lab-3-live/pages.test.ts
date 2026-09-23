@@ -96,5 +96,6 @@ test("public leaderboard page polls a sanitized projection", async () => {
   assert.match(client, /Выбрать топ-3/u);
   assert.match(client, /setInterval/u);
   assert.match(client, /prefers-reduced-motion/u);
+  assert.doesNotMatch(client, />Участнику</u);
   assert.doesNotMatch(client, /ticket|submissionId|aiScore|aiReason/iu);
 });

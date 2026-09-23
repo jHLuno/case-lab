@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 import type { LiveParticipantStateResponse } from "@/lib/case-lab-3/live/contracts";
 import styles from "./live.module.css";
@@ -212,7 +213,7 @@ export default function LiveParticipantClient() {
     <div className={styles.shell}>
       <header className={styles.header}>
         <a href="/case-lab-3" className={styles.brand} aria-label="Case Lab III">
-          <span>CASE LAB</span>
+          <Image src="/logo white.png" alt="Case Lab" width={164} height={34} priority className={styles.logoImage} />
           <strong>III</strong>
         </a>
         {view ? (
@@ -245,7 +246,6 @@ export default function LiveParticipantClient() {
       {phase === "claim" ? (
         <section className={styles.claimPanel}>
           <div className={styles.intro}>
-            <p className={styles.kicker}>Интерактив в зале</p>
             <h1>Ваш ответ может попасть в топ</h1>
             <p>Введите имя и фамилию. Они будут отображаться в лидерборде.</p>
           </div>

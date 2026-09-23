@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 
 import styles from "./leaderboard.module.css";
 
@@ -147,8 +148,10 @@ export default function LeaderboardClient() {
     <main className={`${styles.page} ${reducedMotion ? styles.reducedMotion : ""}`}>
       <div className={styles.shell}>
         <header className={styles.header}>
-          <a href="/case-lab-3" className={styles.brand}>CASE LAB <strong>III</strong></a>
-          <a href="/case-lab-3/live" className={styles.backLink}>Участнику</a>
+          <a href="/case-lab-3" className={styles.brand} aria-label="Case Lab III">
+            <Image src="/logo white.png" alt="Case Lab" width={164} height={34} priority className={styles.logoImage} />
+            <strong>III</strong>
+          </a>
         </header>
 
         <section className={styles.hero}>
