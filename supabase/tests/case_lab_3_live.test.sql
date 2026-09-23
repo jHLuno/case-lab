@@ -1,6 +1,6 @@
 begin;
 
-select plan(32);
+select plan(37);
 
 select has_table('public', 'case_lab_3_live_cases', 'live cases table exists');
 select has_table('public', 'case_lab_3_live_participants', 'live participants table exists');
@@ -140,21 +140,13 @@ values
 select is(
   public.case_lab_3_live_claim_participant('test', '  АЛИЯ ', ' елкина ', null)->>'kind',
   'claimed',
-  'a checked-in guest can claim a participant session by normalized full name'
+  'an arbitrary guest can claim a participant session by normalized full name'
 );
 
 select is(
-  public.case_lab_3_live_claim_participant('test', 'Алия', 'Ёлкина', null)->>'participantId',
-  (
-    select id::text
-    from public.case_lab_3_live_participants
-    where environment = 'test'
-      and normalized_first_name = 'алия'
-      and normalized_last_name = 'елкина'
-    order by created_at asc, id asc
-    limit 1
-  ),
-  'repeating the same name reuses the original participant account'
+  public.case_lab_3_live_claim_participant('test', 'Алия', 'Ёлкина', null)->>'kind',
+  'needs_middle_name',
+  'a duplicate name without a session requires a patronymic'
 );
 
 select is(
@@ -185,6 +177,51 @@ select is(
   public.case_lab_3_live_claim_participant('test', 'Нет', 'Гостя', null)->>'kind',
   'claimed',
   'an arbitrary name can claim a participant session without a ticket'
+);
+
+select is(
+  public.case_lab_3_live_claim_participant_with_middle_name('test', 'Нурлан', 'Тестов', null)->>'kind',
+  'claimed',
+  'a new name without a patronymic can claim the base participant account'
+);
+
+select is(
+  public.case_lab_3_live_claim_participant_with_middle_name('test', 'Нурлан', 'Тестов', null)->>'kind',
+  'needs_middle_name',
+  'a second device with the same name must provide a patronymic'
+);
+
+select is(
+  public.case_lab_3_live_claim_participant_with_middle_name('test', 'Нурлан', 'Тестов', 'Андреевич')->>'kind',
+  'claimed',
+  'a distinct patronymic creates a separate participant account'
+);
+
+select is(
+  public.case_lab_3_live_claim_participant_with_middle_name('test', 'Нурлан', 'Тестов', 'Андреевич')->>'participantId',
+  (
+    select id::text
+    from public.case_lab_3_live_participants
+    where environment = 'test'
+      and normalized_first_name = 'нурлан'
+      and normalized_last_name = 'тестов'
+      and normalized_middle_name = 'андреевич'
+    order by created_at asc, id asc
+    limit 1
+  ),
+  'repeating the same name and patronymic reuses the separate account'
+);
+
+select is(
+  (
+    select count(*)::integer
+    from public.case_lab_3_live_participants
+    where environment = 'test'
+      and normalized_first_name = 'нурлан'
+      and normalized_last_name = 'тестов'
+  ),
+  2,
+  'the collision flow creates exactly one base and one patronymic participant'
 );
 
 select is(
@@ -441,8 +478,10 @@ select is(
 
 select ok(
   has_function_privilege('service_role', 'public.case_lab_3_live_claim_participant(text,text,text,text)', 'EXECUTE')
+    and has_function_privilege('service_role', 'public.case_lab_3_live_claim_participant_with_middle_name(text,text,text,text)', 'EXECUTE')
     and has_function_privilege('service_role', 'public.case_lab_3_live_save_submission(text,uuid,uuid,text,boolean)', 'EXECUTE')
     and not has_function_privilege('anon', 'public.case_lab_3_live_claim_participant(text,text,text,text)', 'EXECUTE')
+    and not has_function_privilege('anon', 'public.case_lab_3_live_claim_participant_with_middle_name(text,text,text,text)', 'EXECUTE')
     and not has_function_privilege('authenticated', 'public.case_lab_3_live_get_leaderboard(text)', 'EXECUTE'),
   'live interaction functions execute only through the server service role'
 );

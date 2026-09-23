@@ -12,6 +12,7 @@ export type LiveCaseState =
 export type LiveParticipantClaimInput = {
   firstName: string;
   lastName: string;
+  middleName?: string;
 };
 
 export type LiveSubmissionInput = {

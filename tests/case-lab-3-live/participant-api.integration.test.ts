@@ -109,6 +109,22 @@ test("claim uses only the submitted first and last name", async () => {
   assert.deepEqual(await response.json(), { status: "claimed", displayName: "Алия Ёлкина" });
 });
 
+test("returns a middle-name challenge without issuing a cookie for a duplicate name", async () => {
+  const cookies = cookieStore("");
+  const response = await handlePost(
+    jsonRequest("/api/case-lab-3/live/session", "POST", { firstName: "Алия", lastName: "Ёлкина" }),
+    {
+      getEnvironment: () => "live",
+      claimParticipant: async () => ({ kind: "needs_middle_name" } as never),
+      getCookies: async () => cookies.store,
+    },
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { status: "needs_middle_name" });
+  assert.equal(cookies.writes.length, 0);
+});
+
 test("claim collapses missing and already claimed participants into one public response", async () => {
   for (const kind of ["not_found", "already_claimed"] as const) {
     const response = await handlePost(

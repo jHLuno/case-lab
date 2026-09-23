@@ -66,6 +66,9 @@ export async function handlePost(
     const input = parseParticipantClaim(parseJsonBody(await readBoundedBody(request, MAX_BODY_BYTES)));
     const result = await active.claimParticipant(input, active.getEnvironment());
 
+    if (result.kind === "needs_middle_name") {
+      return noStoreJson({ status: "needs_middle_name" });
+    }
     if (result.kind !== "claimed") {
       return noStoreJson({ status: "not_available" });
     }

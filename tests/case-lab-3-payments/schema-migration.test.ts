@@ -103,3 +103,16 @@ test("live participant claims reuse the same name identity", async () => {
   assert.match(source, /update public\.case_lab_3_live_participants[\s\S]+claim_status\s*=\s*'active'/iu);
   assert.match(source, /pg_advisory_xact_lock[\s\S]+normalized_first_name/iu);
 });
+
+test("live participant claims can separate duplicate names with a patronymic", async () => {
+  const source = await readFile(
+    "supabase/migrations/20260924010000_add_case_lab_3_live_patronymic_collision_identity.sql",
+    "utf8",
+  );
+
+  assert.match(source, /add column if not exists normalized_middle_name text/iu);
+  assert.match(source, /needs_middle_name/iu);
+  assert.match(source, /case_lab_3_live_claim_participant_with_middle_name/iu);
+  assert.match(source, /normalized_middle_name = v_middle_name/iu);
+  assert.match(source, /grant execute on function public\.case_lab_3_live_claim_participant_with_middle_name/iu);
+});

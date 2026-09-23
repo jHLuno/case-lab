@@ -1,6 +1,6 @@
 import type { LiveParticipantClaimInput, LiveSubmissionInput } from "./contracts";
 
-const CLAIM_FIELDS = new Set(["firstName", "lastName"]);
+const CLAIM_FIELDS = new Set(["firstName", "lastName", "middleName"]);
 const SUBMISSION_FIELDS = new Set(["answer", "mode"]);
 const CONTROL_CHARACTER_PATTERN = /[\u0000-\u001f\u007f-\u009f]/u;
 const WHITESPACE_PATTERN = /\s+/gu;
@@ -53,7 +53,7 @@ function addUnknownFields(
 
 function parseName(
   record: Record<string, unknown>,
-  field: "firstName" | "lastName",
+  field: "firstName" | "lastName" | "middleName",
   issues: LiveValidationIssue[],
 ): string {
   const value = record[field];
@@ -73,6 +73,15 @@ function parseName(
     issues.push({ field, code: "too_long" });
   }
   return normalized;
+}
+
+function parseOptionalName(
+  record: Record<string, unknown>,
+  field: "middleName",
+  issues: LiveValidationIssue[],
+): string | undefined {
+  if (!Object.prototype.hasOwnProperty.call(record, field)) return undefined;
+  return parseName(record, field, issues);
 }
 
 export function normalizeParticipantLookupName(value: string): string {
@@ -97,11 +106,14 @@ export function parseParticipantClaim(value: unknown): LiveParticipantClaimInput
   addUnknownFields(value, CLAIM_FIELDS, issues);
   const firstName = parseName(value, "firstName", issues);
   const lastName = parseName(value, "lastName", issues);
+  const middleName = parseOptionalName(value, "middleName", issues);
 
   if (issues.length > 0) {
     throw new LiveInputValidationError(issues);
   }
-  return { firstName, lastName };
+  return middleName === undefined
+    ? { firstName, lastName }
+    : { firstName, lastName, middleName };
 }
 
 export function parseSubmission(value: unknown): LiveSubmissionInput {

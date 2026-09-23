@@ -38,6 +38,13 @@ test("requires both first name and last name for a live claim", () => {
   );
 });
 
+test("accepts a patronymic only for a duplicate-name claim", () => {
+  assert.deepEqual(
+    parseParticipantClaim({ firstName: "Алия", lastName: "Ёлкина", middleName: "Сериковна" }),
+    { firstName: "Алия", lastName: "Ёлкина", middleName: "Сериковна" },
+  );
+});
+
 test("accepts answers from 30 through 350 Unicode characters", () => {
   assert.equal(parseSubmission({ answer: "а".repeat(30) }).answer.length, 30);
   assert.equal(parseSubmission({ answer: "я".repeat(350) }).answer.length, 350);

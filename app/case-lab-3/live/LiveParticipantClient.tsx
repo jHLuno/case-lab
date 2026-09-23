@@ -52,6 +52,7 @@ export default function LiveParticipantClient() {
   const [pending, setPending] = useState(false);
   const [notice, setNotice] = useState("Загрузка live-сессии");
   const [remainingMs, setRemainingMs] = useState(0);
+  const [requiresMiddleName, setRequiresMiddleName] = useState(false);
   const activeCaseId = useRef<string | null>(null);
   const answerDirty = useRef(false);
   const timeoutSubmissionStarted = useRef(false);
@@ -173,10 +174,11 @@ export default function LiveParticipantClient() {
     setPending(true);
     setNotice("Подключаем участника");
     const form = new FormData(event.currentTarget);
-    const payload = {
+    const payload: { firstName: string; lastName: string; middleName?: string } = {
       firstName: String(form.get("firstName") ?? ""),
       lastName: String(form.get("lastName") ?? ""),
     };
+    if (requiresMiddleName) payload.middleName = String(form.get("middleName") ?? "");
 
     try {
       const response = await fetch(SESSION_ENDPOINT, {
@@ -189,11 +191,17 @@ export default function LiveParticipantClient() {
         setNotice("Не удалось подключиться. Попробуйте ещё раз");
         return;
       }
+      if (result.status === "needs_middle_name") {
+        setRequiresMiddleName(true);
+        setNotice("Участник с такими именем и фамилией уже подключён. Введите отчество");
+        return;
+      }
       if (result.status !== "claimed") {
         setNotice("Не удалось подключиться. Попробуйте ещё раз");
         return;
       }
 
+      setRequiresMiddleName(false);
       await loadState();
     } catch {
       setNotice("Сервис временно недоступен. Попробуйте ещё раз");
@@ -247,7 +255,11 @@ export default function LiveParticipantClient() {
               <span>Попадите в топ-3 лидерборда</span>
               <span>и получите ценные призы!</span>
             </h1>
-            <p>Введите имя и фамилию. Они будут отображаться в лидерборде.</p>
+            <p>
+              {requiresMiddleName
+                ? "Участник с такими именем и фамилией уже подключён. Введите отчество, чтобы создать отдельный аккаунт."
+                : "Введите имя и фамилию. Они будут отображаться в лидерборде."}
+            </p>
           </div>
           <form className={styles.form} onSubmit={claimParticipant}>
             <label className={styles.field}>
@@ -258,6 +270,12 @@ export default function LiveParticipantClient() {
               <span>Фамилия</span>
               <input name="lastName" autoComplete="family-name" maxLength={100} required />
             </label>
+            {requiresMiddleName ? (
+              <label className={styles.field}>
+                <span>Отчество</span>
+                <input name="middleName" autoComplete="additional-name" maxLength={100} required autoFocus />
+              </label>
+            ) : null}
             <button className={styles.primaryButton} type="submit" disabled={pending}>
               {pending ? "Подключаем" : "Подключиться"}
             </button>

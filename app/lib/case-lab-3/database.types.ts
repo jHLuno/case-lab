@@ -1066,7 +1066,7 @@ export type RefundWorkerTransitionResult =
 
 export type LiveClaimParticipantRpcResult =
   | { kind: "claimed"; participantId: string; tokenVersion: number; displayName: string }
-  | { kind: "not_found" | "already_claimed" };
+  | { kind: "not_found" | "already_claimed" | "needs_middle_name" };
 
 export type LiveSaveSubmissionRpcResult =
   | {
@@ -1262,6 +1262,15 @@ export type Database = {
           p_first_name: string;
           p_last_name: string;
           p_ticket_number?: string | null;
+        };
+        Returns: LiveClaimParticipantRpcResult;
+      };
+      case_lab_3_live_claim_participant_with_middle_name: {
+        Args: {
+          p_environment: PaymentEnvironment;
+          p_first_name: string;
+          p_last_name: string;
+          p_middle_name?: string | null;
         };
         Returns: LiveClaimParticipantRpcResult;
       };

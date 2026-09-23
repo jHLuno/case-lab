@@ -43,7 +43,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isClaimResult(value: unknown): value is LiveClaimParticipantRpcResult {
   if (!isRecord(value) || typeof value.kind !== "string") return false;
-  if (value.kind === "not_found" || value.kind === "already_claimed") return true;
+  if (value.kind === "not_found" || value.kind === "already_claimed" || value.kind === "needs_middle_name") return true;
   return value.kind === "claimed"
     && typeof value.participantId === "string"
     && Number.isSafeInteger(value.tokenVersion)
@@ -75,10 +75,11 @@ export async function claimLiveParticipant(
   input: LiveParticipantClaimInput,
   environment: PaymentEnvironment,
 ): Promise<LiveClaimParticipantRpcResult> {
-  const { data, error } = await getCaseLab3AdminClient().rpc("case_lab_3_live_claim_participant", {
+  const { data, error } = await getCaseLab3AdminClient().rpc("case_lab_3_live_claim_participant_with_middle_name", {
     p_environment: environment,
     p_first_name: input.firstName,
     p_last_name: input.lastName,
+    p_middle_name: input.middleName ?? null,
   });
   if (error || !isClaimResult(data)) throw new LiveRepositoryError();
   return data;
