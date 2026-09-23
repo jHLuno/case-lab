@@ -73,6 +73,28 @@ test("claim issues a private participant cookie and exposes only the public name
   });
 });
 
+test("claim works without a client IP header", async () => {
+  const cookies = cookieStore("");
+  const response = await handlePost(
+    jsonRequest("/api/case-lab-3/live/session", "POST", { firstName: "Тест", lastName: "Участник" }),
+    {
+      getEnvironment: () => "live",
+      claimParticipant: async () => ({
+        kind: "claimed",
+        participantId: PARTICIPANT_ID,
+        tokenVersion: 1,
+        displayName: "Тест Участник",
+      }),
+      issueSession: (participantId, version) => serializeLiveSession(issueLiveSession(participantId, version, SECRET)),
+      getCookies: async () => cookies.store,
+    },
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { status: "claimed", displayName: "Тест Участник" });
+  assert.equal(cookies.writes[0]?.name, "cl3_live_session");
+});
+
 test("claim uses only the submitted first and last name", async () => {
   const response = await handlePost(
     jsonRequest("/api/case-lab-3/live/session", "POST", { firstName: "Алия", lastName: "Ёлкина" }),
@@ -266,6 +288,7 @@ test("public leaderboard strips internal identifiers and AI rationale", async ()
       entries: [{ participantId: PARTICIPANT_ID, displayName: "Алия Ёлкина", points: 60, rank: 1, firstPlaces: 1, podiums: 1 }],
       activeCase: { caseNumber: 1, state: "awarded" as const },
       podiumAnswers: [{ place: 1, displayName: "Алия Ёлкина", answer: "Опубликованный ответ победителя.", submissionId: "hidden" }],
+      questionAnswers: [{ id: CASE_ID, caseNumber: 1, questionNumber: 1, question: "Что предложите?", state: "shortlist_ready" as const, answers: [{ candidateId: "hidden", displayName: "Алия Ёлкина", answer: "Сильный ответ." }] }],
     }),
     getEnvironment: () => "live",
   });
@@ -275,6 +298,7 @@ test("public leaderboard strips internal identifiers and AI rationale", async ()
     entries: [{ displayName: "Алия Ёлкина", points: 60, rank: 1 }],
     activeCase: { caseNumber: 1, state: "awarded" },
     podiumAnswers: [{ place: 1, displayName: "Алия Ёлкина", answer: "Опубликованный ответ победителя." }],
+    questionAnswers: [{ id: CASE_ID, caseNumber: 1, questionNumber: 1, question: "Что предложите?", state: "shortlist_ready", answers: [{ displayName: "Алия Ёлкина", answer: "Сильный ответ." }] }],
   });
   assert.equal(JSON.stringify(body).includes(PARTICIPANT_ID), false);
   assert.equal(JSON.stringify(body).includes("submissionId"), false);

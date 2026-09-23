@@ -25,7 +25,7 @@ type LiveCase = {
 type Snapshot = {
   environment: typeof LIVE_ENVIRONMENT;
   cases: LiveCase[];
-  participants: Array<{ id: string; displayName: string; ticketNumber: string | null; claimStatus: string }>;
+  participants: Array<{ id: string; displayName: string; claimStatus: string }>;
   submissions: Array<{ id: string; caseId: string; participantId: string; displayName: string; answer: string; points: number; validityState: string }>;
   aiRuns: Array<{ id: string; caseId: string; runNumber: number; servedModel: string | null; status: string; latencyMs: number | null; errorCategory: string | null }>;
   shortlist: Array<{ id: string; caseId: string; submissionId: string; aiOrder: number | null; aiScore: number | null; aiReason: string | null; approachLabel: string | null; included: boolean; finalOrder: number | null; operatorReason: string | null }>;
@@ -103,6 +103,7 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
   const [dialog, setDialog] = useState<null | { kind: "awards" | "reset"; id: string }>(null);
   const [dialogReason, setDialogReason] = useState("");
   const [clockMs, setClockMs] = useState(0);
+  const [speakerUrl, setSpeakerUrl] = useState<string | null>(null);
   const autoAnalyzedRounds = useRef(new Set<string>());
 
   const draftKey = `${selectedCase}:${selectedQuestion}`;
@@ -230,6 +231,31 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
     }
   }
 
+  async function createSpeakerLink() {
+    const currentCase = snapshot?.cases.find((item) => item.caseNumber === selectedCase && item.questionNumber === selectedQuestion);
+    if (!currentCase || currentCase.state !== "shortlist_ready") return;
+    setPending(true);
+    try {
+      const response = await fetch("/api/admin/case-lab-3/live/speaker-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken, "Idempotency-Key": crypto.randomUUID() },
+        body: JSON.stringify({ caseId: currentCase.id, expectedVersion: currentCase.stateVersion }),
+      });
+      const result = await response.json().catch(() => ({})) as { url?: string; error?: string };
+      if (!response.ok || !result.url) {
+        setMessage(result.error === "conflict" ? "Состояние изменилось. Обновите live-состояние" : "Не удалось открыть режим спикера");
+        return;
+      }
+      setSpeakerUrl(result.url);
+      setMessage("Ссылка для выбора спикером создана");
+      window.open(result.url, "case-lab-3-speaker", "noopener,noreferrer");
+    } catch {
+      setMessage("Сервис режима спикера временно недоступен");
+    } finally {
+      setPending(false);
+    }
+  }
+
   async function addToShortlist(submissionId: string) {
     if (!liveCase) return;
     const nextOrder = selectedSubmissions.reduce((max, entry) => Math.max(max, entry.finalOrder ?? 0), 0) + 1;
@@ -338,8 +364,9 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
               {liveCase?.state === "open" ? <div className="grid gap-2 rounded-xl bg-[#f5f4fb] px-4 py-3 text-sm text-black/65"><span>Ответы закроются автоматически. AI-анализ запустится через {LIVE_ROUND_SETTLE_GRACE_MS / 1000} секунд после дедлайна.</span><button type="button" disabled={pending} onClick={() => void resetTimer()} className="justify-self-start rounded-full border border-black/15 px-3 py-1.5 text-xs text-black hover:bg-white disabled:opacity-40">Сбросить таймер (+3 минуты)</button></div> : null}
               {liveCase?.state === "open" && liveCase.closesAt && isAnalysisReady(Date.parse(liveCase.closesAt), clockMs) ? <button type="button" onClick={() => void analyze()} className="rounded-xl bg-black px-4 py-3 text-left text-sm text-white">Запустить AI-анализ</button> : null}
               {liveCase?.state === "analyzing" ? <button type="button" onClick={() => void transition("shortlist_ready")} className="rounded-xl border border-black/10 px-4 py-3 text-left text-sm text-black">Ручной режим: открыть shortlist</button> : null}
-              {liveCase?.state === "shortlist_ready" ? <button type="button" onClick={() => { setDialog({ kind: "awards", id: liveCase.id }); setDialogReason(""); }} className="rounded-xl bg-black px-4 py-3 text-left text-sm text-white">Опубликовать топ-3</button> : null}
+              {liveCase?.state === "shortlist_ready" ? <div className="grid gap-2"><button type="button" disabled={pending} onClick={() => void createSpeakerLink()} className="rounded-xl bg-[#040082] px-4 py-3 text-left text-sm text-white disabled:opacity-40">Открыть выбор спикера</button><button type="button" disabled={pending} onClick={() => { setDialog({ kind: "awards", id: liveCase.id }); setDialogReason(""); }} className="rounded-xl bg-black px-4 py-3 text-left text-sm text-white disabled:opacity-40">Опубликовать топ-3 вручную</button></div> : null}
             </div>
+            {speakerUrl ? <div className="mt-4 rounded-xl bg-[#f5f4fb] p-3 text-sm"><p className="text-black/60">Ссылка действует 15 минут и привязана к текущему shortlist.</p><a href={speakerUrl} target="_blank" rel="noreferrer" className="mt-2 block break-all text-[#040082] underline">Открыть экран спикера</a></div> : null}
             {latestRun?.status === "failed" ? <p className="mt-4 rounded-xl bg-[#fff4f1] p-3 text-sm text-[#9a3325]">AI недоступен. Используйте ручной режим.</p> : null}
           </section>
 
@@ -347,7 +374,7 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
             <h2 className="text-xl font-semibold text-black" style={{ fontFamily: "var(--font-heading)" }}>Участники</h2>
             <p className="mt-1 text-sm text-black/50">Заявлено: {snapshot?.participants.length ?? 0}. Полные данные видны только CRM.</p>
             <div className="mt-4 grid gap-2">
-              {(snapshot?.participants ?? []).slice(0, 8).map((participant) => <div key={participant.id} className="flex items-center justify-between gap-3 rounded-xl bg-[#f5f4fb] px-3 py-2 text-sm"><span className="truncate text-black">{participant.displayName}{participant.ticketNumber ? <span className="text-black/40"> · {participant.ticketNumber}</span> : null}</span><button type="button" onClick={() => { setDialog({ kind: "reset", id: participant.id }); setDialogReason(""); }} className="shrink-0 text-xs text-black/55 underline">Сбросить участника</button></div>)}
+              {(snapshot?.participants ?? []).slice(0, 8).map((participant) => <div key={participant.id} className="flex items-center justify-between gap-3 rounded-xl bg-[#f5f4fb] px-3 py-2 text-sm"><span className="truncate text-black">{participant.displayName}</span><button type="button" onClick={() => { setDialog({ kind: "reset", id: participant.id }); setDialogReason(""); }} className="shrink-0 text-xs text-black/55 underline">Сбросить участника</button></div>)}
             </div>
           </section>
         </div>

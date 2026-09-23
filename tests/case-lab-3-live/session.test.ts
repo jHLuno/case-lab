@@ -44,9 +44,6 @@ test("rejects malformed and tampered participant sessions", () => {
       environment: "live",
       sessionTokenVersion: 1,
       claimStatus: "active",
-      ticketStatus: "used",
-      ticketRevisionId: "revision-a",
-      currentRevisionId: "revision-a",
     }, "live", `${SECRET}-tampered`),
     LiveSessionAuthorizationError,
   );
@@ -59,9 +56,6 @@ test("rejects malformed and tampered participant sessions", () => {
       environment: "live",
       sessionTokenVersion: 1,
       claimStatus: "active",
-      ticketStatus: "used",
-      ticketRevisionId: "revision-a",
-      currentRevisionId: "revision-a",
     }, "live", SECRET),
     LiveSessionAuthorizationError,
   );
@@ -74,17 +68,12 @@ test("authorizes only the active current participant and matching environment", 
     environment: "live" as const,
     sessionTokenVersion: 2,
     claimStatus: "active" as const,
-    ticketStatus: "used" as const,
-    ticketRevisionId: "revision-current",
-    currentRevisionId: "revision-current",
   };
 
   assert.doesNotThrow(() => assertLiveSession(session, participant, "live", SECRET));
 
   for (const invalid of [
     { ...participant, claimStatus: "reset" as const },
-    { ...participant, ticketStatus: "cancelled" as const },
-    { ...participant, currentRevisionId: "revision-new" },
     { ...participant, sessionTokenVersion: 3 },
   ]) {
     assert.throws(
@@ -99,7 +88,7 @@ test("authorizes only the active current participant and matching environment", 
   );
 });
 
-test("authorizes an active guest participant without a ticket", () => {
+test("authorizes an active participant without consulting ticket identity", () => {
   const session = issueLiveSession(PARTICIPANT_ID, 1, SECRET);
 
   assert.doesNotThrow(() => assertLiveSession(session, {
@@ -107,8 +96,5 @@ test("authorizes an active guest participant without a ticket", () => {
     environment: "live",
     sessionTokenVersion: 1,
     claimStatus: "active",
-    ticketStatus: null,
-    ticketRevisionId: null,
-    currentRevisionId: null,
   }, "live", SECRET));
 });

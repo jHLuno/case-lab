@@ -8,6 +8,7 @@ import type { Json } from "../database.types";
 import { getCaseLab3AdminClient } from "../supabase-admin.server";
 import type { LiveCaseState } from "./contracts";
 import type { EvaluationRubric, ValidatedShortlist } from "./openrouter.server";
+import { issueSpeakerToken, parseSpeakerToken } from "./speaker.server";
 
 export class LiveOperatorRepositoryError extends Error {
   readonly code = "live_operator_service_unavailable" as const;
@@ -43,7 +44,6 @@ export type OperatorSnapshot = {
   participants: Array<{
     id: string;
     displayName: string;
-    ticketNumber: string | null;
     claimStatus: "active" | "reset";
     claimedAt: string;
   }>;
@@ -161,7 +161,7 @@ export async function getLiveSnapshot(environment: PaymentEnvironment): Promise<
   const client = getCaseLab3AdminClient();
   const [casesResult, participantsResult, submissionsResult, runsResult, shortlistResult, awardsResult, tieBreaksResult, leaderboardResult] = await Promise.all([
     client.from("case_lab_3_live_cases").select("*").eq("environment", environment).order("case_number"),
-    client.from("case_lab_3_live_participants").select("id, ticket_id, public_display_name, claim_status, claimed_at").eq("environment", environment).order("claimed_at"),
+    client.from("case_lab_3_live_participants").select("id, public_display_name, claim_status, claimed_at").eq("environment", environment).order("claimed_at"),
     client.from("case_lab_3_live_submissions").select("id, case_id, participant_id, answer_text, content_version, participation_points, validity_state").eq("environment", environment).order("created_at"),
     client.from("case_lab_3_live_ai_runs").select("id, case_id, run_number, served_model, status, latency_ms, usage_payload, error_category").eq("environment", environment).order("created_at", { ascending: false }),
     client.from("case_lab_3_live_shortlist_entries").select("id, case_id, submission_id, ai_order, ai_score, ai_reason, approach_label, candidate_type, included, final_order, operator_reason").eq("environment", environment).order("final_order"),
@@ -175,22 +175,14 @@ export async function getLiveSnapshot(environment: PaymentEnvironment): Promise<
 
   const participants = participantsResult.data ?? [];
   const participantDisplayNames = new Map(participants.map((participant) => [participant.id, participant.public_display_name]));
-  const ticketIds = participants.map((participant) => participant.ticket_id).filter((id): id is string => Boolean(id));
-  const { data: tickets, error: ticketsError } = ticketIds.length === 0
-    ? { data: [], error: null }
-    : await client.from("case_lab_3_tickets").select("id, public_ticket_number, current_revision_id").in("id", ticketIds).eq("environment", environment);
-  if (ticketsError) throw new LiveOperatorRepositoryError();
-  const ticketById = new Map((tickets ?? []).map((ticket) => [ticket.id, ticket]));
 
   return {
     environment,
     cases: (casesResult.data ?? []).map(mapCase),
     participants: participants.map((participant) => {
-      const ticket = participant.ticket_id ? ticketById.get(participant.ticket_id) : undefined;
       return {
         id: participant.id,
         displayName: participant.public_display_name,
-        ticketNumber: ticket?.public_ticket_number ?? null,
         claimStatus: participant.claim_status,
         claimedAt: participant.claimed_at,
       };
@@ -344,6 +336,75 @@ export async function resetLiveCaseTimer(input: {
   });
   if (error || !isRecord(data) || typeof data.kind !== "string") throw new LiveOperatorRepositoryError();
   return data as LiveResetTimerRpcResult;
+}
+
+export async function issueSpeakerSelectionLink(input: {
+  caseId: string;
+  expectedVersion: number;
+  origin: string;
+}): Promise<{ kind: "issued"; url: string; expiresAt: string } | { kind: "conflict" }> {
+  const { data: liveCase, error } = await getCaseLab3AdminClient()
+    .from("case_lab_3_live_cases")
+    .select("id, state, state_version")
+    .eq("id", input.caseId)
+    .eq("environment", "live")
+    .maybeSingle();
+  if (error) throw new LiveOperatorRepositoryError();
+  if (!liveCase || liveCase.state !== "shortlist_ready" || liveCase.state_version !== input.expectedVersion) {
+    return { kind: "conflict" };
+  }
+
+  const now = Date.now();
+  const expiresAtMs = now + 15 * 60 * 1000;
+  const token = issueSpeakerToken(liveCase.id, liveCase.state_version, undefined, undefined, now);
+  const url = new URL("/case-lab-3/live/leaderboard", input.origin);
+  url.hash = `speakerToken=${encodeURIComponent(token)}`;
+  return { kind: "issued", url: url.toString(), expiresAt: new Date(expiresAtMs).toISOString() };
+}
+
+export async function selectSpeakerAwards(input: {
+  token: string;
+  candidateIds: string[];
+}): Promise<{ kind: "published"; stateVersion: number } | { kind: "unauthorized" | "conflict" | "invalid_selection" }> {
+  const token = (() => {
+    try {
+      return parseSpeakerToken(input.token);
+    } catch {
+      return null;
+    }
+  })();
+  if (!token) return { kind: "unauthorized" };
+
+  const client = getCaseLab3AdminClient();
+  const { data: liveCase, error: caseError } = await client
+    .from("case_lab_3_live_cases")
+    .select("id, state, state_version")
+    .eq("id", token.caseId)
+    .eq("environment", "live")
+    .maybeSingle();
+  if (caseError) throw new LiveOperatorRepositoryError();
+  if (!liveCase || liveCase.state !== "shortlist_ready" || liveCase.state_version !== token.stateVersion) return { kind: "conflict" };
+
+  const { data: entries, error: entriesError } = await client
+    .from("case_lab_3_live_shortlist_entries")
+    .select("submission_id")
+    .eq("environment", "live")
+    .eq("case_id", liveCase.id)
+    .eq("included", true)
+    .in("submission_id", input.candidateIds);
+  if (entriesError) throw new LiveOperatorRepositoryError();
+  if ((entries ?? []).length !== 3 || new Set(entries?.map((entry) => entry.submission_id)).size !== 3) return { kind: "invalid_selection" };
+
+  const result = await publishLiveAwards({
+    caseId: liveCase.id,
+    expectedVersion: liveCase.state_version,
+    awards: input.candidateIds.map((submissionId, index) => ({ place: index + 1, submissionId })),
+    actorId: "speaker-mode",
+    reason: "Выбор спикера на live-экране",
+  });
+  return result.kind === "published"
+    ? { kind: "published", stateVersion: result.stateVersion }
+    : { kind: "conflict" };
 }
 
 export async function getCaseAndSubmissions(caseId: string): Promise<CaseEvaluationInput> {
