@@ -9,7 +9,6 @@
 .header { display: flex; min-height: 52px; align-items: center; justify-content: space-between; gap: 20px; }
 .brand { display: inline-flex; align-items: center; gap: 9px; color: #fff; font-family: var(--font-heading); font-size: 17px; letter-spacing: -.025em; text-decoration: none; }
 .logoImage { display: block; width: clamp(132px, 14vw, 164px); height: auto; object-fit: contain; }
-.brand strong { color: #fff; font-family: var(--font-body); font-size: 13px; font-weight: 600; }
 .score { display: flex; align-items: baseline; gap: 10px; color: rgba(255, 255, 255, .68); font-size: 13px; }
 .score strong { color: #fff; font-family: var(--font-heading); font-size: 24px; font-weight: 400; }
 .brand:focus-visible,

@@ -214,7 +214,6 @@ export default function LiveParticipantClient() {
       <header className={styles.header}>
         <a href="/case-lab-3" className={styles.brand} aria-label="Case Lab III">
           <Image src="/logo white.png" alt="Case Lab" width={164} height={34} priority className={styles.logoImage} />
-          <strong>III</strong>
         </a>
         {view ? (
           <div className={styles.score} aria-label={`Ваши баллы: ${view.participant.points}`}>

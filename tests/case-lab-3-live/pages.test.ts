@@ -38,6 +38,7 @@ test("participant client exposes accessible named controls and complete states",
   assert.match(source, /answerLocked/u);
   assert.match(source, /saveAnswer\("timeout"\)/u);
   assert.doesNotMatch(source, /Сменить участника/u);
+  assert.doesNotMatch(source, /<strong>III<\/strong>/u);
   assert.match(source, /answer\.length/u);
   assert.match(source, /aria-live="polite"/u);
   assert.match(source, /Загрузка/u);
@@ -97,5 +98,6 @@ test("public leaderboard page polls a sanitized projection", async () => {
   assert.match(client, /setInterval/u);
   assert.match(client, /prefers-reduced-motion/u);
   assert.doesNotMatch(client, />Участнику</u);
+  assert.doesNotMatch(client, /<strong>III<\/strong>/u);
   assert.doesNotMatch(client, /ticket|submissionId|aiScore|aiReason/iu);
 });

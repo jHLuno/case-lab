@@ -25,7 +25,6 @@
 .header { min-height: 52px; }
 .brand { display: inline-flex; align-items: center; gap: 9px; color: #fff; font-family: var(--font-heading); font-size: 17px; text-decoration: none; }
 .logoImage { display: block; width: clamp(132px, 14vw, 164px); height: auto; object-fit: contain; }
-.brand strong { color: #fff; font-family: var(--font-body); font-size: 13px; font-weight: 600; }
 .backLink { color: #fff; font-size: 14px; text-decoration: none; }
 .backLink:hover { text-decoration: underline; }
 .brand:focus-visible,
