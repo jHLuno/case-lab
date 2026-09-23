@@ -114,6 +114,7 @@
   .liveNotice { margin-top: 10px; }
   .casePanel { min-height: 0; padding: 26px 20px; }
   .speaker { margin-top: 48px; }
+  .intro h1 { font-size: clamp(19px, calc(4.8cqw + 3px), 33px); letter-spacing: -.06em; }
   .question { font-size: 31px; }
   .caseMeta,
   .answerFooter { align-items: stretch; flex-direction: column; }
