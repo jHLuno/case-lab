@@ -25,6 +25,7 @@ export type InternalTicketPdf = {
 };
 
 export type InternalTicketPdfDependencies = {
+  getCronSecret: () => string;
   getTokenSecret: () => string;
   getTickets: (orderIds: string[]) => Promise<InternalTicketPdf[]>;
   renderTicketPdf: typeof renderTicketPdf;
@@ -40,6 +41,12 @@ function parseOrderIds(value: unknown): string[] | null {
   if (!Array.isArray(value) || value.length < 1 || value.length > MAX_TICKETS_PER_REQUEST) return null;
   if (value.some((id) => typeof id !== "string" || !UUID_PATTERN.test(id))) return null;
   return [...new Set(value as string[])];
+}
+
+function defaultCronSecret(): string {
+  const secret = process.env.CASE_LAB_3_CRON_SECRET?.trim() ?? "";
+  if (secret.length < 32) throw new Error("Internal route configuration incomplete");
+  return secret;
 }
 
 function defaultTokenSecret(): string {
@@ -86,6 +93,7 @@ async function loadTickets(orderIds: string[]): Promise<InternalTicketPdf[]> {
 }
 
 const productionDependencies: InternalTicketPdfDependencies = {
+  getCronSecret: defaultCronSecret,
   getTokenSecret: defaultTokenSecret,
   getTickets: loadTickets,
   renderTicketPdf,
@@ -96,7 +104,7 @@ export async function handlePost(
   dependencies: Partial<InternalTicketPdfDependencies> = {},
 ): Promise<Response> {
   const active = { ...productionDependencies, ...dependencies };
-  if (!authorized(request, active.getTokenSecret())) return Response.json({ error: "unauthorized" }, { status: 401 });
+  if (!authorized(request, active.getCronSecret())) return Response.json({ error: "unauthorized" }, { status: 401 });
 
   try {
     const body = await request.json() as { orderIds?: unknown };

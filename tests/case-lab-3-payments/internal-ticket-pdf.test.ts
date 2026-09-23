@@ -5,9 +5,10 @@ import "./server-only-test-loader";
 
 import { handlePost, type InternalTicketPdfDependencies } from "../../app/api/internal/case-lab-3/tickets/pdf/route";
 
-const SECRET = "production-cron-secret-123456789012345";
+const CRON_SECRET = "production-cron-secret-123456789012345";
+const TOKEN_SECRET = "production-token-secret-123456789012345";
 
-function request(body: unknown, authorization = `Bearer ${SECRET}`): Request {
+function request(body: unknown, authorization = `Bearer ${CRON_SECRET}`): Request {
   return new Request("https://caselab.kz/api/internal/case-lab-3/tickets/pdf", {
     method: "POST",
     headers: { authorization, "content-type": "application/json" },
@@ -17,7 +18,8 @@ function request(body: unknown, authorization = `Bearer ${SECRET}`): Request {
 
 function dependencies(overrides: Partial<InternalTicketPdfDependencies> = {}): InternalTicketPdfDependencies {
   return {
-    getTokenSecret: () => SECRET,
+    getCronSecret: () => CRON_SECRET,
+    getTokenSecret: () => TOKEN_SECRET,
     getTickets: async () => [{
       ticketId: "49aaa13e-8c8d-4ad9-9cc5-d37a74790e22",
       publicTicketNumber: "CL3-TICKET-8A05E4FDB691",
