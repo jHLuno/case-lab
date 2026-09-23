@@ -8,6 +8,10 @@ type CheckInResult = "admitted" | "already_used" | "cancelled" | "invalid";
 type CheckInResponse = {
   result: CheckInResult;
   checkedInAt: string | null;
+  participant: {
+    firstName: string;
+    lastName: string;
+  } | null;
 };
 
 const resultCopy: Record<CheckInResult, { title: string; description: string; className: string }> = {
@@ -36,9 +40,15 @@ const resultCopy: Record<CheckInResult, { title: string; description: string; cl
 function isCheckInResponse(value: unknown): value is CheckInResponse {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const result = value as Partial<CheckInResponse>;
+  const participant = result.participant;
   return (
     (result.result === "admitted" || result.result === "already_used" || result.result === "cancelled" || result.result === "invalid") &&
-    (result.checkedInAt === null || typeof result.checkedInAt === "string")
+    (result.checkedInAt === null || typeof result.checkedInAt === "string") &&
+    (participant === null || (
+      typeof participant === "object" &&
+      typeof participant.firstName === "string" &&
+      typeof participant.lastName === "string"
+    ))
   );
 }
 
@@ -200,6 +210,11 @@ export default function CheckInClient({ csrfToken }: { csrfToken: string }) {
         <div className={`mt-6 rounded-xl border px-4 py-4 ${resultCopy[result.result].className}`} role="status" aria-live="polite">
           <strong className="block text-base" style={{ fontFamily: "var(--font-display)" }}>{resultCopy[result.result].title}</strong>
           <span className="mt-1 block text-sm" style={{ fontFamily: "var(--font-body)" }}>{resultCopy[result.result].description}</span>
+          {result.participant && (
+            <span className="mt-3 block text-sm font-semibold" style={{ fontFamily: "var(--font-body)" }}>
+              Участник: {result.participant.firstName} {result.participant.lastName}
+            </span>
+          )}
         </div>
       )}
     </section>

@@ -27,6 +27,8 @@ type CheckInTicket = {
   revisionNumber: number;
   tokenVersion: number;
   status: "valid" | "used" | "cancelled";
+  firstName: string;
+  lastName: string;
 };
 
 type CheckInRequest =
@@ -89,7 +91,7 @@ function isCheckInRpcResult(value: unknown): value is CheckInRpcResult {
 }
 
 function invalidResult(): Response {
-  return noStoreJson({ result: "invalid", checkedInAt: null });
+  return noStoreJson({ result: "invalid", checkedInAt: null, participant: null });
 }
 
 function sameSecretValue(expected: string, actual: string): boolean {
@@ -115,7 +117,7 @@ async function lookupTicket(input: CheckInLookup, environment: PaymentEnvironmen
 
   const { data: revision, error: revisionError } = await client
     .from("case_lab_3_ticket_revisions")
-    .select("id, revision_number, token_version")
+    .select("id, revision_number, token_version, first_name, last_name")
     .eq("id", ticket.current_revision_id)
     .eq("ticket_id", ticket.id)
     .eq("environment", environment)
@@ -128,6 +130,8 @@ async function lookupTicket(input: CheckInLookup, environment: PaymentEnvironmen
     revisionNumber: revision.revision_number,
     tokenVersion: revision.token_version,
     status: ticket.status,
+    firstName: revision.first_name,
+    lastName: revision.last_name,
   };
 }
 
@@ -197,7 +201,13 @@ export async function handlePost(
     });
     if (!isCheckInRpcResult(result)) return noStoreJson({ error: "service_unavailable" }, { status: 503 });
 
-    return noStoreJson({ result: result.result, checkedInAt: result.checked_in_at });
+    return noStoreJson({
+      result: result.result,
+      checkedInAt: result.checked_in_at,
+      participant: result.result === "invalid"
+        ? null
+        : { firstName: ticket.firstName, lastName: ticket.lastName },
+    });
   } catch (error) {
     if (error instanceof RequestGuardError) {
       const response = error.status === 413

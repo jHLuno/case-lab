@@ -44,6 +44,8 @@ function validTicket() {
     revisionNumber: REVISION_NUMBER,
     tokenVersion: TOKEN_VERSION,
     status: "valid" as const,
+    firstName: "Айдан",
+    lastName: "Серикова",
   };
 }
 
@@ -103,6 +105,10 @@ describe("Case Lab III check-in route", () => {
     assert.deepEqual(await response.json(), {
       result: "admitted",
       checkedInAt: "2026-09-24T09:00:00.000Z",
+      participant: {
+        firstName: "Айдан",
+        lastName: "Серикова",
+      },
     });
     assert.deepEqual(rpcInput, {
       ticketId: TICKET_ID,
@@ -126,7 +132,7 @@ describe("Case Lab III check-in route", () => {
     );
 
     assert.equal(response.status, 200);
-    assert.deepEqual(await response.json(), { result: "invalid", checkedInAt: null });
+    assert.deepEqual(await response.json(), { result: "invalid", checkedInAt: null, participant: null });
     assert.equal(lookedUp, false);
   });
 
@@ -148,7 +154,7 @@ describe("Case Lab III check-in route", () => {
     );
 
     assert.equal(response.status, 200);
-    assert.deepEqual(await response.json(), { result: "invalid", checkedInAt: null });
+    assert.deepEqual(await response.json(), { result: "invalid", checkedInAt: null, participant: null });
     assert.equal(checkedIn, false);
   });
 
@@ -173,6 +179,10 @@ describe("Case Lab III check-in route", () => {
     assert.deepEqual(await response.json(), {
       result: "already_used",
       checkedInAt: "2026-09-24T09:00:00.000Z",
+      participant: {
+        firstName: "Айдан",
+        lastName: "Серикова",
+      },
     });
     assert.deepEqual(lookupInput, { mode: "manual", ticketNumber: TICKET_NUMBER });
   });
@@ -193,7 +203,7 @@ describe("Case Lab III check-in route", () => {
 
     assert.equal(response.status, 200);
     const body = await response.json() as Record<string, unknown>;
-    assert.deepEqual(body, { result: "invalid", checkedInAt: null });
+    assert.deepEqual(body, { result: "invalid", checkedInAt: null, participant: null });
     assert.equal(checkedIn, false);
     assert.equal("email" in body, false);
     assert.equal("name" in body, false);
@@ -210,7 +220,14 @@ describe("Case Lab III check-in route", () => {
     );
 
     assert.equal(response.status, 200);
-    assert.deepEqual(await response.json(), { result: "cancelled", checkedInAt: null });
+    assert.deepEqual(await response.json(), {
+      result: "cancelled",
+      checkedInAt: null,
+      participant: {
+        firstName: "Айдан",
+        lastName: "Серикова",
+      },
+    });
   });
 
   it("rejects malformed bodies and oversized input", async () => {
