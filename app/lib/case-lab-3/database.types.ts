@@ -1066,7 +1066,7 @@ export type RefundWorkerTransitionResult =
 
 export type LiveClaimParticipantRpcResult =
   | { kind: "claimed"; participantId: string; tokenVersion: number; displayName: string }
-  | { kind: "ambiguous" | "not_found" | "already_claimed" };
+  | { kind: "not_found" | "already_claimed" };
 
 export type LiveSaveSubmissionRpcResult =
   | {

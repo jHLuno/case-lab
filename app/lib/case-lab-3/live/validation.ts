@@ -1,6 +1,6 @@
 import type { LiveParticipantClaimInput, LiveSubmissionInput } from "./contracts";
 
-const CLAIM_FIELDS = new Set(["firstName", "lastName", "ticketNumber"]);
+const CLAIM_FIELDS = new Set(["firstName", "lastName"]);
 const SUBMISSION_FIELDS = new Set(["answer", "mode"]);
 const CONTROL_CHARACTER_PATTERN = /[\u0000-\u001f\u007f-\u009f]/u;
 const WHITESPACE_PATTERN = /\s+/gu;
@@ -82,11 +82,10 @@ export function normalizeParticipantLookupName(value: string): string {
 export function formatPublicDisplayName(firstName: string, lastName: string): string {
   const normalizedFirstName = normalizedText(firstName);
   const normalizedLastName = normalizedText(lastName);
-  const initial = Array.from(normalizedLastName)[0];
-  if (!normalizedFirstName || !initial) {
+  if (!normalizedFirstName || !normalizedLastName) {
     throw new TypeError("First name and last name are required");
   }
-  return `${normalizedFirstName} ${initial.toLocaleUpperCase("ru-RU")}.`;
+  return `${normalizedFirstName} ${normalizedLastName}`;
 }
 
 export function parseParticipantClaim(value: unknown): LiveParticipantClaimInput {
@@ -98,29 +97,11 @@ export function parseParticipantClaim(value: unknown): LiveParticipantClaimInput
   addUnknownFields(value, CLAIM_FIELDS, issues);
   const firstName = parseName(value, "firstName", issues);
   const lastName = parseName(value, "lastName", issues);
-  let ticketNumber: string | null = null;
-
-  if (value.ticketNumber !== undefined && value.ticketNumber !== null && value.ticketNumber !== "") {
-    if (typeof value.ticketNumber !== "string") {
-      issues.push({ field: "ticketNumber", code: "invalid_type" });
-    } else {
-      if (CONTROL_CHARACTER_PATTERN.test(value.ticketNumber)) {
-        issues.push({ field: "ticketNumber", code: "control_character" });
-      }
-      ticketNumber = normalizedText(value.ticketNumber);
-      const length = characterLength(ticketNumber);
-      if (length === 0) {
-        ticketNumber = null;
-      } else if (length > 100) {
-        issues.push({ field: "ticketNumber", code: "too_long" });
-      }
-    }
-  }
 
   if (issues.length > 0) {
     throw new LiveInputValidationError(issues);
   }
-  return { firstName, lastName, ticketNumber };
+  return { firstName, lastName };
 }
 
 export function parseSubmission(value: unknown): LiveSubmissionInput {

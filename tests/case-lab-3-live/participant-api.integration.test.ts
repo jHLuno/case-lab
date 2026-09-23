@@ -38,7 +38,7 @@ function cookieStore(initial = serializedSession) {
 const authorizedParticipant = {
   id: PARTICIPANT_ID,
   environment: "live" as const,
-  displayName: "Алия Ё.",
+  displayName: "Алия Ёлкина",
 };
 
 test("claim issues a private participant cookie and exposes only the public name", async () => {
@@ -52,7 +52,7 @@ test("claim issues a private participant cookie and exposes only the public name
         kind: "claimed",
         participantId: PARTICIPANT_ID,
         tokenVersion: 1,
-        displayName: "Алия Ё.",
+        displayName: "Алия Ёлкина",
       }),
       issueSession: (participantId, version) => serializeLiveSession(issueLiveSession(participantId, version, SECRET)),
       getCookies: async () => cookies.store,
@@ -60,7 +60,7 @@ test("claim issues a private participant cookie and exposes only the public name
   );
 
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { status: "claimed", displayName: "Алия Ё." });
+  assert.deepEqual(await response.json(), { status: "claimed", displayName: "Алия Ёлкина" });
   assert.equal(response.headers.get("cache-control"), "no-store");
   assert.equal(cookies.writes[0]?.name, "cl3_live_session");
   assert.equal(cookies.writes[0]?.value, serializedSession);
@@ -73,16 +73,21 @@ test("claim issues a private participant cookie and exposes only the public name
   });
 });
 
-test("claim requests ticket disambiguation without leaking ticket records", async () => {
+test("claim uses only the submitted first and last name", async () => {
   const response = await handlePost(
     jsonRequest("/api/case-lab-3/live/session", "POST", { firstName: "Алия", lastName: "Ёлкина" }),
     {
       consumeClaimRateLimit: async () => undefined,
       getEnvironment: () => "live",
-      claimParticipant: async () => ({ kind: "ambiguous" }),
+      claimParticipant: async (input) => {
+        assert.deepEqual(input, { firstName: "Алия", lastName: "Ёлкина" });
+        return { kind: "claimed", participantId: PARTICIPANT_ID, tokenVersion: 1, displayName: "Алия Ёлкина" };
+      },
+      issueSession: (participantId, version) => serializeLiveSession(issueLiveSession(participantId, version, SECRET)),
+      getCookies: async () => cookieStore("").store,
     },
   );
-  assert.deepEqual(await response.json(), { status: "needs_ticket_number" });
+  assert.deepEqual(await response.json(), { status: "claimed", displayName: "Алия Ёлкина" });
 });
 
 test("claim collapses missing and already claimed participants into one public response", async () => {
@@ -129,7 +134,7 @@ test("state rejects a missing session and returns only sanitized participant dat
 
   const present = cookieStore();
   const state = {
-    participant: { displayName: "Алия Ё.", points: 10, rank: 2 },
+    participant: { displayName: "Алия Ёлкина", points: 10, rank: 2 },
     activeCase: {
       id: CASE_ID,
       caseNumber: 1,
@@ -141,7 +146,7 @@ test("state rejects a missing session and returns only sanitized participant dat
       answer: null,
       answerLocked: false,
     },
-    leaderboard: [{ participantId: PARTICIPANT_ID, displayName: "Алия Ё.", points: 10, firstPlaces: 0, podiums: 0, rank: 2 }],
+    leaderboard: [{ participantId: PARTICIPANT_ID, displayName: "Алия Ёлкина", points: 10, firstPlaces: 0, podiums: 0, rank: 2 }],
   };
   const response = await handleGet(new Request(`${ORIGIN}/api/case-lab-3/live/state`), {
     getCookies: async () => present.store,
@@ -258,18 +263,18 @@ test("submission rejects oversized bodies and hides database failures", async ()
 test("public leaderboard strips internal identifiers and AI rationale", async () => {
   const response = await getPublicLeaderboard(new Request(`${ORIGIN}/api/case-lab-3/live/leaderboard`), {
     getPublicData: async () => ({
-      entries: [{ participantId: PARTICIPANT_ID, displayName: "Алия Ё.", points: 60, rank: 1, firstPlaces: 1, podiums: 1 }],
+      entries: [{ participantId: PARTICIPANT_ID, displayName: "Алия Ёлкина", points: 60, rank: 1, firstPlaces: 1, podiums: 1 }],
       activeCase: { caseNumber: 1, state: "awarded" as const },
-      podiumAnswers: [{ place: 1, displayName: "Алия Ё.", answer: "Опубликованный ответ победителя.", submissionId: "hidden" }],
+      podiumAnswers: [{ place: 1, displayName: "Алия Ёлкина", answer: "Опубликованный ответ победителя.", submissionId: "hidden" }],
     }),
     getEnvironment: () => "live",
   });
   assert.equal(response.status, 200);
   const body = await response.json();
   assert.deepEqual(body, {
-    entries: [{ displayName: "Алия Ё.", points: 60, rank: 1 }],
+    entries: [{ displayName: "Алия Ёлкина", points: 60, rank: 1 }],
     activeCase: { caseNumber: 1, state: "awarded" },
-    podiumAnswers: [{ place: 1, displayName: "Алия Ё.", answer: "Опубликованный ответ победителя." }],
+    podiumAnswers: [{ place: 1, displayName: "Алия Ёлкина", answer: "Опубликованный ответ победителя." }],
   });
   assert.equal(JSON.stringify(body).includes(PARTICIPANT_ID), false);
   assert.equal(JSON.stringify(body).includes("submissionId"), false);

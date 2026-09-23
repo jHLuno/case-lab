@@ -12,21 +12,21 @@ import {
 test("normalizes Unicode names, whitespace, and ё for ticket lookup", () => {
   assert.equal(normalizeParticipantLookupName("  АЛИЯ\u00a0\tЁЛКИНА  "), "алия елкина");
   assert.deepEqual(
-    parseParticipantClaim({ firstName: "  Алия ", lastName: " Ёлкина  ", ticketNumber: " CL3-101 " }),
-    { firstName: "Алия", lastName: "Ёлкина", ticketNumber: "CL3-101" },
+    parseParticipantClaim({ firstName: "  Алия ", lastName: " Ёлкина  " }),
+    { firstName: "Алия", lastName: "Ёлкина" },
   );
 });
 
-test("formats only the first name and last-name initial", () => {
-  assert.equal(formatPublicDisplayName(" Аружан ", " Касымова "), "Аружан К.");
+test("formats the full first and last name for the public leaderboard", () => {
+  assert.equal(formatPublicDisplayName(" Аружан ", " Касымова "), "Аружан Касымова");
 });
 
-test("rejects unknown claim fields and control characters", () => {
+test("rejects ticket numbers and control characters in the name-only claim", () => {
   assert.throws(
-    () => parseParticipantClaim({ firstName: "Алия\n", lastName: "Ёлкина", email: "hidden@example.test" }),
+    () => parseParticipantClaim({ firstName: "Алия\n", lastName: "Ёлкина", ticketNumber: "CL3-101" }),
     (error) => error instanceof LiveInputValidationError
       && error.issues.some((issue) => issue.code === "control_character")
-      && error.issues.some((issue) => issue.code === "unknown_field"),
+      && error.issues.some((issue) => issue.field === "ticketNumber" && issue.code === "unknown_field"),
   );
 });
 

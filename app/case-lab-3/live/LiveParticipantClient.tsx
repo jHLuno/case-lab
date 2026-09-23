@@ -48,7 +48,6 @@ export default function LiveParticipantClient() {
   const [phase, setPhase] = useState<Phase>("loading");
   const [view, setView] = useState<LiveParticipantStateResponse | null>(null);
   const [answer, setAnswer] = useState("");
-  const [needsTicketNumber, setNeedsTicketNumber] = useState(false);
   const [pending, setPending] = useState(false);
   const [notice, setNotice] = useState("Загрузка live-сессии");
   const [remainingMs, setRemainingMs] = useState(0);
@@ -171,12 +170,11 @@ export default function LiveParticipantClient() {
   async function claimParticipant(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
-    setNotice("Проверяем билет");
+    setNotice("Проверяем участника");
     const form = new FormData(event.currentTarget);
     const payload = {
       firstName: String(form.get("firstName") ?? ""),
       lastName: String(form.get("lastName") ?? ""),
-      ticketNumber: needsTicketNumber ? String(form.get("ticketNumber") ?? "") : null,
     };
 
     try {
@@ -194,17 +192,11 @@ export default function LiveParticipantClient() {
         setNotice("Не удалось проверить данные. Попробуйте ещё раз");
         return;
       }
-      if (result.status === "needs_ticket_number") {
-        setNeedsTicketNumber(true);
-        setNotice("Нашли несколько совпадений. Добавьте номер билета");
-        return;
-      }
       if (result.status !== "claimed") {
         setNotice("Участник не найден. Проверьте данные или обратитесь к оператору");
         return;
       }
 
-      setNeedsTicketNumber(false);
       await loadState();
     } catch {
       setNotice("Сервис временно недоступен. Попробуйте ещё раз");
@@ -255,7 +247,7 @@ export default function LiveParticipantClient() {
           <div className={styles.intro}>
             <p className={styles.kicker}>Интерактив в зале</p>
             <h1>Ваш ответ может попасть в топ</h1>
-            <p>Введите данные из билета. Полную фамилию увидит только оператор.</p>
+            <p>Введите имя и фамилию из билета. Они будут отображаться в лидерборде.</p>
           </div>
           <form className={styles.form} onSubmit={claimParticipant}>
             <label className={styles.field}>
@@ -266,15 +258,6 @@ export default function LiveParticipantClient() {
               <span>Фамилия</span>
               <input name="lastName" autoComplete="family-name" maxLength={100} required />
             </label>
-            {needsTicketNumber ? (
-              <label className={styles.field}>
-                <span>Номер билета</span>
-                <input name="ticketNumber" autoComplete="off" maxLength={100} required />
-                <small>Номер нужен только для точного совпадения.</small>
-              </label>
-            ) : (
-              <input name="ticketNumber" type="hidden" value="" readOnly />
-            )}
             <button className={styles.primaryButton} type="submit" disabled={pending}>
               {pending ? "Проверяем" : "Подключиться"}
             </button>

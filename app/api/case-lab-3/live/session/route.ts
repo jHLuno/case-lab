@@ -84,9 +84,6 @@ export async function handlePost(
     const input = parseParticipantClaim(parseJsonBody(await readBoundedBody(request, MAX_BODY_BYTES)));
     const result = await active.claimParticipant(input, active.getEnvironment());
 
-    if (result.kind === "ambiguous") {
-      return noStoreJson({ status: "needs_ticket_number" });
-    }
     if (result.kind !== "claimed") {
       return noStoreJson({ status: "not_available" });
     }
