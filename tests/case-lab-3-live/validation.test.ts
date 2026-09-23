@@ -30,19 +30,23 @@ test("rejects unknown claim fields and control characters", () => {
   );
 });
 
-test("accepts answers from 30 through 300 Unicode characters", () => {
+test("accepts answers from 30 through 350 Unicode characters", () => {
   assert.equal(parseSubmission({ answer: "а".repeat(30) }).answer.length, 30);
-  assert.equal(parseSubmission({ answer: "я".repeat(300) }).answer.length, 300);
+  assert.equal(parseSubmission({ answer: "я".repeat(350) }).answer.length, 350);
 });
 
-test("rejects answers outside 30 through 300 characters", () => {
+test("timeout mode accepts a non-empty answer for automatic submission", () => {
+  assert.deepEqual(parseSubmission({ answer: "Да", mode: "timeout" }), { answer: "Да", mode: "timeout" });
+});
+
+test("rejects answers outside 30 through 350 characters", () => {
   assert.throws(
     () => parseSubmission({ answer: "а".repeat(29) }),
     (error) => error instanceof LiveInputValidationError
       && error.issues.some((issue) => issue.code === "too_short"),
   );
   assert.throws(
-    () => parseSubmission({ answer: "а".repeat(301) }),
+    () => parseSubmission({ answer: "а".repeat(351) }),
     (error) => error instanceof LiveInputValidationError
       && error.issues.some((issue) => issue.code === "too_long"),
   );

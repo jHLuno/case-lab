@@ -17,6 +17,7 @@ export type LiveParticipantClaimInput = {
 
 export type LiveSubmissionInput = {
   answer: string;
+  mode: "manual" | "timeout";
 };
 
 export type LeaderboardScore = {
@@ -40,11 +41,13 @@ export type LiveParticipantStateResponse = {
   activeCase: null | {
     id: string;
     caseNumber: number;
+    questionNumber: number;
     speakerLabel: string;
     question: string;
     state: LiveCaseState;
     closesAt: string | null;
     answer: string | null;
+    answerLocked: boolean;
   };
   leaderboard: PublicLeaderboardEntry[];
 };

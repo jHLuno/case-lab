@@ -37,6 +37,13 @@ function formatDeadline(value: string | null): string | null {
   }).format(timestamp);
 }
 
+function formatRemaining(milliseconds: number): string {
+  const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
+  const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
+  const seconds = (totalSeconds % 60).toString().padStart(2, "0");
+  return `${minutes}:${seconds}`;
+}
+
 export default function LiveParticipantClient() {
   const [phase, setPhase] = useState<Phase>("loading");
   const [view, setView] = useState<LiveParticipantStateResponse | null>(null);
@@ -44,8 +51,10 @@ export default function LiveParticipantClient() {
   const [needsTicketNumber, setNeedsTicketNumber] = useState(false);
   const [pending, setPending] = useState(false);
   const [notice, setNotice] = useState("Загрузка live-сессии");
+  const [remainingMs, setRemainingMs] = useState(0);
   const activeCaseId = useRef<string | null>(null);
   const answerDirty = useRef(false);
+  const timeoutSubmissionStarted = useRef(false);
 
   const loadState = useCallback(async (signal?: AbortSignal, silent = false) => {
     try {
@@ -63,6 +72,7 @@ export default function LiveParticipantClient() {
       if (nextCaseId !== activeCaseId.current) {
         activeCaseId.current = nextCaseId;
         answerDirty.current = false;
+        timeoutSubmissionStarted.current = false;
         setAnswer(next.activeCase?.answer ?? "");
       } else if (!answerDirty.current && next.activeCase?.answer !== undefined) {
         setAnswer(next.activeCase?.answer ?? "");
@@ -92,6 +102,71 @@ export default function LiveParticipantClient() {
     }, 3000);
     return () => window.clearInterval(interval);
   }, [loadState, phase]);
+
+  const activeCase = view?.activeCase ?? null;
+
+  const saveAnswer = useCallback(async (mode: "manual" | "timeout" = "manual", event?: FormEvent<HTMLFormElement>) => {
+    event?.preventDefault();
+    if (!activeCase || activeCase.state !== "open" || activeCase.answerLocked || !answer.trim()) return;
+    if (mode === "manual" && (answer.length < 30 || answer.length > 350)) return;
+    setPending(true);
+    setNotice(mode === "timeout" ? "Время вышло. Отправляем ответ" : "Сохраняем ответ");
+    try {
+      const response = await fetch(`/api/case-lab-3/live/cases/${activeCase.id}/submission`, {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ answer, mode }),
+      });
+      if (response.status === 409) {
+        setNotice("Приём ответов уже закрыт");
+        await loadState(undefined, true);
+        return;
+      }
+      if (!response.ok) {
+        const result = await responseJson<{ error?: string }>(response);
+        if (result.error === "already_submitted") {
+          setNotice("Ответ на этот вопрос уже отправлен");
+          await loadState(undefined, true);
+          return;
+        }
+        if (result.error === "invalid_request") {
+          setNotice(mode === "timeout" ? "Не удалось отправить ответ" : "Ответ должен содержать от 30 до 350 символов");
+          return;
+        }
+        throw new Error("save_unavailable");
+      }
+      answerDirty.current = false;
+      setNotice("Ответ сохранён. Начислено 10 баллов");
+      await loadState(undefined, true);
+    } catch {
+      setNotice("Не удалось сохранить ответ. Попробуйте ещё раз");
+    } finally {
+      setPending(false);
+    }
+  // Only the scalar round fields read above are reactive; the object identity changes during polling.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCase?.id, activeCase?.state, activeCase?.answerLocked, answer, loadState]);
+
+  useEffect(() => {
+    if (!activeCase || activeCase.state !== "open" || activeCase.answerLocked || !activeCase.closesAt) {
+      return;
+    }
+    const deadline = Date.parse(activeCase.closesAt);
+    const tick = () => {
+      const nextRemaining = deadline - Date.now();
+      setRemainingMs(Math.max(0, nextRemaining));
+      if (nextRemaining <= 0 && !timeoutSubmissionStarted.current) {
+        timeoutSubmissionStarted.current = true;
+        if (answer.trim()) void saveAnswer("timeout");
+        else setNotice("Время вышло. Ответ не был отправлен");
+      }
+    };
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
+  // Only the scalar round fields read above are reactive; the object identity changes during polling.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCase?.id, activeCase?.state, activeCase?.answerLocked, activeCase?.closesAt, answer, saveAnswer]);
 
   async function claimParticipant(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -138,40 +213,6 @@ export default function LiveParticipantClient() {
     }
   }
 
-  async function saveAnswer(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!view?.activeCase || view.activeCase.state !== "open") return;
-    setPending(true);
-    setNotice("Сохраняем ответ");
-    try {
-      const response = await fetch(`/api/case-lab-3/live/cases/${view.activeCase.id}/submission`, {
-        method: "PUT",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ answer }),
-      });
-      if (response.status === 409) {
-        setNotice("Приём ответов уже закрыт");
-        await loadState(undefined, true);
-        return;
-      }
-      if (!response.ok) {
-        const result = await responseJson<{ error?: string }>(response);
-        if (result.error === "invalid_request") {
-          setNotice("Ответ должен содержать от 30 до 300 символов");
-          return;
-        }
-        throw new Error("save_unavailable");
-      }
-      answerDirty.current = false;
-      setNotice("Ответ сохранён. Начислено 10 баллов");
-      await loadState(undefined, true);
-    } catch {
-      setNotice("Не удалось сохранить ответ. Попробуйте ещё раз");
-    } finally {
-      setPending(false);
-    }
-  }
-
   async function signOut() {
     setPending(true);
     try {
@@ -179,6 +220,7 @@ export default function LiveParticipantClient() {
     } finally {
       activeCaseId.current = null;
       answerDirty.current = false;
+      timeoutSubmissionStarted.current = false;
       setAnswer("");
       setView(null);
       setPhase("claim");
@@ -187,9 +229,8 @@ export default function LiveParticipantClient() {
     }
   }
 
-  const activeCase = view?.activeCase ?? null;
   const deadline = formatDeadline(activeCase?.closesAt ?? null);
-  const canSubmit = activeCase?.state === "open" && answer.length >= 30 && answer.length <= 300 && !pending;
+  const canSubmit = activeCase?.state === "open" && !activeCase.answerLocked && answer.length >= 30 && answer.length <= 350 && !pending;
 
   return (
     <div className={styles.shell}>
@@ -261,7 +302,7 @@ export default function LiveParticipantClient() {
         <div className={styles.liveGrid}>
           <section className={styles.casePanel}>
             <div className={styles.caseMeta}>
-              <span>{activeCase ? `Кейс ${activeCase.caseNumber}` : "Live"}</span>
+              <span>{activeCase ? `Кейс ${activeCase.caseNumber} · Вопрос ${activeCase.questionNumber}` : "Live"}</span>
               {view.participant.rank ? <span>Ваше место: {view.participant.rank}</span> : null}
             </div>
 
@@ -271,19 +312,19 @@ export default function LiveParticipantClient() {
                 <h1 className={styles.question}>{activeCase.question}</h1>
                 <div className={styles.caseStatus}>
                   <strong>{stateLabel(activeCase.state)}</strong>
-                  {activeCase.state === "open" && deadline ? <span>до {deadline}</span> : null}
+                  {activeCase.state === "open" && deadline ? <span>до {deadline} · Осталось {formatRemaining(remainingMs)}</span> : null}
                 </div>
 
-                {activeCase.state === "open" ? (
-                  <form className={styles.answerForm} onSubmit={saveAnswer}>
+                {activeCase.state === "open" && !activeCase.answerLocked ? (
+                  <form className={styles.answerForm} onSubmit={(event) => void saveAnswer("manual", event)}>
                     <label className={styles.field}>
                       <span>Ваш ответ</span>
                       <textarea
                         name="answer"
                         value={answer}
                         minLength={30}
-                        maxLength={300}
-                        rows={7}
+                        maxLength={350}
+                        rows={4}
                         onChange={(event) => {
                           answerDirty.current = true;
                           setAnswer(event.target.value);
@@ -293,14 +334,14 @@ export default function LiveParticipantClient() {
                       />
                     </label>
                     <div className={styles.answerFooter}>
-                      <span className={answer.length > 300 ? styles.counterError : undefined}>
-                        {answer.length} / 300
+                      <span className={answer.length > 350 ? styles.counterError : undefined}>
+                        {answer.length} / 350
                       </span>
                       <button className={styles.primaryButton} type="submit" disabled={!canSubmit}>
-                        {pending ? "Сохраняем" : activeCase.answer ? "Обновить ответ" : "Отправить ответ"}
+                        {pending ? "Сохраняем" : "Отправить ответ"}
                       </button>
                     </div>
-                    <p className={styles.helper}>За валидный ответ вы получите 10 баллов.</p>
+                    <p className={styles.helper}>Один ответ на вопрос · максимум 350 символов · при таймере ответ отправится автоматически.</p>
                   </form>
                 ) : (
                   <div className={styles.lockedAnswer}>

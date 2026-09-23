@@ -22,8 +22,8 @@ export async function getPublicLeaderboardData(environment: PaymentEnvironment):
   const client = getCaseLab3AdminClient();
   const [leaderboardResult, activeCaseResult, awardedCaseResult] = await Promise.all([
     client.rpc("case_lab_3_live_get_leaderboard", { p_environment: environment }),
-    client.from("case_lab_3_live_cases").select("case_number, state").eq("environment", environment).in("state", ["open", "analyzing", "shortlist_ready", "awarded"]).order("case_number", { ascending: false }).limit(1).maybeSingle(),
-    client.from("case_lab_3_live_cases").select("id, case_number, state").eq("environment", environment).in("state", ["awarded", "closed"]).order("case_number", { ascending: false }).limit(1).maybeSingle(),
+    client.from("case_lab_3_live_cases").select("case_number, question_number, state").eq("environment", environment).in("state", ["open", "analyzing", "shortlist_ready", "awarded"]).order("case_number", { ascending: false }).order("question_number", { ascending: false }).limit(1).maybeSingle(),
+    client.from("case_lab_3_live_cases").select("id, case_number, question_number, state").eq("environment", environment).in("state", ["awarded", "closed"]).order("case_number", { ascending: false }).order("question_number", { ascending: false }).limit(1).maybeSingle(),
   ]);
   if (leaderboardResult.error || activeCaseResult.error || awardedCaseResult.error) throw new Error("Public leaderboard unavailable");
 

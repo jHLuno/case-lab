@@ -133,11 +133,13 @@ test("state rejects a missing session and returns only sanitized participant dat
     activeCase: {
       id: CASE_ID,
       caseNumber: 1,
+      questionNumber: 1,
       speakerLabel: "Спикер",
       question: "Что вы предложите?",
       state: "open" as const,
       closesAt: "2026-09-24T10:00:00.000Z",
       answer: null,
+      answerLocked: false,
     },
     leaderboard: [{ participantId: PARTICIPANT_ID, displayName: "Алия Ё.", points: 10, firstPlaces: 0, podiums: 0, rank: 2 }],
   };
@@ -194,6 +196,42 @@ test("submission maps a server-side close to conflict", async () => {
   );
   assert.equal(response.status, 409);
   assert.deepEqual(await response.json(), { error: "case_closed" });
+});
+
+test("submission allows the timeout path to save a short non-empty answer once", async () => {
+  let receivedMode: string | null = null;
+  const response = await handlePut(
+    jsonRequest(`/api/case-lab-3/live/cases/${CASE_ID}/submission`, "PUT", { answer: "Да", mode: "timeout" }),
+    { params: Promise.resolve({ id: CASE_ID }) },
+    {
+      getCookies: async () => cookieStore().store,
+      getEnvironment: () => "live",
+      authorizeParticipant: async () => authorizedParticipant,
+      saveSubmission: async (input) => {
+        receivedMode = input.mode;
+        return { kind: "saved", submissionId: "00000000-0000-4000-8000-000000000302", contentVersion: 1, savedAt: "2026-09-24T09:59:59.000Z", participationPoints: 10 };
+      },
+    },
+  );
+
+  assert.equal(response.status, 200);
+  assert.equal(receivedMode, "timeout");
+});
+
+test("submission maps a duplicate answer to a conflict without allowing an edit", async () => {
+  const response = await handlePut(
+    jsonRequest(`/api/case-lab-3/live/cases/${CASE_ID}/submission`, "PUT", { answer: "а".repeat(30) }),
+    { params: Promise.resolve({ id: CASE_ID }) },
+    {
+      getCookies: async () => cookieStore().store,
+      getEnvironment: () => "live",
+      authorizeParticipant: async () => authorizedParticipant,
+      saveSubmission: async () => ({ kind: "already_submitted" }),
+    },
+  );
+
+  assert.equal(response.status, 409);
+  assert.deepEqual(await response.json(), { error: "already_submitted" });
 });
 
 test("submission rejects oversized bodies and hides database failures", async () => {

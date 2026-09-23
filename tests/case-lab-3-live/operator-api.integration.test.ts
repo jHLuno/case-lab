@@ -190,6 +190,20 @@ test("manual shortlist rejects the test environment", async () => {
   assert.deepEqual(await response.json(), { error: "invalid_request" });
 });
 
+test("manual shortlist is capped at five unique answers", async () => {
+  let called = false;
+  const response = await shortlist(
+    request(`/api/admin/case-lab-3/live/cases/${CASE_ID}/shortlist`, "PATCH", {
+      environment: "live",
+      entries: Array.from({ length: 6 }, (_, index) => ({ submissionId: `sub-${index + 1}`, included: true, finalOrder: index + 1 })),
+    }),
+    routeContext,
+    { ...auth, updateShortlist: async () => { called = true; } },
+  );
+  assert.equal(response.status, 400);
+  assert.equal(called, false);
+});
+
 test("tie resolution requires a reason and ordered participant decisions", async () => {
   const response = await tieBreak(
     request("/api/admin/case-lab-3/live/tie-breaks", "POST", {

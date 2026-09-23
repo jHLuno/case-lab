@@ -117,6 +117,28 @@ test("accepts fewer candidates when there are fewer valid submissions", async ()
   assert.equal(result.candidates.length, 1);
 });
 
+test("rejects a provider shortlist with more than five candidates", async () => {
+  const candidates = Array.from({ length: 6 }, (_, index) => ({
+    id: `candidate_${String(index + 1).padStart(3, "0")}`,
+    score: 80,
+    reason: "Конкретный план.",
+    approach: "Эксперимент",
+    candidateType: "strong",
+  }));
+  const result = {
+    id: "openai/gpt-5-mini",
+    choices: [{ message: { content: JSON.stringify({ candidates }) } }],
+  };
+  await assert.rejects(
+    generateShortlist({
+      question: "Вопрос",
+      referenceAnswer: "Эталон",
+      submissions: Array.from({ length: 6 }, (_, index) => ({ submissionId: `sub-${index + 1}`, answer: "Достаточно подробный ответ участника." })),
+    }, dependencies(async () => Response.json(result))),
+    OpenRouterValidationError,
+  );
+});
+
 test("generates a validated rubric through the same private model route", async () => {
   let body = "";
   const fetch: OpenRouterFetch = async (_url, init) => {

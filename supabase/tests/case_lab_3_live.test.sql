@@ -1,6 +1,6 @@
 begin;
 
-select plan(29);
+select plan(31);
 
 select has_table('public', 'case_lab_3_live_cases', 'live cases table exists');
 select has_table('public', 'case_lab_3_live_participants', 'live participants table exists');
@@ -222,6 +222,20 @@ select throws_ok(
   'answers shorter than 30 characters are rejected'
 );
 
+select throws_ok(
+  $$
+    select public.case_lab_3_live_save_submission(
+      'test',
+      '00000000-0000-4000-8000-000000009101',
+      (select id from public.case_lab_3_live_participants where normalized_first_name = 'алия'),
+      repeat('а', 351)
+    )
+  $$,
+  '22023',
+  'invalid submission',
+  'answers longer than 350 characters are rejected'
+);
+
 select is(
   public.case_lab_3_live_save_submission(
     'test',
@@ -239,9 +253,9 @@ select is(
     '00000000-0000-4000-8000-000000009101',
     (select id from public.case_lab_3_live_participants where normalized_first_name = 'алия'),
     'Сначала проверю гипотезу на пяти клиентах, затем сравню конверсию с контрольной группой.'
-  )->>'contentVersion',
-  '2',
-  'an answer can be edited before the server deadline without creating a duplicate'
+  )->>'kind',
+  'already_submitted',
+  'a participant cannot submit a second answer for the same question'
 );
 
 select is(
@@ -255,6 +269,22 @@ select is(
   'a second participant answer is saved'
 );
 
+update public.case_lab_3_live_cases
+set closes_at = clock_timestamp() - interval '1 second'
+where id = '00000000-0000-4000-8000-000000009101';
+
+select is(
+  public.case_lab_3_live_save_submission(
+    'test',
+    '00000000-0000-4000-8000-000000009101',
+    (select id from public.case_lab_3_live_participants where normalized_first_name = 'вера'),
+    'Да',
+    true
+  )->>'participationPoints',
+  '10',
+  'a non-empty answer is auto-saved at the timeout and receives participation points'
+);
+
 select is(
   public.case_lab_3_live_save_submission(
     'test',
@@ -262,8 +292,8 @@ select is(
     (select id from public.case_lab_3_live_participants where normalized_first_name = 'вера'),
     'Сопоставлю влияние решения с ограничениями команды и заранее определю метрику успеха.'
   )->>'kind',
-  'saved',
-  'a third participant answer is saved'
+  'closed',
+  'a late manual answer is closed after the authoritative deadline'
 );
 
 select is(
@@ -391,7 +421,7 @@ select is(
 
 select ok(
   has_function_privilege('service_role', 'public.case_lab_3_live_claim_participant(text,text,text,text)', 'EXECUTE')
-    and has_function_privilege('service_role', 'public.case_lab_3_live_save_submission(text,uuid,uuid,text)', 'EXECUTE')
+    and has_function_privilege('service_role', 'public.case_lab_3_live_save_submission(text,uuid,uuid,text,boolean)', 'EXECUTE')
     and not has_function_privilege('anon', 'public.case_lab_3_live_claim_participant(text,text,text,text)', 'EXECUTE')
     and not has_function_privilege('authenticated', 'public.case_lab_3_live_get_leaderboard(text)', 'EXECUTE'),
   'live interaction functions execute only through the server service role'

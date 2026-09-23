@@ -34,6 +34,7 @@ export type SaveSubmissionInput = {
   caseId: string;
   participantId: string;
   answer: string;
+  mode: "manual" | "timeout";
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -52,7 +53,7 @@ function isClaimResult(value: unknown): value is LiveClaimParticipantRpcResult {
 
 function isSaveResult(value: unknown): value is LiveSaveSubmissionRpcResult {
   if (!isRecord(value) || typeof value.kind !== "string") return false;
-  if (value.kind === "closed" || value.kind === "unauthorized") return true;
+  if (value.kind === "closed" || value.kind === "already_submitted" || value.kind === "unauthorized") return true;
   return value.kind === "saved"
     && typeof value.submissionId === "string"
     && Number.isSafeInteger(value.contentVersion)
@@ -143,10 +144,11 @@ export async function loadParticipantState(
 
   const { data: activeCase, error: caseError } = await client
     .from("case_lab_3_live_cases")
-    .select("id, case_number, speaker_label, question, state, closes_at")
+    .select("id, case_number, question_number, speaker_label, question, state, closes_at")
     .eq("environment", participant.environment)
     .in("state", ["open", "analyzing", "shortlist_ready", "awarded"])
     .order("case_number", { ascending: false })
+    .order("question_number", { ascending: false })
     .limit(1)
     .maybeSingle();
   if (caseError) throw new LiveRepositoryError();
@@ -172,11 +174,13 @@ export async function loadParticipantState(
     activeCase: activeCase ? {
       id: activeCase.id,
       caseNumber: activeCase.case_number,
+      questionNumber: activeCase.question_number,
       speakerLabel: activeCase.speaker_label,
       question: activeCase.question,
       state: activeCase.state,
       closesAt: activeCase.closes_at,
       answer,
+      answerLocked: answer !== null,
     } : null,
     leaderboard,
   };
@@ -190,6 +194,7 @@ export async function saveParticipantSubmission(
     p_case_id: input.caseId,
     p_participant_id: input.participantId,
     p_answer_text: input.answer,
+    p_timeout: input.mode === "timeout",
   });
   if (error || !isSaveResult(data)) throw new LiveRepositoryError();
   return data;

@@ -28,7 +28,12 @@ test("participant client exposes accessible named controls and complete states",
   assert.match(source, /name="lastName"/u);
   assert.match(source, /name="ticketNumber"/u);
   assert.match(source, /name="answer"/u);
-  assert.match(source, /maxLength=\{300\}/u);
+  assert.match(source, /maxLength=\{350\}/u);
+  assert.match(source, /rows=\{4\}/u);
+  assert.match(source, /closesAt/u);
+  assert.match(source, /formatRemaining/u);
+  assert.match(source, /answerLocked/u);
+  assert.match(source, /saveAnswer\("timeout"\)/u);
   assert.match(source, /answer\.length/u);
   assert.match(source, /aria-live="polite"/u);
   assert.match(source, /Загрузка/u);
@@ -42,6 +47,7 @@ test("participant styles preserve keyboard focus and reduced-motion behavior", a
   assert.match(source, /:focus-visible/u);
   assert.match(source, /@media\s*\(prefers-reduced-motion:\s*reduce\)/u);
   assert.match(source, /min-height:\s*100dvh/u);
+  assert.match(source, /\.field textarea\s*\{[\s\S]*?min-height:\s*112px/u);
 });
 
 test("CRM live page is protected and exposes operator controls", async () => {
@@ -59,6 +65,9 @@ test("CRM live page is protected and exposes operator controls", async () => {
   assert.match(client, /X-CSRF-Token/u);
   assert.match(client, /Idempotency-Key/u);
   assert.match(client, /LIVE_ENVIRONMENT\s*=\s*["']live["']/u);
+  assert.match(client, /questionNumber/u);
+  assert.match(client, /3 \* 60 \* 1000/u);
+  assert.match(client, /autoAnalyzedRounds/u);
   assert.doesNotMatch(client, /<option value=["']test["']>/u);
   assert.doesNotMatch(client, /Среда/u);
   assert.doesNotMatch(client, /OPENROUTER_API_KEY|openrouter\.server/u);

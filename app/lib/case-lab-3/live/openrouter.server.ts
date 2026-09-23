@@ -62,7 +62,7 @@ const shortlistSchema = {
   properties: {
     candidates: {
       type: "array",
-      maxItems: 10,
+      maxItems: 5,
       items: {
         type: "object",
         additionalProperties: false,
@@ -132,7 +132,7 @@ function anonymizedSubmissions(submissions: readonly SubmissionForEvaluation[]) 
 
 function promptForShortlist(input: ShortlistInput, candidates: ReturnType<typeof anonymizedSubmissions>): string {
   return JSON.stringify({
-    task: "Оцени ответы участников и верни до 10 наиболее релевантных решений.",
+    task: "Оцени ответы участников и верни до 5 наиболее релевантных решений.",
     question: input.question,
     speakerReferenceAnswer: input.referenceAnswer,
     context: input.context ?? null,
@@ -236,7 +236,7 @@ function validateShortlistContent(
   content: unknown,
   submissions: readonly SubmissionForEvaluation[],
 ): ValidatedShortlist["candidates"] {
-  if (!isRecord(content) || !Array.isArray(content.candidates) || content.candidates.length > 10) {
+  if (!isRecord(content) || !Array.isArray(content.candidates) || content.candidates.length > 5) {
     throw new OpenRouterValidationError("Shortlist schema is invalid");
   }
   const known = new Map(submissions.map((submission, index) => [

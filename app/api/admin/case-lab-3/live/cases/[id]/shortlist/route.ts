@@ -20,13 +20,15 @@ export async function handlePatch(request: Request, context: { params: Promise<{
     requireJson(request);
     const { id } = await context.params;
     const body = parseJsonBody(await readBoundedBody(request, 16 * 1024));
-    if (!isRecord(body) || body.environment !== "live" || !Array.isArray(body.entries) || body.entries.length > 100) return noStoreJson({ error: "invalid_request" }, { status: 400 });
+    if (!isRecord(body) || body.environment !== "live" || !Array.isArray(body.entries) || body.entries.length > 5) return noStoreJson({ error: "invalid_request" }, { status: 400 });
     const entries = body.entries.map((entry) => {
       if (!isRecord(entry) || typeof entry.submissionId !== "string" || typeof entry.included !== "boolean" || (entry.finalOrder !== null && !Number.isSafeInteger(entry.finalOrder))) return null;
       const reason = entry.operatorReason === undefined || entry.operatorReason === null || entry.operatorReason === "" ? null : typeof entry.operatorReason === "string" && entry.operatorReason.length <= 500 ? entry.operatorReason : "__invalid__";
       return reason === "__invalid__" ? null : { submissionId: entry.submissionId, included: entry.included, finalOrder: entry.finalOrder as number | null, operatorReason: reason };
     });
     if (entries.some((entry) => entry === null)) return noStoreJson({ error: "invalid_request" }, { status: 400 });
+    const submissionIds = (entries as Array<{ submissionId: string } | null>).map((entry) => entry?.submissionId);
+    if (new Set(submissionIds).size !== submissionIds.length) return noStoreJson({ error: "invalid_request" }, { status: 400 });
     await active.updateShortlist({ caseId: id, environment: "live", entries: entries as Array<{ submissionId: string; included: boolean; finalOrder: number | null; operatorReason: string | null }> });
     return noStoreJson({ status: "updated" });
   } catch (error) {

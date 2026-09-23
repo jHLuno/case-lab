@@ -39,6 +39,7 @@ export type LiveSubmissionRouteDependencies = {
     caseId: string;
     participantId: string;
     answer: string;
+    mode: "manual" | "timeout";
   }) => Promise<LiveSaveSubmissionRpcResult>;
 };
 
@@ -83,12 +84,16 @@ export async function handlePut(
       caseId: id,
       participantId: participant.id,
       answer: input.answer,
+      mode: input.mode,
     });
     if (result.kind === "closed") {
       return noStoreJson({ error: "case_closed" }, { status: 409 });
     }
     if (result.kind === "unauthorized") {
       return noStoreJson({ error: "unauthorized" }, { status: 401 });
+    }
+    if (result.kind === "already_submitted") {
+      return noStoreJson({ error: "already_submitted" }, { status: 409 });
     }
     return noStoreJson({
       status: "saved",

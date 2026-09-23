@@ -26,6 +26,7 @@ export type LiveDashboardDependencies = {
     id?: string;
     environment: PaymentEnvironment;
     caseNumber: number;
+    questionNumber: number;
     speakerLabel: string;
     title: string;
     question: string;
@@ -53,7 +54,7 @@ function text(value: unknown, min: number, max: number): value is string {
 }
 
 function parseCaseInput(value: unknown, environment: PaymentEnvironment) {
-  if (!isRecord(value) || !Number.isSafeInteger(value.caseNumber) || (value.caseNumber as number) < 1 || (value.caseNumber as number) > 3) return null;
+  if (!isRecord(value) || !Number.isSafeInteger(value.caseNumber) || (value.caseNumber as number) < 1 || (value.caseNumber as number) > 3 || !Number.isSafeInteger(value.questionNumber) || (value.questionNumber as number) < 1 || (value.questionNumber as number) > 3) return null;
   if (!text(value.speakerLabel, 1, 120) || !text(value.title, 1, 200) || !text(value.question, 1, 1000) || !text(value.referenceAnswer, 1, 4000)) return null;
   if (value.id !== undefined && (typeof value.id !== "string" || !UUID_PATTERN.test(value.id))) return null;
   const optional = (field: "context" | "keyInsight", max: number): string | null => {
@@ -67,6 +68,7 @@ function parseCaseInput(value: unknown, environment: PaymentEnvironment) {
     id: value.id as string | undefined,
     environment,
     caseNumber: value.caseNumber as number,
+    questionNumber: value.questionNumber as number,
     speakerLabel: value.speakerLabel.trim(),
     title: value.title.trim(),
     question: value.question.trim(),

@@ -1,7 +1,7 @@
 import type { LiveParticipantClaimInput, LiveSubmissionInput } from "./contracts";
 
 const CLAIM_FIELDS = new Set(["firstName", "lastName", "ticketNumber"]);
-const SUBMISSION_FIELDS = new Set(["answer"]);
+const SUBMISSION_FIELDS = new Set(["answer", "mode"]);
 const CONTROL_CHARACTER_PATTERN = /[\u0000-\u001f\u007f-\u009f]/u;
 const WHITESPACE_PATTERN = /\s+/gu;
 
@@ -140,15 +140,21 @@ export function parseSubmission(value: unknown): LiveSubmissionInput {
   }
 
   const answer = rawAnswer.normalize("NFC").trim();
+  const mode = value.mode === undefined
+    ? "manual"
+    : value.mode === "timeout" || value.mode === "manual"
+      ? value.mode
+      : null;
+  if (mode === null) issues.push({ field: "mode", code: "invalid_type" });
   const length = characterLength(answer);
-  if (length < 30) {
+  if (mode === "timeout" ? length < 1 : length < 30) {
     issues.push({ field: "answer", code: "too_short" });
-  } else if (length > 300) {
+  } else if (length > 350) {
     issues.push({ field: "answer", code: "too_long" });
   }
 
   if (issues.length > 0) {
     throw new LiveInputValidationError(issues);
   }
-  return { answer };
+  return { answer, mode: mode ?? "manual" };
 }

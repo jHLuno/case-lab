@@ -766,6 +766,7 @@ export type LiveCaseRow = {
   id: string;
   environment: PaymentEnvironment;
   case_number: number;
+  question_number: number;
   speaker_label: string;
   title: string;
   question: string;
@@ -1074,13 +1075,14 @@ export type LiveSaveSubmissionRpcResult =
       contentVersion: number;
       savedAt: string;
       participationPoints: 10;
-    }
+  }
   | { kind: "closed" }
+  | { kind: "already_submitted" }
   | { kind: "unauthorized" };
 
 export type LiveTransitionCaseRpcResult =
   | { kind: "transitioned"; state: LiveCaseState; stateVersion: number; closesAt: string | null }
-  | { kind: "conflict" | "invalid_transition" | "incomplete" | "invalid_deadline" | "another_case_active" };
+  | { kind: "conflict" | "invalid_transition" | "incomplete" | "invalid_deadline" | "round_not_closed" | "another_case_active" };
 
 export type LivePublishAwardsRpcResult =
   | { kind: "published"; state: "awarded"; stateVersion: number }
@@ -1265,6 +1267,7 @@ export type Database = {
           p_case_id: string;
           p_participant_id: string;
           p_answer_text: string;
+          p_timeout?: boolean;
         };
         Returns: LiveSaveSubmissionRpcResult;
       };

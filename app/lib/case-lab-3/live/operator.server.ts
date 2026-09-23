@@ -22,6 +22,7 @@ export type OperatorCase = {
   id: string;
   environment: PaymentEnvironment;
   caseNumber: number;
+  questionNumber: number;
   speakerLabel: string;
   title: string;
   question: string;
@@ -51,6 +52,7 @@ export type OperatorSnapshot = {
     id: string;
     caseId: string;
     participantId: string;
+    displayName: string;
     answer: string;
     contentVersion: number;
     points: number;
@@ -122,6 +124,7 @@ function mapCase(row: {
   id: string;
   environment: PaymentEnvironment;
   case_number: number;
+  question_number: number;
   speaker_label: string;
   title: string;
   question: string;
@@ -139,6 +142,7 @@ function mapCase(row: {
     id: row.id,
     environment: row.environment,
     caseNumber: row.case_number,
+    questionNumber: row.question_number,
     speakerLabel: row.speaker_label,
     title: row.title,
     question: row.question,
@@ -158,7 +162,7 @@ export async function getLiveSnapshot(environment: PaymentEnvironment): Promise<
   const client = getCaseLab3AdminClient();
   const [casesResult, participantsResult, submissionsResult, runsResult, shortlistResult, awardsResult, tieBreaksResult, leaderboardResult] = await Promise.all([
     client.from("case_lab_3_live_cases").select("*").eq("environment", environment).order("case_number"),
-    client.from("case_lab_3_live_participants").select("id, ticket_id, claim_status, claimed_at").eq("environment", environment).order("claimed_at"),
+    client.from("case_lab_3_live_participants").select("id, ticket_id, public_display_name, claim_status, claimed_at").eq("environment", environment).order("claimed_at"),
     client.from("case_lab_3_live_submissions").select("id, case_id, participant_id, answer_text, content_version, participation_points, validity_state").eq("environment", environment).order("created_at"),
     client.from("case_lab_3_live_ai_runs").select("id, case_id, run_number, served_model, status, latency_ms, usage_payload, error_category").eq("environment", environment).order("created_at", { ascending: false }),
     client.from("case_lab_3_live_shortlist_entries").select("id, case_id, submission_id, ai_order, ai_score, ai_reason, approach_label, candidate_type, included, final_order, operator_reason").eq("environment", environment).order("final_order"),
@@ -171,6 +175,7 @@ export async function getLiveSnapshot(environment: PaymentEnvironment): Promise<
   }
 
   const participants = participantsResult.data ?? [];
+  const participantDisplayNames = new Map(participants.map((participant) => [participant.id, participant.public_display_name]));
   const ticketIds = participants.map((participant) => participant.ticket_id);
   const { data: tickets, error: ticketsError } = ticketIds.length === 0
     ? { data: [], error: null }
@@ -203,6 +208,7 @@ export async function getLiveSnapshot(environment: PaymentEnvironment): Promise<
       id: submission.id,
       caseId: submission.case_id,
       participantId: submission.participant_id,
+      displayName: participantDisplayNames.get(submission.participant_id) ?? "Участник",
       answer: submission.answer_text,
       contentVersion: submission.content_version,
       points: submission.participation_points,
@@ -256,6 +262,7 @@ export async function saveLiveCase(input: {
   id?: string;
   environment: PaymentEnvironment;
   caseNumber: number;
+  questionNumber: number;
   speakerLabel: string;
   title: string;
   question: string;
@@ -273,6 +280,7 @@ export async function saveLiveCase(input: {
     ...(input.id ? { id: input.id } : {}),
     environment: input.environment,
     case_number: input.caseNumber,
+    question_number: input.questionNumber,
     speaker_label: input.speakerLabel,
     title: input.title,
     question: input.question,
@@ -280,7 +288,7 @@ export async function saveLiveCase(input: {
     context: input.context,
     key_insight: input.keyInsight,
     ...(input.approvedRubric === undefined ? {} : { approved_rubric: input.approvedRubric as Json }),
-  }, { onConflict: "environment,case_number" }).select("*").single();
+  }, { onConflict: "environment,case_number,question_number" }).select("*").single();
   if (error || !data) throw new LiveOperatorRepositoryError();
   return mapCase(data);
 }
@@ -445,6 +453,14 @@ export async function updateShortlist(input: {
   entries: Array<{ submissionId: string; included: boolean; finalOrder: number | null; operatorReason: string | null }>;
 }): Promise<void> {
   const client = getCaseLab3AdminClient();
+  const { data: currentEntries, error: currentEntriesError } = await client.from("case_lab_3_live_shortlist_entries")
+    .select("submission_id, included")
+    .eq("environment", input.environment)
+    .eq("case_id", input.caseId);
+  if (currentEntriesError) throw new LiveOperatorRepositoryError();
+  const includedBySubmission = new Map((currentEntries ?? []).map((entry) => [entry.submission_id, entry.included]));
+  for (const entry of input.entries) includedBySubmission.set(entry.submissionId, entry.included);
+  if ([...includedBySubmission.values()].filter(Boolean).length > 5) throw new LiveOperatorRepositoryError();
   for (const entry of input.entries) {
     const { error } = await client.from("case_lab_3_live_shortlist_entries").upsert({
       environment: input.environment,
