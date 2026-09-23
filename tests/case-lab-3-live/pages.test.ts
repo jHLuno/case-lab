@@ -27,6 +27,8 @@ test("participant client exposes accessible named controls and complete states",
   assert.match(source, /name="firstName"/u);
   assert.match(source, /name="lastName"/u);
   assert.match(source, /name="lastName"[^>]*required/u);
+  assert.match(source, /Попадите в топ-3 лидерборда/u);
+  assert.match(source, /и получите ценные призы!/u);
   assert.doesNotMatch(source, /из билета/u);
   assert.doesNotMatch(source, /name="ticketNumber"/u);
   assert.doesNotMatch(source, /needsTicketNumber/u);

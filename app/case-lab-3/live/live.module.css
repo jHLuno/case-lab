@@ -35,7 +35,7 @@
 .intro h1,
 .question,
 .waiting h1 { margin: 0; font-family: var(--font-heading); font-weight: 400; letter-spacing: -.045em; }
-.intro h1 { max-width: 14ch; font-size: clamp(32px, 4vw, 54px); line-height: 1.02; text-wrap: balance; }
+.intro h1 { max-width: none; font-size: clamp(27px, 3.2vw, 46px); line-height: 1.04; text-wrap: balance; }
 .intro > p:last-child { max-width: 43ch; margin: 28px 0 0; color: rgba(255, 255, 255, .72); font-size: 16px; line-height: 1.55; }
 .form,
 .answerForm { display: grid; align-content: start; gap: 18px; }
@@ -100,7 +100,7 @@
   .claimPanel,
   .liveGrid { grid-template-columns: 1fr; }
   .claimPanel { gap: 42px; padding: 30px 22px; }
-  .intro h1 { max-width: 14ch; }
+  .intro h1 { max-width: none; }
   .leaderboard { position: static; }
 }
 
@@ -113,6 +113,7 @@
   .liveNotice { margin-top: 10px; }
   .casePanel { min-height: 0; padding: 26px 20px; }
   .speaker { margin-top: 48px; }
+  .intro h1 { font-size: clamp(24px, 7vw, 34px); }
   .question { font-size: 31px; }
   .caseMeta,
   .answerFooter { align-items: stretch; flex-direction: column; }

@@ -245,7 +245,11 @@ export default function LiveParticipantClient() {
       {phase === "claim" ? (
         <section className={styles.claimPanel}>
           <div className={styles.intro}>
-            <h1>Ваш ответ может попасть в топ</h1>
+            <h1>
+              Попадите в топ-3 лидерборда
+              <br />
+              и получите ценные призы!
+            </h1>
             <p>Введите имя и фамилию. Они будут отображаться в лидерборде.</p>
           </div>
           <form className={styles.form} onSubmit={claimParticipant}>
