@@ -223,7 +223,9 @@ export default function LiveParticipantClient() {
         ) : null}
       </header>
 
-      <p className={styles.liveNotice} aria-live="polite">{notice}</p>
+      {notice && !(phase === "claim" && notice === "Введите имя и фамилию") ? (
+        <p className={styles.liveNotice} aria-live="polite">{notice}</p>
+      ) : null}
 
       {phase === "loading" ? (
         <section className={styles.loading} aria-label="Загрузка">
