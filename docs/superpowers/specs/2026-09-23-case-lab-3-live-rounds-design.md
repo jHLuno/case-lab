@@ -36,15 +36,16 @@ Extend the Case Lab III live interaction so each case can contain one to three s
 
 ## Data model
 
-- Add a live question/round table keyed by case and question number, with an environment-aware unique key and the same lifecycle currently used by live cases.
-- Backfill one question row from each existing live case so existing data remains readable.
-- Associate submissions, AI runs, shortlist entries, and awards with the question/round while retaining case and environment foreign-key boundaries.
+- Extend `case_lab_3_live_cases` with `question_number` and use one existing case row as one question/round. The unique key becomes `(environment, case_number, question_number)` and `question_number` is constrained to 1–3.
+- Backfill every existing live case row as question 1 so current data remains readable without a destructive rewrite.
+- Existing submissions, AI runs, shortlist entries, and awards remain linked to the round row through `case_id`; their existing one-per-case-row constraints therefore become one-per-question constraints without changing payment tables.
 - Enforce one participant submission per question, one active shortlist entry per submission/question, and one active award per place/submission/question.
-- Keep leaderboard aggregation scoped to `environment = live` and sum all valid submissions and active awards across every Case Lab III question.
+- Keep leaderboard aggregation scoped to `environment = live` and sum all valid submissions and active awards across every question row and all three Case Lab III cases.
 
 ## Automatic analysis
 
-- Closing a round must enqueue or otherwise trigger one idempotent AI-analysis job for that question.
+- When the authoritative deadline passes, the live CRM poll triggers the existing authenticated analyze endpoint for that question; the endpoint remains the only server-side place that can call OpenRouter.
+- The analyze transition is deadline-aware, idempotent, and cannot run while the round is still open.
 - Repeated timer polls, browser retries, or operator refreshes must not create duplicate AI runs or duplicate awards.
 - If the provider fails, the round remains available to the existing manual shortlist mode; the operator can promote candidates manually and still publish the top three.
 - The AI request must retain the current private strict-schema validation and must cap the returned shortlist at five candidates.
