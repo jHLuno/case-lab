@@ -3,7 +3,6 @@ import "server-only";
 import { cookies } from "next/headers";
 
 import {
-  getHashedClientIp,
   noStoreJson,
   parseJsonBody,
   readBoundedBody,
@@ -11,12 +10,7 @@ import {
   requireSameOrigin,
   RequestGuardError,
 } from "@/lib/case-lab-3/http.server";
-import {
-  consumeRateLimit,
-  getOrderRequestSecret,
-  getPublicPaymentEnvironment,
-  RateLimitExceededError,
-} from "@/lib/case-lab-3/orders.server";
+import { getPublicPaymentEnvironment } from "@/lib/case-lab-3/orders.server";
 import { claimLiveParticipant } from "@/lib/case-lab-3/live/repository.server";
 import {
   issueLiveSession,
@@ -32,7 +26,6 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 const MAX_BODY_BYTES = 2048;
-const CLAIM_RATE_LIMIT = { scope: "case-lab-3-live-claim", limitCount: 10, bucketSeconds: 60 } as const;
 
 type LiveCookieStore = {
   get(name: string): { value: string } | undefined;
@@ -40,7 +33,6 @@ type LiveCookieStore = {
 };
 
 export type LiveSessionRouteDependencies = {
-  consumeClaimRateLimit: (request: Request) => Promise<void>;
   getEnvironment: () => PaymentEnvironment;
   claimParticipant: (input: ReturnType<typeof parseParticipantClaim>, environment: PaymentEnvironment) => Promise<LiveClaimParticipantRpcResult>;
   issueSession: (participantId: string, version: number) => string;
@@ -48,15 +40,6 @@ export type LiveSessionRouteDependencies = {
 };
 
 const productionDependencies: LiveSessionRouteDependencies = {
-  consumeClaimRateLimit: async (request) => {
-    const hashedIp = getHashedClientIp(request, getOrderRequestSecret(), CLAIM_RATE_LIMIT.scope);
-    await consumeRateLimit(
-      CLAIM_RATE_LIMIT.scope,
-      hashedIp,
-      CLAIM_RATE_LIMIT.limitCount,
-      CLAIM_RATE_LIMIT.bucketSeconds,
-    );
-  },
   getEnvironment: getPublicPaymentEnvironment,
   claimParticipant: claimLiveParticipant,
   issueSession: (participantId, version) => serializeLiveSession(issueLiveSession(participantId, version)),
@@ -80,7 +63,6 @@ export async function handlePost(
   try {
     requireSameOrigin(request);
     requireJson(request);
-    await active.consumeClaimRateLimit(request);
     const input = parseParticipantClaim(parseJsonBody(await readBoundedBody(request, MAX_BODY_BYTES)));
     const result = await active.claimParticipant(input, active.getEnvironment());
 
@@ -95,9 +77,6 @@ export async function handlePost(
     );
     return noStoreJson({ status: "claimed", displayName: result.displayName });
   } catch (error) {
-    if (error instanceof RateLimitExceededError) {
-      return noStoreJson({ error: "rate_limited" }, { status: 429 });
-    }
     if (error instanceof RequestGuardError) return guardError(error);
     if (error instanceof LiveInputValidationError) {
       return noStoreJson({ error: "invalid_request", issues: error.issues }, { status: 400 });

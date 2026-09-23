@@ -185,10 +185,6 @@ export default function LiveParticipantClient() {
         body: JSON.stringify(payload),
       });
       const result = await responseJson<{ status?: string; error?: string }>(response);
-      if (response.status === 429) {
-        setNotice("Слишком много попыток. Подождите минуту");
-        return;
-      }
       if (!response.ok) {
         setNotice("Не удалось подключиться. Попробуйте ещё раз");
         return;

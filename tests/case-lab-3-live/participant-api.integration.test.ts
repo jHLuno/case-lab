@@ -7,7 +7,6 @@ import { handleDelete, handlePost } from "../../app/api/case-lab-3/live/session/
 import { handleGet } from "../../app/api/case-lab-3/live/state/route";
 import { handlePut } from "../../app/api/case-lab-3/live/cases/[id]/submission/route";
 import { handleGet as getPublicLeaderboard } from "../../app/api/case-lab-3/live/leaderboard/route";
-import { RateLimitExceededError } from "../../app/lib/case-lab-3/orders.server";
 import { issueLiveSession, serializeLiveSession } from "../../app/lib/case-lab-3/live/session.server";
 
 const ORIGIN = "https://caselab.kz";
@@ -46,7 +45,6 @@ test("claim issues a private participant cookie and exposes only the public name
   const response = await handlePost(
     jsonRequest("/api/case-lab-3/live/session", "POST", { firstName: "Алия", lastName: "Ёлкина" }),
     {
-      consumeClaimRateLimit: async () => undefined,
       getEnvironment: () => "live",
       claimParticipant: async () => ({
         kind: "claimed",
@@ -99,7 +97,6 @@ test("claim uses only the submitted first and last name", async () => {
   const response = await handlePost(
     jsonRequest("/api/case-lab-3/live/session", "POST", { firstName: "Алия", lastName: "Ёлкина" }),
     {
-      consumeClaimRateLimit: async () => undefined,
       getEnvironment: () => "live",
       claimParticipant: async (input) => {
         assert.deepEqual(input, { firstName: "Алия", lastName: "Ёлкина" });
@@ -117,22 +114,12 @@ test("claim collapses missing and already claimed participants into one public r
     const response = await handlePost(
       jsonRequest("/api/case-lab-3/live/session", "POST", { firstName: "Нет", lastName: "Гостя" }),
       {
-        consumeClaimRateLimit: async () => undefined,
         getEnvironment: () => "live",
         claimParticipant: async () => ({ kind }),
       },
     );
     assert.deepEqual(await response.json(), { status: "not_available" });
   }
-});
-
-test("claim enforces database-backed rate limits", async () => {
-  const response = await handlePost(
-    jsonRequest("/api/case-lab-3/live/session", "POST", { firstName: "Алия", lastName: "Ёлкина" }),
-    { consumeClaimRateLimit: async () => { throw new RateLimitExceededError(); } },
-  );
-  assert.equal(response.status, 429);
-  assert.deepEqual(await response.json(), { error: "rate_limited" });
 });
 
 test("logout expires the live cookie", async () => {
