@@ -25,7 +25,7 @@ type LiveCase = {
 type Snapshot = {
   environment: typeof LIVE_ENVIRONMENT;
   cases: LiveCase[];
-  participants: Array<{ id: string; firstName: string; lastName: string; ticketNumber: string; claimStatus: string }>;
+  participants: Array<{ id: string; displayName: string; ticketNumber: string | null; claimStatus: string }>;
   submissions: Array<{ id: string; caseId: string; participantId: string; displayName: string; answer: string; points: number; validityState: string }>;
   aiRuns: Array<{ id: string; caseId: string; runNumber: number; servedModel: string | null; status: string; latencyMs: number | null; errorCategory: string | null }>;
   shortlist: Array<{ id: string; caseId: string; submissionId: string; aiOrder: number | null; aiScore: number | null; aiReason: string | null; approachLabel: string | null; included: boolean; finalOrder: number | null; operatorReason: string | null }>;
@@ -347,7 +347,7 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
             <h2 className="text-xl font-semibold text-black" style={{ fontFamily: "var(--font-heading)" }}>Участники</h2>
             <p className="mt-1 text-sm text-black/50">Заявлено: {snapshot?.participants.length ?? 0}. Полные данные видны только CRM.</p>
             <div className="mt-4 grid gap-2">
-              {(snapshot?.participants ?? []).slice(0, 8).map((participant) => <div key={participant.id} className="flex items-center justify-between gap-3 rounded-xl bg-[#f5f4fb] px-3 py-2 text-sm"><span className="truncate text-black">{participant.firstName} {participant.lastName} <span className="text-black/40">{participant.ticketNumber}</span></span><button type="button" onClick={() => { setDialog({ kind: "reset", id: participant.id }); setDialogReason(""); }} className="shrink-0 text-xs text-black/55 underline">Сбросить участника</button></div>)}
+              {(snapshot?.participants ?? []).slice(0, 8).map((participant) => <div key={participant.id} className="flex items-center justify-between gap-3 rounded-xl bg-[#f5f4fb] px-3 py-2 text-sm"><span className="truncate text-black">{participant.displayName}{participant.ticketNumber ? <span className="text-black/40"> · {participant.ticketNumber}</span> : null}</span><button type="button" onClick={() => { setDialog({ kind: "reset", id: participant.id }); setDialogReason(""); }} className="shrink-0 text-xs text-black/55 underline">Сбросить участника</button></div>)}
             </div>
           </section>
         </div>

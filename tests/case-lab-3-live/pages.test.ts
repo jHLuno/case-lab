@@ -26,6 +26,8 @@ test("participant client exposes accessible named controls and complete states",
   assert.match(source, /^["']use client["'];/u);
   assert.match(source, /name="firstName"/u);
   assert.match(source, /name="lastName"/u);
+  assert.match(source, /name="lastName"[^>]*required/u);
+  assert.doesNotMatch(source, /из билета/u);
   assert.doesNotMatch(source, /name="ticketNumber"/u);
   assert.doesNotMatch(source, /needsTicketNumber/u);
   assert.match(source, /name="answer"/u);

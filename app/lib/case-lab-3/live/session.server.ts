@@ -90,13 +90,18 @@ export function assertLiveSession(
   expectedEnvironment: PaymentEnvironment,
   secret = tokenSecret(),
 ): void {
+  const ticketIdentityIsValid = participant.ticketStatus === null
+    ? participant.ticketRevisionId === null && participant.currentRevisionId === null
+    : participant.ticketStatus === "used"
+      && participant.ticketRevisionId !== null
+      && participant.ticketRevisionId === participant.currentRevisionId;
+
   if (
     session.participantId !== participant.id
     || session.version !== participant.sessionTokenVersion
     || participant.environment !== expectedEnvironment
     || participant.claimStatus !== "active"
-    || participant.ticketStatus !== "used"
-    || participant.ticketRevisionId !== participant.currentRevisionId
+    || !ticketIdentityIsValid
     || !verifyPurposeToken(
       session.token,
       secret,

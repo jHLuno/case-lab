@@ -30,6 +30,14 @@ test("rejects ticket numbers and control characters in the name-only claim", () 
   );
 });
 
+test("requires both first name and last name for a live claim", () => {
+  assert.throws(
+    () => parseParticipantClaim({ firstName: "Алия" }),
+    (error) => error instanceof LiveInputValidationError
+      && error.issues.some((issue) => issue.field === "lastName" && issue.code === "required"),
+  );
+});
+
 test("accepts answers from 30 through 350 Unicode characters", () => {
   assert.equal(parseSubmission({ answer: "а".repeat(30) }).answer.length, 30);
   assert.equal(parseSubmission({ answer: "я".repeat(350) }).answer.length, 350);

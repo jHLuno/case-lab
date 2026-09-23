@@ -98,3 +98,17 @@ test("authorizes only the active current participant and matching environment", 
     LiveSessionAuthorizationError,
   );
 });
+
+test("authorizes an active guest participant without a ticket", () => {
+  const session = issueLiveSession(PARTICIPANT_ID, 1, SECRET);
+
+  assert.doesNotThrow(() => assertLiveSession(session, {
+    id: PARTICIPANT_ID,
+    environment: "live",
+    sessionTokenVersion: 1,
+    claimStatus: "active",
+    ticketStatus: null,
+    ticketRevisionId: null,
+    currentRevisionId: null,
+  }, "live", SECRET));
+});

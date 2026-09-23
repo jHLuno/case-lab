@@ -803,8 +803,8 @@ export type LiveCaseUpdate = Partial<LiveCaseInsert>;
 export type LiveParticipantRow = {
   id: string;
   environment: PaymentEnvironment;
-  ticket_id: string;
-  ticket_revision_id: string;
+  ticket_id: string | null;
+  ticket_revision_id: string | null;
   normalized_first_name: string;
   normalized_last_name: string;
   public_display_name: string;

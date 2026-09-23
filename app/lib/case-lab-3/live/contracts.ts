@@ -62,7 +62,7 @@ export type LiveSessionParticipant = {
   environment: PaymentEnvironment;
   sessionTokenVersion: number;
   claimStatus: "active" | "reset";
-  ticketStatus: "valid" | "used" | "cancelled";
-  ticketRevisionId: string;
+  ticketStatus: "valid" | "used" | "cancelled" | null;
+  ticketRevisionId: string | null;
   currentRevisionId: string | null;
 };

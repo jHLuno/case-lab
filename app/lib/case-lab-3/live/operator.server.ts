@@ -42,9 +42,8 @@ export type OperatorSnapshot = {
   cases: OperatorCase[];
   participants: Array<{
     id: string;
-    firstName: string;
-    lastName: string;
-    ticketNumber: string;
+    displayName: string;
+    ticketNumber: string | null;
     claimStatus: "active" | "reset";
     claimedAt: string;
   }>;
@@ -176,33 +175,25 @@ export async function getLiveSnapshot(environment: PaymentEnvironment): Promise<
 
   const participants = participantsResult.data ?? [];
   const participantDisplayNames = new Map(participants.map((participant) => [participant.id, participant.public_display_name]));
-  const ticketIds = participants.map((participant) => participant.ticket_id);
+  const ticketIds = participants.map((participant) => participant.ticket_id).filter((id): id is string => Boolean(id));
   const { data: tickets, error: ticketsError } = ticketIds.length === 0
     ? { data: [], error: null }
     : await client.from("case_lab_3_tickets").select("id, public_ticket_number, current_revision_id").in("id", ticketIds).eq("environment", environment);
   if (ticketsError) throw new LiveOperatorRepositoryError();
-  const revisionIds = (tickets ?? []).map((ticket) => ticket.current_revision_id).filter((id): id is string => Boolean(id));
-  const { data: revisions, error: revisionsError } = revisionIds.length === 0
-    ? { data: [], error: null }
-    : await client.from("case_lab_3_ticket_revisions").select("id, first_name, last_name").in("id", revisionIds).eq("environment", environment);
-  if (revisionsError) throw new LiveOperatorRepositoryError();
   const ticketById = new Map((tickets ?? []).map((ticket) => [ticket.id, ticket]));
-  const revisionById = new Map((revisions ?? []).map((revision) => [revision.id, revision]));
 
   return {
     environment,
     cases: (casesResult.data ?? []).map(mapCase),
-    participants: participants.flatMap((participant) => {
-      const ticket = ticketById.get(participant.ticket_id);
-      const revision = ticket?.current_revision_id ? revisionById.get(ticket.current_revision_id) : null;
-      return ticket && revision ? [{
+    participants: participants.map((participant) => {
+      const ticket = participant.ticket_id ? ticketById.get(participant.ticket_id) : undefined;
+      return {
         id: participant.id,
-        firstName: revision.first_name,
-        lastName: revision.last_name,
-        ticketNumber: ticket.public_ticket_number,
+        displayName: participant.public_display_name,
+        ticketNumber: ticket?.public_ticket_number ?? null,
         claimStatus: participant.claim_status,
         claimedAt: participant.claimed_at,
-      }] : [];
+      };
     }),
     submissions: (submissionsResult.data ?? []).map((submission) => ({
       id: submission.id,

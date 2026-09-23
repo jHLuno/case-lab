@@ -99,23 +99,30 @@ export async function authorizeLiveParticipant(
     if (participantError) throw new LiveRepositoryError();
     if (!participant) return null;
 
-    const { data: ticket, error: ticketError } = await client
-      .from("case_lab_3_tickets")
-      .select("id, current_revision_id, status")
-      .eq("id", participant.ticket_id)
-      .eq("environment", environment)
-      .maybeSingle();
-    if (ticketError) throw new LiveRepositoryError();
-    if (!ticket) return null;
+    let ticketStatus: "valid" | "used" | "cancelled" | null = null;
+    let currentRevisionId: string | null = null;
+    if (participant.ticket_id !== null || participant.ticket_revision_id !== null) {
+      if (participant.ticket_id === null || participant.ticket_revision_id === null) return null;
+      const { data: ticket, error: ticketError } = await client
+        .from("case_lab_3_tickets")
+        .select("id, current_revision_id, status")
+        .eq("id", participant.ticket_id)
+        .eq("environment", environment)
+        .maybeSingle();
+      if (ticketError) throw new LiveRepositoryError();
+      if (!ticket) return null;
+      ticketStatus = ticket.status;
+      currentRevisionId = ticket.current_revision_id;
+    }
 
     assertLiveSession(session, {
       id: participant.id,
       environment: participant.environment,
       sessionTokenVersion: participant.session_token_version,
       claimStatus: participant.claim_status,
-      ticketStatus: ticket.status,
+      ticketStatus,
       ticketRevisionId: participant.ticket_revision_id,
-      currentRevisionId: ticket.current_revision_id,
+      currentRevisionId,
     }, environment);
 
     return {

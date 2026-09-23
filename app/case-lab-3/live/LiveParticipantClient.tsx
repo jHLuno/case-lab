@@ -61,7 +61,7 @@ export default function LiveParticipantClient() {
       if (response.status === 401) {
         setView(null);
         setPhase("claim");
-        if (!silent) setNotice("Введите имя и фамилию из билета");
+        if (!silent) setNotice("Введите имя и фамилию");
         return;
       }
       if (!response.ok) throw new Error("state_unavailable");
@@ -170,7 +170,7 @@ export default function LiveParticipantClient() {
   async function claimParticipant(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
-    setNotice("Проверяем участника");
+    setNotice("Подключаем участника");
     const form = new FormData(event.currentTarget);
     const payload = {
       firstName: String(form.get("firstName") ?? ""),
@@ -189,11 +189,11 @@ export default function LiveParticipantClient() {
         return;
       }
       if (!response.ok) {
-        setNotice("Не удалось проверить данные. Попробуйте ещё раз");
+        setNotice("Не удалось подключиться. Попробуйте ещё раз");
         return;
       }
       if (result.status !== "claimed") {
-        setNotice("Участник не найден. Проверьте данные или обратитесь к оператору");
+        setNotice("Не удалось подключиться. Попробуйте ещё раз");
         return;
       }
 
@@ -247,7 +247,7 @@ export default function LiveParticipantClient() {
           <div className={styles.intro}>
             <p className={styles.kicker}>Интерактив в зале</p>
             <h1>Ваш ответ может попасть в топ</h1>
-            <p>Введите имя и фамилию из билета. Они будут отображаться в лидерборде.</p>
+            <p>Введите имя и фамилию. Они будут отображаться в лидерборде.</p>
           </div>
           <form className={styles.form} onSubmit={claimParticipant}>
             <label className={styles.field}>
@@ -259,7 +259,7 @@ export default function LiveParticipantClient() {
               <input name="lastName" autoComplete="family-name" maxLength={100} required />
             </label>
             <button className={styles.primaryButton} type="submit" disabled={pending}>
-              {pending ? "Проверяем" : "Подключиться"}
+              {pending ? "Подключаем" : "Подключиться"}
             </button>
           </form>
         </section>
