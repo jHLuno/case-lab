@@ -18,8 +18,8 @@ Extend the Case Lab III live interaction so each case can contain one to three s
 2. The operator opens one question round. Only one round may be active at a time.
 3. The server stores the round deadline as the source of truth: `opensAt + 180 seconds`.
 4. Every participant sees the same question and a countdown derived from the server deadline.
-5. Before the deadline, a participant may submit a manual answer. The existing 30–300 character rule remains for manual submission.
-6. At the deadline, the open page automatically submits the participant's current non-empty text. Timeout submissions accept 1–300 characters and receive 10 participation points.
+5. Before the deadline, a participant may submit one manual answer. The existing 30–350 character rule remains for manual submission, and the answer field is compact rather than a large editor.
+6. At the deadline, the open page automatically submits the participant's current non-empty text. Timeout submissions accept 1–350 characters and receive 10 participation points.
 7. The server rejects late writes after the deadline and never trusts a client-provided timer.
 8. After the round closes, the system starts AI analysis and produces at most five shortlist candidates.
 9. The speaker selects three distinct candidates from that round's shortlist.
@@ -53,7 +53,7 @@ Extend the Case Lab III live interaction so each case can contain one to three s
 
 - An empty answer at timeout is not stored and receives no participation points.
 - A short non-empty timeout answer is valid for participation but is not used as an invalid AI candidate solely because it is short.
-- A participant who submits before the deadline cannot receive a second participation award for editing; updates keep the round's single 10-point participation value.
+- A participant can submit exactly one answer per question. After a successful manual or timeout submission, the answer is locked and repeated writes are rejected without additional points.
 - A stale operator state version returns a conflict and reloads the snapshot.
 - A case cannot open its next question until the current question has reached the awarded/closed workflow required by the operator UI.
 - Public responses expose only the public display name, points, rank, and awarded answers; ticket numbers, full surnames, submission IDs, and AI rationale remain private to CRM.
