@@ -213,22 +213,6 @@ export default function LiveParticipantClient() {
     }
   }
 
-  async function signOut() {
-    setPending(true);
-    try {
-      await fetch(SESSION_ENDPOINT, { method: "DELETE" });
-    } finally {
-      activeCaseId.current = null;
-      answerDirty.current = false;
-      timeoutSubmissionStarted.current = false;
-      setAnswer("");
-      setView(null);
-      setPhase("claim");
-      setPending(false);
-      setNotice("Сессия завершена");
-    }
-  }
-
   const deadline = formatDeadline(activeCase?.closesAt ?? null);
   const canSubmit = activeCase?.state === "open" && !activeCase.answerLocked && answer.length >= 30 && answer.length <= 350 && !pending;
 
@@ -376,9 +360,6 @@ export default function LiveParticipantClient() {
             ) : (
               <p className={styles.emptyLeaderboard}>Первые баллы появятся после ответов.</p>
             )}
-            <button className={styles.signOutButton} type="button" onClick={() => void signOut()} disabled={pending}>
-              Сменить участника
-            </button>
           </aside>
         </div>
       ) : null}

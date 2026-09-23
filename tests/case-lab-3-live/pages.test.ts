@@ -34,6 +34,7 @@ test("participant client exposes accessible named controls and complete states",
   assert.match(source, /formatRemaining/u);
   assert.match(source, /answerLocked/u);
   assert.match(source, /saveAnswer\("timeout"\)/u);
+  assert.doesNotMatch(source, /Сменить участника/u);
   assert.match(source, /answer\.length/u);
   assert.match(source, /aria-live="polite"/u);
   assert.match(source, /Загрузка/u);
@@ -66,7 +67,7 @@ test("CRM live page is protected and exposes operator controls", async () => {
   assert.match(client, /Idempotency-Key/u);
   assert.match(client, /LIVE_ENVIRONMENT\s*=\s*["']live["']/u);
   assert.match(client, /questionNumber/u);
-  assert.match(client, /3 \* 60 \* 1000/u);
+  assert.match(client, /LIVE_ROUND_SETTLE_GRACE_MS/u);
   assert.match(client, /autoAnalyzedRounds/u);
   assert.doesNotMatch(client, /<option value=["']test["']>/u);
   assert.doesNotMatch(client, /Среда/u);

@@ -2,6 +2,8 @@
 
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 
+import { analysisDelayMs, isAnalysisReady, LIVE_ROUND_SETTLE_GRACE_MS } from "@/lib/case-lab-3/live/timing";
+
 const LIVE_ENVIRONMENT = "live" as const;
 type CaseState = "draft" | "ready" | "open" | "analyzing" | "shortlist_ready" | "awarded" | "closed";
 type LiveCase = {
@@ -261,7 +263,7 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
 
   useEffect(() => {
     if (!liveCase || liveCase.state !== "open" || !liveCase.closesAt || autoAnalyzedRounds.current.has(liveCase.id)) return;
-    const delay = Math.max(0, Date.parse(liveCase.closesAt) - Date.now() + 1000);
+    const delay = analysisDelayMs(Date.parse(liveCase.closesAt), Date.now());
     const timer = window.setTimeout(() => {
       if (autoAnalyzedRounds.current.has(liveCase.id)) return;
       autoAnalyzedRounds.current.add(liveCase.id);
@@ -324,8 +326,8 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
             <div className="mt-5 grid gap-2">
               {liveCase?.state === "draft" ? <button type="button" onClick={() => void transition("ready")} className="rounded-xl bg-black px-4 py-3 text-left text-sm text-white">Подготовка завершена</button> : null}
               {liveCase?.state === "ready" ? <button type="button" onClick={() => void transition("open", new Date(Date.now() + 3 * 60 * 1000).toISOString())} className="rounded-xl bg-[#040082] px-4 py-3 text-left text-sm text-white">Открыть ответы на 3 минуты</button> : null}
-              {liveCase?.state === "open" ? <div className="rounded-xl bg-[#f5f4fb] px-4 py-3 text-sm text-black/65">Ответы закроются автоматически. AI-анализ запустится через секунду после дедлайна.</div> : null}
-              {liveCase?.state === "open" && liveCase.closesAt && clockMs >= Date.parse(liveCase.closesAt) ? <button type="button" onClick={() => void analyze()} className="rounded-xl bg-black px-4 py-3 text-left text-sm text-white">Запустить AI-анализ</button> : null}
+              {liveCase?.state === "open" ? <div className="rounded-xl bg-[#f5f4fb] px-4 py-3 text-sm text-black/65">Ответы закроются автоматически. AI-анализ запустится через {LIVE_ROUND_SETTLE_GRACE_MS / 1000} секунд после дедлайна.</div> : null}
+              {liveCase?.state === "open" && liveCase.closesAt && isAnalysisReady(Date.parse(liveCase.closesAt), clockMs) ? <button type="button" onClick={() => void analyze()} className="rounded-xl bg-black px-4 py-3 text-left text-sm text-white">Запустить AI-анализ</button> : null}
               {liveCase?.state === "analyzing" ? <button type="button" onClick={() => void transition("shortlist_ready")} className="rounded-xl border border-black/10 px-4 py-3 text-left text-sm text-black">Ручной режим: открыть shortlist</button> : null}
               {liveCase?.state === "shortlist_ready" ? <button type="button" onClick={() => { setDialog({ kind: "awards", id: liveCase.id }); setDialogReason(""); }} className="rounded-xl bg-black px-4 py-3 text-left text-sm text-white">Опубликовать топ-3</button> : null}
             </div>
