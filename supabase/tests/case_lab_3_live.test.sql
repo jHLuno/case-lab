@@ -1,6 +1,6 @@
 begin;
 
-select plan(31);
+select plan(32);
 
 select has_table('public', 'case_lab_3_live_cases', 'live cases table exists');
 select has_table('public', 'case_lab_3_live_participants', 'live participants table exists');
@@ -144,15 +144,35 @@ select is(
 );
 
 select is(
-  public.case_lab_3_live_claim_participant('test', 'Алия', 'Ёлкина', null)->>'kind',
-  'already_claimed',
-  'an active participant claim cannot be silently taken over'
+  public.case_lab_3_live_claim_participant('test', 'Алия', 'Ёлкина', null)->>'participantId',
+  (
+    select id::text
+    from public.case_lab_3_live_participants
+    where environment = 'test'
+      and normalized_first_name = 'алия'
+      and normalized_last_name = 'елкина'
+    order by created_at asc, id asc
+    limit 1
+  ),
+  'repeating the same name reuses the original participant account'
 );
 
 select is(
-  public.case_lab_3_live_claim_participant('test', 'Борис', 'Смирнов', 'CL3-LIVE-TICKET-2')->>'kind',
+  (
+    select count(*)::integer
+    from public.case_lab_3_live_participants
+    where environment = 'test'
+      and normalized_first_name = 'алия'
+      and normalized_last_name = 'елкина'
+  ),
+  1,
+  'repeating the same name does not create a duplicate participant row'
+);
+
+select is(
+  public.case_lab_3_live_claim_participant('test', 'Борис', 'Смирнов', 'NOT-A-REAL-TICKET')->>'kind',
   'claimed',
-  'a ticket number can be supplied as an additional participant check'
+  'a supplied ticket number is ignored for live name claims'
 );
 
 select is(
@@ -163,14 +183,14 @@ select is(
 
 select is(
   public.case_lab_3_live_claim_participant('test', 'Нет', 'Гостя', null)->>'kind',
-  'not_found',
-  'an unknown or unchecked guest cannot claim a participant session'
+  'claimed',
+  'an arbitrary name can claim a participant session without a ticket'
 );
 
 select is(
   (select public_display_name from public.case_lab_3_live_participants where normalized_first_name = 'алия'),
-  'Алия Ё.',
-  'only first name and the first last-name letter are stored for public display'
+  'Алия Ёлкина',
+  'the full first and last name are stored for public display'
 );
 
 insert into public.case_lab_3_live_cases (
@@ -406,11 +426,11 @@ select results_eq(
   $$,
   $$
     values
-      ('Алия Ё.'::text, 60, 1),
-      ('Борис С.'::text, 45, 2),
-      ('Вера К.'::text, 35, 3)
+      ('Алия Ёлкина'::text, 60, 1),
+      ('Борис Смирнов'::text, 45, 2),
+      ('Вера Ким'::text, 35, 3)
   $$,
-  'leaderboard combines participation and speaker bonus points without exposing full names'
+  'leaderboard combines participation and speaker bonus points with full names'
 );
 
 select is(

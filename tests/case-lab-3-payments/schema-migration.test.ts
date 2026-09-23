@@ -91,3 +91,15 @@ test("live interaction migration defines protected authoritative tables", async 
   assert.match(source, /place = 2 and bonus_points = 35/iu);
   assert.match(source, /place = 3 and bonus_points = 25/iu);
 });
+
+test("live participant claims reuse the same name identity", async () => {
+  const source = await readFile(
+    "supabase/migrations/20260924000000_make_case_lab_3_live_claim_idempotent.sql",
+    "utf8",
+  );
+
+  assert.match(source, /select[\s\S]+into v_existing[\s\S]+case_lab_3_live_participants/iu);
+  assert.match(source, /v_existing\.claim_status\s*=\s*'active'/iu);
+  assert.match(source, /update public\.case_lab_3_live_participants[\s\S]+claim_status\s*=\s*'active'/iu);
+  assert.match(source, /pg_advisory_xact_lock[\s\S]+normalized_first_name/iu);
+});
