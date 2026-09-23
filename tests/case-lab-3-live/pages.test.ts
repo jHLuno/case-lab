@@ -29,6 +29,7 @@ test("participant client exposes accessible named controls and complete states",
   assert.match(source, /name="lastName"[^>]*required/u);
   assert.match(source, /<span>Попадите в топ-3 лидерборда<\/span>/u);
   assert.match(source, /<span>и получите ценные призы!<\/span>/u);
+  assert.match(source, /styles\.claimShell/u);
   assert.match(source, /ИИ анализирует релевантность ответа/u);
   assert.doesNotMatch(source, /из билета/u);
   assert.doesNotMatch(source, /name="ticketNumber"/u);
@@ -58,6 +59,7 @@ test("participant styles preserve keyboard focus and reduced-motion behavior", a
   assert.match(source, /\.field textarea\s*\{[\s\S]*?min-height:\s*112px/u);
   assert.match(source, /container-type:\s*inline-size/u);
   assert.match(source, /text-transform:\s*none/u);
+  assert.match(source, /\.claimShell\s*\{[\s\S]*?justify-content:\s*center/u);
 });
 
 test("CRM live page is protected and exposes operator controls", async () => {

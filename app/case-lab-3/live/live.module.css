@@ -107,6 +107,9 @@
 }
 
 @media (max-width: 520px) {
+  .claimShell { display: flex; flex-direction: column; justify-content: center; }
+  .claimShell .header { justify-content: center; margin-bottom: clamp(18px, 4vh, 30px); }
+  .claimShell .claimPanel { width: min(100%, 360px); margin-inline: auto; }
   .loading,
   .messagePanel,
   .claimPanel,

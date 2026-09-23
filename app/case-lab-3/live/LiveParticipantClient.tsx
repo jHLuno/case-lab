@@ -210,7 +210,7 @@ export default function LiveParticipantClient() {
   const canSubmit = activeCase?.state === "open" && !activeCase.answerLocked && answer.length >= 30 && answer.length <= 350 && !pending;
 
   return (
-    <div className={styles.shell}>
+    <div className={`${styles.shell} ${phase === "claim" ? styles.claimShell : ""}`}>
       <header className={styles.header}>
         <a href="/case-lab-3" className={styles.brand} aria-label="Case Lab III">
           <Image src="/logo white.png" alt="Case Lab" width={164} height={34} priority className={styles.logoImage} />
