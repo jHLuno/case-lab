@@ -154,7 +154,6 @@ export default function LeaderboardClient() {
         </header>
 
         <section className={styles.hero}>
-          <p className={styles.kicker}>Case Lab III · live</p>
           <h1>Лидерборд</h1>
           <p>{data?.activeCase ? `Кейс ${data.activeCase.caseNumber}. ${statusLabel(data.activeCase.state)}` : "Следите за ответами участников"}</p>
         </section>
@@ -168,7 +167,7 @@ export default function LeaderboardClient() {
           </section>
 
           <section className={styles.questions} aria-label="Ответы по кейсам">
-            <div className={styles.questionsHeader}><div><p className={styles.sectionKicker}>Разбор ответов</p><h2>Ответы участников</h2></div><span>Топ-5 каждого вопроса</span></div>
+            <div className={styles.questionsHeader}><div><p className={styles.sectionKicker}>Разбор ответов</p><h2>Ответы участников</h2></div></div>
             {data?.questionAnswers.length ? <>
               <nav className={styles.questionNav} aria-label="Выбор вопроса">
                 {data.questionAnswers.map((question) => <button key={question.id} type="button" className={question.id === selectedQuestion?.id ? styles.questionTabActive : styles.questionTab} onClick={() => chooseQuestion(question.id)} aria-pressed={question.id === selectedQuestion?.id}>Кейс {question.caseNumber} · Вопрос {question.questionNumber}</button>)}
@@ -187,12 +186,12 @@ export default function LeaderboardClient() {
                       <p>{answer.answer}</p>
                     </article>;
                     return speakerMode && candidateId ? <button key={candidateId} type="button" className={styles.answerButton} onClick={() => toggleCandidate(candidateId)} aria-pressed={selectedIndex >= 0}>{card}</button> : <div key={`${answer.displayName}-${answer.answer}`} className={styles.answerButton}>{card}</div>;
-                  }) : <p className={styles.empty}>Ответы появятся после AI-анализа.</p>}
+                  }) : <p className={styles.empty}>Топ-5 каждого вопроса.</p>}
                 </div>
                 {speakerMode ? <div className={styles.speakerActions}><span>{selectedCandidateIds.length} из 3 выбрано</span><button type="button" className={styles.primaryButton} disabled={selectionPending || selectedCandidateIds.length !== 3} onClick={() => void publishSelection()}>Выбрать топ-3</button></div> : null}
                 {selectionMessage ? <p className={styles.selectionMessage} role="status">{selectionMessage}</p> : null}
               </div> : null}
-            </> : <p className={styles.empty}>Ответы появятся после AI-анализа.</p>}
+            </> : <p className={styles.empty}>Топ-5 каждого вопроса.</p>}
           </section>
         </div>
 

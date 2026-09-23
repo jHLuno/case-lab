@@ -318,6 +318,7 @@ export default function LiveParticipantClient() {
                   <div className={styles.lockedAnswer}>
                     <span>Ваш ответ</span>
                     <p>{activeCase.answer ?? "Вы не отправили ответ на этот кейс."}</p>
+                    {activeCase.answer ? <p className={styles.aiNotice} role="status">ИИ анализирует релевантность ответа и его соответствие реальному ответу кейса. Топ-5 появится после анализа.</p> : null}
                   </div>
                 )}
               </>

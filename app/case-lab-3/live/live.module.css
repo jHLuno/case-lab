@@ -78,6 +78,7 @@
 .lockedAnswer { margin-top: 40px; border-top: 1px solid rgba(255, 255, 255, .14); padding-top: 26px; }
 .lockedAnswer span { color: rgba(255, 255, 255, .64); font-size: 13px; }
 .lockedAnswer p { max-width: 62ch; margin: 10px 0 0; color: rgba(255, 255, 255, .9); font-size: 16px; line-height: 1.55; overflow-wrap: anywhere; }
+.lockedAnswer .aiNotice { margin-top: 22px; color: rgba(255, 255, 255, .68); font-size: 14px; line-height: 1.5; }
 .waiting { display: grid; min-height: 430px; place-content: center; text-align: center; }
 .waiting h1 { font-size: clamp(32px, 5vw, 54px); }
 .waiting p { max-width: 42ch; margin: 22px auto 0; color: rgba(255, 255, 255, .7); line-height: 1.55; }

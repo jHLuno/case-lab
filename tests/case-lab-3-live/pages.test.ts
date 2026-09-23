@@ -29,6 +29,7 @@ test("participant client exposes accessible named controls and complete states",
   assert.match(source, /name="lastName"[^>]*required/u);
   assert.match(source, /<span>Попадите в топ-3 лидерборда<\/span>/u);
   assert.match(source, /<span>и получите ценные призы!<\/span>/u);
+  assert.match(source, /ИИ анализирует релевантность ответа/u);
   assert.doesNotMatch(source, /из билета/u);
   assert.doesNotMatch(source, /name="ticketNumber"/u);
   assert.doesNotMatch(source, /needsTicketNumber/u);
@@ -101,6 +102,9 @@ test("public leaderboard page polls a sanitized projection", async () => {
   assert.match(client, /Выбрать топ-3/u);
   assert.match(client, /setInterval/u);
   assert.match(client, /prefers-reduced-motion/u);
+  assert.doesNotMatch(client, /Case Lab III · live/u);
+  assert.match(client, /Топ-5 каждого вопроса/u);
+  assert.doesNotMatch(client, /Ответы появятся после AI-анализа/u);
   assert.doesNotMatch(client, />Участнику</u);
   assert.doesNotMatch(client, /<strong>III<\/strong>/u);
   assert.doesNotMatch(client, /ticket|submissionId|aiScore|aiReason/iu);
