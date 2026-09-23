@@ -3,7 +3,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 
 import type { PaymentEnvironment } from "../contracts";
-import type { LiveAiRunInsert, LivePublishAwardsRpcResult, LiveTransitionCaseRpcResult } from "../database.types";
+import type { LiveAiRunInsert, LivePublishAwardsRpcResult, LiveResetTimerRpcResult, LiveTransitionCaseRpcResult } from "../database.types";
 import type { Json } from "../database.types";
 import { getCaseLab3AdminClient } from "../supabase-admin.server";
 import type { LiveCaseState } from "./contracts";
@@ -339,6 +339,20 @@ export async function transitionLiveCase(input: {
   });
   if (error || !isRecord(data) || typeof data.kind !== "string") throw new LiveOperatorRepositoryError();
   return data as LiveTransitionCaseRpcResult;
+}
+
+export async function resetLiveCaseTimer(input: {
+  caseId: string;
+  expectedVersion: number;
+  actorId: string;
+}): Promise<LiveResetTimerRpcResult> {
+  const { data, error } = await getCaseLab3AdminClient().rpc("case_lab_3_live_reset_timer", {
+    p_case_id: input.caseId,
+    p_expected_version: input.expectedVersion,
+    p_actor_id: input.actorId,
+  });
+  if (error || !isRecord(data) || typeof data.kind !== "string") throw new LiveOperatorRepositoryError();
+  return data as LiveResetTimerRpcResult;
 }
 
 export async function getCaseAndSubmissions(caseId: string): Promise<CaseEvaluationInput> {

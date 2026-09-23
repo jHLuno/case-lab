@@ -1084,6 +1084,10 @@ export type LiveTransitionCaseRpcResult =
   | { kind: "transitioned"; state: LiveCaseState; stateVersion: number; closesAt: string | null }
   | { kind: "conflict" | "invalid_transition" | "incomplete" | "invalid_deadline" | "round_not_closed" | "another_case_active" };
 
+export type LiveResetTimerRpcResult =
+  | { kind: "timer_reset"; state: "open"; stateVersion: number; closesAt: string }
+  | { kind: "conflict" | "invalid_state" | "not_found" };
+
 export type LivePublishAwardsRpcResult =
   | { kind: "published"; state: "awarded"; stateVersion: number }
   | { kind: "conflict" | "invalid_awards" };
@@ -1280,6 +1284,10 @@ export type Database = {
           p_actor_id: string;
         };
         Returns: LiveTransitionCaseRpcResult;
+      };
+      case_lab_3_live_reset_timer: {
+        Args: { p_case_id: string; p_expected_version: number; p_actor_id: string };
+        Returns: LiveResetTimerRpcResult;
       };
       case_lab_3_live_publish_awards: {
         Args: {

@@ -5,6 +5,7 @@ import "../case-lab-3-payments/server-only-test-loader";
 
 import { handleGet as getLive } from "../../app/api/admin/case-lab-3/live/route";
 import { handlePost as transition } from "../../app/api/admin/case-lab-3/live/cases/[id]/transition/route";
+import { handlePost as resetTimer } from "../../app/api/admin/case-lab-3/live/cases/[id]/reset-timer/route";
 import { handlePost as rubric } from "../../app/api/admin/case-lab-3/live/cases/[id]/rubric/route";
 import { handlePost as analyze } from "../../app/api/admin/case-lab-3/live/cases/[id]/analyze/route";
 import { handlePost as awards } from "../../app/api/admin/case-lab-3/live/cases/[id]/awards/route";
@@ -103,6 +104,24 @@ test("operator can transition a case with an expected version", async () => {
   );
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { status: "transitioned", state: "open", stateVersion: 2, closesAt: "2026-09-24T10:30:00.000Z" });
+});
+
+test("operator can reset an open timer with an expected version", async () => {
+  let input: unknown = null;
+  const response = await resetTimer(
+    request(`/api/admin/case-lab-3/live/cases/${CASE_ID}/reset-timer`, "POST", { expectedVersion: 4 }),
+    routeContext,
+    {
+      ...auth,
+      resetTimer: async (value) => {
+        input = value;
+        return { kind: "timer_reset", state: "open", stateVersion: 5, closesAt: "2026-09-24T10:33:00.000Z" };
+      },
+    },
+  );
+  assert.equal(response.status, 200);
+  assert.deepEqual(input, { caseId: CASE_ID, expectedVersion: 4, actorId: ADMIN.role });
+  assert.deepEqual(await response.json(), { status: "timer_reset", state: "open", stateVersion: 5, closesAt: "2026-09-24T10:33:00.000Z" });
 });
 
 test("AI failure leaves submissions intact and enables manual shortlist mode", async () => {

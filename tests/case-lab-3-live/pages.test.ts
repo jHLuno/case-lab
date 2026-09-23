@@ -60,6 +60,8 @@ test("CRM live page is protected and exposes operator controls", async () => {
   assert.match(client, /Подготовка кейсов/u);
   assert.match(client, /Сгенерировать критерии/u);
   assert.match(client, /Запустить AI-анализ/u);
+  assert.match(client, /Сбросить таймер/u);
+  assert.match(client, /reset-timer/u);
   assert.match(client, /Ручной режим/u);
   assert.match(client, /Опубликовать топ-3/u);
   assert.match(client, /Сбросить участника/u);

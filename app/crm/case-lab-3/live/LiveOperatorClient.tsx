@@ -221,6 +221,15 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
     }
   }
 
+  async function resetTimer() {
+    const liveCase = snapshot?.cases.find((item) => item.caseNumber === selectedCase && item.questionNumber === selectedQuestion);
+    if (!liveCase || liveCase.state !== "open") return;
+    if (await mutate(`/api/admin/case-lab-3/live/cases/${liveCase.id}/reset-timer`, { expectedVersion: liveCase.stateVersion })) {
+      setMessage("Таймер сброшен: участникам добавлены новые 3 минуты");
+      await loadSnapshot();
+    }
+  }
+
   async function addToShortlist(submissionId: string) {
     if (!liveCase) return;
     const nextOrder = selectedSubmissions.reduce((max, entry) => Math.max(max, entry.finalOrder ?? 0), 0) + 1;
@@ -326,7 +335,7 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
             <div className="mt-5 grid gap-2">
               {liveCase?.state === "draft" ? <button type="button" onClick={() => void transition("ready")} className="rounded-xl bg-black px-4 py-3 text-left text-sm text-white">Подготовка завершена</button> : null}
               {liveCase?.state === "ready" ? <button type="button" onClick={() => void transition("open", new Date(Date.now() + 3 * 60 * 1000).toISOString())} className="rounded-xl bg-[#040082] px-4 py-3 text-left text-sm text-white">Открыть ответы на 3 минуты</button> : null}
-              {liveCase?.state === "open" ? <div className="rounded-xl bg-[#f5f4fb] px-4 py-3 text-sm text-black/65">Ответы закроются автоматически. AI-анализ запустится через {LIVE_ROUND_SETTLE_GRACE_MS / 1000} секунд после дедлайна.</div> : null}
+              {liveCase?.state === "open" ? <div className="grid gap-2 rounded-xl bg-[#f5f4fb] px-4 py-3 text-sm text-black/65"><span>Ответы закроются автоматически. AI-анализ запустится через {LIVE_ROUND_SETTLE_GRACE_MS / 1000} секунд после дедлайна.</span><button type="button" disabled={pending} onClick={() => void resetTimer()} className="justify-self-start rounded-full border border-black/15 px-3 py-1.5 text-xs text-black hover:bg-white disabled:opacity-40">Сбросить таймер (+3 минуты)</button></div> : null}
               {liveCase?.state === "open" && liveCase.closesAt && isAnalysisReady(Date.parse(liveCase.closesAt), clockMs) ? <button type="button" onClick={() => void analyze()} className="rounded-xl bg-black px-4 py-3 text-left text-sm text-white">Запустить AI-анализ</button> : null}
               {liveCase?.state === "analyzing" ? <button type="button" onClick={() => void transition("shortlist_ready")} className="rounded-xl border border-black/10 px-4 py-3 text-left text-sm text-black">Ручной режим: открыть shortlist</button> : null}
               {liveCase?.state === "shortlist_ready" ? <button type="button" onClick={() => { setDialog({ kind: "awards", id: liveCase.id }); setDialogReason(""); }} className="rounded-xl bg-black px-4 py-3 text-left text-sm text-white">Опубликовать топ-3</button> : null}
