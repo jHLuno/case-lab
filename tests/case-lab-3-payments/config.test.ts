@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { SignJWT } from "jose";
+import { decodeJwt, SignJWT } from "jose";
 
 import { configModule, jwtModule } from "./server-only-test-loader";
 
@@ -91,6 +91,20 @@ test("CRM verification rejects a valid JWT with the wrong role", async () => {
     .setExpirationTime("1h")
     .sign(new TextEncoder().encode("s".repeat(32)));
   assert.equal(await verifyToken(token), false);
+});
+
+test("CRM JWT and auth cookie both use a 12-hour session lifetime", async () => {
+  const { createToken } = await jwtModule;
+  process.env.JWT_SECRET = "s".repeat(32);
+
+  const token = await createToken();
+  const payload = decodeJwt(token);
+  assert.equal(typeof payload.exp, "number");
+  assert.equal(typeof payload.iat, "number");
+  assert.equal((payload.exp as number) - (payload.iat as number), 12 * 60 * 60);
+
+  const loginSource = await readFile("app/api/auth/login/route.ts", "utf8");
+  assert.match(loginSource, /maxAge:\s*CRM_SESSION_TTL_SECONDS/);
 });
 
 test("CRM login does not depend on process-local rate limiting", async () => {

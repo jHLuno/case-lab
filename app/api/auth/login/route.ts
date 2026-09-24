@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { timingSafeEqual } from "node:crypto";
 
-import { createToken } from "../../../lib/jwt";
+import { createToken, CRM_SESSION_TTL_SECONDS } from "../../../lib/jwt";
 import { getHashedClientIp, noStoreJson, parseJsonBody, readBoundedBody, requireJson, RequestGuardError } from "../../../lib/case-lab-3/http.server";
 import { getCaseLab3AdminClient, type CaseLab3RateLimitRpcData } from "../../../lib/case-lab-3/supabase-admin.server";
 
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 3600, // 1 hour
+      maxAge: CRM_SESSION_TTL_SECONDS,
       path: "/",
     });
 

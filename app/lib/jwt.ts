@@ -2,6 +2,8 @@ import "server-only";
 
 import { SignJWT, jwtVerify } from "jose";
 
+export const CRM_SESSION_TTL_SECONDS = 12 * 60 * 60;
+
 function getSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET;
   if (!secret || secret.length < 32) {
@@ -16,7 +18,7 @@ export async function createToken(): Promise<string> {
     .setIssuer("caselab.kz")
     .setAudience("caselab-crm")
     .setIssuedAt()
-    .setExpirationTime("1h")
+    .setExpirationTime(`${CRM_SESSION_TTL_SECONDS}s`)
     .sign(getSecret());
 }
 
