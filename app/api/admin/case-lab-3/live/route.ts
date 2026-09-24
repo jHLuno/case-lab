@@ -9,6 +9,7 @@ import {
   type OperatorCase,
 } from "@/lib/case-lab-3/live/operator.server";
 import type { PaymentEnvironment } from "@/lib/case-lab-3/contracts";
+import { caseLab3LiveArchivedResponse, isCaseLab3LiveArchived } from "@/lib/case-lab-3/live/archive.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -96,8 +97,9 @@ export async function handlePut(request: Request, dependencies: Partial<LiveDash
     const session = await active.requireCrmAdmin();
     if (!session) return noStoreJson({ error: "unauthorized" }, { status: 401 });
     if (!active.verifyCrmMutation(request, session, undefined, { requireIdempotencyKey: true })) return noStoreJson({ error: "forbidden" }, { status: 403 });
-    requireJson(request);
     const environment = active.getEnvironment();
+    if (isCaseLab3LiveArchived(environment)) return caseLab3LiveArchivedResponse();
+    requireJson(request);
     const input = parseCaseInput(parseJsonBody(await readBoundedBody(request, MAX_BODY_BYTES)), environment);
     if (!input) return noStoreJson({ error: "invalid_request" }, { status: 400 });
     return noStoreJson(await active.saveCase(input));

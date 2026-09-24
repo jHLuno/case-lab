@@ -97,6 +97,23 @@ test("CRM live page is protected and exposes operator controls", async () => {
   assert.match(nav, /\/crm\/case-lab-3\/live\//u);
 });
 
+test("production live pages close publicly and the authenticated CRM page becomes a read-only archive", async () => {
+  const participantPage = await readFile(PAGE, "utf8");
+  const leaderboardPage = await readFile(LEADERBOARD_PAGE, "utf8");
+  const crmPage = await readFile(CRM_PAGE, "utf8");
+  const crmClient = await readFile(CRM_CLIENT, "utf8");
+
+  for (const page of [participantPage, leaderboardPage]) {
+    assert.match(page, /isCaseLab3LiveArchived/u);
+    assert.match(page, /notFound\(\)/u);
+  }
+  assert.match(crmPage, /isCaseLab3LiveArchived/u);
+  assert.match(crmPage, /readOnly\s*=\{[^}]*isCaseLab3LiveArchived/u);
+  assert.match(crmClient, /readOnly\s*=\s*false/u);
+  assert.match(crmClient, /Мероприятие завершено|режим просмотра/iu);
+  assert.match(crmClient, /!readOnly/u);
+});
+
 test("public leaderboard page polls a sanitized projection", async () => {
   const page = await readFile(LEADERBOARD_PAGE, "utf8");
   const client = await readFile(LEADERBOARD_CLIENT, "utf8");

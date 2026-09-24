@@ -3,6 +3,7 @@ import "server-only";
 import { noStoreJson } from "@/lib/case-lab-3/http.server";
 import { getPublicPaymentEnvironment } from "@/lib/case-lab-3/orders.server";
 import { getPublicLeaderboardData, type PublicLeaderboardData } from "@/lib/case-lab-3/live/public.server";
+import { caseLab3LiveArchivedResponse, isCaseLab3LiveArchived } from "@/lib/case-lab-3/live/archive.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -20,7 +21,9 @@ const productionDependencies: PublicLeaderboardRouteDependencies = {
 export async function handleGet(_request: Request, dependencies: Partial<PublicLeaderboardRouteDependencies> = {}): Promise<Response> {
   const active = { ...productionDependencies, ...dependencies };
   try {
-    const data = await active.getPublicData(active.getEnvironment());
+    const environment = active.getEnvironment();
+    if (isCaseLab3LiveArchived(environment)) return caseLab3LiveArchivedResponse();
+    const data = await active.getPublicData(environment);
     return noStoreJson({
       entries: data.entries.slice(0, 10).map((entry) => ({ displayName: entry.displayName, points: entry.points, rank: entry.rank })),
       activeCase: data.activeCase,

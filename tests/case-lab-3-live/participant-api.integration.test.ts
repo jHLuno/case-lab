@@ -150,6 +150,68 @@ test("logout expires the live cookie", async () => {
   assert.equal((cookies.writes[0]?.options as { maxAge?: number }).maxAge, 0);
 });
 
+test("production live archive blocks participant reads, claims, and submissions but preserves logout", async () => {
+  const nodeEnvironment = process.env as unknown as Record<string, string | undefined>;
+  const originalNodeEnv = nodeEnvironment.NODE_ENV;
+  nodeEnvironment.NODE_ENV = "production";
+  try {
+    let participantCalls = 0;
+    const archived = { status: 410, body: { error: "event_ended" } };
+    const state = await handleGet(new Request(`${ORIGIN}/api/case-lab-3/live/state`), {
+      getEnvironment: () => "live",
+      getCookies: async () => cookieStore().store,
+      authorizeParticipant: async () => { participantCalls += 1; return authorizedParticipant; },
+      loadState: async () => { participantCalls += 1; throw new Error("must not read state"); },
+    });
+    assert.equal(state.status, archived.status);
+    assert.deepEqual(await state.json(), archived.body);
+
+    const leaderboard = await getPublicLeaderboard(new Request(`${ORIGIN}/api/case-lab-3/live/leaderboard`), {
+      getEnvironment: () => "live",
+      getPublicData: async () => { participantCalls += 1; throw new Error("must not read leaderboard"); },
+    });
+    assert.equal(leaderboard.status, archived.status);
+    assert.deepEqual(await leaderboard.json(), archived.body);
+
+    const cookies = cookieStore("");
+    const claim = await handlePost(
+      jsonRequest("/api/case-lab-3/live/session", "POST", { firstName: "Тест", lastName: "Участник" }),
+      {
+        getEnvironment: () => "live",
+        claimParticipant: async () => { participantCalls += 1; throw new Error("must not claim participant"); },
+        getCookies: async () => cookies.store,
+      },
+    );
+    assert.equal(claim.status, archived.status);
+    assert.deepEqual(await claim.json(), archived.body);
+
+    const submission = await handlePut(
+      jsonRequest(`/api/case-lab-3/live/cases/${CASE_ID}/submission`, "PUT", { answer: "ответ" }),
+      { params: Promise.resolve({ id: CASE_ID }) },
+      {
+        getEnvironment: () => "live",
+        getCookies: async () => cookieStore().store,
+        authorizeParticipant: async () => { participantCalls += 1; return authorizedParticipant; },
+        saveSubmission: async () => { participantCalls += 1; throw new Error("must not save answer"); },
+      },
+    );
+    assert.equal(submission.status, archived.status);
+    assert.deepEqual(await submission.json(), archived.body);
+    assert.equal(participantCalls, 0);
+
+    const logoutCookies = cookieStore();
+    const logout = await handleDelete(new Request(`${ORIGIN}/api/case-lab-3/live/session`, {
+      method: "DELETE",
+      headers: { origin: ORIGIN },
+    }), { getCookies: async () => logoutCookies.store });
+    assert.equal(logout.status, 200);
+    assert.equal(logoutCookies.writes[0]?.value, "");
+  } finally {
+    if (originalNodeEnv === undefined) delete nodeEnvironment.NODE_ENV;
+    else nodeEnvironment.NODE_ENV = originalNodeEnv;
+  }
+});
+
 test("state rejects a missing session and returns only sanitized participant data", async () => {
   const missing = cookieStore("");
   const missingResponse = await handleGet(new Request(`${ORIGIN}/api/case-lab-3/live/state`), {

@@ -11,6 +11,7 @@ import {
   RequestGuardError,
 } from "@/lib/case-lab-3/http.server";
 import { getPublicPaymentEnvironment } from "@/lib/case-lab-3/orders.server";
+import { caseLab3LiveArchivedResponse, isCaseLab3LiveArchived } from "@/lib/case-lab-3/live/archive.server";
 import { claimLiveParticipant } from "@/lib/case-lab-3/live/repository.server";
 import {
   issueLiveSession,
@@ -61,6 +62,8 @@ export async function handlePost(
 ): Promise<Response> {
   const active = { ...productionDependencies, ...dependencies };
   try {
+    if (isCaseLab3LiveArchived(active.getEnvironment())) return caseLab3LiveArchivedResponse();
+
     requireSameOrigin(request);
     requireJson(request);
     const input = parseParticipantClaim(parseJsonBody(await readBoundedBody(request, MAX_BODY_BYTES)));

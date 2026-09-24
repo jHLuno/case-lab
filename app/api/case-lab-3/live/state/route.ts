@@ -3,6 +3,7 @@ import "server-only";
 import { cookies } from "next/headers";
 
 import { noStoreJson } from "@/lib/case-lab-3/http.server";
+import { caseLab3LiveArchivedResponse, isCaseLab3LiveArchived } from "@/lib/case-lab-3/live/archive.server";
 import { getPublicPaymentEnvironment } from "@/lib/case-lab-3/orders.server";
 import type { PaymentEnvironment } from "@/lib/case-lab-3/contracts";
 import type { LiveParticipantStateResponse, LiveSession } from "@/lib/case-lab-3/live/contracts";
@@ -42,7 +43,10 @@ export async function handleGet(
     const session = parseLiveSession(rawSession);
     if (!session) return noStoreJson({ error: "unauthorized" }, { status: 401 });
 
-    const participant = await active.authorizeParticipant(session, active.getEnvironment());
+    const environment = active.getEnvironment();
+    if (isCaseLab3LiveArchived(environment)) return caseLab3LiveArchivedResponse();
+
+    const participant = await active.authorizeParticipant(session, environment);
     if (!participant) return noStoreJson({ error: "unauthorized" }, { status: 401 });
     return noStoreJson(await active.loadState(participant));
   } catch {

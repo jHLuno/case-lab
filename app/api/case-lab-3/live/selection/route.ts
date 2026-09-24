@@ -9,6 +9,7 @@ import {
   RequestGuardError,
 } from "@/lib/case-lab-3/http.server";
 import { selectSpeakerAwards } from "@/lib/case-lab-3/live/operator.server";
+import { caseLab3LiveArchivedResponse, isCaseLab3LiveArchived } from "@/lib/case-lab-3/live/archive.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -28,6 +29,8 @@ const productionDependencies: Dependencies = { selectAwards: selectSpeakerAwards
 export async function handlePost(request: Request, dependencies: Partial<Dependencies> = {}): Promise<Response> {
   const active = { ...productionDependencies, ...dependencies };
   try {
+    if (isCaseLab3LiveArchived("live")) return caseLab3LiveArchivedResponse();
+
     requireSameOrigin(request);
     requireJson(request);
     const body = parseJsonBody(await readBoundedBody(request, 4096));

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
+import { isCaseLab3LiveArchived } from "@/lib/case-lab-3/live/archive.server";
 import LiveParticipantClient from "./LiveParticipantClient";
 import styles from "./live.module.css";
 
@@ -15,6 +17,8 @@ export const metadata: Metadata = {
 };
 
 export default function CaseLab3LivePage() {
+  if (isCaseLab3LiveArchived("live")) notFound();
+
   return (
     <main className={styles.page}>
       <LiveParticipantClient />

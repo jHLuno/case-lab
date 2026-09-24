@@ -3,6 +3,7 @@ import "server-only";
 import { requireCrmAdmin, verifyCrmMutation } from "@/lib/crm-auth.server";
 import { noStoreJson, parseJsonBody, readBoundedBody, requireJson, RequestGuardError } from "@/lib/case-lab-3/http.server";
 import { resolveLiveTie } from "@/lib/case-lab-3/live/operator.server";
+import { caseLab3LiveArchivedResponse, isCaseLab3LiveArchived } from "@/lib/case-lab-3/live/archive.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -18,6 +19,7 @@ export async function handlePost(request: Request, dependencies: Partial<Depende
     const session = await active.requireCrmAdmin();
     if (!session) return noStoreJson({ error: "unauthorized" }, { status: 401 });
     if (!active.verifyCrmMutation(request, session, undefined, { requireIdempotencyKey: true })) return noStoreJson({ error: "forbidden" }, { status: 403 });
+    if (isCaseLab3LiveArchived(active.getEnvironment())) return caseLab3LiveArchivedResponse();
     requireJson(request);
     const body = parseJsonBody(await readBoundedBody(request, 8192));
     if (!isRecord(body) || !Array.isArray(body.decisions) || body.decisions.length < 2 || typeof body.reason !== "string" || body.reason.trim().length < 3 || body.reason.length > 500) return noStoreJson({ error: "invalid_request" }, { status: 400 });

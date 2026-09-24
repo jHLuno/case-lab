@@ -3,7 +3,8 @@ import test from "node:test";
 
 import "../case-lab-3-payments/server-only-test-loader";
 
-import { handleGet as getLive } from "../../app/api/admin/case-lab-3/live/route";
+import { handleGet as getLive, handlePut as saveLiveCase } from "../../app/api/admin/case-lab-3/live/route";
+import { handlePost as issueSpeakerSession } from "../../app/api/admin/case-lab-3/live/speaker-session/route";
 import { handlePost as transition } from "../../app/api/admin/case-lab-3/live/cases/[id]/transition/route";
 import { handlePost as resetTimer } from "../../app/api/admin/case-lab-3/live/cases/[id]/reset-timer/route";
 import { handlePost as rubric } from "../../app/api/admin/case-lab-3/live/cases/[id]/rubric/route";
@@ -12,6 +13,9 @@ import { handlePost as awards } from "../../app/api/admin/case-lab-3/live/cases/
 import { handlePatch as shortlist } from "../../app/api/admin/case-lab-3/live/cases/[id]/shortlist/route";
 import { handlePost as reset } from "../../app/api/admin/case-lab-3/live/participants/[id]/reset/route";
 import { handlePost as tieBreak } from "../../app/api/admin/case-lab-3/live/tie-breaks/route";
+import { handlePost as analyzeArchive } from "../../app/api/admin/case-lab-3/live/cases/[id]/analyze/route";
+import { handlePost as awardArchive } from "../../app/api/admin/case-lab-3/live/cases/[id]/awards/route";
+import { handlePost as resetTimerArchive } from "../../app/api/admin/case-lab-3/live/cases/[id]/reset-timer/route";
 
 const ORIGIN = "https://caselab.kz";
 const CASE_ID = "00000000-0000-4000-8000-000000000101";
@@ -57,6 +61,47 @@ test("operator dashboard ignores test environment overrides", async () => {
   });
   assert.equal(response.status, 200);
   assert.equal(requestedEnvironment, "live");
+});
+
+test("production CRM archive preserves snapshot reads and rejects every live write", async () => {
+  const nodeEnvironment = process.env as unknown as Record<string, string | undefined>;
+  const originalNodeEnv = nodeEnvironment.NODE_ENV;
+  nodeEnvironment.NODE_ENV = "production";
+  try {
+    let snapshotCalls = 0;
+    const snapshot = await getLive(request("/api/admin/case-lab-3/live", "GET"), {
+      ...auth,
+      getEnvironment: () => "live",
+      getSnapshot: async () => {
+        snapshotCalls += 1;
+        return { environment: "live", cases: [], participants: [], submissions: [], aiRuns: [], shortlist: [], awards: [], tieBreaks: [], leaderboard: [] };
+      },
+    });
+    assert.equal(snapshot.status, 200);
+    assert.equal(snapshotCalls, 1);
+
+    const writes = [
+      await saveLiveCase(request("/api/admin/case-lab-3/live", "PUT", {}), auth),
+      await issueSpeakerSession(request("/api/admin/case-lab-3/live/speaker-session", "POST", {}), auth),
+      await tieBreak(request("/api/admin/case-lab-3/live/tie-breaks", "POST", {}), auth),
+      await analyzeArchive(request(`/api/admin/case-lab-3/live/cases/${CASE_ID}/analyze`, "POST", {}), routeContext, auth),
+      await awardArchive(request(`/api/admin/case-lab-3/live/cases/${CASE_ID}/awards`, "POST", {}), routeContext, auth),
+      await resetTimerArchive(request(`/api/admin/case-lab-3/live/cases/${CASE_ID}/reset-timer`, "POST", {}), routeContext, auth),
+      await rubric(request(`/api/admin/case-lab-3/live/cases/${CASE_ID}/rubric`, "POST", {}), routeContext, auth),
+      await shortlist(request(`/api/admin/case-lab-3/live/cases/${CASE_ID}/shortlist`, "PATCH", {}), routeContext, auth),
+      await transition(request(`/api/admin/case-lab-3/live/cases/${CASE_ID}/transition`, "POST", {}), routeContext, auth),
+      await reset(request("/api/admin/case-lab-3/live/participants/00000000-0000-4000-8000-000000000201/reset", "POST", {}), { params: Promise.resolve({ id: "00000000-0000-4000-8000-000000000201" }) }, auth),
+    ];
+
+    for (const response of writes) {
+      assert.equal(response.status, 410);
+      assert.deepEqual(await response.json(), { error: "event_ended" });
+      assert.equal(response.headers.get("cache-control"), "no-store");
+    }
+  } finally {
+    if (originalNodeEnv === undefined) delete nodeEnvironment.NODE_ENV;
+    else nodeEnvironment.NODE_ENV = originalNodeEnv;
+  }
 });
 
 test("operator mutations require CRM mutation verification", async () => {

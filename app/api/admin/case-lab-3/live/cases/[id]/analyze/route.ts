@@ -10,6 +10,7 @@ import {
   transitionLiveCase,
 } from "@/lib/case-lab-3/live/operator.server";
 import type { LiveTransitionCaseRpcResult } from "@/lib/case-lab-3/database.types";
+import { caseLab3LiveArchivedResponse, isCaseLab3LiveArchived } from "@/lib/case-lab-3/live/archive.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -47,6 +48,7 @@ export async function handlePost(request: Request, context: { params: Promise<{ 
     const session = await active.requireCrmAdmin();
     if (!session) return noStoreJson({ error: "unauthorized" }, { status: 401 });
     if (!active.verifyCrmMutation(request, session, undefined, { requireIdempotencyKey: true })) return noStoreJson({ error: "forbidden" }, { status: 403 });
+    if (isCaseLab3LiveArchived(active.getEnvironment())) return caseLab3LiveArchivedResponse();
     requireJson(request);
     const body = parseJsonBody(await readBoundedBody(request, 4096));
     const { id } = await context.params;

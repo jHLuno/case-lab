@@ -4,6 +4,7 @@ import { requireCrmAdmin, verifyCrmMutation } from "@/lib/crm-auth.server";
 import { noStoreJson, parseJsonBody, readBoundedBody, requireJson, RequestGuardError } from "@/lib/case-lab-3/http.server";
 import { transitionLiveCase } from "@/lib/case-lab-3/live/operator.server";
 import type { LiveCaseState } from "@/lib/case-lab-3/live/contracts";
+import { caseLab3LiveArchivedResponse, isCaseLab3LiveArchived } from "@/lib/case-lab-3/live/archive.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -25,6 +26,7 @@ export async function handlePost(request: Request, context: { params: Promise<{ 
     const session = await active.requireCrmAdmin();
     if (!session) return noStoreJson({ error: "unauthorized" }, { status: 401 });
     if (!active.verifyCrmMutation(request, session, undefined, { requireIdempotencyKey: true })) return noStoreJson({ error: "forbidden" }, { status: 403 });
+    if (isCaseLab3LiveArchived()) return caseLab3LiveArchivedResponse();
     requireJson(request);
     const { id } = await context.params;
     const body = parseJsonBody(await readBoundedBody(request, 4096));

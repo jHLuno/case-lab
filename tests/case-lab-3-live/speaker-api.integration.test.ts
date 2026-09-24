@@ -68,3 +68,25 @@ test("public speaker selection requires exactly three distinct shortlist positio
   assert.deepEqual(await valid.json(), { status: "published", stateVersion: 8 });
   assert.equal(calls, 1);
 });
+
+test("public speaker selection is archived in production before publishing awards", async () => {
+  const nodeEnvironment = process.env as unknown as Record<string, string | undefined>;
+  const originalNodeEnv = nodeEnvironment.NODE_ENV;
+  nodeEnvironment.NODE_ENV = "production";
+  try {
+    let calls = 0;
+    const response = await selectSpeakerAwards(request("/api/case-lab-3/live/selection", {
+      caseId: CASE_ID,
+      candidateIndexes: [0, 1, 2],
+    }), {
+      selectAwards: async () => { calls += 1; throw new Error("must not publish awards"); },
+    });
+    assert.equal(response.status, 410);
+    assert.deepEqual(await response.json(), { error: "event_ended" });
+    assert.equal(response.headers.get("cache-control"), "no-store");
+    assert.equal(calls, 0);
+  } finally {
+    if (originalNodeEnv === undefined) delete nodeEnvironment.NODE_ENV;
+    else nodeEnvironment.NODE_ENV = originalNodeEnv;
+  }
+});

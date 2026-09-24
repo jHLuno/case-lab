@@ -91,7 +91,7 @@ function ConfirmDialog({ title, description, reason, onReasonChange, onCancel, o
   );
 }
 
-export default function LiveOperatorClient({ csrfToken }: { csrfToken: string }) {
+export default function LiveOperatorClient({ csrfToken, readOnly = false }: { csrfToken: string; readOnly?: boolean }) {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [selectedCase, setSelectedCase] = useState(1);
@@ -140,6 +140,10 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
   }, []);
 
   async function mutate(path: string, body: Record<string, unknown>, method = "POST"): Promise<boolean> {
+    if (readOnly) {
+      setMessage("Live-мероприятие завершено. CRM открыт в режиме просмотра.");
+      return false;
+    }
     setPending(true);
     try {
       const response = await fetch(path, {
@@ -271,6 +275,7 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
   const latestRun = snapshot?.aiRuns.find((run) => run.caseId === liveCase?.id);
 
   useEffect(() => {
+    if (readOnly) return;
     if (!liveCase || liveCase.state !== "open" || !liveCase.closesAt || autoAnalyzedRounds.current.has(liveCase.id)) return;
     const delay = analysisDelayMs(Date.parse(liveCase.closesAt), Date.now());
     const timer = window.setTimeout(() => {
@@ -281,7 +286,7 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
     return () => window.clearTimeout(timer);
   // The selected round id/state/deadline are the intentional trigger; the callback uses the matching snapshot.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [liveCase?.id, liveCase?.state, liveCase?.closesAt]);
+  }, [readOnly, liveCase?.id, liveCase?.state, liveCase?.closesAt]);
 
   return (
     <div style={{ fontFamily: "var(--font-body)" }}>
@@ -293,14 +298,16 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
         </div>
       </header>
 
+      {readOnly ? <p className="mb-5 rounded-2xl border border-[#040082]/15 bg-white px-5 py-4 text-sm leading-6 text-black/65" role="status">Мероприятие завершено. Данные, ответы, результаты AI-анализа и начисленные баллы доступны только для просмотра; изменения отключены.</p> : null}
+
       {loading && !snapshot ? <p className="rounded-2xl bg-white p-6 text-sm text-black/50">Загрузка live-состояния...</p> : null}
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(300px,.6fr)]">
         <section className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm md:p-7">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-xl font-semibold text-black" style={{ fontFamily: "var(--font-heading)" }}>Подготовка кейсов</h2>
-              <p className="mt-1 text-sm text-black/50">Эталон спикера и вопрос задаются до начала эфира.</p>
+              <h2 className="text-xl font-semibold text-black" style={{ fontFamily: "var(--font-heading)" }}>{readOnly ? "Архив кейсов" : "Подготовка кейсов"}</h2>
+              <p className="mt-1 text-sm text-black/50">{readOnly ? "Сохранённые материалы мероприятия." : "Эталон спикера и вопрос задаются до начала эфира."}</p>
             </div>
             <div className="flex gap-2">
               {[1, 2, 3].map((number) => <button key={number} type="button" onClick={() => { setSelectedCase(number); setSelectedQuestion(1); }} className={`rounded-full px-4 py-2 text-sm ${selectedCase === number ? "bg-black text-white" : "border border-black/10 text-black/55"}`}>Кейс {number}</button>)}
@@ -313,19 +320,30 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
               return <button key={number} type="button" onClick={() => setSelectedQuestion(number)} className={`rounded-full px-3 py-1.5 text-sm ${selectedQuestion === number ? "bg-[#040082] text-white" : "border border-black/10 text-black/55"}`}>#{number}{questionCase ? ` · ${questionCase.state}` : ""}</button>;
             })}
           </div>
-          <form onSubmit={saveCase} className="grid gap-4">
-            {(["speakerLabel", "title", "question", "referenceAnswer", "context", "keyInsight"] as const).map((field) => (
-              <label key={field} className="grid gap-1.5 text-sm text-black/70">
-                {({ speakerLabel: "Спикер", title: "Название", question: "Вопрос аудитории", referenceAnswer: "Действительный ответ спикера", context: "Контекст", keyInsight: "Главный инсайт" } as Record<string, string>)[field]}
-                {field === "question" || field === "referenceAnswer" || field === "context" || field === "keyInsight" ? <textarea value={drafts[draftKey]?.[field] ?? draftFromCase(liveCase, selectedCase)[field]} onChange={(event) => updateDraft(selectedCase, field, event.target.value)} rows={field === "referenceAnswer" ? 4 : 2} className="rounded-xl border border-black/10 px-3 py-2 text-black outline-none focus:border-[#040082] focus:ring-2 focus:ring-[#040082]/10" /> : <input value={drafts[draftKey]?.[field] ?? draftFromCase(liveCase, selectedCase)[field]} onChange={(event) => updateDraft(selectedCase, field, event.target.value)} className="rounded-xl border border-black/10 px-3 py-2 text-black outline-none focus:border-[#040082] focus:ring-2 focus:ring-[#040082]/10" />}
-              </label>
-            ))}
-            <div className="flex flex-wrap gap-2">
-              <button type="submit" disabled={pending} className="rounded-full bg-black px-5 py-2.5 text-sm text-white disabled:opacity-40">Сохранить кейс</button>
-              <button type="button" disabled={pending || !liveCase} onClick={() => void generateRubric()} className="rounded-full border border-black/10 px-5 py-2.5 text-sm text-black disabled:opacity-40">Сгенерировать критерии</button>
-              <button type="button" disabled={pending || !liveCase?.generatedRubric.criteria?.length} onClick={() => void approveRubric()} className="rounded-full border border-black/10 px-5 py-2.5 text-sm text-black disabled:opacity-40">Утвердить критерии</button>
-            </div>
-          </form>
+          {readOnly ? (
+            <dl className="grid gap-4">
+              {(["speakerLabel", "title", "question", "referenceAnswer", "context", "keyInsight"] as const).map((field) => (
+                <div key={field} className="grid gap-1.5 text-sm">
+                  <dt className="text-black/50">{({ speakerLabel: "Спикер", title: "Название", question: "Вопрос аудитории", referenceAnswer: "Действительный ответ спикера", context: "Контекст", keyInsight: "Главный инсайт" } as Record<string, string>)[field]}</dt>
+                  <dd className="whitespace-pre-wrap rounded-xl bg-[#f5f4fb] px-3 py-2 text-black/80">{liveCase?.[field === "referenceAnswer" ? "speakerReferenceAnswer" : field] || "—"}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : (
+            <form onSubmit={saveCase} className="grid gap-4">
+              {(["speakerLabel", "title", "question", "referenceAnswer", "context", "keyInsight"] as const).map((field) => (
+                <label key={field} className="grid gap-1.5 text-sm text-black/70">
+                  {({ speakerLabel: "Спикер", title: "Название", question: "Вопрос аудитории", referenceAnswer: "Действительный ответ спикера", context: "Контекст", keyInsight: "Главный инсайт" } as Record<string, string>)[field]}
+                  {field === "question" || field === "referenceAnswer" || field === "context" || field === "keyInsight" ? <textarea value={drafts[draftKey]?.[field] ?? draftFromCase(liveCase, selectedCase)[field]} onChange={(event) => updateDraft(selectedCase, field, event.target.value)} rows={field === "referenceAnswer" ? 4 : 2} className="rounded-xl border border-black/10 px-3 py-2 text-black outline-none focus:border-[#040082] focus:ring-2 focus:ring-[#040082]/10" /> : <input value={drafts[draftKey]?.[field] ?? draftFromCase(liveCase, selectedCase)[field]} onChange={(event) => updateDraft(selectedCase, field, event.target.value)} className="rounded-xl border border-black/10 px-3 py-2 text-black outline-none focus:border-[#040082] focus:ring-2 focus:ring-[#040082]/10" />}
+                </label>
+              ))}
+              <div className="flex flex-wrap gap-2">
+                <button type="submit" disabled={pending} className="rounded-full bg-black px-5 py-2.5 text-sm text-white disabled:opacity-40">Сохранить кейс</button>
+                <button type="button" disabled={pending || !liveCase} onClick={() => void generateRubric()} className="rounded-full border border-black/10 px-5 py-2.5 text-sm text-black disabled:opacity-40">Сгенерировать критерии</button>
+                <button type="button" disabled={pending || !liveCase?.generatedRubric.criteria?.length} onClick={() => void approveRubric()} className="rounded-full border border-black/10 px-5 py-2.5 text-sm text-black disabled:opacity-40">Утвердить критерии</button>
+              </div>
+            </form>
+          )}
           {liveCase?.generatedRubric.criteria?.length ? <div className="mt-5 rounded-xl bg-[#f5f4fb] p-4 text-sm text-black/65"><strong className="text-black">Черновик критериев:</strong> {liveCase.generatedRubric.criteria.map((criterion) => criterion.name).join(", ")}</div> : null}
         </section>
 
@@ -333,21 +351,24 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
           <section className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
             <div className="flex items-start justify-between gap-3"><div><h2 className="text-xl font-semibold text-black" style={{ fontFamily: "var(--font-heading)" }}>Управление эфиром</h2><p className="mt-1 text-sm text-black/50">Текущее состояние: {liveCase?.state ?? "draft"}</p></div><span className="rounded-full bg-[#f5f4fb] px-3 py-1 text-xs text-black/55">v{liveCase?.stateVersion ?? 1}</span></div>
             <div className="mt-5 grid gap-2">
+              {readOnly ? <p className="rounded-xl bg-[#f5f4fb] px-4 py-3 text-sm text-black/65">Архивное состояние: {liveCase?.state ?? "—"}. Управление таймером, анализом и начислениями отключено.</p> : null}
+              {!readOnly ? <>
               {liveCase?.state === "draft" ? <button type="button" onClick={() => void transition("ready")} className="rounded-xl bg-black px-4 py-3 text-left text-sm text-white">Подготовка завершена</button> : null}
               {liveCase?.state === "ready" ? <button type="button" onClick={() => void transition("open", new Date(Date.now() + 3 * 60 * 1000).toISOString())} className="rounded-xl bg-[#040082] px-4 py-3 text-left text-sm text-white">Открыть ответы на 3 минуты</button> : null}
               {liveCase?.state === "open" ? <div className="grid gap-2 rounded-xl bg-[#f5f4fb] px-4 py-3 text-sm text-black/65"><span>Ответы закроются автоматически. AI-анализ запустится через {LIVE_ROUND_SETTLE_GRACE_MS / 1000} секунд после дедлайна.</span><button type="button" disabled={pending} onClick={() => void resetTimer()} className="justify-self-start rounded-full border border-black/15 px-3 py-1.5 text-xs text-black hover:bg-white disabled:opacity-40">Сбросить таймер (+3 минуты)</button></div> : null}
               {liveCase?.state === "open" && liveCase.closesAt && isAnalysisReady(Date.parse(liveCase.closesAt), clockMs) ? <button type="button" onClick={() => void analyze()} className="rounded-xl bg-black px-4 py-3 text-left text-sm text-white">Запустить AI-анализ</button> : null}
               {liveCase?.state === "analyzing" ? <button type="button" onClick={() => void transition("shortlist_ready")} className="rounded-xl border border-black/10 px-4 py-3 text-left text-sm text-black">Ручной режим: открыть shortlist</button> : null}
               {liveCase?.state === "shortlist_ready" ? <div className="grid gap-2"><p className="rounded-xl bg-[#f5f4fb] px-4 py-3 text-sm text-black/65">выбор проходит прямо на /live/leaderboard</p><button type="button" disabled={pending} onClick={() => { setDialog({ kind: "awards", id: liveCase.id }); setDialogReason(""); }} className="rounded-xl bg-black px-4 py-3 text-left text-sm text-white disabled:opacity-40">Опубликовать топ-3 вручную</button></div> : null}
+              </> : null}
             </div>
-            {latestRun?.status === "failed" ? <p className="mt-4 rounded-xl bg-[#fff4f1] p-3 text-sm text-[#9a3325]">AI недоступен. Используйте ручной режим.</p> : null}
+            {latestRun?.status === "failed" ? <p className="mt-4 rounded-xl bg-[#fff4f1] p-3 text-sm text-[#9a3325]">{readOnly ? "AI-анализ этого вопроса не завершился успешно." : "AI недоступен. Используйте ручной режим."}</p> : null}
           </section>
 
           <section className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
             <h2 className="text-xl font-semibold text-black" style={{ fontFamily: "var(--font-heading)" }}>Участники</h2>
             <p className="mt-1 text-sm text-black/50">Заявлено: {snapshot?.participants.length ?? 0}. Полные данные видны только CRM.</p>
             <div className="mt-4 grid gap-2">
-              {(snapshot?.participants ?? []).slice(0, 8).map((participant) => <div key={participant.id} className="flex items-center justify-between gap-3 rounded-xl bg-[#f5f4fb] px-3 py-2 text-sm"><span className="truncate text-black">{participant.displayName}</span><button type="button" onClick={() => { setDialog({ kind: "reset", id: participant.id }); setDialogReason(""); }} className="shrink-0 text-xs text-black/55 underline">Сбросить участника</button></div>)}
+              {(snapshot?.participants ?? []).slice(0, 8).map((participant) => <div key={participant.id} className="flex items-center justify-between gap-3 rounded-xl bg-[#f5f4fb] px-3 py-2 text-sm"><span className="truncate text-black">{participant.displayName}</span>{!readOnly ? <button type="button" onClick={() => { setDialog({ kind: "reset", id: participant.id }); setDialogReason(""); }} className="shrink-0 text-xs text-black/55 underline">Сбросить участника</button> : null}</div>)}
             </div>
           </section>
         </div>
@@ -356,9 +377,9 @@ export default function LiveOperatorClient({ csrfToken }: { csrfToken: string })
       <section className="mt-5 rounded-2xl border border-black/10 bg-white p-5 shadow-sm md:p-7">
         <div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-xl font-semibold text-black" style={{ fontFamily: "var(--font-heading)" }}>Ответы и shortlist</h2><p className="mt-1 text-sm text-black/50">AI помогает сузить выбор. Баллы начисляются только сервером после решения спикера.</p></div><span className="text-sm text-black/45">Ответов: {caseSubmissions.length} · В shortlist: {selectedSubmissions.length}</span></div>
         <div className="mt-5 grid gap-3 lg:grid-cols-2">
-          {caseSubmissions.map((submission) => { const shortlistEntry = snapshot?.shortlist.find((entry) => entry.submissionId === submission.id); return <article key={submission.id} className="rounded-xl border border-black/10 p-4"><div className="flex justify-between gap-3 text-xs text-black/45"><span className="font-medium text-black/70">{submission.displayName}</span><span>{shortlistEntry?.approachLabel ?? "Ответ участника"} · {shortlistEntry?.aiScore ?? "без оценки"}</span></div><p className="mt-3 text-sm leading-6 text-black/75">{submission.answer}</p>{liveCase?.state === "shortlist_ready" && !shortlistEntry?.included && selectedSubmissions.length < 5 ? <button type="button" disabled={pending} onClick={() => void addToShortlist(submission.id)} className="mt-4 rounded-full border border-black/15 px-3 py-1.5 text-xs text-black hover:bg-black/5 disabled:opacity-40">Добавить в shortlist</button> : null}{shortlistEntry?.included ? <p className="mt-4 text-xs text-black/45">В shortlist</p> : null}</article>; })}
+          {caseSubmissions.map((submission) => { const shortlistEntry = snapshot?.shortlist.find((entry) => entry.submissionId === submission.id); return <article key={submission.id} className="rounded-xl border border-black/10 p-4"><div className="flex justify-between gap-3 text-xs text-black/45"><span className="font-medium text-black/70">{submission.displayName}</span><span>{shortlistEntry?.approachLabel ?? "Ответ участника"} · {shortlistEntry?.aiScore ?? "без оценки"}</span></div><p className="mt-3 text-sm leading-6 text-black/75">{submission.answer}</p>{!readOnly && liveCase?.state === "shortlist_ready" && !shortlistEntry?.included && selectedSubmissions.length < 5 ? <button type="button" disabled={pending} onClick={() => void addToShortlist(submission.id)} className="mt-4 rounded-full border border-black/15 px-3 py-1.5 text-xs text-black hover:bg-black/5 disabled:opacity-40">Добавить в shortlist</button> : null}{shortlistEntry?.included ? <p className="mt-4 text-xs text-black/45">В shortlist</p> : null}</article>; })}
         </div>
-        {liveCase?.state === "shortlist_ready" ? <div className="mt-6 grid gap-3 border-t border-black/10 pt-5 md:grid-cols-3">{[1, 2, 3].map((place) => <label key={place} className="grid gap-1 text-sm text-black/65">Место {place}<select value={awardSelections[place] ?? ""} onChange={(event) => setAwardSelections((current) => ({ ...current, [place]: event.target.value }))} className="rounded-xl border border-black/10 bg-white px-3 py-2 text-black"><option value="">Выберите ответ</option>{selectedSubmissions.map((entry) => { const submission = caseSubmissions.find((item) => item.id === entry.submissionId); return <option key={entry.submissionId} value={entry.submissionId}>{submission?.displayName ?? "Участник"}{entry.aiScore === null ? "" : ` · ${entry.aiScore} баллов AI`}</option>; })}</select></label>)}</div> : null}
+        {readOnly ? <div className="mt-6 border-t border-black/10 pt-5"><h3 className="text-sm font-semibold text-black">Опубликованные места</h3>{snapshot?.awards.filter((award) => award.caseId === liveCase?.id && award.active).sort((a, b) => a.place - b.place).length ? <ol className="mt-3 grid gap-2 sm:grid-cols-3">{snapshot.awards.filter((award) => award.caseId === liveCase?.id && award.active).sort((a, b) => a.place - b.place).map((award) => { const submission = caseSubmissions.find((item) => item.id === award.submissionId); return <li key={award.submissionId} className="rounded-xl bg-[#f5f4fb] px-4 py-3 text-sm text-black/70">{award.place} место · {submission?.displayName ?? "Участник"} · +{award.bonusPoints} баллов</li>; })}</ol> : <p className="mt-2 text-sm text-black/50">Награждённые ответы не опубликованы.</p>}</div> : liveCase?.state === "shortlist_ready" ? <div className="mt-6 grid gap-3 border-t border-black/10 pt-5 md:grid-cols-3">{[1, 2, 3].map((place) => <label key={place} className="grid gap-1 text-sm text-black/65">Место {place}<select value={awardSelections[place] ?? ""} onChange={(event) => setAwardSelections((current) => ({ ...current, [place]: event.target.value }))} className="rounded-xl border border-black/10 bg-white px-3 py-2 text-black"><option value="">Выберите ответ</option>{selectedSubmissions.map((entry) => { const submission = caseSubmissions.find((item) => item.id === entry.submissionId); return <option key={entry.submissionId} value={entry.submissionId}>{submission?.displayName ?? "Участник"}{entry.aiScore === null ? "" : ` · ${entry.aiScore} баллов AI`}</option>; })}</select></label>)}</div> : null}
       </section>
 
       {dialog ? <ConfirmDialog title={dialog.kind === "awards" ? "Опубликовать топ-3?" : "Сбросить сессию участника?"} description={dialog.kind === "awards" ? "После публикации места и бонусные баллы фиксируются сервером." : "Участник сможет пройти проверку заново."} reason={dialogReason} onReasonChange={setDialogReason} onCancel={() => setDialog(null)} onConfirm={() => void (dialog.kind === "awards" ? publishAwards() : resetParticipant())} /> : null}

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
+import { isCaseLab3LiveArchived } from "@/lib/case-lab-3/live/archive.server";
 import LeaderboardClient from "./LeaderboardClient";
 
 export const dynamic = "force-dynamic";
@@ -14,5 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default function CaseLab3LeaderboardPage() {
+  if (isCaseLab3LiveArchived("live")) notFound();
+
   return <LeaderboardClient />;
 }

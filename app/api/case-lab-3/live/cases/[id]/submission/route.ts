@@ -21,6 +21,7 @@ import { LIVE_SESSION_COOKIE, parseLiveSession } from "@/lib/case-lab-3/live/ses
 import { LiveInputValidationError, parseSubmission } from "@/lib/case-lab-3/live/validation";
 import type { LiveSession } from "@/lib/case-lab-3/live/contracts";
 import { getPublicPaymentEnvironment } from "@/lib/case-lab-3/orders.server";
+import { caseLab3LiveArchivedResponse, isCaseLab3LiveArchived } from "@/lib/case-lab-3/live/archive.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -75,6 +76,7 @@ export async function handlePut(
     const session = parseLiveSession((await active.getCookies()).get(LIVE_SESSION_COOKIE)?.value);
     if (!session) return noStoreJson({ error: "unauthorized" }, { status: 401 });
     const environment = active.getEnvironment();
+    if (isCaseLab3LiveArchived(environment)) return caseLab3LiveArchivedResponse();
     const participant = await active.authorizeParticipant(session, environment);
     if (!participant) return noStoreJson({ error: "unauthorized" }, { status: 401 });
 

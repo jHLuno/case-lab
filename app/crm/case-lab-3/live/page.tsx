@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { issueCrmCsrfToken, requireCrmAdmin } from "@/lib/crm-auth.server";
+import { isCaseLab3LiveArchived } from "@/lib/case-lab-3/live/archive.server";
 import CrmSectionNav from "../../components/CrmSectionNav";
 import LiveOperatorClient from "./LiveOperatorClient";
 
@@ -28,7 +29,7 @@ export default async function CaseLab3LiveCrmPage() {
         <div className="mb-7">
           <CrmSectionNav active="case-lab-3-live" />
         </div>
-        <LiveOperatorClient csrfToken={issueCrmCsrfToken(session)} />
+        <LiveOperatorClient csrfToken={issueCrmCsrfToken(session)} readOnly={isCaseLab3LiveArchived("live")} />
       </div>
     </main>
   );
