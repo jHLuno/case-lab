@@ -13,6 +13,7 @@ import type { LiveTransitionCaseRpcResult } from "@/lib/case-lab-3/database.type
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const maxDuration = 60;
 const LIVE_ENVIRONMENT = "live" as const;
 
 export type AnalyzeDependencies = {

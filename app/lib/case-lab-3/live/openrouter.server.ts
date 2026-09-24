@@ -53,6 +53,8 @@ type Dependencies = {
 const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 const DEFAULT_PRIMARY_MODEL = "google/gemini-3-flash-preview";
 const DEFAULT_FALLBACK_MODEL = "openai/gpt-5-mini";
+const DEFAULT_TIMEOUT_MS = 40_000;
+const MAX_TIMEOUT_MS = 60_000;
 const MAX_RESPONSE_BYTES = 128 * 1024;
 
 const shortlistSchema = {
@@ -105,12 +107,16 @@ const rubricSchema = {
 function config(dependencies: Dependencies) {
   const apiKey = dependencies.apiKey ?? process.env.OPENROUTER_API_KEY?.trim();
   if (!apiKey) throw new Error("OpenRouter API key is not configured");
+  const requestedTimeoutMs = dependencies.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const timeoutMs = Number.isFinite(requestedTimeoutMs) && requestedTimeoutMs > 0
+    ? Math.min(requestedTimeoutMs, MAX_TIMEOUT_MS)
+    : DEFAULT_TIMEOUT_MS;
   return {
     apiKey,
     primaryModel: dependencies.primaryModel ?? process.env.OPENROUTER_MODEL?.trim() ?? DEFAULT_PRIMARY_MODEL,
     fallbackModel: dependencies.fallbackModel ?? process.env.OPENROUTER_FALLBACK_MODEL?.trim() ?? DEFAULT_FALLBACK_MODEL,
     fetch: dependencies.fetch ?? fetch,
-    timeoutMs: dependencies.timeoutMs ?? 20_000,
+    timeoutMs,
     now: dependencies.now ?? Date.now,
   };
 }

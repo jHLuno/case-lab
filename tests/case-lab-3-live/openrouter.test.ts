@@ -29,12 +29,13 @@ async function fixtureResponse(name: string): Promise<Response> {
   });
 }
 
-function dependencies(fetch: OpenRouterFetch) {
+function dependencies(fetch: OpenRouterFetch, options: { timeoutMs?: number } = {}) {
   return {
     apiKey: "test-openrouter-key",
     primaryModel: "google/gemini-3-flash-preview",
     fallbackModel: "openai/gpt-5-mini",
     fetch,
+    ...options,
   };
 }
 
@@ -160,15 +161,39 @@ test("generates a validated rubric through the same private model route", async 
   assert.equal(body.includes("fullName"), false);
 });
 
-test("uses explicit timeout and hides transport failures", async () => {
+test("uses a 40-second default timeout and caps it at one minute", async () => {
+  const capturedTimeouts: number[] = [];
+  const originalTimeout = AbortSignal.timeout;
+  Object.defineProperty(AbortSignal, "timeout", {
+    configurable: true,
+    value: (delay: number) => {
+      capturedTimeouts.push(delay);
+      return originalTimeout(delay);
+    },
+  });
+
   const fetch: OpenRouterFetch = async (_url, init) => {
     assert.ok(init?.signal);
     throw new TypeError("network failed");
   };
-  await assert.rejects(
-    generateShortlist({ question: "Вопрос", referenceAnswer: "Эталон", submissions: SUBMISSIONS }, dependencies(fetch)),
-    /OpenRouter request failed/u,
-  );
+
+  try {
+    await assert.rejects(
+      generateShortlist({ question: "Вопрос", referenceAnswer: "Эталон", submissions: SUBMISSIONS }, dependencies(fetch)),
+      /OpenRouter request failed/u,
+    );
+    await assert.rejects(
+      generateShortlist(
+        { question: "Вопрос", referenceAnswer: "Эталон", submissions: SUBMISSIONS },
+        dependencies(fetch, { timeoutMs: 120_000 }),
+      ),
+      /OpenRouter request failed/u,
+    );
+  } finally {
+    Object.defineProperty(AbortSignal, "timeout", { configurable: true, value: originalTimeout });
+  }
+
+  assert.deepEqual(capturedTimeouts, [40_000, 60_000]);
 });
 
 test("rejects fenced or malformed JSON instead of guessing", async () => {
