@@ -285,12 +285,12 @@ select throws_ok(
       'test',
       '00000000-0000-4000-8000-000000009101',
       (select id from public.case_lab_3_live_participants where normalized_first_name = 'алия'),
-      repeat('а', 351)
+      repeat('а', 201)
     )
   $$,
   '22023',
   'invalid submission',
-  'answers longer than 350 characters are rejected'
+  'answers longer than 200 characters are rejected'
 );
 
 select is(

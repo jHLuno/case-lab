@@ -45,23 +45,23 @@ test("accepts a patronymic only for a duplicate-name claim", () => {
   );
 });
 
-test("accepts answers from 30 through 350 Unicode characters", () => {
+test("accepts answers from 30 through 200 Unicode characters", () => {
   assert.equal(parseSubmission({ answer: "а".repeat(30) }).answer.length, 30);
-  assert.equal(parseSubmission({ answer: "я".repeat(350) }).answer.length, 350);
+  assert.equal(parseSubmission({ answer: "я".repeat(200) }).answer.length, 200);
 });
 
 test("timeout mode accepts a non-empty answer for automatic submission", () => {
   assert.deepEqual(parseSubmission({ answer: "Да", mode: "timeout" }), { answer: "Да", mode: "timeout" });
 });
 
-test("rejects answers outside 30 through 350 characters", () => {
+test("rejects answers outside 30 through 200 characters", () => {
   assert.throws(
     () => parseSubmission({ answer: "а".repeat(29) }),
     (error) => error instanceof LiveInputValidationError
       && error.issues.some((issue) => issue.code === "too_short"),
   );
   assert.throws(
-    () => parseSubmission({ answer: "а".repeat(351) }),
+    () => parseSubmission({ answer: "а".repeat(201) }),
     (error) => error instanceof LiveInputValidationError
       && error.issues.some((issue) => issue.code === "too_long"),
   );

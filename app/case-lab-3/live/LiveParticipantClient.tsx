@@ -109,7 +109,7 @@ export default function LiveParticipantClient() {
   const saveAnswer = useCallback(async (mode: "manual" | "timeout" = "manual", event?: FormEvent<HTMLFormElement>) => {
     event?.preventDefault();
     if (!activeCase || activeCase.state !== "open" || activeCase.answerLocked || !answer.trim()) return;
-    if (mode === "manual" && (answer.length < 30 || answer.length > 350)) return;
+    if (mode === "manual" && (answer.length < 30 || answer.length > 200)) return;
     setPending(true);
     setNotice(mode === "timeout" ? "Время вышло. Отправляем ответ" : "Сохраняем ответ");
     try {
@@ -131,7 +131,7 @@ export default function LiveParticipantClient() {
           return;
         }
         if (result.error === "invalid_request") {
-          setNotice(mode === "timeout" ? "Не удалось отправить ответ" : "Ответ должен содержать от 30 до 350 символов");
+          setNotice(mode === "timeout" ? "Не удалось отправить ответ" : "Ответ должен содержать от 30 до 200 символов");
           return;
         }
         throw new Error("save_unavailable");
@@ -211,7 +211,7 @@ export default function LiveParticipantClient() {
   }
 
   const deadline = formatDeadline(activeCase?.closesAt ?? null);
-  const canSubmit = activeCase?.state === "open" && !activeCase.answerLocked && answer.length >= 30 && answer.length <= 350 && !pending;
+  const canSubmit = activeCase?.state === "open" && !activeCase.answerLocked && answer.length >= 30 && answer.length <= 200 && !pending;
 
   return (
     <div className={`${styles.shell} ${phase === "claim" ? styles.claimShell : ""}`}>
@@ -308,7 +308,7 @@ export default function LiveParticipantClient() {
                         name="answer"
                         value={answer}
                         minLength={30}
-                        maxLength={350}
+                        maxLength={200}
                         rows={4}
                         onChange={(event) => {
                           answerDirty.current = true;
@@ -319,14 +319,14 @@ export default function LiveParticipantClient() {
                       />
                     </label>
                     <div className={styles.answerFooter}>
-                      <span className={answer.length > 350 ? styles.counterError : undefined}>
-                        {answer.length} / 350
+                      <span className={answer.length > 200 ? styles.counterError : undefined}>
+                        {answer.length} / 200
                       </span>
                       <button className={styles.primaryButton} type="submit" disabled={!canSubmit}>
                         {pending ? "Сохраняем" : "Отправить ответ"}
                       </button>
                     </div>
-                    <p className={styles.helper}>Один ответ на вопрос · максимум 350 символов · при таймере ответ отправится автоматически.</p>
+                    <p className={styles.helper}>Один ответ на вопрос · максимум 200 символов · при таймере ответ отправится автоматически.</p>
                   </form>
                 ) : (
                   <div className={styles.lockedAnswer}>

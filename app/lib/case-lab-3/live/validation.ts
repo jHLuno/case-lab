@@ -142,7 +142,7 @@ export function parseSubmission(value: unknown): LiveSubmissionInput {
   const length = characterLength(answer);
   if (mode === "timeout" ? length < 1 : length < 30) {
     issues.push({ field: "answer", code: "too_short" });
-  } else if (length > 350) {
+  } else if (length > 200) {
     issues.push({ field: "answer", code: "too_long" });
   }
 

@@ -36,7 +36,7 @@ test("participant client exposes accessible named controls and complete states",
   assert.doesNotMatch(source, /name="ticketNumber"/u);
   assert.doesNotMatch(source, /needsTicketNumber/u);
   assert.match(source, /name="answer"/u);
-  assert.match(source, /maxLength=\{350\}/u);
+  assert.match(source, /maxLength=\{200\}/u);
   assert.match(source, /rows=\{4\}/u);
   assert.match(source, /closesAt/u);
   assert.match(source, /formatRemaining/u);
