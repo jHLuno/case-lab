@@ -61,6 +61,9 @@ test("participant styles preserve keyboard focus and reduced-motion behavior", a
   assert.match(source, /container-type:\s*inline-size/u);
   assert.match(source, /text-transform:\s*none/u);
   assert.match(source, /\.claimShell\s*\{[\s\S]*?justify-content:\s*center/u);
+  assert.match(source, /\.question\s*\{[\s\S]*?max-width:\s*min\(100%,\s*34ch\)/u);
+  assert.match(source, /\.question\s*\{[\s\S]*?font-size:\s*clamp\(24px,\s*3\.6vw,\s*44px\)/u);
+  assert.match(source, /\.question\s*\{[\s\S]*?overflow-wrap:\s*anywhere/u);
 });
 
 test("CRM live page is protected and exposes operator controls", async () => {
