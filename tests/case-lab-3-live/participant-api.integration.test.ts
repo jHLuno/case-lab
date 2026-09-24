@@ -156,15 +156,24 @@ test("production live archive blocks participant reads, claims, and submissions 
   nodeEnvironment.NODE_ENV = "production";
   try {
     let participantCalls = 0;
+    let credentialReads = 0;
     const archived = { status: 410, body: { error: "event_ended" } };
     const state = await handleGet(new Request(`${ORIGIN}/api/case-lab-3/live/state`), {
       getEnvironment: () => "live",
-      getCookies: async () => cookieStore().store,
+      getCookies: async () => { credentialReads += 1; return cookieStore().store; },
       authorizeParticipant: async () => { participantCalls += 1; return authorizedParticipant; },
       loadState: async () => { participantCalls += 1; throw new Error("must not read state"); },
     });
     assert.equal(state.status, archived.status);
     assert.deepEqual(await state.json(), archived.body);
+    assert.equal(credentialReads, 0);
+
+    const anonymousState = await handleGet(new Request(`${ORIGIN}/api/case-lab-3/live/state`), {
+      getEnvironment: () => "live",
+      getCookies: async () => { credentialReads += 1; return cookieStore("").store; },
+    });
+    assert.equal(anonymousState.status, archived.status);
+    assert.deepEqual(await anonymousState.json(), archived.body);
 
     const leaderboard = await getPublicLeaderboard(new Request(`${ORIGIN}/api/case-lab-3/live/leaderboard`), {
       getEnvironment: () => "live",
@@ -190,13 +199,22 @@ test("production live archive blocks participant reads, claims, and submissions 
       { params: Promise.resolve({ id: CASE_ID }) },
       {
         getEnvironment: () => "live",
-        getCookies: async () => cookieStore().store,
+        getCookies: async () => { credentialReads += 1; return cookieStore().store; },
         authorizeParticipant: async () => { participantCalls += 1; return authorizedParticipant; },
         saveSubmission: async () => { participantCalls += 1; throw new Error("must not save answer"); },
       },
     );
     assert.equal(submission.status, archived.status);
     assert.deepEqual(await submission.json(), archived.body);
+    assert.equal(credentialReads, 0);
+
+    const malformedSubmission = await handlePut(
+      new Request(`${ORIGIN}/api/case-lab-3/live/cases/not-a-uuid/submission`, { method: "PUT" }),
+      { params: Promise.resolve({ id: "not-a-uuid" }) },
+      { getEnvironment: () => "live" },
+    );
+    assert.equal(malformedSubmission.status, archived.status);
+    assert.deepEqual(await malformedSubmission.json(), archived.body);
     assert.equal(participantCalls, 0);
 
     const logoutCookies = cookieStore();
@@ -216,6 +234,7 @@ test("state rejects a missing session and returns only sanitized participant dat
   const missing = cookieStore("");
   const missingResponse = await handleGet(new Request(`${ORIGIN}/api/case-lab-3/live/state`), {
     getCookies: async () => missing.store,
+    getEnvironment: () => "live",
   });
   assert.equal(missingResponse.status, 401);
 
@@ -330,6 +349,7 @@ test("submission rejects oversized bodies and hides database failures", async ()
   const oversized = await handlePut(
     jsonRequest(`/api/case-lab-3/live/cases/${CASE_ID}/submission`, "PUT", { answer: "а".repeat(5000) }),
     { params: Promise.resolve({ id: CASE_ID }) },
+    { getEnvironment: () => "live" },
   );
   assert.equal(oversized.status, 413);
 

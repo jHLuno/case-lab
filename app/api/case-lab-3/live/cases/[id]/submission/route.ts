@@ -67,6 +67,9 @@ export async function handlePut(
 ): Promise<Response> {
   const active = { ...productionDependencies, ...dependencies };
   try {
+    const environment = active.getEnvironment();
+    if (isCaseLab3LiveArchived(environment)) return caseLab3LiveArchivedResponse();
+
     requireSameOrigin(request);
     requireJson(request);
     const body = await readBoundedBody(request, MAX_BODY_BYTES);
@@ -75,8 +78,6 @@ export async function handlePut(
 
     const session = parseLiveSession((await active.getCookies()).get(LIVE_SESSION_COOKIE)?.value);
     if (!session) return noStoreJson({ error: "unauthorized" }, { status: 401 });
-    const environment = active.getEnvironment();
-    if (isCaseLab3LiveArchived(environment)) return caseLab3LiveArchivedResponse();
     const participant = await active.authorizeParticipant(session, environment);
     if (!participant) return noStoreJson({ error: "unauthorized" }, { status: 401 });
 

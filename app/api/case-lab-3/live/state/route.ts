@@ -39,12 +39,12 @@ export async function handleGet(
 ): Promise<Response> {
   const active = { ...productionDependencies, ...dependencies };
   try {
+    const environment = active.getEnvironment();
+    if (isCaseLab3LiveArchived(environment)) return caseLab3LiveArchivedResponse();
+
     const rawSession = (await active.getCookies()).get(LIVE_SESSION_COOKIE)?.value;
     const session = parseLiveSession(rawSession);
     if (!session) return noStoreJson({ error: "unauthorized" }, { status: 401 });
-
-    const environment = active.getEnvironment();
-    if (isCaseLab3LiveArchived(environment)) return caseLab3LiveArchivedResponse();
 
     const participant = await active.authorizeParticipant(session, environment);
     if (!participant) return noStoreJson({ error: "unauthorized" }, { status: 401 });
