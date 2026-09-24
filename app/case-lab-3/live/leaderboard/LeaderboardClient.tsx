@@ -6,7 +6,7 @@ import Image from "next/image";
 import styles from "./leaderboard.module.css";
 
 type CaseState = "draft" | "ready" | "open" | "analyzing" | "shortlist_ready" | "awarded" | "closed";
-type QuestionAnswer = { displayName: string; answer: string; candidateId?: string };
+type QuestionAnswer = { displayName: string; answer: string };
 type QuestionAnswers = {
   id: string;
   caseNumber: number;
@@ -40,48 +40,27 @@ export default function LeaderboardClient() {
   const [data, setData] = useState<LeaderboardData | null>(null);
   const [error, setError] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [speakerToken, setSpeakerToken] = useState<string | null>(null);
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
-  const [selectedCandidateIds, setSelectedCandidateIds] = useState<string[]>([]);
+  const [selectedCandidateIndexes, setSelectedCandidateIndexes] = useState<number[]>([]);
   const [selectionPending, setSelectionPending] = useState(false);
   const [selectionMessage, setSelectionMessage] = useState<string | null>(null);
 
   useEffect(() => {
     queueMicrotask(() => {
       setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-      const url = new URL(window.location.href);
-      const fragmentToken = new URLSearchParams(url.hash.replace(/^#/, "")).get("speakerToken");
-      const queryToken = url.searchParams.get("speakerToken");
-      let storedToken: string | null = null;
-      try {
-        storedToken = window.sessionStorage.getItem("case-lab-3-speaker-token");
-        if (fragmentToken || queryToken) window.sessionStorage.setItem("case-lab-3-speaker-token", fragmentToken ?? queryToken ?? "");
-      } catch {
-        // Private browsing modes can deny sessionStorage; the one-page flow still works.
-      }
-      const token = fragmentToken ?? queryToken ?? storedToken;
-      if (token) {
-        setSpeakerToken(token);
-        url.searchParams.delete("speakerToken");
-        url.hash = "";
-        window.history.replaceState(null, "", `${url.pathname}${url.search}`);
-      }
     });
   }, []);
 
   const load = useCallback(async () => {
     try {
-      const response = await fetch("/api/case-lab-3/live/leaderboard", {
-        cache: "no-store",
-        headers: speakerToken ? { "X-Case-Lab-3-Speaker-Token": speakerToken } : undefined,
-      });
+      const response = await fetch("/api/case-lab-3/live/leaderboard", { cache: "no-store" });
       if (!response.ok) throw new Error("leaderboard");
       setData(await response.json() as LeaderboardData);
       setError(false);
     } catch {
       setError(true);
     }
-  }, [speakerToken]);
+  }, []);
 
   useEffect(() => {
     queueMicrotask(() => void load());
@@ -95,7 +74,7 @@ export default function LeaderboardClient() {
     if (next === selectedQuestionId) return;
     queueMicrotask(() => {
       setSelectedQuestionId(next);
-      setSelectedCandidateIds([]);
+      setSelectedCandidateIndexes([]);
       setSelectionMessage(null);
     });
   }, [data?.questionAnswers, selectedQuestionId]);
@@ -104,30 +83,30 @@ export default function LeaderboardClient() {
     () => data?.questionAnswers.find((question) => question.id === selectedQuestionId) ?? data?.questionAnswers[0] ?? null,
     [data?.questionAnswers, selectedQuestionId],
   );
-  const speakerMode = Boolean(speakerToken && selectedQuestion?.state === "shortlist_ready" && selectedQuestion.answers.every((answer) => answer.candidateId));
+  const speakerMode = selectedQuestion?.state === "shortlist_ready";
 
   function chooseQuestion(id: string) {
     setSelectedQuestionId(id);
-    setSelectedCandidateIds([]);
+    setSelectedCandidateIndexes([]);
     setSelectionMessage(null);
   }
 
-  function toggleCandidate(id: string) {
+  function toggleCandidate(index: number) {
     setSelectionMessage(null);
-    setSelectedCandidateIds((current) => current.includes(id)
-      ? current.filter((candidateId) => candidateId !== id)
-      : current.length < 3 ? [...current, id] : current);
+    setSelectedCandidateIndexes((current) => current.includes(index)
+      ? current.filter((candidateIndex) => candidateIndex !== index)
+      : current.length < 3 ? [...current, index] : current);
   }
 
   async function publishSelection() {
-    if (!speakerToken || selectedCandidateIds.length !== 3) return;
+    if (selectedCandidateIndexes.length !== 3) return;
     setSelectionPending(true);
     setSelectionMessage(null);
     try {
       const response = await fetch("/api/case-lab-3/live/selection", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ speakerToken, candidateIds: selectedCandidateIds }),
+        body: JSON.stringify({ candidateIndexes: selectedCandidateIndexes }),
       });
       const result = await response.json().catch(() => ({})) as { status?: string; error?: string };
       if (!response.ok) {
@@ -135,7 +114,7 @@ export default function LeaderboardClient() {
         return;
       }
       setSelectionMessage("Топ-3 опубликован. Спасибо!");
-      setSelectedCandidateIds([]);
+      setSelectedCandidateIndexes([]);
       await load();
     } catch {
       setSelectionMessage("Не удалось связаться с сервером.");
@@ -177,18 +156,17 @@ export default function LeaderboardClient() {
                 <h3 className={styles.questionTitle}>{selectedQuestion.question}</h3>
                 {speakerMode ? <p className={styles.speakerHint}>Режим спикера · выберите 3 ответа</p> : null}
                 <div className={styles.answerGrid}>
-                  {selectedQuestion.answers.length ? selectedQuestion.answers.map((answer) => {
-                    const candidateId = answer.candidateId;
-                    const selectedIndex = candidateId ? selectedCandidateIds.indexOf(candidateId) : -1;
+                  {selectedQuestion.answers.length ? selectedQuestion.answers.map((answer, answerIndex) => {
+                    const selectedIndex = selectedCandidateIndexes.indexOf(answerIndex);
                     const card = <article className={`${styles.answerCard} ${selectedIndex >= 0 ? styles.answerCardSelected : ""}`}>
                       <div className={styles.answerCardTop}>{selectedIndex >= 0 ? <span className={styles.selectionChip}>Выбрано {selectedIndex + 1}</span> : null}</div>
                       <h4>{answer.displayName}</h4>
                       <p>{answer.answer}</p>
                     </article>;
-                    return speakerMode && candidateId ? <button key={candidateId} type="button" className={styles.answerButton} onClick={() => toggleCandidate(candidateId)} aria-pressed={selectedIndex >= 0}>{card}</button> : <div key={`${answer.displayName}-${answer.answer}`} className={styles.answerButton}>{card}</div>;
+                    return speakerMode ? <button key={`${answer.displayName}-${answer.answer}`} type="button" className={styles.answerButton} onClick={() => toggleCandidate(answerIndex)} aria-pressed={selectedIndex >= 0}>{card}</button> : <div key={`${answer.displayName}-${answer.answer}`} className={styles.answerButton}>{card}</div>;
                   }) : <p className={styles.empty}>Топ-5 каждого вопроса.</p>}
                 </div>
-                {speakerMode ? <div className={styles.speakerActions}><span>{selectedCandidateIds.length} из 3 выбрано</span><button type="button" className={styles.primaryButton} disabled={selectionPending || selectedCandidateIds.length !== 3} onClick={() => void publishSelection()}>Выбрать топ-3</button></div> : null}
+                {speakerMode ? <div className={styles.speakerActions}><span>{selectedCandidateIndexes.length} из 3 выбрано</span><button type="button" className={styles.primaryButton} disabled={selectionPending || selectedCandidateIndexes.length !== 3} onClick={() => void publishSelection()}>Выбрать топ-3</button></div> : null}
                 {selectionMessage ? <p className={styles.selectionMessage} role="status">{selectionMessage}</p> : null}
               </div> : null}
             </> : <p className={styles.empty}>Топ-5 каждого вопроса.</p>}

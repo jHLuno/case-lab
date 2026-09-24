@@ -2,13 +2,11 @@ import "server-only";
 
 import type { PaymentEnvironment } from "../contracts";
 import type { LiveCaseState } from "./contracts";
-import { parseSpeakerToken } from "./speaker.server";
 import { getCaseLab3AdminClient } from "../supabase-admin.server";
 
 export type PublicAnswerCard = {
   displayName: string;
   answer: string;
-  candidateId?: string;
 };
 
 export type PublicQuestionAnswers = {
@@ -35,7 +33,7 @@ function publicCaseState(value: LiveCaseState): PublicCaseState | null {
   return value === "open" || value === "analyzing" || value === "shortlist_ready" || value === "awarded" || value === "closed" ? value : null;
 }
 
-export async function getPublicLeaderboardData(environment: PaymentEnvironment, speakerToken?: string): Promise<PublicLeaderboardData> {
+export async function getPublicLeaderboardData(environment: PaymentEnvironment): Promise<PublicLeaderboardData> {
   const client = getCaseLab3AdminClient();
   const [leaderboardResult, activeCaseResult, awardedCaseResult, casesResult] = await Promise.all([
     client.rpc("case_lab_3_live_get_leaderboard", { p_environment: environment }),
@@ -47,15 +45,6 @@ export async function getPublicLeaderboardData(environment: PaymentEnvironment, 
 
   const entries = (leaderboardResult.data ?? []).slice(0, 10);
   const cases = casesResult.data ?? [];
-  const speakerContext = speakerToken
-    ? (() => {
-        try {
-          return parseSpeakerToken(speakerToken, undefined, Date.now());
-        } catch {
-          return null;
-        }
-      })()
-    : null;
   const caseIds = cases.map((liveCase) => liveCase.id);
   const shortlistResult = caseIds.length === 0
     ? { data: [], error: null }
@@ -83,9 +72,6 @@ export async function getPublicLeaderboardData(environment: PaymentEnvironment, 
   const submissionById = new Map(submissions.map((submission) => [submission.id, submission]));
   const participantById = new Map((participantsResult.data ?? []).map((participant) => [participant.id, participant.public_display_name]));
   const questionAnswers = cases.map((liveCase) => {
-    const canSelect = speakerContext?.caseId === liveCase.id
-      && speakerContext.stateVersion === liveCase.state_version
-      && liveCase.state === "shortlist_ready";
     const answers = shortlisted
       .filter((entry) => entry.case_id === liveCase.id)
       .map((entry) => {
@@ -95,7 +81,6 @@ export async function getPublicLeaderboardData(environment: PaymentEnvironment, 
         return {
           displayName,
           answer: submission.answer_text,
-          ...(canSelect ? { candidateId: submission.id } : {}),
         };
       })
       .filter((answer): answer is PublicAnswerCard => answer !== null)

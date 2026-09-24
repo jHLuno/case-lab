@@ -81,8 +81,9 @@ test("CRM live page is protected and exposes operator controls", async () => {
   assert.match(client, /reset-timer/u);
   assert.match(client, /Ручной режим/u);
   assert.match(client, /Опубликовать топ-3/u);
-  assert.match(client, /Открыть выбор спикера/u);
-  assert.match(client, /speaker-session/u);
+  assert.match(client, /выбор проходит прямо на \/live\/leaderboard/u);
+  assert.doesNotMatch(client, /Открыть выбор спикера/u);
+  assert.doesNotMatch(client, /speaker-session/u);
   assert.match(client, /Сбросить участника/u);
   assert.match(client, /X-CSRF-Token/u);
   assert.match(client, /Idempotency-Key/u);
@@ -105,8 +106,9 @@ test("public leaderboard page polls a sanitized projection", async () => {
   assert.match(client, /Топ-10/u);
   assert.match(client, /podiumAnswers/u);
   assert.match(client, /questionAnswers/u);
-  assert.match(client, /candidateId/u);
-  assert.match(client, /speakerToken/u);
+  assert.match(client, /candidateIndexes/u);
+  assert.doesNotMatch(client, /speakerToken/u);
+  assert.doesNotMatch(client, /sessionStorage/u);
   assert.match(client, /Выбрать топ-3/u);
   assert.match(client, /setInterval/u);
   assert.match(client, /prefers-reduced-motion/u);

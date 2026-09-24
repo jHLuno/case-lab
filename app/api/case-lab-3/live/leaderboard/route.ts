@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export type PublicLeaderboardRouteDependencies = {
-  getPublicData: (environment: ReturnType<typeof getPublicPaymentEnvironment>, speakerToken?: string) => Promise<PublicLeaderboardData>;
+  getPublicData: (environment: ReturnType<typeof getPublicPaymentEnvironment>) => Promise<PublicLeaderboardData>;
   getEnvironment: typeof getPublicPaymentEnvironment;
 };
 
@@ -20,8 +20,7 @@ const productionDependencies: PublicLeaderboardRouteDependencies = {
 export async function handleGet(_request: Request, dependencies: Partial<PublicLeaderboardRouteDependencies> = {}): Promise<Response> {
   const active = { ...productionDependencies, ...dependencies };
   try {
-    const speakerToken = _request.headers.get("x-case-lab-3-speaker-token") ?? new URL(_request.url).searchParams.get("speakerToken") ?? undefined;
-    const data = await active.getPublicData(active.getEnvironment(), speakerToken);
+    const data = await active.getPublicData(active.getEnvironment());
     return noStoreJson({
       entries: data.entries.slice(0, 10).map((entry) => ({ displayName: entry.displayName, points: entry.points, rank: entry.rank })),
       activeCase: data.activeCase,
@@ -32,11 +31,7 @@ export async function handleGet(_request: Request, dependencies: Partial<PublicL
         questionNumber: question.questionNumber,
         question: question.question,
         state: question.state,
-        answers: question.answers.map((answer) => ({
-          ...(speakerToken && answer.candidateId ? { candidateId: answer.candidateId } : {}),
-          displayName: answer.displayName,
-          answer: answer.answer,
-        })),
+        answers: question.answers.map((answer) => ({ displayName: answer.displayName, answer: answer.answer })),
       })),
     });
   } catch {

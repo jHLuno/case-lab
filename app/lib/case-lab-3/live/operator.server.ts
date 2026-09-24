@@ -8,7 +8,7 @@ import type { Json } from "../database.types";
 import { getCaseLab3AdminClient } from "../supabase-admin.server";
 import type { LiveCaseState } from "./contracts";
 import type { EvaluationRubric, ValidatedShortlist } from "./openrouter.server";
-import { issueSpeakerToken, parseSpeakerToken } from "./speaker.server";
+import { issueSpeakerToken } from "./speaker.server";
 
 export class LiveOperatorRepositoryError extends Error {
   readonly code = "live_operator_service_unavailable" as const;
@@ -363,42 +363,45 @@ export async function issueSpeakerSelectionLink(input: {
 }
 
 export async function selectSpeakerAwards(input: {
-  token: string;
-  candidateIds: string[];
-}): Promise<{ kind: "published"; stateVersion: number } | { kind: "unauthorized" | "conflict" | "invalid_selection" }> {
-  const token = (() => {
-    try {
-      return parseSpeakerToken(input.token);
-    } catch {
-      return null;
-    }
-  })();
-  if (!token) return { kind: "unauthorized" };
+  candidateIndexes: number[];
+}): Promise<{ kind: "published"; stateVersion: number } | { kind: "conflict" | "invalid_selection" }> {
+  if (
+    input.candidateIndexes.length !== 3
+    || input.candidateIndexes.some((index) => !Number.isSafeInteger(index) || index < 0 || index >= 5)
+    || new Set(input.candidateIndexes).size !== 3
+  ) return { kind: "invalid_selection" };
 
   const client = getCaseLab3AdminClient();
   const { data: liveCase, error: caseError } = await client
     .from("case_lab_3_live_cases")
     .select("id, state, state_version")
-    .eq("id", token.caseId)
     .eq("environment", "live")
+    .eq("state", "shortlist_ready")
+    .order("case_number", { ascending: false })
+    .order("question_number", { ascending: false })
+    .limit(1)
     .maybeSingle();
   if (caseError) throw new LiveOperatorRepositoryError();
-  if (!liveCase || liveCase.state !== "shortlist_ready" || liveCase.state_version !== token.stateVersion) return { kind: "conflict" };
+  if (!liveCase || liveCase.state !== "shortlist_ready") return { kind: "conflict" };
 
   const { data: entries, error: entriesError } = await client
     .from("case_lab_3_live_shortlist_entries")
-    .select("submission_id")
+    .select("submission_id, ai_order, final_order, created_at")
     .eq("environment", "live")
     .eq("case_id", liveCase.id)
-    .eq("included", true)
-    .in("submission_id", input.candidateIds);
+    .eq("included", true);
   if (entriesError) throw new LiveOperatorRepositoryError();
-  if ((entries ?? []).length !== 3 || new Set(entries?.map((entry) => entry.submission_id)).size !== 3) return { kind: "invalid_selection" };
+  const sortedEntries = (entries ?? []).toSorted((left, right) => (
+    (left.final_order ?? left.ai_order ?? Number.MAX_SAFE_INTEGER) - (right.final_order ?? right.ai_order ?? Number.MAX_SAFE_INTEGER)
+      || left.created_at.localeCompare(right.created_at)
+  ));
+  const selectedEntries = input.candidateIndexes.map((index) => sortedEntries[index]);
+  if (selectedEntries.some((entry) => !entry)) return { kind: "invalid_selection" };
 
   const result = await publishLiveAwards({
     caseId: liveCase.id,
     expectedVersion: liveCase.state_version,
-    awards: input.candidateIds.map((submissionId, index) => ({ place: index + 1, submissionId })),
+    awards: selectedEntries.map((entry, index) => ({ place: index + 1, submissionId: entry.submission_id })),
     actorId: "speaker-mode",
     reason: "Выбор спикера на live-экране",
   });
