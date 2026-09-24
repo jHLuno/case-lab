@@ -20,7 +20,7 @@ export type PublicQuestionAnswers = {
 
 export type PublicLeaderboardData = {
   entries: Array<{ participantId: string; displayName: string; points: number; rank: number; firstPlaces: number; podiums: number }>;
-  activeCase: { caseNumber: number; state: "open" | "analyzing" | "shortlist_ready" | "awarded" | "closed" } | null;
+  activeCase: { caseNumber: number; questionNumber: number; state: "open" | "analyzing" | "shortlist_ready" | "awarded" | "closed" } | null;
   podiumAnswers: Array<{ place: number; displayName: string; answer: string; submissionId: string }>;
   questionAnswers: PublicQuestionAnswers[];
 };
@@ -57,6 +57,7 @@ export async function getPublicLeaderboardData(environment: PaymentEnvironment):
   const shortlisted = (shortlistResult.data ?? []).sort((left, right) => (
     (left.final_order ?? left.ai_order ?? Number.MAX_SAFE_INTEGER) - (right.final_order ?? right.ai_order ?? Number.MAX_SAFE_INTEGER)
       || left.created_at.localeCompare(right.created_at)
+      || left.submission_id.localeCompare(right.submission_id)
   ));
   const submissionIds = [...new Set(shortlisted.map((entry) => entry.submission_id))];
   const submissionsResult = submissionIds.length === 0
@@ -98,7 +99,7 @@ export async function getPublicLeaderboardData(environment: PaymentEnvironment):
   if (!awardedCase) {
     return {
       entries,
-      activeCase: activeCaseResult.data ? { caseNumber: activeCaseResult.data.case_number, state: publicCaseState(activeCaseResult.data.state) as PublicCaseState } : null,
+      activeCase: activeCaseResult.data ? { caseNumber: activeCaseResult.data.case_number, questionNumber: activeCaseResult.data.question_number, state: publicCaseState(activeCaseResult.data.state) as PublicCaseState } : null,
       podiumAnswers: [],
       questionAnswers,
     };
@@ -126,7 +127,7 @@ export async function getPublicLeaderboardData(environment: PaymentEnvironment):
 
   return {
     entries,
-    activeCase: activeCaseResult.data ? { caseNumber: activeCaseResult.data.case_number, state: publicCaseState(activeCaseResult.data.state) as PublicCaseState } : null,
+    activeCase: activeCaseResult.data ? { caseNumber: activeCaseResult.data.case_number, questionNumber: activeCaseResult.data.question_number, state: publicCaseState(activeCaseResult.data.state) as PublicCaseState } : null,
     podiumAnswers: (awards ?? []).flatMap((award) => {
       const submission = awardedSubmissionById.get(award.submission_id);
       const displayName = submission ? awardedParticipantById.get(submission.participant_id) : null;

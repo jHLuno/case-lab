@@ -289,7 +289,7 @@ test("public leaderboard strips internal identifiers and AI rationale", async ()
   const response = await getPublicLeaderboard(new Request(`${ORIGIN}/api/case-lab-3/live/leaderboard`), {
     getPublicData: async () => ({
       entries: [{ participantId: PARTICIPANT_ID, displayName: "Алия Ёлкина", points: 60, rank: 1, firstPlaces: 1, podiums: 1 }],
-      activeCase: { caseNumber: 1, state: "awarded" as const },
+      activeCase: { caseNumber: 1, questionNumber: 1, state: "awarded" as const },
       podiumAnswers: [{ place: 1, displayName: "Алия Ёлкина", answer: "Опубликованный ответ победителя.", submissionId: "hidden" }],
       questionAnswers: [{ id: CASE_ID, caseNumber: 1, questionNumber: 1, question: "Что предложите?", state: "shortlist_ready" as const, answers: [{ candidateId: "hidden", displayName: "Алия Ёлкина", answer: "Сильный ответ." }] }],
     }),
@@ -299,7 +299,7 @@ test("public leaderboard strips internal identifiers and AI rationale", async ()
   const body = await response.json();
   assert.deepEqual(body, {
     entries: [{ displayName: "Алия Ёлкина", points: 60, rank: 1 }],
-    activeCase: { caseNumber: 1, state: "awarded" },
+    activeCase: { caseNumber: 1, questionNumber: 1, state: "awarded" },
     podiumAnswers: [{ place: 1, displayName: "Алия Ёлкина", answer: "Опубликованный ответ победителя." }],
     questionAnswers: [{ id: CASE_ID, caseNumber: 1, questionNumber: 1, question: "Что предложите?", state: "shortlist_ready", answers: [{ displayName: "Алия Ёлкина", answer: "Сильный ответ." }] }],
   });

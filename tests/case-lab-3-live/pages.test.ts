@@ -107,6 +107,8 @@ test("public leaderboard page polls a sanitized projection", async () => {
   assert.match(client, /podiumAnswers/u);
   assert.match(client, /questionAnswers/u);
   assert.match(client, /candidateIndexes/u);
+  assert.match(client, /caseId/u);
+  assert.match(client, /activeCase\?\.questionNumber/u);
   assert.doesNotMatch(client, /speakerToken/u);
   assert.doesNotMatch(client, /sessionStorage/u);
   assert.match(client, /Выбрать топ-3/u);

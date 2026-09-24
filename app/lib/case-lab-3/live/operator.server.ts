@@ -363,6 +363,7 @@ export async function issueSpeakerSelectionLink(input: {
 }
 
 export async function selectSpeakerAwards(input: {
+  caseId: string;
   candidateIndexes: number[];
 }): Promise<{ kind: "published"; stateVersion: number } | { kind: "conflict" | "invalid_selection" }> {
   if (
@@ -375,11 +376,9 @@ export async function selectSpeakerAwards(input: {
   const { data: liveCase, error: caseError } = await client
     .from("case_lab_3_live_cases")
     .select("id, state, state_version")
+    .eq("id", input.caseId)
     .eq("environment", "live")
     .eq("state", "shortlist_ready")
-    .order("case_number", { ascending: false })
-    .order("question_number", { ascending: false })
-    .limit(1)
     .maybeSingle();
   if (caseError) throw new LiveOperatorRepositoryError();
   if (!liveCase || liveCase.state !== "shortlist_ready") return { kind: "conflict" };
@@ -394,6 +393,7 @@ export async function selectSpeakerAwards(input: {
   const sortedEntries = (entries ?? []).toSorted((left, right) => (
     (left.final_order ?? left.ai_order ?? Number.MAX_SAFE_INTEGER) - (right.final_order ?? right.ai_order ?? Number.MAX_SAFE_INTEGER)
       || left.created_at.localeCompare(right.created_at)
+      || left.submission_id.localeCompare(right.submission_id)
   ));
   const selectedEntries = input.candidateIndexes.map((index) => sortedEntries[index]);
   if (selectedEntries.some((entry) => !entry)) return { kind: "invalid_selection" };

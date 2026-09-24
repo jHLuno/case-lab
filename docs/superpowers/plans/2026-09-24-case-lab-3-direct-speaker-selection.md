@@ -4,7 +4,7 @@
 
 **Goal:** Let the speaker choose three answers directly on `/live/leaderboard` without a link, code, or separate activation step.
 
-**Architecture:** The public leaderboard will expose answer positions only while the current question is in `shortlist_ready`; the page will make those cards selectable immediately. The selection endpoint will resolve the submitted positions against the single live case currently in `shortlist_ready`, validate that all three entries belong to its included shortlist, and publish awards through the existing server-side RPC. The CRM will retain its manual top-3 fallback and no longer render the speaker-link control.
+**Architecture:** The public leaderboard will expose answer positions only while the selected question is in `shortlist_ready`; the page will make those cards selectable immediately. The selection endpoint will bind the submitted positions to the selected live case, validate that all three entries belong to its included shortlist, and publish awards through the existing server-side RPC. The CRM will retain its manual top-3 fallback and no longer render the speaker-link control.
 
 **Tech Stack:** Next.js App Router, React, strict TypeScript, Supabase admin repository, Node test runner.
 
@@ -26,12 +26,12 @@
 - Modify: `tests/case-lab-3-live/pages.test.ts`
 
 **Interfaces:**
-- Public selection request: `{ candidateIndexes: number[] }` with exactly three distinct zero-based shortlist positions.
+- Public selection request: `{ caseId: string, candidateIndexes: number[] }` with exactly three distinct zero-based shortlist positions.
 - Public leaderboard answer cards remain `{ displayName, answer }`; no internal candidate ID is returned.
 
 - [ ] **Step 1: Write failing tests**
 
-  Replace the token-required selection assertion with a request containing only `candidateIndexes`, assert the dependency receives those indexes, and assert that a shortlist-ready answer projection has no internal identifier while the page contains no speaker-link flow and does contain direct selection behavior.
+  Replace the token-required selection assertion with a request containing `caseId` and `candidateIndexes`, assert the dependency receives both values, and assert that a shortlist-ready answer projection has no internal identifier while the page contains no speaker-link flow and does contain direct selection behavior.
 
 - [ ] **Step 2: Run the focused tests and confirm failure**
 
@@ -48,16 +48,16 @@
 - Modify: `app/api/case-lab-3/live/leaderboard/route.ts`
 
 **Interfaces:**
-- `POST /api/case-lab-3/live/selection` accepts only `candidateIndexes`.
-- `selectSpeakerAwards({ candidateIndexes })` finds the current `live` case in `shortlist_ready`, sorts included shortlist entries using the same final/AI order as the public projection, and calls `publishLiveAwards` with the resulting submission IDs.
+- `POST /api/case-lab-3/live/selection` accepts `caseId` and `candidateIndexes`.
+- `selectSpeakerAwards({ caseId, candidateIndexes })` validates that the exact `live` case is in `shortlist_ready`, sorts included shortlist entries using the same final/AI/created-at/submission-id order as the public projection, and calls `publishLiveAwards` with the resulting submission IDs.
 
 - [ ] **Step 1: Implement the smallest route validation change**
 
-  Validate an array of exactly three distinct integer indexes, reject negative or out-of-range values, and return `invalid_selection` for malformed input.
+  Validate a UUID `caseId` plus an array of exactly three distinct integer indexes, reject negative or out-of-range values, and return `invalid_selection` for malformed input.
 
 - [ ] **Step 2: Implement current-round resolution**
 
-  Query the live case in `shortlist_ready`, load its included shortlist entries, sort them by `final_order`, then `ai_order`, then `created_at`, resolve the three indexes to submission IDs, and return `conflict` if no current shortlist-ready case exists.
+  Query the requested live case in `shortlist_ready`, load its included shortlist entries, sort them by `final_order`, then `ai_order`, then `created_at`, then `submission_id`, resolve the three indexes to submission IDs, and return `conflict` if that case is no longer shortlist-ready.
 
 - [ ] **Step 3: Make public answer positions available without identifiers**
 
@@ -79,7 +79,7 @@
 
 - [ ] **Step 1: Remove token and URL state from the leaderboard client**
 
-  Delete fragment/query/sessionStorage token parsing and send `{ candidateIndexes }` to the selection endpoint.
+  Delete fragment/query/sessionStorage token parsing and send `{ caseId, candidateIndexes }` to the selection endpoint.
 
 - [ ] **Step 2: Enable direct selection for the shortlist-ready question**
 

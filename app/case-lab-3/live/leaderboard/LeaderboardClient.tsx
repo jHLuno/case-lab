@@ -17,7 +17,7 @@ type QuestionAnswers = {
 };
 type LeaderboardData = {
   entries: Array<{ displayName: string; points: number; rank: number }>;
-  activeCase: { caseNumber: number; state: CaseState } | null;
+  activeCase: { caseNumber: number; questionNumber: number; state: CaseState } | null;
   podiumAnswers: Array<{ place: number; displayName: string; answer: string }>;
   questionAnswers: QuestionAnswers[];
 };
@@ -70,14 +70,20 @@ export default function LeaderboardClient() {
 
   useEffect(() => {
     if (!data?.questionAnswers.length) return;
-    const next = data.questionAnswers.some((question) => question.id === selectedQuestionId) ? selectedQuestionId : data.questionAnswers[0].id;
+    const currentQuestion = data.activeCase
+      ? data.questionAnswers.find((question) => question.caseNumber === data.activeCase?.caseNumber && question.questionNumber === data.activeCase?.questionNumber)
+      : undefined;
+    const selectedQuestion = data.questionAnswers.find((question) => question.id === selectedQuestionId);
+    const next = selectedQuestion
+      ? selectedQuestion.state !== "shortlist_ready" && currentQuestion ? currentQuestion.id : selectedQuestion.id
+      : currentQuestion?.id ?? data.questionAnswers[0].id;
     if (next === selectedQuestionId) return;
     queueMicrotask(() => {
       setSelectedQuestionId(next);
       setSelectedCandidateIndexes([]);
       setSelectionMessage(null);
     });
-  }, [data?.questionAnswers, selectedQuestionId]);
+  }, [data?.activeCase, data?.questionAnswers, selectedQuestionId]);
 
   const selectedQuestion = useMemo(
     () => data?.questionAnswers.find((question) => question.id === selectedQuestionId) ?? data?.questionAnswers[0] ?? null,
@@ -99,14 +105,14 @@ export default function LeaderboardClient() {
   }
 
   async function publishSelection() {
-    if (selectedCandidateIndexes.length !== 3) return;
+    if (!selectedQuestion || selectedQuestion.state !== "shortlist_ready" || selectedCandidateIndexes.length !== 3) return;
     setSelectionPending(true);
     setSelectionMessage(null);
     try {
       const response = await fetch("/api/case-lab-3/live/selection", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ candidateIndexes: selectedCandidateIndexes }),
+        body: JSON.stringify({ caseId: selectedQuestion.id, candidateIndexes: selectedCandidateIndexes }),
       });
       const result = await response.json().catch(() => ({})) as { status?: string; error?: string };
       if (!response.ok) {
