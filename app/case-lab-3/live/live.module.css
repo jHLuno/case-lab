@@ -120,7 +120,7 @@
   .speaker { margin-top: 48px; }
   .intro h1 { font-size: clamp(16px, 5.4cqw, 22px); letter-spacing: -.06em; text-wrap: balance; }
   .intro h1 span { white-space: normal; }
-  .question { max-width: 100%; font-size: clamp(24px, 7vw, 32px); }
+  .question { max-width: 100%; font-size: 24px; }
   .caseMeta,
   .answerFooter { align-items: stretch; flex-direction: column; }
   .answerFooter .primaryButton { width: 100%; }
