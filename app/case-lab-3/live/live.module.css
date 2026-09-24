@@ -67,7 +67,7 @@
 .leaderboardHeader { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .caseMeta { color: rgba(255, 255, 255, .64); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
 .speaker { margin: clamp(46px, 8vw, 88px) 0 16px; color: #d9d5ff; font-size: 14px; font-weight: 600; }
-.question { max-width: min(100%, 34ch); font-size: clamp(24px, 3.6vw, 44px); line-height: 1.08; overflow-wrap: anywhere; text-wrap: balance; }
+.question { max-width: min(100%, 34ch); font-size: clamp(24px, 3.6vw, 44px); line-height: 1.08; overflow-wrap: normal; word-break: normal; hyphens: none; text-wrap: balance; }
 .caseStatus { justify-content: flex-start; margin-top: 28px; color: rgba(255, 255, 255, .64); font-size: 13px; }
 .caseStatus strong { color: #fff; font-weight: 600; }
 .answerForm { margin-top: 40px; }
@@ -120,7 +120,7 @@
   .speaker { margin-top: 48px; }
   .intro h1 { font-size: clamp(16px, 5.4cqw, 22px); letter-spacing: -.06em; text-wrap: balance; }
   .intro h1 span { white-space: normal; }
-  .question { max-width: 100%; font-size: 24px; }
+  .question { max-width: 100%; font-size: 21px; }
   .caseMeta,
   .answerFooter { align-items: stretch; flex-direction: column; }
   .answerFooter .primaryButton { width: 100%; }

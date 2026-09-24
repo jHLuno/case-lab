@@ -81,7 +81,7 @@
 .questionPanel { border-top: 1px solid rgba(255, 255, 255, .14); padding-top: 22px; }
 .questionMeta { color: rgba(255, 255, 255, .64); font-size: 12px; }
 .questionMeta span:last-child { color: #d9d5ff; font-weight: 600; }
-.questionTitle { max-width: 28ch; margin: 20px 0 0; color: #fff; font-family: var(--font-heading); font-size: clamp(27px, 3.5vw, 48px); font-weight: 400; letter-spacing: -.04em; line-height: 1.02; text-wrap: balance; }
+.questionTitle { max-width: 34ch; margin: 20px 0 0; color: #fff; font-family: var(--font-heading); font-size: clamp(24px, 2.8vw, 38px); font-weight: 400; letter-spacing: -.04em; line-height: 1.08; overflow-wrap: normal; word-break: normal; hyphens: none; text-wrap: balance; }
 .speakerHint { margin: 20px 0 0; color: #d9d5ff; font-size: 13px; font-weight: 600; }
 .answerGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 24px; }
 .answerButton { display: block; width: 100%; border: 0; background: transparent; color: inherit; padding: 0; text-align: left; }
@@ -113,6 +113,7 @@
   .hero h1 { font-size: clamp(52px, 18vw, 82px); }
   .questionsHeader { align-items: flex-start; flex-direction: column; gap: 8px; }
   .questionMeta { align-items: flex-start; flex-direction: column; gap: 7px; }
+  .questionTitle { max-width: 100%; font-size: 24px; }
   .answerGrid { grid-template-columns: 1fr; }
   .speakerActions { align-items: stretch; flex-direction: column; }
   .primaryButton { width: 100%; }
