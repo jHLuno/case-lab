@@ -44,6 +44,7 @@ export default function NbsParticipantClient() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const previousStateRef = useRef<FormState>(null);
   const memoryRegistrationKey = useRef<string | null>(null);
   const memorySubmissionKey = useRef<string | null>(null);
   const runId = state?.runId ?? "";
@@ -54,6 +55,22 @@ export default function NbsParticipantClient() {
       const response = await fetch("/api/nbs/state/", { cache: "no-store", signal });
       if (!response.ok) throw new Error("Не удалось загрузить опрос. Попробуйте обновить страницу.");
       const next = await response.json() as NbsParticipantState;
+      const previous = previousStateRef.current;
+      if (next.state === "ready" && next.participant === null
+          && (previous?.state !== "ready" || previous.participant !== null)) {
+        setFirstName("");
+        setLastName("");
+        setAnswers({ 1: "", 2: "", 3: "" });
+        setMessage("");
+        setError("");
+        memoryRegistrationKey.current = null;
+        memorySubmissionKey.current = null;
+        try {
+          window.sessionStorage.removeItem("nbs:" + next.runId + ":registration");
+          window.sessionStorage.removeItem("nbs:" + next.runId + ":submission");
+        } catch { /* session storage may be disabled */ }
+      }
+      previousStateRef.current = next;
       setState(next);
       setError("");
       if (next.participant?.submitted && next.participant.answers) setAnswers(next.participant.answers);

@@ -46,7 +46,7 @@ type CommandRow = {
   id: string;
   environment: "test" | "live";
   run_id: string;
-  operation: "register" | "submit" | "start" | "finish" | "retry";
+  operation: "register" | "submit" | "start" | "finish" | "retry" | "reset";
   idempotency_key: string;
   request_hash: string;
   result: Json;
@@ -123,6 +123,10 @@ export type NbsDatabase = {
         Returns: Json;
       };
       nbs_forum_finish: {
+        Args: { p_environment: string; p_run_id: string; p_expected_version: number; p_idempotency_key: string; p_request_hash: string };
+        Returns: Json;
+      };
+      nbs_forum_reset: {
         Args: { p_environment: string; p_run_id: string; p_expected_version: number; p_idempotency_key: string; p_request_hash: string };
         Returns: Json;
       };

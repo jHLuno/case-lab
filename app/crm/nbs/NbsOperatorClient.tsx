@@ -36,9 +36,15 @@ export default function NbsOperatorClient({ csrfToken }: Props) {
   const [clock, setClock] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirmFinish, setConfirmFinish] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const finishRef = useRef<HTMLButtonElement>(null);
+  const confirmFinishRef = useRef<HTMLButtonElement>(null);
+  const resetRef = useRef<HTMLButtonElement>(null);
+  const confirmResetRef = useRef<HTMLButtonElement>(null);
+  const pendingResetRef = useRef<{ runId: string; expectedVersion: number; idempotencyKey: string } | null>(null);
+  const previousConfirmation = useRef({ finish: false, reset: false });
 
   const refresh = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -84,38 +90,68 @@ export default function NbsOperatorClient({ csrfToken }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!confirmFinish) return;
+    if (confirmFinish) confirmFinishRef.current?.focus();
+    else if (previousConfirmation.current.finish) finishRef.current?.focus();
+
+    if (confirmReset) confirmResetRef.current?.focus();
+    else if (previousConfirmation.current.reset) resetRef.current?.focus();
+
+    previousConfirmation.current = { finish: confirmFinish, reset: confirmReset };
+  }, [confirmFinish, confirmReset]);
+
+  useEffect(() => {
+    if (!confirmFinish && !confirmReset) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setConfirmFinish(false);
-        requestAnimationFrame(() => finishRef.current?.focus());
+        if (confirmReset) setConfirmReset(false);
+        if (confirmFinish) setConfirmFinish(false);
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [confirmFinish]);
+  }, [confirmFinish, confirmReset]);
 
-  const runCommand = async (operation: "start" | "finish" | "retry") => {
+  const runCommand = async (operation: "start" | "finish" | "retry" | "reset") => {
     if (!snapshot || busy) return;
     setBusy(true);
     setError("");
     setMessage("");
     try {
+      if (operation === "reset" && !pendingResetRef.current) {
+        pendingResetRef.current = {
+          runId: snapshot.runId,
+          expectedVersion: snapshot.stateVersion,
+          idempotencyKey: createIdempotencyKey(),
+        };
+      }
+      const resetCommand = operation === "reset" ? pendingResetRef.current : null;
       const response = await fetch("/api/admin/nbs/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-CSRF-Token": csrfToken,
-          "Idempotency-Key": createIdempotencyKey(),
+          "Idempotency-Key": resetCommand?.idempotencyKey ?? createIdempotencyKey(),
         },
-        body: JSON.stringify({ operation, command: { runId: snapshot.runId, expectedVersion: snapshot.stateVersion } }),
+        body: JSON.stringify({
+          operation,
+          command: resetCommand
+            ? { runId: resetCommand.runId, expectedVersion: resetCommand.expectedVersion }
+            : { runId: snapshot.runId, expectedVersion: snapshot.stateVersion },
+        }),
       });
       if (!response.ok) {
         const payload = await response.json().catch(() => ({})) as { error?: string };
+        if (operation === "reset" && payload.error === "conflict") {
+          pendingResetRef.current = null;
+          setConfirmReset(false);
+        }
         throw new Error(payload.error === "conflict" ? "Состояние уже изменилось. Обновляю данные." : "Команда не выполнена.");
       }
+      if (operation === "reset") pendingResetRef.current = null;
       setConfirmFinish(false);
-      setMessage(operation === "start" ? "Сбор ответов открыт."
+      setConfirmReset(false);
+      setMessage(operation === "reset" ? "Данные очищены. Опрос готов к новому запуску."
+        : operation === "start" ? "Сбор ответов открыт."
         : operation === "retry" ? "Повторный анализ поставлен в очередь."
         : "Сбор закрыт. Анализ поставлен в очередь.");
       await refresh();
@@ -167,7 +203,7 @@ export default function NbsOperatorClient({ csrfToken }: Props) {
           {confirmFinish ? (
             <div className="flex w-full flex-wrap items-center gap-3 rounded-2xl border border-[#eed2d0] bg-[#fff7f6] p-4" aria-label="Подтвердить завершение опроса">
               <span className="w-full text-sm text-[#6f2424]">Закрыть приём ответов и запустить анализ?</span>
-              <button type="button" disabled={busy} onClick={() => void runCommand("finish")} className="min-h-11 rounded-full bg-[#991e1e] px-5 text-sm font-semibold text-white disabled:opacity-50">
+              <button ref={confirmFinishRef} type="button" disabled={busy} onClick={() => void runCommand("finish")} className="min-h-11 rounded-full bg-[#991e1e] px-5 text-sm font-semibold text-white disabled:opacity-50">
                 Подтвердить завершение
               </button>
               <button type="button" disabled={busy} onClick={() => setConfirmFinish(false)} className="min-h-11 rounded-full border border-[#d6c5c2] px-5 text-sm text-[#463d3b] disabled:opacity-50">
@@ -183,6 +219,25 @@ export default function NbsOperatorClient({ csrfToken }: Props) {
               className="min-h-12 rounded-full border border-[#cdb8b5] bg-white px-6 text-sm font-semibold text-[#6d201e] transition-colors hover:bg-[#fff7f6] focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[#e94848] disabled:cursor-not-allowed disabled:opacity-40"
             >
               Закончить
+            </button>
+          )}
+        </div>
+        <div className="mt-5">
+          {confirmReset ? (
+            <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#b94848] bg-[#fff7f6] p-4" role="group" aria-label="Подтвердить сброс данных NBS">
+              <p className="m-0 w-full text-sm leading-6 text-[#6f2424]">
+                Сброс очистит участников ({snapshot?.participants ?? 0}), отправленные анкеты ({snapshot?.submissions ?? 0}), все ответы и результаты анализа. Опрос вернётся в состояние готовности.
+              </p>
+              <button ref={confirmResetRef} type="button" disabled={busy} onClick={() => void runCommand("reset")} className="min-h-11 rounded-full bg-[#991e1e] px-5 text-sm font-semibold text-white hover:bg-[#7a1818] focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#e94848] disabled:opacity-50">
+                {busy ? "Сбрасываю…" : "Подтвердить сброс"}
+              </button>
+              <button type="button" disabled={busy} onClick={() => setConfirmReset(false)} className="min-h-11 rounded-full border border-[#d6c5c2] px-5 text-sm text-[#463d3b] focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#991e1e] disabled:opacity-50">
+                Отмена
+              </button>
+            </div>
+          ) : (
+            <button ref={resetRef} type="button" disabled={busy || !snapshot} onClick={() => { setConfirmFinish(false); setConfirmReset(true); }} className="min-h-11 rounded-full border border-[#991e1e] px-5 text-sm font-semibold text-[#991e1e] transition-colors hover:bg-[#fff1f0] focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#e94848] disabled:cursor-not-allowed disabled:opacity-40">
+              Сбросить всё
             </button>
           )}
         </div>

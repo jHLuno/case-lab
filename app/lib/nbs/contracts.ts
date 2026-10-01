@@ -5,6 +5,7 @@ export type NbsAnswerSet = Record<NbsQuestionNumber, string>;
 export type NbsRegistrationInput = { runId: string; firstName: string; lastName: string };
 export type NbsSubmissionInput = { runId: string; answers: NbsAnswerSet };
 export type NbsRunCommand = { runId: string; expectedVersion: number };
+export type NbsRunOperation = "start" | "finish" | "retry" | "reset";
 
 export type NbsSnapshotAnswer = { answerId: string; text: string; redactions?: string[] };
 export type NbsQuestionSnapshot = {

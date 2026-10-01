@@ -47,7 +47,7 @@ export async function POST(request: Request): Promise<Response> {
     requireJson(request);
     const body = parseJsonBody<unknown>(await readBoundedBody(request, 4096));
     if (body === null || typeof body !== "object" || Array.isArray(body)
-        || !("operation" in body) || (body.operation !== "start" && body.operation !== "finish" && body.operation !== "retry")
+        || !("operation" in body) || (body.operation !== "start" && body.operation !== "finish" && body.operation !== "retry" && body.operation !== "reset")
         || !("command" in body)) {
       return noStoreJson({ error: "invalid_request" }, { status: 400 });
     }
@@ -70,7 +70,7 @@ export async function POST(request: Request): Promise<Response> {
         // The durable queue is picked up by its scheduled dispatcher.
       }
     }
-    return noStoreJson(result, { status: body.operation === "start" ? 200 : 202 });
+    return noStoreJson(result, { status: body.operation === "finish" || body.operation === "retry" ? 202 : 200 });
   } catch (error) {
     return errorResponse(error);
   }

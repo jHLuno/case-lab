@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { NbsEnvironment, NbsRunCommand } from "./contracts";
+import type { NbsEnvironment, NbsRunCommand, NbsRunOperation } from "./contracts";
 import type { NbsAdminClient } from "./db.server";
 import { hashNbsRequest, loadNbsOperatorSnapshot, NbsRepositoryError } from "./repository.server";
 
@@ -9,7 +9,7 @@ export { loadNbsOperatorSnapshot };
 export async function executeNbsRunCommand(
   db: NbsAdminClient,
   environment: NbsEnvironment,
-  operation: "start" | "finish" | "retry",
+  operation: NbsRunOperation,
   command: NbsRunCommand,
   idempotencyKey: string,
   tokenSecret: string,
@@ -25,6 +25,14 @@ export async function executeNbsRunCommand(
       })
     : operation === "finish"
     ? await db.rpc("nbs_forum_finish", {
+        p_environment: environment,
+        p_run_id: command.runId,
+        p_expected_version: command.expectedVersion,
+        p_idempotency_key: idempotencyKey,
+        p_request_hash: requestHash,
+      })
+    : operation === "reset"
+    ? await db.rpc("nbs_forum_reset", {
         p_environment: environment,
         p_run_id: command.runId,
         p_expected_version: command.expectedVersion,
