@@ -186,7 +186,10 @@ export default function NbsParticipantClient() {
         <section className={styles.hero} aria-labelledby="nbs-title">
           <div>
             <p className={styles.eyebrow}>Голос руководителей</p>
-            <h1 id="nbs-title" className={styles.title}>NBS Leadership Forum 2026</h1>
+            <h1 id="nbs-title" className={styles.title}>
+              <span className={styles.titlePrimary}>NBS Leadership</span>
+              <span className={styles.titleSecondary}>Forum 2026</span>
+            </h1>
           </div>
           <p className={styles.heroText}>
             Поделитесь взглядом на лидерство и решения, которые можно доверить искусственному интеллекту. Ответы будут показаны аудитории в виде общих смыслов.

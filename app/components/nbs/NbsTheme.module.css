@@ -14,22 +14,24 @@
   font-weight: 500;
 }
 
-.shell { width: min(1480px, 100%); margin: 0 auto; padding: clamp(18px, 4vw, 54px) clamp(16px, 5vw, 76px) 64px; }
+.shell { width: min(1480px, 100%); margin: 0 auto; padding: clamp(16px, 2.5vw, 32px) clamp(16px, 5vw, 76px) 48px; }
 .topline, .resultsTop { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .logoLink { display: inline-flex; min-width: 0; align-items: center; text-decoration: none; }
 .logoLink:focus-visible { border-radius: 2px; outline: 3px solid #fff; outline-offset: 6px; }
 .logo { display: block; width: clamp(176px, 22vw, 286px); height: auto; }
 .forumTag { color: var(--nbs-muted); font-size: 12px; letter-spacing: .08em; text-align: right; text-transform: uppercase; }
-.hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr); align-items: end; gap: clamp(28px, 8vw, 120px); padding: clamp(48px, 9vw, 124px) 0 clamp(32px, 5vw, 72px); }
-.eyebrow { margin: 0 0 22px; color: #ffb5bf; font-size: 12px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; }
-.title { max-width: 13ch; margin: 0; font-family: var(--font-heading); font-size: clamp(44px, 6.2vw, 80px); font-weight: 600; letter-spacing: -.035em; line-height: .99; overflow-wrap: anywhere; text-wrap: balance; }
+.hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr); align-items: end; gap: clamp(24px, 5vw, 72px); padding: clamp(28px, 4vw, 56px) 0 clamp(22px, 3vw, 42px); }
+.eyebrow { margin: 0 0 14px; color: #ffb5bf; font-size: 12px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; }
+.title { max-width: 15ch; margin: 0; font-family: var(--font-heading); font-size: clamp(40px, 4.5vw, 58px); font-weight: 600; letter-spacing: -.035em; line-height: 1.04; overflow-wrap: normal; word-break: normal; text-wrap: balance; }
+.titlePrimary, .titleSecondary { display: block; }
+.titleSecondary { white-space: nowrap; }
 .heroText { max-width: 39ch; margin: 0 0 7px; color: var(--nbs-muted); font-size: clamp(15px, 1.3vw, 18px); line-height: 1.65; }
 .content { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr); gap: 18px; align-items: start; }
 .panel { min-width: 0; border: 1px solid rgba(255, 255, 255, .17); border-radius: 24px; background: var(--nbs-surface); box-shadow: 0 24px 70px rgba(7, 0, 3, .24); backdrop-filter: blur(14px); }
-.formPanel { padding: clamp(22px, 4vw, 46px); }
+.formPanel { padding: clamp(20px, 2.6vw, 32px); }
 .sectionHeading { margin: 0; font-family: var(--font-heading); font-size: clamp(22px, 2.3vw, 32px); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; }
-.sectionIntro { margin: 11px 0 26px; color: var(--nbs-muted); font-size: 14px; line-height: 1.6; }
-.names { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; margin-bottom: 30px; }
+.sectionIntro { margin: 9px 0 20px; color: var(--nbs-muted); font-size: 14px; line-height: 1.6; }
+.names { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; margin-bottom: 22px; }
 .field { display: grid; min-width: 0; gap: 8px; color: #fff; font-size: 13px; font-weight: 500; }
 .input, .textarea { width: 100%; border: 1px solid rgba(255, 255, 255, .38); border-radius: 12px; background: rgba(255, 255, 255, .97); color: #2b1018; font-family: var(--font-body); font-size: 16px; font-weight: 500; line-height: 1.5; outline: none; transition: border-color .16s ease, box-shadow .16s ease; }
 .input { min-height: 52px; padding: 0 14px; }
@@ -51,12 +53,12 @@
 .primaryButton:focus-visible, .link:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .formFooter { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 24px; }
 .helper { max-width: 38ch; margin: 0; color: var(--nbs-muted); font-size: 12px; line-height: 1.5; }
-.sidePanel { padding: clamp(22px, 3vw, 34px); }
+.sidePanel { padding: clamp(20px, 2.4vw, 28px); }
 .statusLabel { display: inline-flex; min-height: 30px; align-items: center; gap: 8px; border: 1px solid rgba(255, 255, 255, .2); border-radius: 999px; background: rgba(255, 255, 255, .1); color: #fff; padding: 0 12px; font-size: 12px; font-weight: 700; }
 .statusDot { width: 7px; height: 7px; border-radius: 50%; background: #ff8895; }
-.sideTitle { margin: 24px 0 10px; font-family: var(--font-heading); font-size: clamp(23px, 2.4vw, 32px); font-weight: 600; letter-spacing: -.03em; line-height: 1.1; }
+.sideTitle { margin: 16px 0 10px; font-family: var(--font-heading); font-size: clamp(23px, 2.4vw, 32px); font-weight: 600; letter-spacing: -.03em; line-height: 1.1; }
 .sideText { margin: 0; color: var(--nbs-muted); font-size: 14px; line-height: 1.65; }
-.finePrint { margin: 30px 0 0; border-top: 1px solid rgba(255, 255, 255, .18); padding-top: 18px; color: var(--nbs-muted); font-size: 12px; line-height: 1.55; }
+.finePrint { margin: 20px 0 0; border-top: 1px solid rgba(255, 255, 255, .18); padding-top: 14px; color: var(--nbs-muted); font-size: 12px; line-height: 1.55; }
 .notice, .alert { margin: 16px 0 0; border: 1px solid rgba(255, 255, 255, .2); border-radius: 12px; color: #fff; padding: 12px 14px; font-size: 13px; line-height: 1.5; }
 .notice { background: rgba(20, 92, 57, .68); }
 .alert { background: rgba(100, 10, 27, .78); }
@@ -94,11 +96,10 @@
 .comparison p { max-width: 80ch; margin: 0; color: var(--nbs-muted); font-size: 15px; line-height: 1.65; }
 
 @media (max-width: 899px) {
-  .hero { grid-template-columns: 1fr; gap: 20px; padding-top: 72px; }
-  .title { max-width: 16ch; }
+  .hero { grid-template-columns: 1fr; gap: 18px; padding-top: 42px; }
+  .title { max-width: 18ch; }
   .heroText { max-width: 56ch; }
   .content { grid-template-columns: 1fr; }
-  .sidePanel { order: -1; }
   .screenGrid { grid-template-columns: 1fr; }
   .screenCard { min-height: 0; }
   .screenRows { gap: 17px; margin-top: 18px; }
@@ -110,14 +111,14 @@
   .topline, .resultsTop { align-items: flex-start; }
   .logo { width: clamp(168px, 52vw, 230px); }
   .forumTag { max-width: 15ch; font-size: 10px; line-height: 1.5; }
-  .hero { gap: 16px; padding: 54px 0 28px; }
-  .eyebrow { margin-bottom: 16px; font-size: 10px; }
-  .title { max-width: 13ch; font-size: clamp(30px, 9.8vw, 42px); letter-spacing: -.03em; line-height: 1.01; }
+  .hero { gap: 14px; padding: 30px 0 22px; }
+  .eyebrow { margin-bottom: 10px; font-size: 10px; }
+  .title { max-width: 15ch; font-size: clamp(27px, 8vw, 36px); letter-spacing: -.03em; line-height: 1.05; }
   .heroText { font-size: 15px; line-height: 1.55; }
   .formPanel, .sidePanel { border-radius: 19px; }
-  .formPanel { padding: 21px 17px; }
+  .formPanel { padding: 18px 17px; }
   .sidePanel { padding: 20px 18px; }
-  .sideTitle { margin-top: 15px; }
+  .sideTitle { margin-top: 13px; }
   .names { grid-template-columns: 1fr; gap: 12px; margin-bottom: 25px; }
   .questionList { gap: 19px; }
   .questionLabel { font-size: 14px; }
