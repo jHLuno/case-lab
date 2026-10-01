@@ -11,19 +11,19 @@ QR всегда ведёт на одну анкету: `https://caselab.kz/narxo
 
 ## Настройки окружения
 
-Для каждого развёртывания задаётся ровно одно серверное окружение:
+Окружение NBS можно задать отдельной переменной:
 
 - `NBS_ENVIRONMENT=test` для тестового развёртывания;
 - `NBS_ENVIRONMENT=live` для рабочего развёртывания.
 
-Задай `NBS_WORKER_SECRET` случайным секретом длиной не менее 32 символов. Передай то же значение для выбранного окружения в Supabase Vault через `nbs_worker_secret_test` или `nbs_worker_secret_live`. Не добавляй секрет в `NEXT_PUBLIC_*`, репозиторий, миграции или клиентские страницы.
+Если `NBS_ENVIRONMENT` не задан, NBS использует существующий `CASE_LAB_3_PAYMENT_MODE` (`test` или `live`). Для worker можно отдельно задать `NBS_WORKER_SECRET`; если он отсутствует, используется существующий `CASE_LAB_3_CRON_SECRET`. Эффективный worker secret должен иметь длину не менее 32 символов и совпадать со значением в Supabase Vault. Не добавляй секрет в `NEXT_PUBLIC_*`, репозиторий, миграции или клиентские страницы.
 
 NBS использует существующие серверные настройки приложения: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CASE_LAB_3_TOKEN_SECRET`, `OPENROUTER_API_KEY` и, при необходимости, `OPENROUTER_MODEL`/`OPENROUTER_FALLBACK_MODEL`. Значения вводятся только средствами окружения хостинга и Supabase Vault; не печатай их в командной строке или логах.
 
 Для включения очереди в Supabase Vault добавь:
 
 - `nbs_worker_url_test` или `nbs_worker_url_live` — полный HTTPS-адрес соответствующего развёртывания с путём `/api/internal/nbs/jobs/`;
-- `nbs_worker_secret_test` или `nbs_worker_secret_live` — тот же секрет, что задан как `NBS_WORKER_SECRET` для этого развёртывания.
+- `nbs_worker_secret_test` или `nbs_worker_secret_live` — тот же эффективный секрет, что использует `NBS_WORKER_SECRET` или его fallback `CASE_LAB_3_CRON_SECRET`.
 
 Тестовое и рабочее развёртывания должны использовать собственные environment, endpoint и Vault entries.
 
