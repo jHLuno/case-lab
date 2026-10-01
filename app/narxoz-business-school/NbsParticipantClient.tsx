@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { answerLength, participantNameLength } from "@/lib/nbs/text";
 import type { NbsAnswerSet, NbsParticipantState } from "@/lib/nbs/contracts";
 import { NBS_QUESTIONS } from "@/lib/nbs/questions";
@@ -160,7 +161,9 @@ export default function NbsParticipantClient() {
     <div className={styles.root}>
       <div className={styles.shell}>
         <header className={styles.topline}>
-          <a href="https://nbs.narxoz.kz/" className={styles.wordmark}>NARXOZ BUSINESS SCHOOL</a>
+          <a href="https://nbs.narxoz.kz/" className={styles.logoLink}>
+            <Image src="/NBS Logo Full.png" width={1726} height={122} alt="Narxoz Business School" className={styles.logo} preload />
+          </a>
           <span className={styles.forumTag}>Leadership Forum · 2026</span>
         </header>
         <section className={styles.hero} aria-labelledby="nbs-title">

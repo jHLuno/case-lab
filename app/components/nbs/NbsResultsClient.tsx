@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 import type { NbsQuestionReport, NbsRunState, NbsScreenReport } from "@/lib/nbs/contracts";
 import styles from "./NbsTheme.module.css";
@@ -73,7 +74,9 @@ export default function NbsResultsClient({ view }: Props) {
     <div className={styles.root}>
       <main className={styles.resultsShell}>
         <header className={styles.resultsTop}>
-          <a href="https://nbs.narxoz.kz/" className={styles.wordmark}>NARXOZ BUSINESS SCHOOL</a>
+          <a href="https://nbs.narxoz.kz/" className={styles.logoLink}>
+            <Image src="/NBS Logo Full.png" width={1726} height={122} alt="Narxoz Business School" className={styles.logo} preload />
+          </a>
           <span className={styles.forumTag}>Leadership Forum · 2026</span>
         </header>
         {view === "screen" ? (
