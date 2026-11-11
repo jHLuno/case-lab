@@ -4,8 +4,8 @@ import { requireCrmAdmin } from "@/lib/crm-auth.server";
 import { noStoreJson } from "@/lib/case-lab-3/http.server";
 import { getCaseLab3AdminClient, type CaseLab3AdminClient } from "@/lib/case-lab-3/supabase-admin.server";
 import type { PaymentEnvironment } from "@/lib/case-lab-3/contracts";
+import type { IncidentStatus, RefundStatus } from "@/lib/case-lab-3/database.types";
 
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const MAX_PAGE_SIZE = 100;
 const EXPORT_PAGE_SIZE = 5000;
 
@@ -201,16 +201,15 @@ async function orderIdsWithRelatedStatus(
   table: "case_lab_3_refunds" | "case_lab_3_incidents",
   status: string,
 ): Promise<string[]> {
-  const query = client.from(table) as any;
-  const { data, error } = await query
-    .select("order_id")
-    .eq("environment", filters.environment)
-    .eq("status", status)
-    .limit(EXPORT_PAGE_SIZE);
+  const { data, error } = table === "case_lab_3_refunds"
+    ? await client.from("case_lab_3_refunds").select("order_id")
+      .eq("environment", filters.environment).eq("status", status as RefundStatus).limit(EXPORT_PAGE_SIZE)
+    : await client.from("case_lab_3_incidents").select("order_id")
+      .eq("environment", filters.environment).eq("status", status as IncidentStatus).limit(EXPORT_PAGE_SIZE);
   if (error) throw new Error("Admin order query failed");
-  return (data ?? [])
-    .map((row: { order_id: string | null }) => row.order_id)
-    .filter((orderId: string | null): orderId is string => typeof orderId === "string");
+  return ((data ?? []) as Array<{ order_id: string | null }>)
+    .map((row) => row.order_id)
+    .filter((orderId): orderId is string => typeof orderId === "string");
 }
 
 function mapOrder(row: OrderRow, ticketNumber: string | null): AdminOrderSummary {

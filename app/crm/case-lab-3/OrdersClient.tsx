@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useDeferredValue, useEffect, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 
 type Environment = "test" | "live";
 
@@ -83,20 +83,23 @@ export default function OrdersClient({ csrfToken, initialData }: OrdersClientPro
   const [allocations, setAllocations] = useState<Allocation[]>([]);
   const [allocationReason, setAllocationReason] = useState("");
   const [allocationQuantity, setAllocationQuantity] = useState("1");
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const deferredSearch = useDeferredValue(search);
 
-  useEffect(() => {
-    const controller = new AbortController();
+  const ordersQuery = useMemo(() => {
     const params = new URLSearchParams({ environment, page: String(page), pageSize: String(ORDERS_PAGE_SIZE) });
     if (deferredSearch.trim()) params.set("search", deferredSearch.trim());
     if (paymentStatus) params.set("paymentStatus", paymentStatus);
     if (ticketStatus) params.set("ticketStatus", ticketStatus);
+    return params.toString();
+  }, [deferredSearch, environment, page, paymentStatus, ticketStatus]);
+  const [loadedOrdersQuery, setLoadedOrdersQuery] = useState<string | null>(null);
+  const loading = loadedOrdersQuery !== ordersQuery;
 
-    setLoading(true);
-    fetch(`/api/admin/case-lab-3/orders?${params.toString()}`, { cache: "no-store", signal: controller.signal })
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(`/api/admin/case-lab-3/orders?${ordersQuery}`, { cache: "no-store", signal: controller.signal })
       .then(async (response) => {
         if (!response.ok) throw new Error("orders");
         return response.json() as Promise<OrderList>;
@@ -108,10 +111,12 @@ export default function OrdersClient({ csrfToken, initialData }: OrdersClientPro
       .catch((error: unknown) => {
         if (!(error instanceof DOMException && error.name === "AbortError")) setMessage("Не удалось загрузить заказы.");
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!controller.signal.aborted) setLoadedOrdersQuery(ordersQuery);
+      });
 
     return () => controller.abort();
-  }, [deferredSearch, environment, page, paymentStatus, ticketStatus]);
+  }, [ordersQuery]);
 
   useEffect(() => {
     const controller = new AbortController();
