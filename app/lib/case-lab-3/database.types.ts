@@ -5,7 +5,16 @@ import type {
   PaymentEnvironment,
   TicketTier,
 } from "./contracts";
-import type { LiveCaseState, PublicLeaderboardEntry } from "./live/contracts";
+// Live interaction tables remain in the database after the Live UI was removed.
+type LiveCaseState = "draft" | "ready" | "open" | "analyzing" | "shortlist_ready" | "awarded" | "closed";
+type PublicLeaderboardEntry = {
+  participantId: string;
+  displayName: string;
+  points: number;
+  firstPlaces: number;
+  podiums: number;
+  rank: number;
+};
 
 export type Json =
   | string
