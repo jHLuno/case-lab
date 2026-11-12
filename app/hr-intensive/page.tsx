@@ -264,6 +264,7 @@ export default function Page() {
         ctaDescription="Соберите формат в конфигураторе — пришлём КП в течение рабочего дня."
         ctaLabel="Запросить КП"
         ctaHref="#request"
+        compact
       />
     </div>
   );
