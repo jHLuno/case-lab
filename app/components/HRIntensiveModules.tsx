@@ -241,37 +241,38 @@ export default function HRIntensiveModules() {
             <li key={module.index} data-sheet-row className="relative md:pb-6" style={{ zIndex: i + 1 }}>
               <article
                 data-sheet
-                className="grid origin-top gap-6 rounded-[20px] border border-black/5 bg-white p-6 text-black shadow-[0_-18px_40px_-18px_rgba(0,0,17,0.55)] md:min-h-[260px] md:rotate-[var(--sheet-tilt)] md:p-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_260px] lg:items-center lg:gap-8 xl:p-10"
+                // Reference layout: number · title · stacked tags · description · picture, all top-aligned.
+                className="grid origin-top items-start gap-4 rounded-[20px] border border-black/5 bg-white p-6 text-black shadow-[0_-18px_40px_-18px_rgba(0,0,17,0.55)] md:min-h-[260px] md:rotate-[var(--sheet-tilt)] md:gap-5 md:p-8 lg:grid-cols-[28px_minmax(0,1fr)_minmax(0,1fr)_240px] lg:gap-x-8 lg:gap-y-4 lg:[grid-template-areas:'num_title_desc_img'_'num_tags_desc_img'] xl:grid-cols-[28px_minmax(0,1.3fr)_minmax(0,0.55fr)_minmax(0,1fr)_260px] xl:p-10 xl:[grid-template-areas:'num_title_tags_desc_img']"
                 style={{ ["--sheet-tilt" as string]: `${module.tilt}deg` }}
               >
-                <div className="flex flex-col items-start gap-2 sm:flex-row sm:gap-4 md:gap-6">
-                  <span className="text-[13px] tracking-[0.12em] text-black/40 sm:pt-1" style={bodyFont}>
-                    {module.index}
-                  </span>
-                  <div>
-                    <h3
-                      className="text-[19px] font-bold uppercase leading-[1.1] tracking-[0.02em] text-[#040082] sm:text-[22px] md:text-[28px] lg:text-[22px] xl:text-[30px]"
-                      style={headingFont}
-                    >
-                      {module.title}
-                    </h3>
-                    <p className="mt-3 text-[11px] uppercase tracking-[0.1em] text-[#040082]/70" style={bodyFont}>
-                      {module.tag}
-                    </p>
-                  </div>
-                </div>
+                <span className="text-[13px] tracking-[0.12em] text-black/40 lg:pt-1 lg:[grid-area:num]" style={bodyFont}>
+                  {module.index}
+                </span>
 
-                <p className="text-[15px] font-light leading-[1.55] text-black/65 md:text-[16px]" style={bodyFont}>
+                <h3
+                  className="text-[19px] font-bold uppercase leading-[1.1] tracking-[0.02em] text-[#040082] sm:text-[22px] md:text-[28px] lg:text-[22px] lg:[grid-area:title] xl:text-[26px]"
+                  style={headingFont}
+                >
+                  {module.title}
+                </h3>
+
+                <ul className="space-y-0.5 text-[12px] leading-[1.4] text-[#040082]/70 lg:[grid-area:tags] xl:pt-1" style={bodyFont}>
+                  {module.tag.split(" · ").map((tag) => (
+                    <li key={tag}>{tag}</li>
+                  ))}
+                </ul>
+
+                <p className="text-[14px] leading-[1.5] text-black/75 lg:[grid-area:desc] xl:pt-0.5" style={bodyFont}>
                   {module.text}
                 </p>
 
-                <div className="relative aspect-[4/3] w-full max-w-[320px] overflow-hidden rounded-[14px] bg-[#dde1fa] lg:max-w-none">
+                <div className="relative aspect-[4/3] w-full max-w-[320px] overflow-hidden rounded-[14px] bg-[#dde1fa] lg:max-w-none lg:[grid-area:img]">
                   {module.image ? (
                     <Image
                       src={module.image}
                       alt=""
                       fill
-                      sizes="(min-width: 1024px) 260px, 320px"
+                      sizes="(min-width: 1280px) 260px, (min-width: 1024px) 240px, 320px"
                       className="object-cover"
                     />
                   ) : (
