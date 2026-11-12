@@ -4,6 +4,7 @@ import { ArrowRight, Plus } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import HRIntensiveConfigurator from "../components/HRIntensiveConfigurator";
+import HRIntensiveHeroBackground from "../components/HRIntensiveHeroBackground";
 
 export const metadata: Metadata = {
   title: "Корпоративный интенсив о новом поколении | Case Lab",
@@ -132,30 +133,7 @@ export default function Page() {
           aria-labelledby="hr-intensive-title"
           className="relative isolate flex min-h-[100dvh] w-full items-end overflow-hidden bg-[#000011] text-white"
         >
-          <div
-            aria-hidden="true"
-            className="absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(ellipse at 78% 18%, rgba(4,0,130,0.95) 0%, transparent 55%), radial-gradient(ellipse at 10% 90%, rgba(26,26,158,0.55) 0%, transparent 50%)",
-            }}
-          />
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 opacity-[0.04]"
-            style={{
-              backgroundImage:
-                "linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)",
-              backgroundSize: "100px 100px",
-            }}
-          />
-          <span
-            aria-hidden="true"
-            className="absolute right-[4%] top-[14%] text-[clamp(120px,22vw,340px)] font-bold leading-none text-white/[0.05]"
-            style={headingFont}
-          >
-            GEN Z
-          </span>
+          <HRIntensiveHeroBackground />
 
           <div className="relative z-10 mx-auto w-full max-w-[1440px] px-6 pb-16 pt-32 md:px-10 md:pb-24">
             <p
@@ -166,7 +144,7 @@ export default function Page() {
             </p>
             <h1
               id="hr-intensive-title"
-              className="evp-hero-enter mt-5 max-w-[18ch] text-[clamp(30px,5.2vw,72px)] font-bold uppercase leading-[1.02] tracking-[0.02em]"
+              className="evp-hero-enter mt-5 max-w-[1040px] text-balance break-words text-[clamp(24px,3.6vw,52px)] font-bold uppercase leading-[1.08] tracking-[0.02em]"
               style={headingFont}
             >
               Ваши следующие клиенты и сотрудники — зумеры
@@ -231,14 +209,14 @@ export default function Page() {
               43% казахстанцев — моложе 25 лет. Компании, которые были на коне 10–15 лет назад, теряют выручку не из-за продукта, а потому что не понимают, как с этим поколением говорить: как с клиентами и как с сотрудниками.
             </p>
 
-            <div className="mt-12 grid gap-4 md:mt-16 md:grid-cols-3 md:gap-6">
+            <div className="mt-12 grid gap-4 md:mt-16 lg:grid-cols-3 lg:gap-6">
               {symptoms.map((item) => (
                 <article
                   key={item.title}
-                  className="flex flex-col rounded-[24px] border border-black/[0.08] bg-[#f5f5f5] p-8 md:p-10"
+                  className="flex flex-col rounded-[24px] border border-black/[0.08] bg-[#f5f5f5] p-7 md:p-9 lg:p-7 xl:p-10"
                 >
                   <h3
-                    className="text-[17px] font-bold uppercase leading-[1.2] tracking-[0.02em] text-[#040082] md:text-[19px]"
+                    className="text-[16px] font-bold uppercase leading-[1.2] tracking-[0.02em] text-[#040082] md:text-[19px] lg:text-[16px] xl:text-[19px]"
                     style={headingFont}
                   >
                     {item.title}
@@ -281,17 +259,17 @@ export default function Page() {
               Программа уже обкатана на конференциях и корпоративных сессиях. Вы выбираете, сколько времени готова уделить команда, — мы собираем из блоков нужный формат.
             </p>
 
-            <ol className="mt-12 grid gap-4 md:mt-16 md:grid-cols-3 md:gap-6">
+            <ol className="mt-12 grid gap-4 md:mt-16 lg:grid-cols-3 lg:gap-6">
               {modules.map((module) => (
                 <li
                   key={module.index}
-                  className="flex flex-col rounded-[24px] border border-white/20 bg-white/[0.06] p-8 md:p-10"
+                  className="flex flex-col rounded-[24px] border border-white/20 bg-white/[0.06] p-7 md:p-9 lg:p-7 xl:p-10"
                 >
                   <span className="text-[13px] tracking-[0.12em] text-white/50" style={bodyFont}>
                     {module.index}
                   </span>
                   <h3
-                    className="mt-4 text-[20px] font-bold uppercase leading-[1.15] tracking-[0.02em] md:text-[24px]"
+                    className="mt-4 text-[18px] font-bold uppercase leading-[1.15] tracking-[0.02em] md:text-[22px] lg:text-[18px] xl:text-[22px]"
                     style={headingFont}
                   >
                     {module.title}
@@ -420,7 +398,7 @@ export default function Page() {
         </section>
       </main>
       <Footer
-        ctaHeading="Обсудим программу для вашей команды?"
+        ctaHeading="Обсудим программу?"
         ctaDescription="Соберите формат в конфигураторе — пришлём КП в течение рабочего дня."
         ctaLabel="Запросить КП"
         ctaHref="#request"
