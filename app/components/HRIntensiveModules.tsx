@@ -18,7 +18,7 @@ const modules: {
   index: string;
   title: string;
   text: string;
-  tag: string;
+  tags: string[];
   art: "zoomer" | "ejm" | "evp";
   image?: string;
   tilt: number;
@@ -27,7 +27,7 @@ const modules: {
     index: "01",
     title: "Зумерология",
     text: "Кто такие Gen Z и Alpha: как они думают, выбирают, покупают и работают. Ценности, мифы о поколении и навыки будущего — на данных и живых кейсах.",
-    tag: "Поколения · ценности · навыки будущего",
+    tags: ["Поколения", "Ценности", "Навыки будущего"],
     art: "zoomer",
     tilt: -0.8,
   },
@@ -35,7 +35,7 @@ const modules: {
     index: "02",
     title: "EJM — карта пути сотрудника",
     text: "Employee Journey Map: разбираем путь сотрудника от первого касания с компанией до ухода — где молодые таланты теряют интерес и что менять на каждом этапе.",
-    tag: "Найм · онбординг · удержание",
+    tags: ["Найм", "Онбординг", "Удержание"],
     art: "ejm",
     tilt: 0.7,
   },
@@ -43,7 +43,7 @@ const modules: {
     index: "03",
     title: "EVP и бренд работодателя",
     text: "Тренды HR-брендинга, архетипы работодателя и из чего складывается позиционирование, которое привлекает и удерживает молодые таланты.",
-    tag: "Архетипы · позиционирование · тренды",
+    tags: ["Архетипы", "Позиционирование", "Тренды"],
     art: "evp",
     tilt: -0.5,
   },
@@ -235,7 +235,7 @@ export default function HRIntensiveModules() {
             <li key={module.index} data-sheet-row className="relative" style={{ zIndex: i + 1 }}>
               <article
                 data-sheet
-                // Reference layout: number · title · stacked tags · description · picture, all top-aligned.
+                // Reference layout: number, title, stacked tags, description and picture, all top-aligned.
                 className="grid origin-top items-start gap-4 rounded-[20px] border border-black/5 bg-white p-6 text-black shadow-[0_-18px_40px_-18px_rgba(0,0,17,0.55)] md:min-h-[260px] md:rotate-[var(--sheet-tilt)] md:gap-5 md:p-[32px] lg:grid-cols-[28px_minmax(0,1fr)_minmax(0,1fr)_240px] lg:gap-x-[32px] lg:gap-y-4 lg:[grid-template-areas:'num_title_desc_img'_'num_tags_desc_img'] xl:grid-cols-[28px_minmax(0,1.3fr)_minmax(0,0.55fr)_minmax(0,1fr)_260px] xl:p-10 xl:[grid-template-areas:'num_title_tags_desc_img']"
                 style={{ ["--sheet-tilt" as string]: `${module.tilt}deg` }}
               >
@@ -251,7 +251,7 @@ export default function HRIntensiveModules() {
                 </h3>
 
                 <ul className="space-y-0.5 text-[12px] leading-[1.4] text-[#040082]/70 lg:[grid-area:tags] xl:pl-4 xl:pt-1" style={bodyFont}>
-                  {module.tag.split(" · ").map((tag) => (
+                  {module.tags.map((tag) => (
                     <li key={tag}>{tag}</li>
                   ))}
                 </ul>

@@ -260,7 +260,7 @@ function TiltLink({ reduceMotion }: { reduceMotion: boolean }) {
           <div className="flex flex-row items-center gap-3 md:gap-6">
             <span className="whitespace-nowrap text-[15px] font-normal leading-tight md:text-[22px]">Запросить КП</span>
             <span className="hidden text-[14px] font-light text-white/50 md:inline md:text-[16px]">
-              3 часа · полдня · целый день · цена по запросу
+              Программа и цена в течение рабочего дня
             </span>
           </div>
           <motion.div

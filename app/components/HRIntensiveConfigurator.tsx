@@ -1,8 +1,9 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { ArrowRight, Check, CheckCircle, Loader2, Plus } from "lucide-react";
 import { trackMetaPixelEvent } from "./MetaPixel";
+import StepProgress from "./StepProgress";
 
 const formats = [
   {
@@ -33,6 +34,9 @@ const formats = [
     text: "Все блоки и практические упражнения с командой во второй половине дня.",
   },
 ] as const;
+
+const STEP_NAMES = ["Формат", "Блоки", "Аудитория", "Контакты"];
+const STEP_TITLES = ["Выберите формат", "Какие блоки нужны", "Кто будет в зале", "Куда прислать КП"];
 
 // Highlighted tier, as in the chosen pricing reference.
 const RECOMMENDED: (typeof formats)[number]["id"] = "5h";
@@ -65,6 +69,20 @@ export default function HRIntensiveConfigurator() {
   const [audience, setAudience] = useState<string[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [step, setStep] = useState(0);
+  const stepHeadingRef = useRef<HTMLHeadingElement>(null);
+  const movedStep = useRef(false);
+
+  const goTo = (next: number) => {
+    movedStep.current = true;
+    setStatus((current) => (current === "error" ? "idle" : current));
+    setStep(Math.max(0, Math.min(STEP_NAMES.length - 1, next)));
+  };
+
+  // Keep keyboard and screen-reader users on the new step's heading.
+  useEffect(() => {
+    if (movedStep.current) stepHeadingRef.current?.focus();
+  }, [step]);
 
   const format = formats.find((item) => item.id === formatId) ?? formats[1];
 
@@ -210,124 +228,19 @@ export default function HRIntensiveConfigurator() {
           </div>
         </div>
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
-          {/* Choices */}
-          <div className="rounded-[24px] bg-white p-6 md:p-[32px]">
-            <fieldset>
-              <legend className={stepLabel} style={bodyFont}>
-                1. Формат
-              </legend>
-              <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
-                {formats.map((item) => {
-                  const active = item.id === formatId;
-                  return (
-                    <label
-                      key={item.id}
-                      className={`relative flex cursor-pointer items-center gap-4 rounded-[18px] border px-4 py-3.5 transition-[background-color,border-color,color,box-shadow] duration-200 sm:flex-col sm:items-stretch sm:gap-0 sm:p-5 ${focusRing} ${
-                        active
-                          ? "border-[#040082] bg-[#040082] text-white shadow-[0_18px_40px_-18px_rgba(4,0,130,0.6)]"
-                          : "border-black/10 bg-white text-black hover:border-[#040082]/40"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="format"
-                        value={item.id}
-                        checked={active}
-                        onChange={() => chooseFormat(item.id)}
-                        className="sr-only"
-                      />
-                      {item.id === RECOMMENDED && (
-                        <span
-                          className={`absolute -top-2.5 right-4 rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.08em] sm:left-5 sm:right-auto ${
-                            active ? "bg-white text-[#040082]" : "bg-[#040082] text-white"
-                          }`}
-                          style={bodyFont}
-                        >
-                          Рекомендуем
-                        </span>
-                      )}
-                      <span className="flex items-baseline gap-1.5" style={headingFont}>
-                        <span className="text-[28px] font-bold leading-none sm:text-[40px]">{item.hours}</span>
-                        <span className={`text-[11px] uppercase sm:text-[12px] ${active ? "text-white/70" : "text-black/45"}`} style={bodyFont}>
-                          {item.unit}
-                        </span>
-                      </span>
-                      <span className="text-[15px] font-medium sm:mt-2" style={bodyFont}>
-                        {item.title}
-                      </span>
-                      <ul className={`mt-3 hidden space-y-1.5 text-[13px] leading-[1.4] sm:block ${active ? "text-white/80" : "text-black/60"}`} style={bodyFont}>
-                        {item.includes.map((line) => (
-                          <li key={line} className="flex items-start gap-1.5">
-                            <Check size={13} strokeWidth={2.5} className="mt-[3px] shrink-0" aria-hidden="true" />
-                            {line}
-                          </li>
-                        ))}
-                      </ul>
-                    </label>
-                  );
-                })}
-              </div>
-              <p className="mt-3 text-[13px] leading-[1.5] text-black/55 sm:hidden" style={bodyFont}>
-                {format.text}
-              </p>
-            </fieldset>
-
-            <fieldset className="mt-[32px]">
-              <legend className={stepLabel} style={bodyFont}>
-                2. Блоки · {selected.length} из {format.maxBlocks}
-              </legend>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {blocks.map((block) => {
-                  const active = selected.includes(block.id);
-                  return (
-                    <label
-                      key={block.id}
-                      className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2.5 text-[14px] transition-colors duration-200 ${focusRing} ${
-                        active ? "border-[#040082] bg-[#040082] text-white" : "border-black/15 text-black hover:border-[#040082]/40"
-                      }`}
-                      style={bodyFont}
-                    >
-                      <input type="checkbox" checked={active} onChange={() => toggleBlock(block.id)} className="sr-only" />
-                      {active ? <Check size={14} strokeWidth={2.5} aria-hidden="true" /> : <Plus size={14} strokeWidth={2} aria-hidden="true" />}
-                      {block.title}
-                    </label>
-                  );
-                })}
-              </div>
-              <p className="mt-3 text-[12px] leading-[1.5] text-black/45" style={bodyFont}>
-                Добавите больше блоков, чем вмещает формат, — длительность увеличится автоматически.
-              </p>
-            </fieldset>
-
-            <fieldset className="mt-[32px]">
-              <legend className={stepLabel} style={bodyFont}>
-                3. Кто будет в зале · необязательно
-              </legend>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {audiences.map((value) => {
-                  const active = audience.includes(value);
-                  return (
-                    <label
-                      key={value}
-                      className={`cursor-pointer rounded-full border px-4 py-2.5 text-[14px] transition-colors duration-200 ${focusRing} ${
-                        active ? "border-[#040082] bg-[#040082] text-white" : "border-black/15 text-black hover:border-[#040082]/40"
-                      }`}
-                      style={bodyFont}
-                    >
-                      <input type="checkbox" checked={active} onChange={() => toggleAudience(value)} className="sr-only" />
-                      {value}
-                    </label>
-                  );
-                })}
-              </div>
-            </fieldset>
+        {/* Step-by-step builder with the animated step progress */}
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          className="mt-4 rounded-[24px] bg-white p-6 md:p-[32px]"
+        >
+          <div className="mx-auto max-w-[560px]">
+            <StepProgress steps={STEP_NAMES} current={step} complete={status === "success"} />
           </div>
 
-          {/* Request form (quote-form reference) */}
-          <div className="rounded-[24px] bg-white p-6 md:p-[32px]">
+          <div className="mt-[32px] min-h-[260px]">
             {status === "success" ? (
-              <div className="flex h-full flex-col justify-center" role="status">
+              <div className="flex flex-col items-start" role="status">
                 <CheckCircle size={36} className="text-[#040082]" aria-hidden="true" />
                 <p className="mt-4 text-[20px] font-bold uppercase tracking-[0.02em] text-black" style={headingFont}>
                   Заявка отправлена
@@ -337,40 +250,197 @@ export default function HRIntensiveConfigurator() {
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} noValidate>
-                <p className={stepLabel} style={bodyFont}>
-                  4. Контакты
-                </p>
-                <p className="mt-3 text-[20px] font-bold uppercase leading-[1.15] tracking-[0.02em] text-black md:text-[22px]" style={headingFont}>
-                  Получить КП
-                </p>
-                <p className="mt-2 text-[14px] leading-[1.5] text-black/55" style={bodyFont}>
-                  Пришлём предложение с программой и ценой в течение рабочего дня.
-                </p>
+              <>
+                <h3
+                  ref={stepHeadingRef}
+                  tabIndex={-1}
+                  className="text-[20px] font-bold uppercase leading-[1.15] tracking-[0.02em] text-black outline-none md:text-[22px]"
+                  style={headingFont}
+                >
+                  {STEP_TITLES[step]}
+                </h3>
 
-                <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                  <div>
-                    <label htmlFor="hr-name" className="sr-only">Имя и фамилия</label>
-                    <input id="hr-name" name="name" type="text" required autoComplete="name" placeholder="Имя и фамилия *" className={inputClass} style={bodyFont} />
-                  </div>
-                  <div>
-                    <label htmlFor="hr-phone" className="sr-only">Телефон</label>
-                    <input id="hr-phone" name="phone" type="tel" required autoComplete="tel" placeholder="Телефон *" className={inputClass} style={bodyFont} />
-                  </div>
-                  <div>
-                    <label htmlFor="hr-company" className="sr-only">Компания</label>
-                    <input id="hr-company" name="company" type="text" required autoComplete="organization" placeholder="Компания *" className={inputClass} style={bodyFont} />
-                  </div>
-                  <div>
-                    <label htmlFor="hr-position" className="sr-only">Должность</label>
-                    <input id="hr-position" name="position" type="text" autoComplete="organization-title" placeholder="Должность" className={inputClass} style={bodyFont} />
-                  </div>
-                </div>
+                {step === 0 && (
+                  <fieldset className="mt-5">
+                    <legend className="sr-only">Формат</legend>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
+                      {formats.map((item) => {
+                        const active = item.id === formatId;
+                        return (
+                          <label
+                            key={item.id}
+                            className={`relative flex cursor-pointer items-center gap-4 rounded-[18px] border px-4 py-3.5 transition-[background-color,border-color,color,box-shadow] duration-200 sm:flex-col sm:items-stretch sm:gap-0 sm:p-5 ${focusRing} ${
+                              active
+                                ? "border-[#040082] bg-[#040082] text-white shadow-[0_18px_40px_-18px_rgba(4,0,130,0.6)]"
+                                : "border-black/10 bg-white text-black hover:border-[#040082]/40"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="format"
+                              value={item.id}
+                              checked={active}
+                              onChange={() => chooseFormat(item.id)}
+                              className="sr-only"
+                            />
+                            {item.id === RECOMMENDED && (
+                              <span
+                                className={`absolute -top-2.5 right-4 rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.08em] sm:left-5 sm:right-auto ${
+                                  active ? "bg-white text-[#040082]" : "bg-[#040082] text-white"
+                                }`}
+                                style={bodyFont}
+                              >
+                                Рекомендуем
+                              </span>
+                            )}
+                            <span className="flex items-baseline gap-1.5" style={headingFont}>
+                              <span className="text-[28px] font-bold leading-none sm:text-[40px]">{item.hours}</span>
+                              <span className={`text-[11px] uppercase sm:text-[12px] ${active ? "text-white/70" : "text-black/45"}`} style={bodyFont}>
+                                {item.unit}
+                              </span>
+                            </span>
+                            <span className="text-[15px] font-medium sm:mt-2" style={bodyFont}>
+                              {item.title}
+                            </span>
+                            <ul className={`mt-3 hidden space-y-1.5 text-[13px] leading-[1.4] sm:block ${active ? "text-white/80" : "text-black/60"}`} style={bodyFont}>
+                              {item.includes.map((line) => (
+                                <li key={line} className="flex items-start gap-1.5">
+                                  <Check size={13} strokeWidth={2.5} className="mt-[3px] shrink-0" aria-hidden="true" />
+                                  {line}
+                                </li>
+                              ))}
+                            </ul>
+                          </label>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-3 text-[13px] leading-[1.5] text-black/55 sm:hidden" style={bodyFont}>
+                      {format.text}
+                    </p>
+                  </fieldset>
+                )}
 
+                {step === 1 && (
+                  <fieldset className="mt-5">
+                    <legend className="text-[14px] text-black/55" style={bodyFont}>
+                      В формат «{format.title}» входит блоков: {format.maxBlocks}. Выбрано: {selected.length}.
+                    </legend>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {blocks.map((block) => {
+                        const active = selected.includes(block.id);
+                        return (
+                          <label
+                            key={block.id}
+                            className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2.5 text-[14px] transition-colors duration-200 ${focusRing} ${
+                              active ? "border-[#040082] bg-[#040082] text-white" : "border-black/15 text-black hover:border-[#040082]/40"
+                            }`}
+                            style={bodyFont}
+                          >
+                            <input type="checkbox" checked={active} onChange={() => toggleBlock(block.id)} className="sr-only" />
+                            {active ? <Check size={14} strokeWidth={2.5} aria-hidden="true" /> : <Plus size={14} strokeWidth={2} aria-hidden="true" />}
+                            {block.title}
+                          </label>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-3 text-[12px] leading-[1.5] text-black/45" style={bodyFont}>
+                      Если выбрать больше блоков, чем вмещает формат, длительность увеличится сама.
+                    </p>
+                  </fieldset>
+                )}
+
+                {step === 2 && (
+                  <fieldset className="mt-5">
+                    <legend className="text-[14px] text-black/55" style={bodyFont}>
+                      Отметьте, кто придёт, чтобы мы подобрали примеры. Шаг можно пропустить.
+                    </legend>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {audiences.map((value) => {
+                        const active = audience.includes(value);
+                        return (
+                          <label
+                            key={value}
+                            className={`cursor-pointer rounded-full border px-4 py-2.5 text-[14px] transition-colors duration-200 ${focusRing} ${
+                              active ? "border-[#040082] bg-[#040082] text-white" : "border-black/15 text-black hover:border-[#040082]/40"
+                            }`}
+                            style={bodyFont}
+                          >
+                            <input type="checkbox" checked={active} onChange={() => toggleAudience(value)} className="sr-only" />
+                            {value}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
+                )}
+
+                {step === 3 && (
+                  <div className="mt-5">
+                    <p className="text-[14px] leading-[1.5] text-black/55" style={bodyFont}>
+                      Пришлём предложение с программой и ценой в течение рабочего дня.
+                    </p>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <label htmlFor="hr-name" className="sr-only">Имя и фамилия</label>
+                        <input id="hr-name" name="name" type="text" required autoComplete="name" placeholder="Имя и фамилия *" className={inputClass} style={bodyFont} />
+                      </div>
+                      <div>
+                        <label htmlFor="hr-phone" className="sr-only">Телефон</label>
+                        <input id="hr-phone" name="phone" type="tel" required autoComplete="tel" placeholder="Телефон *" className={inputClass} style={bodyFont} />
+                      </div>
+                      <div>
+                        <label htmlFor="hr-company" className="sr-only">Компания</label>
+                        <input id="hr-company" name="company" type="text" required autoComplete="organization" placeholder="Компания *" className={inputClass} style={bodyFont} />
+                      </div>
+                      <div>
+                        <label htmlFor="hr-position" className="sr-only">Должность</label>
+                        <input id="hr-position" name="position" type="text" autoComplete="organization-title" placeholder="Должность" className={inputClass} style={bodyFont} />
+                      </div>
+                    </div>
+                    <p className="mt-4 text-[11px] leading-[1.5] text-black/45" style={bodyFont}>
+                      Отправляя форму, вы соглашаетесь с{" "}
+                      <a href="/privacy/" className="underline transition-colors hover:text-[#040082]">
+                        Политикой конфиденциальности
+                      </a>
+                      .
+                    </p>
+                  </div>
+                )}
+
+                {status === "error" && (
+                  <p className="mt-4 text-[13px] text-red-600" role="alert" style={bodyFont}>
+                    {errorMsg}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+
+          {status !== "success" && (
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => goTo(step - 1)}
+                disabled={step === 0}
+                className="h-[48px] flex-1 rounded-full bg-black/[0.05] text-[15px] text-black transition-colors duration-200 hover:bg-black/[0.09] disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none sm:px-8"
+                style={bodyFont}
+              >
+                Назад
+              </button>
+              {step < STEP_NAMES.length - 1 ? (
+                <button
+                  type="button"
+                  onClick={() => goTo(step + 1)}
+                  className="inline-flex h-[48px] flex-1 items-center justify-center gap-2 rounded-full bg-[#040082] text-[15px] text-white transition-colors duration-200 hover:bg-[#0600a8] sm:flex-none sm:px-10"
+                  style={bodyFont}
+                >
+                  Далее <ArrowRight size={15} aria-hidden="true" />
+                </button>
+              ) : (
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#040082] px-7 py-4 text-[15px] text-white transition-colors duration-200 hover:bg-[#0600a8] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex h-[48px] flex-1 items-center justify-center gap-2 rounded-full bg-[#040082] text-[15px] text-white transition-colors duration-200 hover:bg-[#0600a8] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none sm:px-10"
                   style={bodyFont}
                 >
                   {status === "loading" ? (
@@ -379,28 +449,14 @@ export default function HRIntensiveConfigurator() {
                     </>
                   ) : (
                     <>
-                      Запросить КП · {format.title} <ArrowRight size={15} aria-hidden="true" />
+                      Запросить КП <ArrowRight size={15} aria-hidden="true" />
                     </>
                   )}
                 </button>
-
-                {status === "error" && (
-                  <p className="mt-3 text-[13px] text-red-600" role="alert" style={bodyFont}>
-                    {errorMsg}
-                  </p>
-                )}
-
-                <p className="mt-4 text-[11px] leading-[1.5] text-black/45" style={bodyFont}>
-                  Отправляя форму, вы соглашаетесь с{" "}
-                  <a href="/privacy/" className="underline transition-colors hover:text-[#040082]">
-                    Политикой конфиденциальности
-                  </a>
-                  .
-                </p>
-              </form>
-            )}
-          </div>
-        </div>
+              )}
+            </div>
+          )}
+        </form>
       </div>
     </section>
   );
