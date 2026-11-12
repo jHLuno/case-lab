@@ -138,7 +138,7 @@ export default function Page() {
                 <span className="md:block md:whitespace-nowrap">и сотрудники — зумеры</span>
               </h1>
               <p
-                className="evp-hero-enter evp-hero-enter-delay-1 mt-6 max-w-[60ch] text-[16px] leading-[1.5] text-white/80 md:mt-8 md:text-[19px]"
+                className="evp-hero-enter evp-hero-enter-delay-1 mt-6 max-w-[740px] text-balance text-[15px] leading-[1.5] text-white/80 md:mt-8 lg:text-[17px]"
                 style={bodyFont}
               >
                 Готовая программа для вашей команды: почему молодёжь не покупает и не остаётся — и как компании перестроить продажи, маркетинг и найм под новое поколение.
