@@ -15,11 +15,12 @@ type Lead = {
   created_at: string;
 };
 
-type Source = "main" | "evp-pro";
+type Source = "main" | "evp-pro" | "hr-intensive";
 
 const sourceTabs: { value: Source; label: string }[] = [
   { value: "main", label: "Сайт" },
   { value: "evp-pro", label: "EVP PRO" },
+  { value: "hr-intensive", label: "Интенсив (КП)" },
 ];
 
 export default function CRMPage() {
