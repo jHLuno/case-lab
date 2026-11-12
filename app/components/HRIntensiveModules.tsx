@@ -250,7 +250,7 @@ export default function HRIntensiveModules() {
                 </span>
 
                 <h3
-                  className="text-[19px] font-bold uppercase leading-[1.1] tracking-[0.02em] text-[#040082] sm:text-[22px] md:text-[28px] lg:text-[22px] lg:[grid-area:title] xl:text-[22px]"
+                  className="text-[19px] font-bold uppercase leading-[1.1] tracking-[0.02em] text-[#040082] sm:text-[22px] md:text-[28px] lg:text-[22px] lg:[grid-area:title] xl:text-[24px]"
                   style={headingFont}
                 >
                   {module.title}
