@@ -71,11 +71,10 @@ function Pill({ x, y, label, filled }: { x: number; y: number; label: string; fi
   );
 }
 
-// Soft "documents in a folder" illustrations (style of the chosen reference), drawn in brand blue.
+// Soft document/chart illustrations (style of the chosen reference), drawn in brand blue.
 function ModuleArt({ kind }: { kind: (typeof modules)[number]["art"] }) {
   const shadow = `hr-art-shadow-${kind}`;
   const area = `hr-art-area-${kind}`;
-  const pocket = `hr-art-pocket-${kind}`;
 
   return (
     <svg viewBox="0 0 400 300" className="h-full w-full" aria-hidden="true">
@@ -86,10 +85,6 @@ function ModuleArt({ kind }: { kind: (typeof modules)[number]["art"] }) {
         <linearGradient id={area} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#fff" stopOpacity="0.95" />
           <stop offset="100%" stopColor="#fff" stopOpacity="0.35" />
-        </linearGradient>
-        <linearGradient id={pocket} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#fff" stopOpacity="0.72" />
-          <stop offset="100%" stopColor="#fff" stopOpacity="0.9" />
         </linearGradient>
       </defs>
 
@@ -102,9 +97,9 @@ function ModuleArt({ kind }: { kind: (typeof modules)[number]["art"] }) {
             { x: 244, h: 58 },
             { x: 308, h: 124 },
           ].map((bar) => (
-            <rect key={bar.x} x={bar.x} y={236 - bar.h} width="44" height={bar.h + 20} rx="6" fill="#fff" />
+            <rect key={bar.x} x={bar.x} y={272 - bar.h} width="44" height={bar.h + 40} rx="6" fill="#fff" />
           ))}
-          <Pill x={170} y={36} label="Gen Z" filled />
+          <Pill x={170} y={66} label="Gen Z" filled />
         </g>
       )}
 
@@ -141,23 +136,15 @@ function ModuleArt({ kind }: { kind: (typeof modules)[number]["art"] }) {
           <rect x="144" y="62" width="96" height="10" rx="5" fill={ACCENT} opacity="0.12" />
           <rect x="144" y="82" width="64" height="10" rx="5" fill={ACCENT} opacity="0.12" />
           <rect x="144" y="112" width="72" height="22" rx="11" fill={ACCENT} opacity="0.75" />
+          <rect x="144" y="162" width="162" height="10" rx="5" fill={ACCENT} opacity="0.08" />
+          <rect x="144" y="182" width="140" height="10" rx="5" fill={ACCENT} opacity="0.08" />
+          <rect x="144" y="202" width="110" height="10" rx="5" fill={ACCENT} opacity="0.08" />
           <circle cx="282" cy="104" r="32" fill={ACCENT} opacity="0.12" />
           <path d="M282 104 V72 A32 32 0 0 1 312.4 94.1 Z" fill={ACCENT} />
           <Pill x={34} y={40} label="EVP" filled />
         </g>
       )}
 
-      {/* Folder pocket in front */}
-      <g filter={`url(#${shadow})`}>
-        <path
-          d="M0 300 V 222 Q 0 212 10 212 H 110 Q 118 212 124 204 L 128 200 Q 132 196 140 196 H 400 V 300 Z"
-          fill={`url(#${pocket})`}
-        />
-      </g>
-      <g transform="translate(26 238)" stroke={ACCENT} strokeWidth="2.5" fill="none" strokeLinecap="round">
-        <circle cx="9" cy="9" r="8" />
-        <path d="M15 15 L22 22" />
-      </g>
     </svg>
   );
 }
