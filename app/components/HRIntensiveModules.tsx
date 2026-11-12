@@ -55,51 +55,107 @@ const SHEET_STEP = 28;
 const headingFont = { fontFamily: "var(--font-heading)" };
 const bodyFont = { fontFamily: "var(--font-body)" };
 
-function ModuleArt({ kind }: { kind: (typeof modules)[number]["art"] }) {
+const ACCENT = "#040082";
+
+function Pill({ x, y, label, filled }: { x: number; y: number; label: string; filled?: boolean }) {
+  const width = label.length * 8.6 + 26;
   return (
-    <svg viewBox="0 0 240 150" className="h-full w-full" aria-hidden="true">
-      {kind === "zoomer" &&
-        [
-          { x: 34, h: 38, l: "X" },
-          { x: 82, h: 62, l: "Y" },
-          { x: 130, h: 92, l: "Z" },
-          { x: 178, h: 112, l: "α" },
-        ].map((bar, i) => (
-          <g key={bar.l}>
-            <rect x={bar.x} y={128 - bar.h} width="28" height={bar.h} rx="8" fill="#040082" opacity={0.35 + i * 0.2} />
-            <text x={bar.x + 14} y={144} textAnchor="middle" fontSize="11" fill="#040082" opacity="0.6" style={bodyFont}>
-              {bar.l}
-            </text>
-          </g>
-        ))}
+    <g transform={`translate(${x} ${y})`}>
+      <rect width={width} height="26" rx="13" fill={filled ? ACCENT : "#fff"} stroke={filled ? "none" : ACCENT} strokeOpacity="0.15" />
+      <text x={width / 2} y="17.5" textAnchor="middle" fontSize="13" fontWeight="500" fill={filled ? "#fff" : ACCENT} style={bodyFont}>
+        {label}
+      </text>
+    </g>
+  );
+}
+
+// Soft "documents in a folder" illustrations (style of the chosen reference), drawn in brand blue.
+function ModuleArt({ kind }: { kind: (typeof modules)[number]["art"] }) {
+  const shadow = `hr-art-shadow-${kind}`;
+  const area = `hr-art-area-${kind}`;
+  const pocket = `hr-art-pocket-${kind}`;
+
+  return (
+    <svg viewBox="0 0 400 300" className="h-full w-full" aria-hidden="true">
+      <defs>
+        <filter id={shadow} x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor={ACCENT} floodOpacity="0.14" />
+        </filter>
+        <linearGradient id={area} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#fff" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="#fff" stopOpacity="0.35" />
+        </linearGradient>
+        <linearGradient id={pocket} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#fff" stopOpacity="0.72" />
+          <stop offset="100%" stopColor="#fff" stopOpacity="0.9" />
+        </linearGradient>
+      </defs>
+
+      {kind === "zoomer" && (
+        <g filter={`url(#${shadow})`}>
+          {[
+            { x: 52, h: 96 },
+            { x: 116, h: 74 },
+            { x: 180, h: 170 },
+            { x: 244, h: 58 },
+            { x: 308, h: 124 },
+          ].map((bar) => (
+            <rect key={bar.x} x={bar.x} y={236 - bar.h} width="44" height={bar.h + 20} rx="6" fill="#fff" />
+          ))}
+          <Pill x={170} y={36} label="Gen Z" filled />
+        </g>
+      )}
+
       {kind === "ejm" && (
         <g>
           <path
-            d="M16 112 C 56 112, 56 52, 96 60 S 140 120, 176 76 S 210 26, 226 30"
+            d="M0 150 C 60 150, 80 70, 140 80 S 220 190, 280 140 S 360 40, 400 60 V 300 H 0 Z"
+            fill={`url(#${area})`}
+            filter={`url(#${shadow})`}
+          />
+          <path
+            d="M0 150 C 60 150, 80 70, 140 80 S 220 190, 280 140 S 360 40, 400 60"
             fill="none"
-            stroke="#040082"
-            strokeWidth="5"
-            strokeLinecap="round"
+            stroke={ACCENT}
+            strokeOpacity="0.55"
+            strokeWidth="2.5"
           />
           {[
-            [16, 112],
-            [96, 60],
-            [146, 100],
-            [176, 76],
-            [226, 30],
-          ].map(([cx, cy], i) => (
-            <circle key={i} cx={cx} cy={cy} r="8" fill="#fff" stroke="#040082" strokeWidth="3" />
+            [140, 80],
+            [280, 140],
+            [372, 50],
+          ].map(([cx, cy]) => (
+            <circle key={cx} cx={cx} cy={cy} r="6" fill="#fff" stroke={ACCENT} strokeWidth="2.5" />
           ))}
+          <Pill x={24} y={24} label="Найм" filled />
+          <Pill x={108} y={24} label="Удержание" />
         </g>
       )}
+
       {kind === "evp" && (
-        <g>
-          <circle cx="120" cy="75" r="62" fill="none" stroke="#040082" strokeOpacity="0.15" strokeWidth="10" />
-          <circle cx="120" cy="75" r="42" fill="none" stroke="#040082" strokeOpacity="0.3" strokeWidth="10" />
-          <circle cx="120" cy="75" r="22" fill="#040082" />
-          <path d="M120 64 l3.2 6.8 7.3 .9 -5.4 5 1.4 7.3 -6.5 -3.6 -6.5 3.6 1.4 -7.3 -5.4 -5 7.3 -.9z" fill="#fff" />
+        <g filter={`url(#${shadow})`}>
+          <rect x="96" y="44" width="200" height="200" rx="10" fill="#fff" opacity="0.7" transform="rotate(-8 196 144)" />
+          <rect x="120" y="34" width="210" height="210" rx="10" fill="#fff" />
+          <rect x="144" y="62" width="96" height="10" rx="5" fill={ACCENT} opacity="0.12" />
+          <rect x="144" y="82" width="64" height="10" rx="5" fill={ACCENT} opacity="0.12" />
+          <rect x="144" y="112" width="72" height="22" rx="11" fill={ACCENT} opacity="0.75" />
+          <circle cx="282" cy="104" r="32" fill={ACCENT} opacity="0.12" />
+          <path d="M282 104 V72 A32 32 0 0 1 312.4 94.1 Z" fill={ACCENT} />
+          <Pill x={34} y={40} label="EVP" filled />
         </g>
       )}
+
+      {/* Folder pocket in front */}
+      <g filter={`url(#${shadow})`}>
+        <path
+          d="M0 300 V 222 Q 0 212 10 212 H 110 Q 118 212 124 204 L 128 200 Q 132 196 140 196 H 400 V 300 Z"
+          fill={`url(#${pocket})`}
+        />
+      </g>
+      <g transform="translate(26 238)" stroke={ACCENT} strokeWidth="2.5" fill="none" strokeLinecap="round">
+        <circle cx="9" cy="9" r="8" />
+        <path d="M15 15 L22 22" />
+      </g>
     </svg>
   );
 }
@@ -131,7 +187,6 @@ export default function HRIntensiveModules() {
         // The covered sheet sinks back a little as the next one slides over it.
         gsap.to(row.querySelector("[data-sheet]"), {
           scale: 0.96,
-          filter: "brightness(0.94)",
           ease: "none",
           scrollTrigger: {
             trigger: rows[i + 1],
@@ -210,7 +265,7 @@ export default function HRIntensiveModules() {
                   {module.text}
                 </p>
 
-                <div className="relative aspect-[4/3] w-full max-w-[320px] overflow-hidden rounded-[14px] bg-[#f5f5f5] lg:max-w-none">
+                <div className="relative aspect-[4/3] w-full max-w-[320px] overflow-hidden rounded-[14px] bg-[#dde1fa] lg:max-w-none">
                   {module.image ? (
                     <Image
                       src={module.image}
@@ -220,7 +275,7 @@ export default function HRIntensiveModules() {
                       className="object-cover"
                     />
                   ) : (
-                    <div className="absolute inset-0 p-4">
+                    <div className="absolute inset-0">
                       <ModuleArt kind={module.art} />
                     </div>
                   )}
