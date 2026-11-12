@@ -250,13 +250,13 @@ export default function HRIntensiveModules() {
                 </span>
 
                 <h3
-                  className="text-[19px] font-bold uppercase leading-[1.1] tracking-[0.02em] text-[#040082] sm:text-[22px] md:text-[28px] lg:text-[22px] lg:[grid-area:title] xl:text-[26px]"
+                  className="text-[19px] font-bold uppercase leading-[1.1] tracking-[0.02em] text-[#040082] sm:text-[22px] md:text-[28px] lg:text-[22px] lg:[grid-area:title] xl:text-[22px]"
                   style={headingFont}
                 >
                   {module.title}
                 </h3>
 
-                <ul className="space-y-0.5 text-[12px] leading-[1.4] text-[#040082]/70 lg:[grid-area:tags] xl:pt-1" style={bodyFont}>
+                <ul className="space-y-0.5 text-[12px] leading-[1.4] text-[#040082]/70 lg:[grid-area:tags] xl:pl-4 xl:pt-1" style={bodyFont}>
                   {module.tag.split(" · ").map((tag) => (
                     <li key={tag}>{tag}</li>
                   ))}
