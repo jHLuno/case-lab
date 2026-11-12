@@ -130,8 +130,9 @@ export default function HRIntensiveSteps() {
     const ctx = gsap.context(() => {
       ScrollTrigger.create({
         trigger: root,
-        start: "top 80%",
-        end: "bottom 45%",
+        start: "top 85%",
+        // Finishes as soon as the whole timeline is on screen.
+        end: "bottom 85%",
         onUpdate: (self) => render(self.progress),
       });
     }, root);
