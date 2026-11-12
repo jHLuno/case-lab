@@ -35,19 +35,28 @@ const heroFacts = [
 const facilitators = [
   {
     name: "Данияр Косназаров",
-    text: "Основатель Case Lab, советник президента Narxoz University, ex-CMO Qazaq Republic и KPMG. 50+ компаний в консалтинге.",
+    role: "Основатель Case Lab",
+    stat: "50+",
+    statLabel: "компаний в консалтинге",
+    text: "Советник президента Narxoz University, ex-CMO Qazaq Republic и KPMG.",
     photo: "/daniyar-kosnazarov.webp",
     position: "center 20%",
   },
   {
     name: "Арман Шокпаров",
-    text: "Основатель On-Point и сооснователь People Consulting. Хедхантер, эксперт по привлечению и развитию талантов.",
+    role: "Основатель On-Point",
+    stat: "2",
+    statLabel: "HR-компании: On-Point и People Consulting",
+    text: "Хедхантер, эксперт по привлечению и развитию талантов.",
     photo: "/arman-shokparov.webp",
     position: "center 24%",
   },
   {
     name: "Амиржан Жампеисов",
-    text: "CEO Founder's Hub, координатор проекта Case Lab. Работает с командами и предпринимательскими проектами.",
+    role: "CEO Founder's Hub",
+    stat: "Case Lab",
+    statLabel: "координатор проекта",
+    text: "Работает с командами и предпринимательскими проектами.",
     photo: "/amirzhan-zhampeisov.webp",
     position: "center 15%",
   },
@@ -175,27 +184,45 @@ export default function Page() {
             >
               Кто проводит
             </h2>
-            <ul className="mt-[32px] grid gap-6 md:mt-[40px] md:grid-cols-3">
+            {/* Mentor cards: photo, name and role, then a highlighted figure (reference #9) */}
+            <ul className="mt-[32px] grid gap-4 sm:grid-cols-2 md:mt-[40px] lg:grid-cols-3 lg:gap-6">
               {facilitators.map((person) => (
-                <li key={person.name} className="overflow-hidden rounded-[24px] bg-white">
-                  <div className="relative aspect-[4/3] w-full bg-black/5">
+                <li
+                  key={person.name}
+                  className="group flex flex-col rounded-[24px] bg-white p-3 shadow-[0_20px_50px_-30px_rgba(4,0,130,0.25)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-safe:hover:-translate-y-1"
+                >
+                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[16px] bg-[#f5f5f5]">
                     <Image
                       src={person.photo}
                       alt={person.name}
                       fill
-                      sizes="(min-width: 768px) 33vw, 100vw"
-                      className="object-cover"
+                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                      className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] motion-safe:group-hover:scale-[1.04]"
                       style={{ objectPosition: person.position }}
                     />
                   </div>
-                  <div className="p-7 md:p-[32px]">
+                  <div className="flex flex-1 flex-col px-3 pb-3 pt-5 md:px-4 md:pb-4">
                     <h3
-                      className="text-[17px] font-bold uppercase tracking-[0.02em] text-black md:text-[19px]"
+                      className="text-[15px] font-bold uppercase leading-[1.25] tracking-[0.04em] text-black md:text-[16px]"
                       style={headingFont}
                     >
                       {person.name}
                     </h3>
-                    <p className="mt-3 text-[15px] leading-[1.5] text-black/65" style={bodyFont}>
+                    <p className="mt-1 text-[13px] text-black/50" style={bodyFont}>
+                      {person.role}
+                    </p>
+                    <div className="mt-5 flex items-end gap-3 border-t border-black/[0.06] pt-5">
+                      <span
+                        className="shrink-0 text-[32px] font-bold leading-none text-[#040082] md:text-[36px]"
+                        style={headingFont}
+                      >
+                        {person.stat}
+                      </span>
+                      <span className="pb-0.5 text-[12px] leading-[1.35] text-black/50" style={bodyFont}>
+                        {person.statLabel}
+                      </span>
+                    </div>
+                    <p className="mt-4 text-[14px] leading-[1.5] text-black/65" style={bodyFont}>
                       {person.text}
                     </p>
                   </div>
