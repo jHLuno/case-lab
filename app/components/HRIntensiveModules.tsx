@@ -49,9 +49,9 @@ const modules: {
   },
 ];
 
-// The stack pins just below the fixed navbar; each landed sheet sits a step lower
+// The block pins just below the fixed navbar; each landed sheet sits a step lower
 // so the edges of the ones underneath stay visible.
-const PIN_TOP = 120;
+const PIN_TOP = 110;
 const SHEET_STEP = 28;
 
 const headingFont = { fontFamily: "var(--font-heading)" };
@@ -165,10 +165,12 @@ function ModuleArt({ kind }: { kind: (typeof modules)[number]["art"] }) {
 export default function HRIntensiveModules() {
   const shouldReduceMotion = useReducedMotion() ?? false;
   const listRef = useRef<HTMLOListElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const list = listRef.current;
-    if (!list || shouldReduceMotion) return;
+    const wrap = wrapRef.current;
+    if (!list || !wrap || shouldReduceMotion) return;
 
     const mm = gsap.matchMedia();
     mm.add("(min-width: 768px)", () => {
@@ -180,14 +182,17 @@ export default function HRIntensiveModules() {
       gsap.set(list, { position: "relative", paddingBottom: incoming.length * SHEET_STEP });
       gsap.set(incoming, { position: "absolute", top: 0, left: 0, right: 0 });
 
-      // The list pins once the first sheet reaches the top; while it is pinned the
-      // next sheets rise from the bottom of the screen and land on the first one.
+      // The heading and the stack pin together once the heading is just below the navbar;
+      // while pinned, the next sheets rise from the bottom of the screen onto the first one.
+      // On screens too short for heading + stack, only the stack pins.
+      const withHeading = wrap.offsetHeight + PIN_TOP <= window.innerHeight;
+      const pinTarget = withHeading ? wrap : list;
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: list,
+          trigger: pinTarget,
           start: `top ${PIN_TOP}px`,
           end: () => `+=${incoming.length * window.innerHeight * 0.8}`,
-          pin: true,
+          pin: pinTarget,
           scrub: 0.6,
           invalidateOnRefresh: true,
         },
@@ -215,7 +220,7 @@ export default function HRIntensiveModules() {
         className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.14),transparent_40%)]"
       />
 
-      <div className="mx-auto max-w-[1200px]">
+      <div ref={wrapRef} className="mx-auto max-w-[1200px]">
         <div className="mb-8 md:mb-12">
           <span
             className="mb-3 block text-[11px] font-normal uppercase leading-[1.58] tracking-wider text-white/60"
