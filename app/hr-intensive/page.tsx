@@ -175,7 +175,7 @@ export default function Page() {
             >
               Кто проводит
             </h2>
-            <ul className="mt-[32px] grid gap-6 md:mt-[40px] md:grid-cols-3">
+            <ul className="mt-[32px] grid gap-6 md:mt-[40px] md:grid-cols-2 lg:grid-cols-3">
               {facilitators.map((person) => (
                 <li key={person.name} className="overflow-hidden rounded-[24px] bg-white">
                   <div className="relative aspect-[4/3] w-full bg-black/5">
@@ -183,14 +183,15 @@ export default function Page() {
                       src={person.photo}
                       alt={person.name}
                       fill
-                      sizes="(min-width: 768px) 33vw, 100vw"
+                      sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                       className="object-cover"
                       style={{ objectPosition: person.position }}
                     />
                   </div>
-                  <div className="p-7 md:p-[32px]">
+                  {/* @container: names stay on one line, shrinking with the card if needed */}
+                  <div className="p-7 @container md:p-[32px]">
                     <h3
-                      className="text-[17px] font-bold uppercase tracking-[0.02em] text-black md:text-[19px]"
+                      className="whitespace-nowrap text-[min(19px,calc(100cqw/17.6))] font-bold uppercase tracking-[0.02em] text-black"
                       style={headingFont}
                     >
                       {person.name}
