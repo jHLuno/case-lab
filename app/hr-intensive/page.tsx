@@ -211,7 +211,7 @@ export default function Page() {
           id="faq"
           tabIndex={-1}
           aria-labelledby="hr-faq-title"
-          className="bg-white px-6 py-24 md:px-10 md:py-32"
+          className="bg-white px-6 py-[48px] md:px-10 md:py-14 lg:py-16"
         >
           <div className="mx-auto max-w-[900px]">
             <h2
@@ -221,7 +221,7 @@ export default function Page() {
             >
               Частые вопросы
             </h2>
-            <ul className="mt-[48px] border-t border-black/10 md:mt-16">
+            <ul className="mt-[32px] border-t border-black/10 md:mt-[40px]">
               {faqItems.map((item) => (
                 <li key={item.question} className="border-b border-black/10">
                   <details className="group">
