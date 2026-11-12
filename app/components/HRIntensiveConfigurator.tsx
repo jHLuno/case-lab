@@ -123,7 +123,7 @@ export default function HRIntensiveConfigurator() {
       <div className="mx-auto max-w-[1160px]">
         <h2
           id="hr-request-title"
-          className="max-w-[20ch] text-[clamp(26px,3.8vw,52px)] font-bold uppercase leading-[1.06] tracking-[0.02em] text-black"
+          className="text-[clamp(26px,3.8vw,52px)] font-bold uppercase leading-[1.06] tracking-[0.02em] text-black"
           style={headingFont}
         >
           Соберите программу

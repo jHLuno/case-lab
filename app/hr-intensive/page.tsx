@@ -135,55 +135,59 @@ export default function Page() {
         >
           <HRIntensiveHeroBackground />
 
-          <div className="relative z-10 mx-auto w-full max-w-[1440px] px-6 pb-16 pt-32 md:px-10 md:pb-24">
-            <p
-              className="evp-hero-enter text-[12px] uppercase tracking-[0.14em] text-white/60 md:text-[13px]"
-              style={bodyFont}
-            >
-              Корпоративный интенсив Case Lab
-            </p>
-            <h1
-              id="hr-intensive-title"
-              className="evp-hero-enter mt-5 max-w-[1040px] text-balance break-words text-[clamp(24px,3.6vw,52px)] font-bold uppercase leading-[1.08] tracking-[0.02em]"
-              style={headingFont}
-            >
-              Ваши следующие клиенты и сотрудники — зумеры
-            </h1>
-            <p
-              className="evp-hero-enter evp-hero-enter-delay-1 mt-6 max-w-[60ch] text-[16px] leading-[1.5] text-white/80 md:mt-8 md:text-[19px]"
-              style={bodyFont}
-            >
-              Готовая программа для вашей команды: почему молодёжь не покупает и не остаётся — и как компании перестроить продажи, маркетинг и найм под новое поколение.
-            </p>
-            <div className="evp-hero-enter evp-hero-enter-delay-2 mt-8 flex flex-wrap items-center gap-3 md:mt-10">
-              <a
-                href="#request"
-                className="inline-flex items-center gap-3 rounded-full bg-white px-7 py-3.5 text-[14px] text-[#040082] transition-[gap] duration-200 hover:gap-4 md:px-10 md:py-5 md:text-[15px]"
+          <div className="relative z-10 w-full px-6 pb-16 pt-32 md:px-10 md:pb-24">
+            <div className="mx-auto max-w-[1440px]">
+              <p
+                className="evp-hero-enter text-[12px] uppercase tracking-[0.14em] text-white/60 md:text-[13px]"
                 style={bodyFont}
               >
-                Собрать программу
-                <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
-              </a>
-              <a
-                href="#modules"
-                className="inline-flex items-center rounded-full border border-white/30 px-7 py-3.5 text-[14px] text-white transition-colors duration-200 hover:bg-white/10 md:px-10 md:py-5 md:text-[15px]"
+                Корпоративный интенсив Case Lab
+              </p>
+              <h1
+                id="hr-intensive-title"
+                className="evp-hero-enter mt-5 text-[clamp(24px,7vw,30px)] font-bold uppercase leading-[1.08] tracking-[0.02em] md:text-[clamp(26px,calc((100vw-80px)/23.5),60px)]"
+                style={headingFont}
+              >
+                {/* Two fixed lines from md up; font scales with the container so the longer line always fits. */}
+                <span className="md:block md:whitespace-nowrap">Ваши следующие клиенты</span>{" "}
+                <span className="md:block md:whitespace-nowrap">и сотрудники — зумеры</span>
+              </h1>
+              <p
+                className="evp-hero-enter evp-hero-enter-delay-1 mt-6 max-w-[60ch] text-[16px] leading-[1.5] text-white/80 md:mt-8 md:text-[19px]"
                 style={bodyFont}
               >
-                Что внутри
-              </a>
-            </div>
+                Готовая программа для вашей команды: почему молодёжь не покупает и не остаётся — и как компании перестроить продажи, маркетинг и найм под новое поколение.
+              </p>
+              <div className="evp-hero-enter evp-hero-enter-delay-2 mt-8 flex flex-wrap items-center gap-3 md:mt-10">
+                <a
+                  href="#request"
+                  className="inline-flex items-center gap-3 rounded-full bg-white px-7 py-3.5 text-[14px] text-[#040082] transition-[gap] duration-200 hover:gap-4 md:px-10 md:py-5 md:text-[15px]"
+                  style={bodyFont}
+                >
+                  Собрать программу
+                  <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+                </a>
+                <a
+                  href="#modules"
+                  className="inline-flex items-center rounded-full border border-white/30 px-7 py-3.5 text-[14px] text-white transition-colors duration-200 hover:bg-white/10 md:px-10 md:py-5 md:text-[15px]"
+                  style={bodyFont}
+                >
+                  Что внутри
+                </a>
+              </div>
 
-            <dl
-              className="evp-hero-enter evp-hero-enter-delay-2 mt-14 grid gap-4 border-t border-white/20 pt-6 md:grid-cols-3 md:gap-8"
-              style={bodyFont}
-            >
-              {heroFacts.map((fact) => (
-                <div key={fact.label}>
-                  <dt className="text-[12px] uppercase tracking-[0.12em] text-white/50">{fact.label}</dt>
-                  <dd className="mt-2 text-[15px] leading-[1.35] text-white md:text-[17px]">{fact.value}</dd>
-                </div>
-              ))}
-            </dl>
+              <dl
+                className="evp-hero-enter evp-hero-enter-delay-2 mt-14 grid gap-4 border-t border-white/20 pt-6 md:grid-cols-3 md:gap-8"
+                style={bodyFont}
+              >
+                {heroFacts.map((fact) => (
+                  <div key={fact.label}>
+                    <dt className="text-[12px] uppercase tracking-[0.12em] text-white/50">{fact.label}</dt>
+                    <dd className="mt-2 text-[15px] leading-[1.35] text-white md:text-[17px]">{fact.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
           </div>
         </section>
 
@@ -197,10 +201,11 @@ export default function Page() {
           <div className="mx-auto max-w-[1160px]">
             <h2
               id="hr-problem-title"
-              className="max-w-[20ch] text-[clamp(26px,3.8vw,52px)] font-bold uppercase leading-[1.06] tracking-[0.02em] text-black"
+              className="text-[clamp(26px,3.8vw,52px)] font-bold uppercase leading-[1.06] tracking-[0.02em] text-black"
               style={headingFont}
             >
-              Поколение сменилось. Ваши продажи — ещё нет
+              <span className="md:block md:whitespace-nowrap">Поколение сменилось.</span>{" "}
+              <span className="md:block md:whitespace-nowrap">Ваши продажи — ещё нет</span>
             </h2>
             <p
               className="mt-6 max-w-[60ch] text-[16px] leading-[1.55] text-black/65 md:text-[18px]"
@@ -247,7 +252,7 @@ export default function Page() {
           <div className="relative z-10 mx-auto max-w-[1160px]">
             <h2
               id="hr-modules-title"
-              className="max-w-[20ch] text-[clamp(26px,3.8vw,52px)] font-bold uppercase leading-[1.06] tracking-[0.02em]"
+              className="text-[clamp(26px,3.8vw,52px)] font-bold uppercase leading-[1.06] tracking-[0.02em]"
               style={headingFont}
             >
               Три готовых блока
