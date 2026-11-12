@@ -107,7 +107,7 @@ export default function HRIntensiveProblem() {
             <span className="md:block md:whitespace-nowrap">Ваши продажи — ещё нет</span>
           </h2>
           <p
-            className="mt-5 max-w-[60ch] text-[15px] font-light leading-[1.55] text-black/60 md:mt-6 md:text-[17px]"
+            className="mt-5 max-w-[880px] text-balance text-[15px] font-light leading-[1.55] text-black/60 md:mt-6 md:text-[17px]"
             style={bodyFont}
           >
             Компании, которые были на коне 10–15 лет назад, теряют выручку не из-за продукта, а потому что не понимают, как говорить с новым поколением — как с клиентами и как с сотрудниками.

@@ -28,7 +28,6 @@ const navLinks = [
 const heroFacts = [
   { label: "Длительность", value: "3 часа, полдня или целый день" },
   { label: "Для кого", value: "Коммерция, маркетинг, HR, руководство" },
-  { label: "Стоимость", value: "По запросу — пришлём КП" },
 ];
 
 const modules = [
@@ -158,12 +157,12 @@ export default function Page() {
                   className="inline-flex items-center rounded-full border border-white/30 px-7 py-3.5 text-[14px] text-white transition-colors duration-200 hover:bg-white/10 md:px-10 md:py-5 md:text-[15px]"
                   style={bodyFont}
                 >
-                  Что внутри
+                  Смотреть программу
                 </a>
               </div>
 
               <dl
-                className="evp-hero-enter evp-hero-enter-delay-2 mt-14 grid gap-4 border-t border-white/20 pt-6 md:grid-cols-3 md:gap-8"
+                className="evp-hero-enter evp-hero-enter-delay-2 mt-14 grid gap-4 border-t border-white/20 pt-6 md:grid-cols-2 md:gap-8"
                 style={bodyFont}
               >
                 {heroFacts.map((fact) => (
