@@ -47,8 +47,19 @@ export default function HRIntensiveSteps() {
         onUpdate: (self) => {
           // Horizontal fill on desktop, vertical on mobile (the other one is hidden).
           gsap.set(fills, { scaleX: self.progress, scaleY: self.progress });
-          // A step activates once the line has reached its node.
-          setActive(Math.min(items.length, Math.floor(self.progress * (items.length - 1) + 1.0001)));
+
+          // A step activates once the filled part of the visible track reaches its node.
+          const track = fills.map((fill) => fill.parentElement).find((el) => el && el.offsetParent !== null);
+          if (!track) return;
+          const t = track.getBoundingClientRect();
+          const vertical = t.height > t.width;
+          const filledTo = vertical ? t.top + t.height * self.progress : t.left + t.width * self.progress;
+          items.forEach((item) => {
+            const node = item.querySelector<HTMLElement>("[data-node]")?.getBoundingClientRect();
+            if (!node) return;
+            const center = vertical ? node.top + node.height / 2 : node.left + node.width / 2;
+            item.toggleAttribute("data-active", filledTo >= center);
+          });
         },
       });
     }, list);
@@ -84,6 +95,7 @@ export default function HRIntensiveSteps() {
               {/* Node on the track */}
               <span
                 aria-hidden="true"
+                data-node
                 className="absolute -left-10 top-0 flex h-6 w-6 items-center justify-center rounded-full border-2 border-black/15 bg-white transition-[border-color,background-color,box-shadow] duration-500 group-data-[active]:border-[#040082] group-data-[active]:bg-[#040082] group-data-[active]:shadow-[0_0_0_8px_rgba(4,0,130,0.1),0_0_28px_6px_rgba(4,0,130,0.35)] md:-top-14 md:left-0"
               >
                 <span className="h-2 w-2 rounded-full bg-black/15 transition-colors duration-500 group-data-[active]:bg-white" />
