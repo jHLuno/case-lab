@@ -166,7 +166,7 @@ export default function Page() {
         <HRIntensiveSteps />
 
         {/* Facilitators */}
-        <section aria-labelledby="hr-team-title" className="bg-[#f5f5f5] px-6 py-24 md:px-10 md:py-32">
+        <section aria-labelledby="hr-team-title" className="bg-[#f5f5f5] px-6 py-[48px] md:px-10 md:py-14 lg:py-16">
           <div className="mx-auto max-w-[1160px]">
             <h2
               id="hr-team-title"
@@ -175,7 +175,7 @@ export default function Page() {
             >
               Кто проводит
             </h2>
-            <ul className="mt-[48px] grid gap-6 md:mt-16 md:grid-cols-3">
+            <ul className="mt-[32px] grid gap-6 md:mt-[40px] md:grid-cols-3">
               {facilitators.map((person) => (
                 <li key={person.name} className="overflow-hidden rounded-[24px] bg-white">
                   <div className="relative aspect-[4/3] w-full bg-black/5">
