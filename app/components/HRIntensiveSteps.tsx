@@ -121,8 +121,8 @@ export default function HRIntensiveSteps() {
       ScrollTrigger.create({
         trigger: root,
         start: "top 85%",
-        // Finishes as soon as the whole timeline is on screen.
-        end: "bottom 85%",
+        // Finishes once the timeline has risen a bit above the bottom of the screen.
+        end: "bottom 65%",
         onUpdate: (self) => render(self.progress),
       });
     }, root);
