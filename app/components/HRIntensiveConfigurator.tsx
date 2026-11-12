@@ -166,19 +166,11 @@ export default function HRIntensiveConfigurator() {
           Выберите формат и блоки — пришлём коммерческое предложение с программой и ценой. Стоимость рассчитываем под вашу команду.
         </p>
 
-        {/* Summary stage: the current build, shown large (configurator reference) */}
+        {/* Summary stage: the current build (configurator reference) */}
         <div
           className="relative mt-6 overflow-hidden rounded-[24px] bg-white p-6 md:mt-10 md:p-10"
           aria-live="polite"
         >
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-4 top-1/2 -translate-y-1/2 select-none whitespace-nowrap text-[clamp(64px,13vw,190px)] font-bold uppercase leading-none text-[#040082]/[0.05]"
-            style={headingFont}
-          >
-            {format.title}
-          </span>
-
           <div className="relative grid gap-[32px] lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div>
               <p className={stepLabel} style={bodyFont}>

@@ -178,7 +178,7 @@ export default function Page() {
             >
               Как это работает
             </h2>
-            <ol className="mt-12 grid gap-8 border-t border-black/10 pt-10 md:mt-16 md:grid-cols-4 md:gap-6">
+            <ol className="mt-[48px] grid gap-[32px] border-t border-black/10 pt-10 md:mt-16 md:grid-cols-4 md:gap-6">
               {steps.map((step, index) => (
                 <li key={step.title}>
                   <span className="text-[13px] tracking-[0.12em] text-[#040082]" style={bodyFont}>
@@ -206,7 +206,7 @@ export default function Page() {
             >
               Кто проводит
             </h2>
-            <ul className="mt-12 grid gap-6 md:mt-16 md:grid-cols-3">
+            <ul className="mt-[48px] grid gap-6 md:mt-16 md:grid-cols-3">
               {facilitators.map((person) => (
                 <li key={person.name} className="overflow-hidden rounded-[24px] bg-white">
                   <div className="relative aspect-[4/3] w-full bg-black/5">
@@ -219,7 +219,7 @@ export default function Page() {
                       style={{ objectPosition: person.position }}
                     />
                   </div>
-                  <div className="p-7 md:p-8">
+                  <div className="p-7 md:p-[32px]">
                     <h3
                       className="text-[17px] font-bold uppercase tracking-[0.02em] text-black md:text-[19px]"
                       style={headingFont}
@@ -251,7 +251,7 @@ export default function Page() {
             >
               Частые вопросы
             </h2>
-            <ul className="mt-12 border-t border-black/10 md:mt-16">
+            <ul className="mt-[48px] border-t border-black/10 md:mt-16">
               {faqItems.map((item) => (
                 <li key={item.question} className="border-b border-black/10">
                   <details className="group">
