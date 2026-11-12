@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 import HRIntensiveConfigurator from "../components/HRIntensiveConfigurator";
 import HRIntensiveHeroBackground from "../components/HRIntensiveHeroBackground";
 import HRIntensiveProblem from "../components/HRIntensiveProblem";
+import HRIntensiveModules from "../components/HRIntensiveModules";
 
 export const metadata: Metadata = {
   title: "Корпоративный интенсив о новом поколении | Case Lab",
@@ -28,24 +29,6 @@ const navLinks = [
 const heroFacts = [
   { label: "Длительность", value: "3 часа, полдня или целый день" },
   { label: "Для кого", value: "Коммерция, маркетинг, HR, руководство" },
-];
-
-const modules = [
-  {
-    index: "01",
-    title: "Зумерология",
-    text: "Кто такие Gen Z и Alpha: как они думают, выбирают, покупают и работают. Ценности, мифы о поколении и навыки будущего — на данных и живых кейсах.",
-  },
-  {
-    index: "02",
-    title: "EJM — карта пути сотрудника",
-    text: "Employee Journey Map: разбираем путь сотрудника от первого касания с компанией до ухода — где молодые таланты теряют интерес и что менять на каждом этапе.",
-  },
-  {
-    index: "03",
-    title: "EVP и бренд работодателя",
-    text: "Тренды HR-брендинга, архетипы работодателя и из чего складывается позиционирование, которое привлекает и удерживает молодые таланты.",
-  },
 ];
 
 const steps = [
@@ -180,54 +163,7 @@ export default function Page() {
         <HRIntensiveProblem />
 
         {/* Modules */}
-        <section
-          id="modules"
-          tabIndex={-1}
-          aria-labelledby="hr-modules-title"
-          className="relative isolate overflow-hidden bg-[#040082] px-6 py-24 text-white md:px-10 md:py-36"
-        >
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.14),transparent_40%)]"
-          />
-          <div className="relative z-10 mx-auto max-w-[1160px]">
-            <h2
-              id="hr-modules-title"
-              className="text-[clamp(26px,3.8vw,52px)] font-bold uppercase leading-[1.06] tracking-[0.02em]"
-              style={headingFont}
-            >
-              Три готовых блока
-            </h2>
-            <p
-              className="mt-6 max-w-[58ch] text-[16px] leading-[1.55] text-white/70 md:text-[18px]"
-              style={bodyFont}
-            >
-              Программа уже обкатана на конференциях и корпоративных сессиях. Вы выбираете, сколько времени готова уделить команда, — мы собираем из блоков нужный формат.
-            </p>
-
-            <ol className="mt-12 grid gap-4 md:mt-16 lg:grid-cols-3 lg:gap-6">
-              {modules.map((module) => (
-                <li
-                  key={module.index}
-                  className="flex flex-col rounded-[24px] border border-white/20 bg-white/[0.06] p-7 md:p-9 lg:p-7 xl:p-10"
-                >
-                  <span className="text-[13px] tracking-[0.12em] text-white/50" style={bodyFont}>
-                    {module.index}
-                  </span>
-                  <h3
-                    className="mt-4 text-[18px] font-bold uppercase leading-[1.15] tracking-[0.02em] md:text-[22px] lg:text-[18px] xl:text-[22px]"
-                    style={headingFont}
-                  >
-                    {module.title}
-                  </h3>
-                  <p className="mt-5 text-[15px] leading-[1.55] text-white/75" style={bodyFont}>
-                    {module.text}
-                  </p>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
+        <HRIntensiveModules />
 
         {/* Configurator + request form */}
         <HRIntensiveConfigurator />
