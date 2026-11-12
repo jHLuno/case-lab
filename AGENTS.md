@@ -20,12 +20,13 @@ Follow `Inspect -> Plan -> Implement -> Verify` for every task:
 - Case Lab is Russian-language marketing site for marketing diagnostics and growth strategy. Production domain: `caselab.kz`.
 - Stack: Next.js App Router, React, strict TypeScript, Tailwind CSS, Framer Motion, GSAP/ScrollTrigger, React Three Fiber, Supabase.
 - `app/components/HomePage.tsx` composes homepage. Individual sections live in `app/sections/`; shared interaction lives in `app/components/`; API routes live in `app/api/`.
+- The checkout folder is named `icomat-replica`, but the project is Case Lab; there is no iComat code to preserve.
+- `proxy.ts` at the repo root is this Next.js version's request middleware (the successor of `middleware.ts`). Read the local Next.js guide before changing it.
 
 ## Source Of Truth And Context Economy
 
-- Treat this `AGENTS.md` as the source of operating rules, `package.json`, the lockfile, configuration files, and the filesystem as the source of truth for the current repository, and database schema and migration files as the source of truth for database state. Verify current repository state instead of relying on duplicated facts.
-- Read feature-specific docs or specs only when the task concerns that feature. Do not read the entire `docs/` directory without a task-specific reason.
-- Read only files relevant to the task. Prefer targeted search over reading directories or large files wholesale; do not re-read unchanged files without need or load unrelated logs and documentation into context.
+- Treat this `AGENTS.md` as the source of operating rules; `package.json`, the lockfile, configuration files, and the filesystem as the source of truth for the repository; and `supabase/migrations/` as the source of truth for database state. Verify current state instead of relying on facts repeated elsewhere.
+- Read only files relevant to the task, using targeted search rather than reading directories or large files wholesale. Read `docs/` (including `docs/superpowers/plans|specs`) only for the feature the task concerns.
 
 ## Design And Accessibility
 
@@ -36,8 +37,13 @@ Follow `Inspect -> Plan -> Implement -> Verify` for every task:
 
 ## Commands And Conventions
 
-- Use npm and verify available scripts in `package.json`. Common CLI checks are `npx tsc --noEmit --incremental false` and `npm run build`; use lint or test scripts only when the current repository configuration provides them.
-- Follow strict TypeScript and existing component patterns. When asked to commit, use lowercase Conventional Commits, scoped where useful.
+Use npm. Checks, from fastest to slowest:
+
+- Typecheck: `npx tsc --noEmit --incremental false`
+- Lint: `npm run lint` (or `npx eslint <files>` for touched files only)
+- Build: `npm run build`
+
+Follow strict TypeScript and existing component patterns. When asked to commit, use lowercase Conventional Commits, scoped where useful. Do not commit or push the repo-root `todo.md`; it is the user's local notes file.
 
 ## Dependencies, Boundaries, And Performance
 
@@ -51,10 +57,10 @@ Follow `Inspect -> Plan -> Implement -> Verify` for every task:
 A task is complete only when:
 
 - The requested behavior is implemented without unrelated changes, existing behavior is preserved, and applicable accessibility and security invariants remain intact.
-- Relevant static or CLI checks have passed, normally `npx tsc --noEmit --incremental false` and `npm run build`. Run only checks relevant to the change; do not claim checks that were not run. If a check cannot run or fails because of a pre-existing issue, report the exact limitation.
+- Relevant checks from "Commands And Conventions" have passed: typecheck always, plus lint for touched files, and build for routing, config, Server/Client boundary, or dependency changes. Do not claim checks that were not run. If a check cannot run or fails because of a pre-existing issue, report the exact limitation.
 - No secrets, credentials, personal data, generated artifacts, or unintended dependency/configuration changes were introduced.
 
-To conserve tokens, do not take screenshots or use browser-based verification, agent browsing, visual browsing, or any UI/browser inspection tools by default. Do not start a browser or dev server solely for visual verification. Use code inspection and relevant static/CLI checks instead. Visual verification of UI changes is intentionally left to the user unless the user explicitly requests browser-based verification.
+Visual verification of UI changes is left to the user to save tokens: by default, do not take screenshots, drive a browser, or start a dev server just to look at the result. Use code inspection and CLI checks. Use the browser only when the user asks for it in the current task.
 
 ## Final Response Contract
 
