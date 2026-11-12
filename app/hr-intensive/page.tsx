@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import HRIntensiveConfigurator from "../components/HRIntensiveConfigurator";
 import HRIntensiveHeroBackground from "../components/HRIntensiveHeroBackground";
+import HRIntensiveProblem from "../components/HRIntensiveProblem";
 
 export const metadata: Metadata = {
   title: "Корпоративный интенсив о новом поколении | Case Lab",
@@ -28,21 +29,6 @@ const heroFacts = [
   { label: "Длительность", value: "3 часа, полдня или целый день" },
   { label: "Для кого", value: "Коммерция, маркетинг, HR, руководство" },
   { label: "Стоимость", value: "По запросу — пришлём КП" },
-];
-
-const symptoms = [
-  {
-    title: "Бренд знают мамы, но не дочери",
-    text: "Косметическая компания: ядро покупателей — женщины 45+. Молодёжь бренд просто не знает, а команда и консультанты говорят на языке своего поколения.",
-  },
-  {
-    title: "Наследник уходит к конкуренту",
-    text: "Дистрибьютор агротехники: ферму принимает сын основателя и первым делом покупает другой бренд. Техника не хуже — просто лояльность держалась на убеждениях отца.",
-  },
-  {
-    title: "Молодые не задерживаются",
-    text: "Внутри компании руководители не понимают, как нанимать, мотивировать и удерживать молодых сотрудников. Текучка растёт, преемственности нет.",
-  },
 ];
 
 const modules = [
@@ -192,51 +178,7 @@ export default function Page() {
         </section>
 
         {/* Problem */}
-        <section
-          id="problem"
-          tabIndex={-1}
-          aria-labelledby="hr-problem-title"
-          className="bg-white px-6 py-24 md:px-10 md:py-36"
-        >
-          <div className="mx-auto max-w-[1160px]">
-            <h2
-              id="hr-problem-title"
-              className="text-[clamp(26px,3.8vw,52px)] font-bold uppercase leading-[1.06] tracking-[0.02em] text-black"
-              style={headingFont}
-            >
-              <span className="md:block md:whitespace-nowrap">Поколение сменилось.</span>{" "}
-              <span className="md:block md:whitespace-nowrap">Ваши продажи — ещё нет</span>
-            </h2>
-            <p
-              className="mt-6 max-w-[60ch] text-[16px] leading-[1.55] text-black/65 md:text-[18px]"
-              style={bodyFont}
-            >
-              43% казахстанцев — моложе 25 лет. Компании, которые были на коне 10–15 лет назад, теряют выручку не из-за продукта, а потому что не понимают, как с этим поколением говорить: как с клиентами и как с сотрудниками.
-            </p>
-
-            <div className="mt-12 grid gap-4 md:mt-16 lg:grid-cols-3 lg:gap-6">
-              {symptoms.map((item) => (
-                <article
-                  key={item.title}
-                  className="flex flex-col rounded-[24px] border border-black/[0.08] bg-[#f5f5f5] p-7 md:p-9 lg:p-7 xl:p-10"
-                >
-                  <h3
-                    className="text-[16px] font-bold uppercase leading-[1.2] tracking-[0.02em] text-[#040082] md:text-[19px] lg:text-[16px] xl:text-[19px]"
-                    style={headingFont}
-                  >
-                    {item.title}
-                  </h3>
-                  <p className="mt-5 text-[15px] leading-[1.55] text-black/70" style={bodyFont}>
-                    {item.text}
-                  </p>
-                </article>
-              ))}
-            </div>
-            <p className="mt-8 text-[14px] leading-[1.5] text-black/50" style={bodyFont}>
-              Реальные запросы, с которыми к нам приходят компании. Названия скрыты.
-            </p>
-          </div>
-        </section>
+        <HRIntensiveProblem />
 
         {/* Modules */}
         <section
