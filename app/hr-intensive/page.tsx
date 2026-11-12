@@ -7,6 +7,7 @@ import HRIntensiveConfigurator from "../components/HRIntensiveConfigurator";
 import HRIntensiveHeroBackground from "../components/HRIntensiveHeroBackground";
 import HRIntensiveProblem from "../components/HRIntensiveProblem";
 import HRIntensiveModules from "../components/HRIntensiveModules";
+import HRIntensiveSteps from "../components/HRIntensiveSteps";
 
 export const metadata: Metadata = {
   title: "Корпоративный интенсив о новом поколении | Case Lab",
@@ -29,13 +30,6 @@ const navLinks = [
 const heroFacts = [
   { label: "Длительность", value: "3 часа, полдня или целый день" },
   { label: "Для кого", value: "Коммерция, маркетинг, HR, руководство" },
-];
-
-const steps = [
-  { title: "Собираете программу", text: "Выбираете длительность и блоки в конфигураторе ниже." },
-  { title: "Получаете КП", text: "В течение рабочего дня присылаем предложение с программой и стоимостью." },
-  { title: "Согласуем детали", text: "Дату, площадку и состав участников: коммерция, маркетинг, HR, руководство." },
-  { title: "Проводим сессию", text: "Приходим к вашей команде с готовой программой и практикой." },
 ];
 
 const facilitators = [
@@ -169,32 +163,7 @@ export default function Page() {
         <HRIntensiveConfigurator />
 
         {/* How it works */}
-        <section aria-labelledby="hr-steps-title" className="bg-white px-6 py-24 md:px-10 md:py-32">
-          <div className="mx-auto max-w-[1160px]">
-            <h2
-              id="hr-steps-title"
-              className="text-[clamp(26px,3.8vw,52px)] font-bold uppercase leading-[1.06] tracking-[0.02em] text-black"
-              style={headingFont}
-            >
-              Как это работает
-            </h2>
-            <ol className="mt-[48px] grid gap-[32px] border-t border-black/10 pt-10 md:mt-16 md:grid-cols-4 md:gap-6">
-              {steps.map((step, index) => (
-                <li key={step.title}>
-                  <span className="text-[13px] tracking-[0.12em] text-[#040082]" style={bodyFont}>
-                    0{index + 1}
-                  </span>
-                  <h3 className="mt-3 text-[18px] font-bold leading-[1.3] text-black" style={bodyFont}>
-                    {step.title}
-                  </h3>
-                  <p className="mt-2 text-[15px] leading-[1.5] text-black/60" style={bodyFont}>
-                    {step.text}
-                  </p>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
+        <HRIntensiveSteps />
 
         {/* Facilitators */}
         <section aria-labelledby="hr-team-title" className="bg-[#f5f5f5] px-6 py-24 md:px-10 md:py-32">
