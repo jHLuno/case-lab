@@ -68,7 +68,7 @@ export default function HRIntensiveSteps() {
   }, [shouldReduceMotion]);
 
   return (
-    <section aria-labelledby="hr-steps-title" className="bg-white px-6 py-24 md:px-10 md:py-32">
+    <section aria-labelledby="hr-steps-title" className="bg-white px-6 py-[48px] md:px-10 md:py-14 lg:py-16">
       <div className="mx-auto max-w-[1160px]">
         <span className="mb-3 block text-[11px] uppercase leading-[1.58] tracking-wider text-[#040082]" style={bodyFont}>
           Процесс
@@ -81,7 +81,7 @@ export default function HRIntensiveSteps() {
           Как это работает
         </h2>
 
-        <ol ref={listRef} className="relative mt-[48px] grid gap-10 pl-10 md:mt-16 md:grid-cols-4 md:gap-6 md:pl-0 md:pt-14">
+        <ol ref={listRef} className="relative mt-[32px] grid gap-10 pl-10 md:mt-[40px] md:grid-cols-4 md:gap-6 md:pl-0 md:pt-14">
           {/* Track: vertical on mobile, horizontal from md */}
           <span aria-hidden="true" className="absolute bottom-2 left-[11px] top-2 w-[2px] bg-black/10 md:hidden">
             <span data-track-fill className="absolute inset-0 origin-top scale-y-0 bg-[#040082]" />
