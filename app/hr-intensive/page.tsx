@@ -115,15 +115,9 @@ export default function Page() {
 
           <div className="relative z-10 w-full px-6 pb-16 pt-32 md:px-10 md:pb-[46px] md:pt-[178px]">
             <div className="mx-auto max-w-[1440px]">
-              <p
-                className="evp-hero-enter text-[12px] uppercase tracking-[0.14em] text-white/60 md:text-[13px]"
-                style={bodyFont}
-              >
-                Корпоративный интенсив Case Lab
-              </p>
               <h1
                 id="hr-intensive-title"
-                className="evp-hero-enter mt-5 text-[clamp(24px,7vw,30px)] font-bold uppercase leading-[1.08] tracking-[0.02em] md:text-[clamp(26px,calc((100vw-80px)/23.5),60px)]"
+                className="evp-hero-enter text-[clamp(24px,7vw,30px)] font-bold uppercase leading-[1.08] tracking-[0.02em] md:text-[clamp(26px,calc((100vw-80px)/23.5),60px)]"
                 style={headingFont}
               >
                 {/* Two fixed lines from md up; font scales with the container so the longer line always fits. */}
@@ -134,7 +128,7 @@ export default function Page() {
                 className="evp-hero-enter evp-hero-enter-delay-1 mt-6 max-w-[740px] text-balance text-[15px] leading-[1.5] text-white/80 md:mt-8 lg:text-[17px]"
                 style={bodyFont}
               >
-                Готовая программа для вашей команды: почему молодёжь не покупает и не остаётся — и как компании перестроить продажи, маркетинг и найм под новое поколение.
+                Корпоративный интенсив для вашей команды. Разберём, почему молодёжь не покупает и не остаётся, и как перестроить продажи, маркетинг и найм.
               </p>
               <div className="evp-hero-enter evp-hero-enter-delay-2 mt-8 flex flex-wrap items-center gap-3 md:mt-10">
                 <a
