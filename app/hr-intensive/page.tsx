@@ -145,7 +145,7 @@ export default function Page() {
               </div>
 
               <dl
-                className="evp-hero-enter evp-hero-enter-delay-2 mt-14 grid gap-4 border-t border-white/20 pt-6 md:grid-cols-2 md:gap-8"
+                className="evp-hero-enter evp-hero-enter-delay-2 mt-14 flex flex-col gap-4 border-t border-white/20 pt-6 md:flex-row md:gap-16 lg:gap-24"
                 style={bodyFont}
               >
                 {heroFacts.map((fact) => (
