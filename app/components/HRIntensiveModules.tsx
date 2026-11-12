@@ -241,7 +241,7 @@ export default function HRIntensiveModules() {
             <li key={module.index} data-sheet-row className="relative md:pb-6" style={{ zIndex: i + 1 }}>
               <article
                 data-sheet
-                className="grid origin-top gap-6 rounded-[20px] border border-black/5 bg-white p-6 text-black shadow-[0_-18px_40px_-18px_rgba(0,0,17,0.55)] md:rotate-[var(--sheet-tilt)] md:px-8 md:py-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_200px] lg:items-center lg:gap-8 xl:px-10 xl:py-6"
+                className="grid origin-top gap-6 rounded-[20px] border border-black/5 bg-white p-6 text-black shadow-[0_-18px_40px_-18px_rgba(0,0,17,0.55)] md:min-h-[260px] md:rotate-[var(--sheet-tilt)] md:p-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_260px] lg:items-center lg:gap-8 xl:p-10"
                 style={{ ["--sheet-tilt" as string]: `${module.tilt}deg` }}
               >
                 <div className="flex flex-col items-start gap-2 sm:flex-row sm:gap-4 md:gap-6">
@@ -265,13 +265,13 @@ export default function HRIntensiveModules() {
                   {module.text}
                 </p>
 
-                <div className="relative aspect-[4/3] w-full max-w-[280px] overflow-hidden rounded-[14px] bg-[#dde1fa] lg:max-w-none">
+                <div className="relative aspect-[4/3] w-full max-w-[320px] overflow-hidden rounded-[14px] bg-[#dde1fa] lg:max-w-none">
                   {module.image ? (
                     <Image
                       src={module.image}
                       alt=""
                       fill
-                      sizes="(min-width: 1024px) 200px, 320px"
+                      sizes="(min-width: 1024px) 260px, 320px"
                       className="object-cover"
                     />
                   ) : (
