@@ -35,28 +35,19 @@ const heroFacts = [
 const facilitators = [
   {
     name: "Данияр Косназаров",
-    role: "Основатель Case Lab",
-    stat: "50+",
-    statLabel: "компаний в консалтинге",
-    text: "Советник президента Narxoz University, ex-CMO Qazaq Republic и KPMG.",
+    text: "Основатель Case Lab, советник президента Narxoz University, ex-CMO Qazaq Republic и KPMG. 50+ компаний в консалтинге.",
     photo: "/daniyar-kosnazarov.webp",
     position: "center 20%",
   },
   {
     name: "Арман Шокпаров",
-    role: "Основатель On-Point",
-    stat: "2",
-    statLabel: "HR-компании: On-Point и People Consulting",
-    text: "Хедхантер, эксперт по привлечению и развитию талантов.",
+    text: "Основатель On-Point и сооснователь People Consulting. Хедхантер, эксперт по привлечению и развитию талантов.",
     photo: "/arman-shokparov.webp",
     position: "center 24%",
   },
   {
     name: "Амиржан Жампеисов",
-    role: "CEO Founder's Hub",
-    stat: "Case Lab",
-    statLabel: "координатор проекта",
-    text: "Работает с командами и предпринимательскими проектами.",
+    text: "CEO Founder's Hub, координатор проекта Case Lab. Работает с командами и предпринимательскими проектами.",
     photo: "/amirzhan-zhampeisov.webp",
     position: "center 15%",
   },
@@ -174,82 +165,39 @@ export default function Page() {
         {/* How it works */}
         <HRIntensiveSteps />
 
-        {/* Facilitators: dark portrait cards; the hovered / focused card turns blue and shows the bio */}
-        <section
-          aria-labelledby="hr-team-title"
-          className="relative isolate overflow-hidden bg-[#000011] px-6 py-[48px] text-white md:px-10 md:py-14 lg:py-16"
-        >
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 -z-10"
-            style={{
-              background:
-                "radial-gradient(ellipse at 50% 0%, rgba(26,26,158,0.55) 0%, transparent 60%), radial-gradient(ellipse at 50% 100%, rgba(4,0,130,0.6) 0%, transparent 55%)",
-            }}
-          />
+        {/* Facilitators */}
+        <section aria-labelledby="hr-team-title" className="bg-[#f5f5f5] px-6 py-[48px] md:px-10 md:py-14 lg:py-16">
           <div className="mx-auto max-w-[1160px]">
-            <span className="mb-3 block text-[11px] uppercase leading-[1.58] tracking-wider text-white/60" style={bodyFont}>
-              Команда
-            </span>
             <h2
               id="hr-team-title"
-              className="text-[clamp(26px,3.8vw,52px)] font-bold uppercase leading-[1.06] tracking-[0.02em]"
+              className="text-[clamp(26px,3.8vw,52px)] font-bold uppercase leading-[1.06] tracking-[0.02em] text-black"
               style={headingFont}
             >
               Кто проводит
             </h2>
-            <ul className="mt-[32px] grid gap-4 sm:grid-cols-2 md:mt-[40px] lg:grid-cols-3 lg:gap-5">
+            <ul className="mt-[32px] grid gap-6 md:mt-[40px] md:grid-cols-3">
               {facilitators.map((person) => (
-                <li
-                  key={person.name}
-                  tabIndex={0}
-                  className="group relative aspect-[3/4] overflow-hidden rounded-[20px] border border-white/10 bg-[#0a0a3a] outline-none focus-visible:ring-2 focus-visible:ring-white/70 sm:aspect-[4/5]"
-                >
-                  <Image
-                    src={person.photo}
-                    alt={person.name}
-                    fill
-                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] motion-safe:group-hover:scale-[1.04]"
-                    style={{ objectPosition: person.position }}
-                  />
-                  {/* Unifying blue tint + bottom shade for the caption */}
-                  <div
-                    aria-hidden="true"
-                    className="absolute inset-0 bg-[linear-gradient(180deg,rgba(4,0,130,0.15)_0%,rgba(0,0,17,0.15)_45%,rgba(0,0,17,0.85)_100%)]"
-                  />
-
-                  {/* Resting caption */}
-                  <div className="absolute inset-x-0 bottom-0 p-5 transition-opacity duration-300 group-hover:opacity-0 group-focus:opacity-0 md:p-6 [@media(hover:none)]:hidden">
-                    <h3 className="text-[16px] font-bold uppercase leading-[1.2] tracking-[0.03em] md:text-[18px]" style={headingFont}>
+                <li key={person.name} className="overflow-hidden rounded-[24px] bg-white">
+                  <div className="relative aspect-[4/3] w-full bg-black/5">
+                    <Image
+                      src={person.photo}
+                      alt={person.name}
+                      fill
+                      sizes="(min-width: 768px) 33vw, 100vw"
+                      className="object-cover"
+                      style={{ objectPosition: person.position }}
+                    />
+                  </div>
+                  <div className="p-7 md:p-[32px]">
+                    <h3
+                      className="text-[17px] font-bold uppercase tracking-[0.02em] text-black md:text-[19px]"
+                      style={headingFont}
+                    >
                       {person.name}
                     </h3>
-                    <p className="mt-1 text-[13px] text-white/65" style={bodyFont}>
-                      {person.role}
+                    <p className="mt-3 text-[15px] leading-[1.5] text-black/65" style={bodyFont}>
+                      {person.text}
                     </p>
-                  </div>
-
-                  {/* Active state: blue panel with the bio (always shown on touch screens) */}
-                  <div className="absolute inset-0 flex flex-col justify-between bg-[#040082]/90 p-5 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover:opacity-100 group-focus:opacity-100 md:p-6 [@media(hover:none)]:inset-auto [@media(hover:none)]:bottom-0 [@media(hover:none)]:left-0 [@media(hover:none)]:right-0 [@media(hover:none)]:opacity-100">
-                    <div>
-                      <h3 className="text-[16px] font-bold uppercase leading-[1.2] tracking-[0.03em] md:text-[18px]" style={headingFont}>
-                        {person.name}
-                      </h3>
-                      <p className="mt-1 text-[13px] text-white/70" style={bodyFont}>
-                        {person.role}
-                      </p>
-                      <p className="mt-4 text-[14px] leading-[1.5] text-white/85 [@media(hover:none)]:mt-3" style={bodyFont}>
-                        {person.text}
-                      </p>
-                    </div>
-                    <div className="mt-5 flex items-end gap-3 border-t border-white/20 pt-4">
-                      <span className="shrink-0 text-[30px] font-bold leading-none md:text-[34px]" style={headingFont}>
-                        {person.stat}
-                      </span>
-                      <span className="pb-0.5 text-[12px] leading-[1.35] text-white/70" style={bodyFont}>
-                        {person.statLabel}
-                      </span>
-                    </div>
                   </div>
                 </li>
               ))}
