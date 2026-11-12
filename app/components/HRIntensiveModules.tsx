@@ -200,7 +200,7 @@ export default function HRIntensiveModules() {
       id="modules"
       tabIndex={-1}
       aria-labelledby="hr-modules-title"
-      className="relative isolate overflow-clip bg-[#040082] px-6 py-12 text-white md:px-10 md:py-14 lg:py-16"
+      className="relative isolate overflow-clip bg-[#040082] px-6 py-[48px] text-white md:px-10 md:py-14 lg:py-16"
     >
       <div
         aria-hidden="true"
@@ -208,7 +208,7 @@ export default function HRIntensiveModules() {
       />
 
       <div ref={wrapRef} className="mx-auto max-w-[1200px]">
-        <div className="mb-8 md:mb-12">
+        <div className="mb-[32px] md:mb-12">
           <span
             className="mb-3 block text-[11px] font-normal uppercase leading-[1.58] tracking-wider text-white/60"
             style={bodyFont}
@@ -236,7 +236,7 @@ export default function HRIntensiveModules() {
               <article
                 data-sheet
                 // Reference layout: number · title · stacked tags · description · picture, all top-aligned.
-                className="grid origin-top items-start gap-4 rounded-[20px] border border-black/5 bg-white p-6 text-black shadow-[0_-18px_40px_-18px_rgba(0,0,17,0.55)] md:min-h-[260px] md:rotate-[var(--sheet-tilt)] md:gap-5 md:p-8 lg:grid-cols-[28px_minmax(0,1fr)_minmax(0,1fr)_240px] lg:gap-x-8 lg:gap-y-4 lg:[grid-template-areas:'num_title_desc_img'_'num_tags_desc_img'] xl:grid-cols-[28px_minmax(0,1.3fr)_minmax(0,0.55fr)_minmax(0,1fr)_260px] xl:p-10 xl:[grid-template-areas:'num_title_tags_desc_img']"
+                className="grid origin-top items-start gap-4 rounded-[20px] border border-black/5 bg-white p-6 text-black shadow-[0_-18px_40px_-18px_rgba(0,0,17,0.55)] md:min-h-[260px] md:rotate-[var(--sheet-tilt)] md:gap-5 md:p-[32px] lg:grid-cols-[28px_minmax(0,1fr)_minmax(0,1fr)_240px] lg:gap-x-[32px] lg:gap-y-4 lg:[grid-template-areas:'num_title_desc_img'_'num_tags_desc_img'] xl:grid-cols-[28px_minmax(0,1.3fr)_minmax(0,0.55fr)_minmax(0,1fr)_260px] xl:p-10 xl:[grid-template-areas:'num_title_tags_desc_img']"
                 style={{ ["--sheet-tilt" as string]: `${module.tilt}deg` }}
               >
                 <span className="text-[13px] tracking-[0.12em] text-black/40 lg:pt-1 lg:[grid-area:num]" style={bodyFont}>
