@@ -8,9 +8,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Rows are "sheets": from md up each sheet is pinned while the next one slides
-// over it, so they stack with a slight skew. (Pinned with GSAP, because the
-// global html/body overflow-x: hidden disables position: sticky.)
+// Rows are "sheets": from md up the list pins when the first sheet reaches the top
+// and the next sheets rise from below onto it, stacking with a slight skew.
+// (Pinned with GSAP, because the global html/body overflow-x: hidden disables
+// position: sticky.)
 // Set `image` to a file in /public/hr-intensive/ once the generated pictures exist;
 // until then the row shows a vector placeholder.
 const modules: {
@@ -48,8 +49,9 @@ const modules: {
   },
 ];
 
-// Sheets pin below the fixed navbar, each one a step lower so the edges underneath stay visible.
-const SHEET_TOP = 96;
+// The stack pins just below the fixed navbar; each landed sheet sits a step lower
+// so the edges of the ones underneath stay visible.
+const PIN_TOP = 120;
 const SHEET_STEP = 28;
 
 const headingFont = { fontFamily: "var(--font-heading)" };
@@ -171,30 +173,30 @@ export default function HRIntensiveModules() {
     const mm = gsap.matchMedia();
     mm.add("(min-width: 768px)", () => {
       const rows = Array.from(list.querySelectorAll<HTMLElement>("[data-sheet-row]"));
-      const last = rows[rows.length - 1];
-      const offset = (i: number) => SHEET_TOP + i * SHEET_STEP;
+      const sheets = rows.map((row) => row.querySelector<HTMLElement>("[data-sheet]"));
+      const incoming = rows.slice(1);
 
-      rows.slice(0, -1).forEach((row, i) => {
-        // Pin each sheet until the last one arrives; the next sheets scroll over it.
-        ScrollTrigger.create({
-          trigger: row,
-          start: `top ${offset(i)}px`,
-          endTrigger: last,
-          end: `top ${offset(rows.length - 1)}px`,
+      // Later sheets sit on top of the first one, each a step lower.
+      gsap.set(list, { position: "relative", paddingBottom: incoming.length * SHEET_STEP });
+      gsap.set(incoming, { position: "absolute", top: 0, left: 0, right: 0 });
+
+      // The list pins once the first sheet reaches the top; while it is pinned the
+      // next sheets rise from the bottom of the screen and land on the first one.
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: list,
+          start: `top ${PIN_TOP}px`,
+          end: () => `+=${incoming.length * window.innerHeight * 0.8}`,
           pin: true,
-          pinSpacing: false,
-        });
-        // The covered sheet sinks back a little as the next one slides over it.
-        gsap.to(row.querySelector("[data-sheet]"), {
-          scale: 0.96,
-          ease: "none",
-          scrollTrigger: {
-            trigger: rows[i + 1],
-            start: "top bottom",
-            end: `top ${offset(i + 1)}px`,
-            scrub: true,
-          },
-        });
+          scrub: 0.6,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      incoming.forEach((row, k) => {
+        const i = k + 1;
+        tl.fromTo(row, { y: () => window.innerHeight }, { y: i * SHEET_STEP, ease: "none" });
+        tl.to(sheets[i - 1], { scale: 0.96, ease: "none" }, "<");
       });
     });
 
@@ -206,7 +208,7 @@ export default function HRIntensiveModules() {
       id="modules"
       tabIndex={-1}
       aria-labelledby="hr-modules-title"
-      className="relative isolate bg-[#040082] px-6 py-12 text-white md:px-10 md:py-14 lg:py-16"
+      className="relative isolate overflow-clip bg-[#040082] px-6 py-12 text-white md:px-10 md:py-14 lg:py-16"
     >
       <div
         aria-hidden="true"
@@ -238,7 +240,7 @@ export default function HRIntensiveModules() {
 
         <ol ref={listRef} className="space-y-4 md:space-y-0">
           {modules.map((module, i) => (
-            <li key={module.index} data-sheet-row className="relative md:pb-6 md:last:pb-0" style={{ zIndex: i + 1 }}>
+            <li key={module.index} data-sheet-row className="relative" style={{ zIndex: i + 1 }}>
               <article
                 data-sheet
                 // Reference layout: number · title · stacked tags · description · picture, all top-aligned.
