@@ -208,7 +208,7 @@ export default function HRIntensiveModules() {
       />
 
       <div ref={wrapRef} className="mx-auto max-w-[1200px]">
-        <div className="mb-[32px] md:mb-12">
+        <div className="mb-[32px] md:mb-[32px]">
           <span
             className="mb-3 block text-[11px] font-normal uppercase leading-[1.58] tracking-wider text-white/60"
             style={bodyFont}
