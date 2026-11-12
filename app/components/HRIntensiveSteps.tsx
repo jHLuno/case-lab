@@ -82,33 +82,23 @@ const nodeClass =
 export default function HRIntensiveSteps() {
   const shouldReduceMotion = useReducedMotion() ?? false;
   const rootRef = useRef<HTMLDivElement>(null);
-  const waveRef = useRef<SVGPathElement>(null);
+  const revealRef = useRef<SVGRectElement>(null);
 
   useEffect(() => {
     const root = rootRef.current;
-    const wave = waveRef.current;
-    if (!root || !wave) return;
+    const reveal = revealRef.current;
+    if (!root || !reveal) return;
 
     const desktopItems = Array.from(root.querySelectorAll<HTMLElement>("[data-wave-step]"));
     const mobileItems = Array.from(root.querySelectorAll<HTMLElement>("[data-line-step]"));
     const mobileFill = root.querySelector<HTMLElement>("[data-line-fill]");
 
-    // Share of the wave's length at which each node sits.
-    const total = wave.getTotalLength();
-    const nodeShare = NODES.map((node) => {
-      let lo = 0;
-      let hi = total;
-      for (let i = 0; i < 24; i++) {
-        const mid = (lo + hi) / 2;
-        if (wave.getPointAtLength(mid).x < node.x) lo = mid;
-        else hi = mid;
-      }
-      return lo / total;
-    });
-
     const render = (progress: number) => {
-      wave.style.strokeDashoffset = String(1 - progress);
-      desktopItems.forEach((item, i) => item.toggleAttribute("data-active", progress >= nodeShare[i] - 0.002));
+      // The wave only moves left to right, so revealing it with a growing clip
+      // keeps the drawn part and the node positions exactly in sync.
+      const drawnTo = progress * 1000;
+      reveal.setAttribute("width", String(drawnTo));
+      desktopItems.forEach((item, i) => item.toggleAttribute("data-active", drawnTo >= NODES[i].x));
       if (mobileFill) mobileFill.style.transform = `scaleY(${progress})`;
       // Mobile: a step lights up once the filled line reaches its node.
       const line = mobileFill?.parentElement?.getBoundingClientRect();
@@ -155,8 +145,8 @@ export default function HRIntensiveSteps() {
         </h2>
 
         <div ref={rootRef} className="mt-[32px] md:mt-[40px]">
-          {/* Desktop: wave with alternating steps */}
-          <ol className="relative hidden md:block" style={{ height: LIST_H }}>
+          {/* Desktop (lg+): wave with alternating steps */}
+          <ol className="relative hidden lg:block" style={{ height: LIST_H }}>
             <svg
               aria-hidden="true"
               className="absolute left-0 w-full overflow-visible"
@@ -166,6 +156,9 @@ export default function HRIntensiveSteps() {
               preserveAspectRatio="none"
             >
               <defs>
+                <clipPath id="hr-steps-reveal">
+                  <rect ref={revealRef} x="0" y="-20" width="0" height={WAVE_H + 40} />
+                </clipPath>
                 <linearGradient id="hr-steps-wave" x1="0" y1="0" x2="1" y2="0">
                   <stop offset="0%" stopColor="#040082" />
                   <stop offset="100%" stopColor="#1a1a9e" />
@@ -173,16 +166,13 @@ export default function HRIntensiveSteps() {
               </defs>
               <path d={WAVE_D} fill="none" stroke="rgba(0,0,0,0.1)" strokeWidth="2" vectorEffect="non-scaling-stroke" />
               <path
-                ref={waveRef}
                 d={WAVE_D}
                 fill="none"
                 stroke="url(#hr-steps-wave)"
                 strokeWidth="3"
                 strokeLinecap="round"
                 vectorEffect="non-scaling-stroke"
-                pathLength={1}
-                strokeDasharray="1"
-                strokeDashoffset="1"
+                clipPath="url(#hr-steps-reveal)"
               />
             </svg>
 
@@ -214,8 +204,8 @@ export default function HRIntensiveSteps() {
             })}
           </ol>
 
-          {/* Mobile: vertical line */}
-          <ol className="relative grid gap-10 pl-14 md:hidden">
+          {/* Phone and tablet: vertical line */}
+          <ol className="relative grid gap-10 pl-14 lg:hidden">
             <span aria-hidden="true" className="absolute bottom-6 left-[19px] top-6 w-[2px] bg-black/10">
               <span data-line-fill className="absolute inset-0 origin-top bg-[#040082]" style={{ transform: "scaleY(0)" }} />
             </span>
