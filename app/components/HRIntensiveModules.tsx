@@ -206,7 +206,7 @@ export default function HRIntensiveModules() {
       id="modules"
       tabIndex={-1}
       aria-labelledby="hr-modules-title"
-      className="relative isolate bg-[#040082] px-6 py-16 text-white md:px-10 md:py-20 lg:py-24"
+      className="relative isolate bg-[#040082] px-6 py-12 text-white md:px-10 md:py-14 lg:py-16"
     >
       <div
         aria-hidden="true"
@@ -238,7 +238,7 @@ export default function HRIntensiveModules() {
 
         <ol ref={listRef} className="space-y-4 md:space-y-0">
           {modules.map((module, i) => (
-            <li key={module.index} data-sheet-row className="relative md:pb-6" style={{ zIndex: i + 1 }}>
+            <li key={module.index} data-sheet-row className="relative md:pb-6 md:last:pb-0" style={{ zIndex: i + 1 }}>
               <article
                 data-sheet
                 // Reference layout: number · title · stacked tags · description · picture, all top-aligned.
