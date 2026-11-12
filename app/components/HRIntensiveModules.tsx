@@ -206,7 +206,7 @@ export default function HRIntensiveModules() {
       id="modules"
       tabIndex={-1}
       aria-labelledby="hr-modules-title"
-      className="relative isolate bg-[#040082] px-6 py-20 text-white md:px-10 md:py-36"
+      className="relative isolate bg-[#040082] px-6 py-16 text-white md:px-10 md:py-20 lg:py-24"
     >
       <div
         aria-hidden="true"
@@ -214,7 +214,7 @@ export default function HRIntensiveModules() {
       />
 
       <div className="mx-auto max-w-[1200px]">
-        <div className="mb-10 md:mb-16">
+        <div className="mb-8 md:mb-12">
           <span
             className="mb-3 block text-[11px] font-normal uppercase leading-[1.58] tracking-wider text-white/60"
             style={bodyFont}
@@ -236,7 +236,7 @@ export default function HRIntensiveModules() {
           </p>
         </div>
 
-        <ol ref={listRef} className="space-y-4 md:space-y-0 md:pb-10">
+        <ol ref={listRef} className="space-y-4 md:space-y-0">
           {modules.map((module, i) => (
             <li key={module.index} data-sheet-row className="relative md:pb-6" style={{ zIndex: i + 1 }}>
               <article
