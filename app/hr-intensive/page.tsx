@@ -135,7 +135,7 @@ export default function Page() {
         >
           <HRIntensiveHeroBackground />
 
-          <div className="relative z-10 w-full px-6 pb-16 pt-32 md:px-10 md:pb-24">
+          <div className="relative z-10 w-full px-6 pb-16 pt-32 md:px-10 md:pb-[46px] md:pt-[178px]">
             <div className="mx-auto max-w-[1440px]">
               <p
                 className="evp-hero-enter text-[12px] uppercase tracking-[0.14em] text-white/60 md:text-[13px]"
