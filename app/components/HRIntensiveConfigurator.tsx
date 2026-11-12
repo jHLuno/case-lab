@@ -118,7 +118,7 @@ export default function HRIntensiveConfigurator() {
       id="request"
       tabIndex={-1}
       aria-labelledby="hr-request-title"
-      className="bg-[#f5f5f5] px-6 py-24 md:px-10 md:py-36"
+      className="bg-[#f5f5f5] px-6 py-12 md:px-10 md:py-14 lg:py-16"
     >
       <div className="mx-auto max-w-[1160px]">
         <h2
@@ -132,7 +132,7 @@ export default function HRIntensiveConfigurator() {
           Выберите формат и блоки — пришлём коммерческое предложение с программой и ценой. Стоимость рассчитываем под вашу команду.
         </p>
 
-        <div className="mt-12 grid gap-6 md:mt-16 lg:grid-cols-[1.25fr_1fr]">
+        <div className="mt-8 grid gap-6 md:mt-10 lg:grid-cols-[1.25fr_1fr]">
           {/* Configurator */}
           <div className="rounded-[24px] bg-white p-6 md:p-10">
             <fieldset>
