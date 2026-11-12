@@ -205,11 +205,7 @@ export default function HRIntensiveProblem() {
           })}
         </div>
 
-        <p className="mt-6 text-[12px] font-light leading-[1.5] text-black/40" style={bodyFont}>
-          Реальные запросы, с которыми к нам приходят компании. Названия скрыты.
-        </p>
-
-        <div className="mt-10 md:mt-14" style={{ perspective: "1000px" }}>
+        <div className="mt-12 md:mt-16" style={{ perspective: "1000px" }}>
           <TiltLink reduceMotion={shouldReduceMotion} />
         </div>
       </div>
