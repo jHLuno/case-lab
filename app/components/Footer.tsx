@@ -10,6 +10,8 @@ type FooterProps = {
   ctaDescription?: string;
   ctaLabel?: string;
   ctaHref?: string | null;
+  /** Tighter vertical spacing (used on the HR intensive landing). */
+  compact?: boolean;
 };
 
 export default function Footer({
@@ -18,17 +20,18 @@ export default function Footer({
   ctaDescription = "Заполните форму — мы свяжемся в течение рабочего дня. Первая консультация бесплатно.",
   ctaLabel = "Записаться на диагностику",
   ctaHref,
+  compact = false,
 }: FooterProps) {
   const { openPopup } = useLeadPopup();
 
   return (
-    <footer className="relative z-[2] bg-white px-6 pb-8 pt-20 md:px-10 md:pt-32">
+    <footer className={`relative z-[2] bg-white px-6 pb-8 md:px-10 ${compact ? "pt-[48px] md:pt-16" : "pt-20 md:pt-32"}`}>
       {/* Top divider */}
       <div className="absolute top-0 left-0 w-full h-[1px] divider-gradient" />
 
       <div className="mx-auto max-w-[1078px]">
         {/* CTA Section */}
-        <div className="mb-20 text-center md:mb-28">
+        <div className={`text-center ${compact ? "mb-[48px] md:mb-16" : "mb-20 md:mb-28"}`}>
           <h2
             className="text-black text-[clamp(24px,4vw,48px)] font-bold leading-[1.05] uppercase tracking-[0.02em] mb-6 md:mb-6 md:max-w-none"
             style={{ fontFamily: "var(--font-heading)" }}

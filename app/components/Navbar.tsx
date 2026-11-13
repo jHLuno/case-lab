@@ -21,6 +21,8 @@ type NavLink = { label: string; href: string };
 type NavbarProps = {
   accent?: "blue" | "emerald";
   logoSrc?: string;
+  /** Light logo for the open mobile menu; shown without the white pill when set. */
+  menuLogoSrc?: string;
   navLinks?: NavLink[];
   basePath?: string;
   ctaLabel?: string;
@@ -35,6 +37,7 @@ type NavbarProps = {
 export default function Navbar({
   accent = "blue",
   logoSrc = "/Logo.png",
+  menuLogoSrc,
   navLinks = defaultNavLinks,
   basePath = "/",
   ctaLabel = "Записаться",
@@ -357,16 +360,22 @@ export default function Navbar({
               className="relative z-10 flex shrink-0 items-center justify-between px-6 pt-5 pb-3"
               style={{ paddingTop: "max(20px, calc(env(safe-area-inset-top) + 8px))" }}
             >
-              <div className="relative h-10 w-[154px] rounded-full border border-white/60 bg-white px-4 py-2 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)]">
-                <Image
-                  src={logoSrc}
-                  alt="Case Lab"
-                  fill
-                  className="object-contain p-1.5"
-                  priority
-                  sizes="154px"
-                />
-              </div>
+              {menuLogoSrc ? (
+                <div className="relative h-[32px] w-[154px]">
+                  <Image src={menuLogoSrc} alt="Case Lab" fill className="object-contain object-left" priority sizes="154px" />
+                </div>
+              ) : (
+                <div className="relative h-10 w-[154px] rounded-full border border-white/60 bg-white px-4 py-2 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)]">
+                  <Image
+                    src={logoSrc}
+                    alt="Case Lab"
+                    fill
+                    className="object-contain p-1.5"
+                    priority
+                    sizes="154px"
+                  />
+                </div>
+              )}
               <motion.button
                 type="button"
                 onClick={closeMobileMenuAndReturnFocus}
