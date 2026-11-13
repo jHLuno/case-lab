@@ -217,10 +217,11 @@ export default function HRIntensiveModules() {
           </span>
           <h2
             id="hr-modules-title"
-            className="text-[clamp(28px,9vw,40px)] font-bold uppercase leading-[1] tracking-[0.02em] md:whitespace-nowrap md:text-[clamp(32px,calc((100vw-80px)/16.5),76px)]"
+            className="text-[min(40px,calc((100vw-48px)/11.2))] font-bold uppercase leading-[1] tracking-[0.02em] md:whitespace-nowrap md:text-[clamp(32px,calc((100vw-80px)/16.5),76px)]"
             style={headingFont}
           >
-            Три готовых блока
+            {/* Phones: "Три готовых" / "блока"; one line from md */}
+            <span className="block md:inline">Три готовых</span> блока
           </h2>
           <p
             className="mt-5 max-w-[880px] text-balance text-[15px] font-light leading-[1.55] text-white/70 md:mt-6 lg:text-[17px]"

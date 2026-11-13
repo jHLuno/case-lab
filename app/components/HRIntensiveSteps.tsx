@@ -55,7 +55,7 @@ function StepText({ index, title, text }: { index: number; title: string; text: 
     <div className="relative">
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute -top-10 right-0 select-none text-[120px] font-bold leading-none text-black/[0.04] transition-colors duration-500 group-data-[active]:text-[#040082]/[0.08]"
+        className="pointer-events-none absolute -top-10 right-0 hidden select-none text-[120px] lg:block font-bold leading-none text-black/[0.04] transition-colors duration-500 group-data-[active]:text-[#040082]/[0.08]"
         style={headingFont}
       >
         {index + 1}
