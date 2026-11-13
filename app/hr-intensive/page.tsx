@@ -8,6 +8,7 @@ import HRIntensiveHeroBackground from "../components/HRIntensiveHeroBackground";
 import HRIntensiveProblem from "../components/HRIntensiveProblem";
 import HRIntensiveModules from "../components/HRIntensiveModules";
 import HRIntensiveSteps from "../components/HRIntensiveSteps";
+import HRIntensiveReviews from "../components/HRIntensiveReviews";
 
 export const metadata: Metadata = {
   title: "Корпоративный интенсив о новом поколении | Case Lab",
@@ -215,6 +216,9 @@ export default function Page() {
             </ul>
           </div>
         </section>
+
+        {/* Reviews */}
+        <HRIntensiveReviews />
 
         {/* FAQ */}
         <section
