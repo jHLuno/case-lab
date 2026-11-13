@@ -52,21 +52,15 @@ export default function HRIntensiveProblem() {
     if (!grid) return;
     const cards = grid.querySelectorAll<HTMLElement>(".pain-card");
 
-    if (shouldReduceMotion) {
-      cards.forEach((card) => (card.style.opacity = "1"));
-      return;
-    }
-
+    // Reduced motion: the cards only fade in, without moving.
     const ctx = gsap.context(() => {
       cards.forEach((card, i) => {
         gsap.fromTo(
           card,
-          { opacity: 0, y: 80, rotateX: 20, scale: 0.92 },
+          shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 80, rotateX: 20, scale: 0.92 },
           {
             opacity: 1,
-            y: 0,
-            rotateX: 0,
-            scale: 1,
+            ...(shouldReduceMotion ? {} : { y: 0, rotateX: 0, scale: 1 }),
             duration: 0.8,
             ease: "power3.out",
             scrollTrigger: { trigger: card, start: "top 85%", toggleActions: "play none none none" },
