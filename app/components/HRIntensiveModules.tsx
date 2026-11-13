@@ -223,7 +223,7 @@ export default function HRIntensiveModules() {
             Три готовых блока
           </h2>
           <p
-            className="mt-5 max-w-[720px] text-balance text-[15px] font-light leading-[1.55] text-white/70 md:mt-6 lg:text-[17px]"
+            className="mt-5 max-w-[880px] text-balance text-[15px] font-light leading-[1.55] text-white/70 md:mt-6 lg:text-[17px]"
             style={bodyFont}
           >
             Мы уже проводили эту программу на конференциях и корпоративных сессиях. Вы выбираете, сколько времени готова уделить команда, а мы собираем из блоков нужный формат.
