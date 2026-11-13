@@ -101,6 +101,7 @@ export default function Page() {
       <Navbar
         navLinks={navLinks}
         basePath="/hr-intensive/"
+        menuLogoSrc="/Case%20Lab%20logo%20white.png"
         ctaLabel="Запросить КП"
         ctaHref="#request"
         menuDescription="Корпоративный интенсив о новом поколении клиентов и сотрудников."
