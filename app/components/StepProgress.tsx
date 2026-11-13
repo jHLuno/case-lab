@@ -64,18 +64,18 @@ export default function StepProgress({ steps, current, complete = false }: Props
       item.f.t = done ? 1 : 0;
       item.on.t = k === i && !done ? 1 : 0;
       if (done) {
-        if (reduce) item.c.t = 1;
-        else timers.current.push(window.setTimeout(() => (item.c.t = 1), CHECK_DELAY * 1000));
+        timers.current.push(window.setTimeout(() => (item.c.t = 1), CHECK_DELAY * 1000));
       } else item.c.t = 0;
     });
 
-    if (reduce || prev.current === null) {
-      // Jump straight to the target: first render, or reduced motion.
+    if (prev.current === null) {
+      // First render: start at the target without animating.
       [s.line, ...s.items.flatMap((it) => [it.f, it.c, it.on])].forEach((sp) => {
         sp.x = sp.t;
         sp.v = 0;
       });
-    } else if (prev.current !== i) {
+    } else if (prev.current !== i && !reduce) {
+      // The pop is skipped for reduced motion; the line and fills still glide.
       s.items[i].p.x = 0.7;
       s.items[i].p.v = 6;
     }

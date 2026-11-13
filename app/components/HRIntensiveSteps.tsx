@@ -111,11 +111,8 @@ export default function HRIntensiveSteps() {
       }
     };
 
-    if (shouldReduceMotion) {
-      render(1);
-      return;
-    }
-
+    // The line fill and step highlight are scroll-linked and small, so they stay on
+    // with reduced motion too; nothing moves around the screen.
     render(0);
     const ctx = gsap.context(() => {
       ScrollTrigger.create({
