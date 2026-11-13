@@ -247,7 +247,7 @@ export default function Page() {
                       </span>
                     </summary>
                     <p
-                      className="max-w-[58ch] pb-6 text-[15px] leading-[1.55] text-black/65 md:text-[16px]"
+                      className="pb-6 text-[15px] leading-[1.55] text-black/65 md:pr-[60px] md:text-[16px]"
                       style={bodyFont}
                     >
                       {item.answer}
