@@ -114,7 +114,7 @@ export default function Page() {
         >
           <HRIntensiveHeroBackground />
 
-          <div className="relative z-10 w-full px-6 pb-16 pt-32 md:px-10 md:pb-[46px] md:pt-[178px]">
+          <div className="relative z-10 w-full px-6 pb-[44px] pt-[148px] md:px-10 md:pb-[46px] md:pt-[178px]">
             <div className="mx-auto max-w-[1440px]">
               <h1
                 id="hr-intensive-title"
