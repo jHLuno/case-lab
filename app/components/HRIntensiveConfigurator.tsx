@@ -178,7 +178,7 @@ export default function HRIntensiveConfigurator() {
           className="text-[clamp(26px,3.8vw,52px)] font-bold uppercase leading-[1.06] tracking-[0.02em] text-black"
           style={headingFont}
         >
-          Соберите программу
+          Соберите свою программу
         </h2>
         <p className="mt-5 max-w-[58ch] text-[15px] leading-[1.55] text-black/65 md:mt-6 lg:text-[17px]" style={bodyFont}>
           Выберите формат и блоки — пришлём коммерческое предложение с программой и ценой. Стоимость рассчитываем под вашу команду.
