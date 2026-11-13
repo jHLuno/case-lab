@@ -118,15 +118,16 @@ export default function Page() {
             <div className="mx-auto max-w-[1440px]">
               <h1
                 id="hr-intensive-title"
-                className="evp-hero-enter text-[calc((100vw-48px)/18.8)] font-bold uppercase leading-[1.08] tracking-[0.02em] md:text-[clamp(26px,calc((100vw-80px)/23.5),60px)]"
+                className="evp-hero-enter text-[calc((100vw-48px)/15)] font-bold uppercase leading-[1.08] tracking-[0.02em] md:text-[clamp(26px,calc((100vw-80px)/23.5),60px)]"
                 style={headingFont}
               >
-                {/* Phones: 3 lines (Ваши следующие / клиенты и сотрудники / — зумеры); from md: 2 lines.
+                {/* Phones: 4 lines (Ваши следующие / клиенты / и сотрудники / — зумеры); from md: 2 lines.
                     The font scales with the width so the longest line always fits. */}
                 <span className="md:block md:whitespace-nowrap">
                   Ваши следующие
                   <br className="md:hidden" /> клиенты
-                </span>{" "}
+                </span>
+                <br className="md:hidden" />{" "}
                 <span className="md:block md:whitespace-nowrap">
                   и сотрудники
                   <br className="md:hidden" /> — зумеры
@@ -138,10 +139,10 @@ export default function Page() {
               >
                 Корпоративный интенсив для вашей команды. Разберём, почему молодёжь не покупает, не идёт к вам работать и не остаётся, и что с этим делать.
               </p>
-              <div className="evp-hero-enter evp-hero-enter-delay-2 mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center md:mt-10">
+              <div className="evp-hero-enter evp-hero-enter-delay-2 mt-[32px] inline-flex flex-col gap-3 sm:flex sm:flex-row sm:flex-wrap sm:items-center md:mt-10">
                 <a
                   href="#request"
-                  className="inline-flex w-full items-center justify-center gap-3 rounded-full bg-white px-7 py-3.5 text-[14px] text-[#040082] transition-[gap] duration-200 hover:gap-4 sm:w-auto md:px-10 md:py-5 md:text-[15px]"
+                  className="inline-flex items-center justify-center gap-3 rounded-full bg-white px-7 py-3.5 text-[14px] text-[#040082] transition-[gap] duration-200 hover:gap-4 md:px-10 md:py-5 md:text-[15px]"
                   style={bodyFont}
                 >
                   Собрать программу
@@ -149,7 +150,7 @@ export default function Page() {
                 </a>
                 <a
                   href="#modules"
-                  className="inline-flex w-full items-center justify-center rounded-full border border-white/30 px-7 py-3.5 text-[14px] text-white transition-colors duration-200 hover:bg-white/10 sm:w-auto md:px-10 md:py-5 md:text-[15px]"
+                  className="inline-flex items-center justify-center rounded-full border border-white/30 px-7 py-3.5 text-[14px] text-white transition-colors duration-200 hover:bg-white/10 md:px-10 md:py-5 md:text-[15px]"
                   style={bodyFont}
                 >
                   Смотреть программу
