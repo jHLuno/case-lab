@@ -516,28 +516,3 @@
   }
 
 }
-
-/* HR intensive reviews: tilted cards drifting in a loop (desktop only) */
-.hr-reviews-copy {
-  display: none;
-}
-
-@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
-  .hr-reviews-copy {
-    display: flex;
-  }
-
-  .hr-reviews-track {
-    animation: marquee 60s linear infinite;
-    will-change: transform;
-  }
-
-  .hr-reviews-viewport:hover .hr-reviews-track,
-  .hr-reviews-viewport:focus-within .hr-reviews-track {
-    animation-play-state: paused;
-  }
-
-  .hr-review-card:hover {
-    translate: 0 -6px;
-  }
-}

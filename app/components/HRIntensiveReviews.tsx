@@ -1,5 +1,12 @@
-// Reviews: a slowly drifting row of tilted cards (marquee). Companies are not named,
-// so each card shows the author's role, industry and the session format instead.
+"use client";
+
+import { PointerEvent, useCallback, useEffect, useRef, useState } from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+
+// Reviews: cards sit on an arc (the centre one upright and highest, the side ones
+// lower and tilted outwards) and the arc turns by itself; arrows, swipe and a
+// progress line underneath. Companies are not named, so each card shows the
+// author's role, industry and the session format instead.
 // TODO(content): replace the placeholder reviews below with real ones.
 type Review = {
   initials: string;
@@ -47,16 +54,17 @@ const reviews: Review[] = [
   },
 ];
 
-const TILTS = [-4, 3, -2.5, 4, -3];
 const headingFont = { fontFamily: "var(--font-heading)" };
 const bodyFont = { fontFamily: "var(--font-body)" };
 
-function ReviewCard({ review, tilt }: { review: Review; tilt: number }) {
+const AUTOPLAY_MS = 3500;
+// The list is repeated so the arc always has cards on both sides; repeats are hidden from screen readers.
+const COPIES = reviews.length < 7 ? 2 : 1;
+const slides = Array.from({ length: COPIES }, () => reviews).flat();
+
+function ReviewCard({ review }: { review: Review }) {
   return (
-    <figure
-      className="hr-review-card flex w-[300px] shrink-0 flex-col rounded-[20px] border border-white bg-[#eef0fb] p-6 shadow-[0_24px_50px_-28px_rgba(4,0,130,0.35)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:w-[340px]"
-      style={{ rotate: `${tilt}deg` }}
-    >
+    <figure className="flex h-full flex-col rounded-[20px] border border-white bg-[#eef0fb] p-6 shadow-[0_24px_50px_-28px_rgba(4,0,130,0.35)]">
       <figcaption className="flex items-center gap-3">
         <span
           aria-hidden="true"
@@ -87,11 +95,57 @@ function ReviewCard({ review, tilt }: { review: Review; tilt: number }) {
 }
 
 export default function HRIntensiveReviews() {
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const [narrow, setNarrow] = useState(false);
+  const dragStart = useRef<number | null>(null);
+  const n = slides.length;
+
+  useEffect(() => {
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const width = window.matchMedia("(max-width: 767px)");
+    const sync = () => {
+      setReduceMotion(motion.matches);
+      setNarrow(width.matches);
+    };
+    sync();
+    motion.addEventListener("change", sync);
+    width.addEventListener("change", sync);
+    return () => {
+      motion.removeEventListener("change", sync);
+      width.removeEventListener("change", sync);
+    };
+  }, []);
+
+  const go = useCallback((step: number) => setActive((current) => (current + step + n) % n), [n]);
+
+  // The arc turns by itself; it stops on hover, focus and for reduced motion.
+  useEffect(() => {
+    if (paused || reduceMotion) return;
+    const id = window.setInterval(() => go(1), AUTOPLAY_MS);
+    return () => window.clearInterval(id);
+  }, [paused, reduceMotion, go]);
+
+  const onPointerDown = (e: PointerEvent) => {
+    dragStart.current = e.clientX;
+  };
+  const onPointerUp = (e: PointerEvent) => {
+    if (dragStart.current === null) return;
+    const dx = e.clientX - dragStart.current;
+    dragStart.current = null;
+    if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
+  };
+
+  // Geometry of the arc.
+  const spacing = narrow ? 250 : 360;
+  const drop = narrow ? 22 : 34; // how much lower each step away from the centre sits
+  const tilt = narrow ? 6 : 8; // degrees per step
+
+  const current = active % reviews.length;
+
   return (
-    <section
-      aria-labelledby="hr-reviews-title"
-      className="overflow-hidden bg-white py-[48px] md:py-14 lg:py-16"
-    >
+    <section aria-labelledby="hr-reviews-title" className="overflow-hidden bg-white py-[48px] md:py-14 lg:py-16">
       <div className="mx-auto max-w-[1160px] px-6 md:px-10 xl:px-0">
         <span className="mb-3 block text-[11px] uppercase leading-[1.58] tracking-wider text-[#040082]" style={bodyFont}>
           Отзывы
@@ -108,25 +162,85 @@ export default function HRIntensiveReviews() {
         </p>
       </div>
 
-      {/* Drifting row: the list is rendered twice for a seamless loop; the copy is hidden from screen readers. */}
-      <div className="hr-reviews-viewport mt-[32px] overflow-x-auto py-6 md:mt-[40px] md:overflow-hidden">
-        <div className="hr-reviews-track flex w-max px-6 md:px-0">
-          <ul className="flex gap-5 md:pr-5">
-            {reviews.map((review, i) => (
-              <li key={i}>
-                <ReviewCard review={review} tilt={TILTS[i % TILTS.length]} />
+      <div
+        role="region"
+        aria-roledescription="карусель"
+        aria-label="Отзывы участников"
+        className="relative mt-[32px] h-[330px] touch-pan-y select-none md:mt-[40px] md:h-[360px]"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        onFocus={() => setPaused(true)}
+        onBlur={() => setPaused(false)}
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerCancel={() => (dragStart.current = null)}
+      >
+        <ul>
+          {slides.map((review, i) => {
+            // Shortest signed distance from the active card, so the arc wraps around.
+            let d = i - active;
+            if (d > n / 2) d -= n;
+            if (d < -n / 2) d += n;
+            const hidden = Math.abs(d) > 2;
+            const isCopy = i >= reviews.length;
+            return (
+              <li
+                key={i}
+                aria-hidden={isCopy || d !== 0 ? true : undefined}
+                className="absolute left-1/2 top-0 w-[260px] md:w-[340px]"
+                style={{
+                  transform: `translateX(calc(-50% + ${d * spacing}px)) translateY(${d * d * drop}px) rotate(${d * tilt}deg)`,
+                  transformOrigin: "50% 100%",
+                  opacity: hidden ? 0 : 1,
+                  zIndex: 10 - Math.abs(d),
+                  transition: reduceMotion
+                    ? "none"
+                    : "transform 900ms cubic-bezier(0.16, 1, 0.3, 1), opacity 500ms ease",
+                  pointerEvents: hidden ? "none" : undefined,
+                }}
+              >
+                <ReviewCard review={review} />
               </li>
-            ))}
-          </ul>
-          <ul className="hr-reviews-copy flex gap-5 pr-5" aria-hidden="true">
-            {reviews.map((review, i) => (
-              <li key={i}>
-                <ReviewCard review={review} tilt={TILTS[i % TILTS.length]} />
-              </li>
-            ))}
-          </ul>
-        </div>
+            );
+          })}
+        </ul>
       </div>
+
+      {/* Controls: arrows and a progress line */}
+      <div className="mx-auto mt-2 flex max-w-[1160px] items-center justify-between gap-6 px-6 md:px-10 xl:px-0">
+        <button
+          type="button"
+          onClick={() => go(-1)}
+          aria-label="Предыдущий отзыв"
+          className="grid h-[44px] w-[44px] place-items-center rounded-full border border-black/10 text-black transition-colors duration-200 hover:border-[#040082]/40 hover:text-[#040082]"
+        >
+          <ArrowLeft size={18} aria-hidden="true" />
+        </button>
+        <div
+          className="relative h-[2px] w-[160px] overflow-hidden rounded-full bg-black/10"
+          role="progressbar"
+          aria-label="Положение в карусели"
+          aria-valuemin={1}
+          aria-valuemax={reviews.length}
+          aria-valuenow={current + 1}
+        >
+          <span
+            className="absolute inset-y-0 left-0 rounded-full bg-[#040082] transition-[left] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            style={{ width: `${100 / reviews.length}%`, left: `${(current * 100) / reviews.length}%` }}
+          />
+        </div>
+        <button
+          type="button"
+          onClick={() => go(1)}
+          aria-label="Следующий отзыв"
+          className="grid h-[44px] w-[44px] place-items-center rounded-full bg-[#040082] text-white transition-colors duration-200 hover:bg-[#0600a8]"
+        >
+          <ArrowRight size={18} aria-hidden="true" />
+        </button>
+      </div>
+      <p className="sr-only" aria-live="polite">
+        Отзыв {current + 1} из {reviews.length}
+      </p>
     </section>
   );
 }
