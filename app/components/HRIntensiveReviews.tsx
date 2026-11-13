@@ -1,11 +1,11 @@
 "use client";
 
-import { PointerEvent, useCallback, useEffect, useRef, useState } from "react";
+import { PointerEvent, useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-// Reviews: cards sit on an arc (the centre one upright and highest, the side ones
-// lower and tilted outwards) and the arc turns by itself; arrows, swipe and a
-// progress line underneath. Companies are not named, so each card shows the
+// Reviews: five cards on an arc (the centre one upright and highest, the side ones
+// lower and tilted outwards). The arc turns continuously like a marquee and stops
+// on hover; arrows, swipe/drag and a progress line underneath. Companies are not named, so each card shows the
 // author's role, industry and the session format instead.
 // TODO(content): replace the placeholder reviews below with real ones.
 type Review = {
@@ -57,10 +57,14 @@ const reviews: Review[] = [
 const headingFont = { fontFamily: "var(--font-heading)" };
 const bodyFont = { fontFamily: "var(--font-body)" };
 
-const AUTOPLAY_MS = 3500;
-// The list is repeated so the arc always has cards on both sides; repeats are hidden from screen readers.
-const COPIES = reviews.length < 7 ? 2 : 1;
-const slides = Array.from({ length: COPIES }, () => reviews).flat();
+// One card passes the centre every SECONDS_PER_CARD while the arc turns.
+const SECONDS_PER_CARD = 5;
+
+// Card size and step along the arc for a given stage width: three cards fit on screen.
+function arcGeometry(width: number) {
+  const cardW = width < 768 ? Math.min(340, width * 0.78) : Math.max(300, Math.min(460, width * 0.36));
+  return { cardW, spacing: cardW * (width < 768 ? 1.04 : 1.1), drop: cardW * 0.1 };
+}
 
 function ReviewCard({ review }: { review: Review }) {
   return (
@@ -95,54 +99,99 @@ function ReviewCard({ review }: { review: Review }) {
 }
 
 export default function HRIntensiveReviews() {
-  const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [reduceMotion, setReduceMotion] = useState(false);
-  const [narrow, setNarrow] = useState(false);
-  const dragStart = useRef<number | null>(null);
-  const n = slides.length;
+  const n = reviews.length;
+  const stageRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLLIElement | null)[]>([]);
+  const thumbRef = useRef<HTMLSpanElement>(null);
+  const [current, setCurrent] = useState(0);
+  // Animation state lives in refs: the loop writes styles directly, without re-rendering.
+  const pos = useRef(0); // continuous position on the arc, in cards
+  const target = useRef<number | null>(null); // set by arrows: glide to this card, then resume
+  const paused = useRef(false);
+  const drag = useRef<{ x: number; pos: number } | null>(null);
+  const reduceMotion = useRef(false);
 
   useEffect(() => {
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const width = window.matchMedia("(max-width: 767px)");
-    const sync = () => {
-      setReduceMotion(motion.matches);
-      setNarrow(width.matches);
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    reduceMotion.current = mq.matches;
+    const onChange = () => (reduceMotion.current = mq.matches);
+    mq.addEventListener("change", onChange);
+
+    let raf = 0;
+    let last = performance.now();
+    let shown = 0;
+    const loop = (now: number) => {
+      const dt = Math.min((now - last) / 1000, 1 / 20);
+      last = now;
+
+      if (drag.current === null) {
+        if (target.current !== null) {
+          // Ease towards the chosen card.
+          const delta = target.current - pos.current;
+          pos.current += delta * Math.min(1, dt * 6);
+          if (Math.abs(delta) < 0.001) {
+            pos.current = target.current;
+            target.current = null;
+          }
+        } else if (!paused.current && !reduceMotion.current) {
+          pos.current += dt / SECONDS_PER_CARD;
+        }
+      }
+
+      const stage = stageRef.current;
+      const width = stage?.clientWidth ?? 1200;
+      // Three cards on screen: the centre one and one on each side.
+      const { cardW, spacing, drop } = arcGeometry(width);
+      const tilt = 7;
+
+      cardRefs.current.forEach((el, i) => {
+        if (!el) return;
+        let d = (((i - pos.current) % n) + n) % n; // 0..n
+        if (d > n / 2) d -= n; // shortest signed distance from the centre
+        const fade = Math.max(0, Math.min(1, (1.75 - Math.abs(d)) / 0.4));
+        el.style.width = `${cardW}px`;
+        el.style.transform = `translateX(calc(-50% + ${d * spacing}px)) translateY(${d * d * drop}px) rotate(${d * tilt}deg)`;
+        el.style.opacity = String(fade);
+        el.style.zIndex = String(Math.round(10 - Math.abs(d) * 2));
+        el.style.pointerEvents = fade < 0.2 ? "none" : "";
+      });
+
+      const wrapped = ((pos.current % n) + n) % n;
+      if (thumbRef.current) thumbRef.current.style.left = `${(wrapped / n) * 100}%`;
+      const nearest = Math.round(wrapped) % n;
+      if (nearest !== shown) {
+        shown = nearest;
+        setCurrent(nearest);
+      }
+      raf = requestAnimationFrame(loop);
     };
-    sync();
-    motion.addEventListener("change", sync);
-    width.addEventListener("change", sync);
+    raf = requestAnimationFrame(loop);
     return () => {
-      motion.removeEventListener("change", sync);
-      width.removeEventListener("change", sync);
+      cancelAnimationFrame(raf);
+      mq.removeEventListener("change", onChange);
     };
-  }, []);
+  }, [n]);
 
-  const go = useCallback((step: number) => setActive((current) => (current + step + n) % n), [n]);
-
-  // The arc turns by itself; it stops on hover, focus and for reduced motion.
-  useEffect(() => {
-    if (paused || reduceMotion) return;
-    const id = window.setInterval(() => go(1), AUTOPLAY_MS);
-    return () => window.clearInterval(id);
-  }, [paused, reduceMotion, go]);
-
-  const onPointerDown = (e: PointerEvent) => {
-    dragStart.current = e.clientX;
-  };
-  const onPointerUp = (e: PointerEvent) => {
-    if (dragStart.current === null) return;
-    const dx = e.clientX - dragStart.current;
-    dragStart.current = null;
-    if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
+  const step = (dir: 1 | -1) => {
+    const base = target.current ?? Math.round(pos.current);
+    target.current = base + dir;
   };
 
-  // Geometry of the arc.
-  const spacing = narrow ? 250 : 360;
-  const drop = narrow ? 22 : 34; // how much lower each step away from the centre sits
-  const tilt = narrow ? 6 : 8; // degrees per step
-
-  const current = active % reviews.length;
+  const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    drag.current = { x: e.clientX, pos: pos.current };
+    target.current = null;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (!drag.current || !stageRef.current) return;
+    const { spacing } = arcGeometry(stageRef.current.clientWidth);
+    pos.current = drag.current.pos - (e.clientX - drag.current.x) / spacing;
+  };
+  const onPointerUp = () => {
+    if (!drag.current) return;
+    drag.current = null;
+    target.current = Math.round(pos.current); // settle on the nearest card
+  };
 
   return (
     <section aria-labelledby="hr-reviews-title" className="overflow-hidden bg-white py-[48px] md:py-14 lg:py-16">
@@ -163,46 +212,34 @@ export default function HRIntensiveReviews() {
       </div>
 
       <div
+        ref={stageRef}
         role="region"
         aria-roledescription="карусель"
         aria-label="Отзывы участников"
-        className="relative mt-[32px] h-[330px] touch-pan-y select-none md:mt-[40px] md:h-[360px]"
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-        onFocus={() => setPaused(true)}
-        onBlur={() => setPaused(false)}
+        className="relative mt-[32px] h-[290px] cursor-grab touch-pan-y select-none active:cursor-grabbing md:mt-[40px] md:h-[300px]"
+        onMouseEnter={() => (paused.current = true)}
+        onMouseLeave={() => (paused.current = false)}
+        onFocus={() => (paused.current = true)}
+        onBlur={() => (paused.current = false)}
         onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        onPointerCancel={() => (dragStart.current = null)}
+        onPointerCancel={onPointerUp}
       >
         <ul>
-          {slides.map((review, i) => {
-            // Shortest signed distance from the active card, so the arc wraps around.
-            let d = i - active;
-            if (d > n / 2) d -= n;
-            if (d < -n / 2) d += n;
-            const hidden = Math.abs(d) > 2;
-            const isCopy = i >= reviews.length;
-            return (
-              <li
-                key={i}
-                aria-hidden={isCopy || d !== 0 ? true : undefined}
-                className="absolute left-1/2 top-0 w-[260px] md:w-[340px]"
-                style={{
-                  transform: `translateX(calc(-50% + ${d * spacing}px)) translateY(${d * d * drop}px) rotate(${d * tilt}deg)`,
-                  transformOrigin: "50% 100%",
-                  opacity: hidden ? 0 : 1,
-                  zIndex: 10 - Math.abs(d),
-                  transition: reduceMotion
-                    ? "none"
-                    : "transform 900ms cubic-bezier(0.16, 1, 0.3, 1), opacity 500ms ease",
-                  pointerEvents: hidden ? "none" : undefined,
-                }}
-              >
-                <ReviewCard review={review} />
-              </li>
-            );
-          })}
+          {reviews.map((review, i) => (
+            <li
+              key={i}
+              ref={(el) => {
+                cardRefs.current[i] = el;
+              }}
+              aria-hidden={i !== current ? true : undefined}
+              className="absolute left-1/2 top-0 will-change-transform"
+              style={{ transformOrigin: "50% 100%", width: 340 }}
+            >
+              <ReviewCard review={review} />
+            </li>
+          ))}
         </ul>
       </div>
 
@@ -210,28 +247,18 @@ export default function HRIntensiveReviews() {
       <div className="mx-auto mt-2 flex max-w-[1160px] items-center justify-between gap-6 px-6 md:px-10 xl:px-0">
         <button
           type="button"
-          onClick={() => go(-1)}
+          onClick={() => step(-1)}
           aria-label="Предыдущий отзыв"
           className="grid h-[44px] w-[44px] place-items-center rounded-full border border-black/10 text-black transition-colors duration-200 hover:border-[#040082]/40 hover:text-[#040082]"
         >
           <ArrowLeft size={18} aria-hidden="true" />
         </button>
-        <div
-          className="relative h-[2px] w-[160px] overflow-hidden rounded-full bg-black/10"
-          role="progressbar"
-          aria-label="Положение в карусели"
-          aria-valuemin={1}
-          aria-valuemax={reviews.length}
-          aria-valuenow={current + 1}
-        >
-          <span
-            className="absolute inset-y-0 left-0 rounded-full bg-[#040082] transition-[left] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
-            style={{ width: `${100 / reviews.length}%`, left: `${(current * 100) / reviews.length}%` }}
-          />
+        <div className="relative h-[2px] w-[160px] overflow-hidden rounded-full bg-black/10" aria-hidden="true">
+          <span ref={thumbRef} className="absolute inset-y-0 left-0 rounded-full bg-[#040082]" style={{ width: `${100 / n}%` }} />
         </div>
         <button
           type="button"
-          onClick={() => go(1)}
+          onClick={() => step(1)}
           aria-label="Следующий отзыв"
           className="grid h-[44px] w-[44px] place-items-center rounded-full bg-[#040082] text-white transition-colors duration-200 hover:bg-[#0600a8]"
         >
@@ -239,7 +266,7 @@ export default function HRIntensiveReviews() {
         </button>
       </div>
       <p className="sr-only" aria-live="polite">
-        Отзыв {current + 1} из {reviews.length}
+        Отзыв {current + 1} из {n}
       </p>
     </section>
   );
