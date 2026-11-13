@@ -11,7 +11,7 @@ gsap.registerPlugin(ScrollTrigger);
 const steps: { title: string; text: string; icon: LucideIcon }[] = [
   { title: "Собираете программу", text: "Выбираете длительность и блоки в конфигураторе выше.", icon: SlidersHorizontal },
   { title: "Получаете КП", text: "В течение рабочего дня присылаем предложение с программой и стоимостью.", icon: FileText },
-  { title: "Согласуем детали", text: "Дату, площадку и состав участников: коммерция, маркетинг, HR, руководство.", icon: CalendarCheck },
+  { title: "Согласуем детали", text: "Дату, время и состав участников: коммерция, маркетинг, HR, руководство.", icon: CalendarCheck },
   { title: "Проводим сессию", text: "Приходим к вашей команде с готовой программой и практикой.", icon: Presentation },
 ];
 
